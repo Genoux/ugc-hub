@@ -1,62 +1,71 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { CampaignForm } from './campaign-form'
+import { Button } from '@/shared/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/components/ui/card'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/shared/components/ui/dialog'
+import { Badge } from '@/shared/components/ui/badge'
 
 type Campaign = {
   id: string
   name: string
   description: string | null
   brief: string
+  status: string
 }
 
 export function CampaignList({ campaigns }: { campaigns: Campaign[] }) {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
 
   return (
-    <div className="p-8">
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Campaigns</h1>
-        <button
-          onClick={() => setIsDialogOpen(true)}
-          className="rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
-        >
-          New Campaign
-        </button>
+    <div className="flex flex-1 flex-col gap-4 p-4">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold">Campaigns</h1>
+          <p className="text-sm text-muted-foreground">
+            Manage your UGC campaigns and submissions
+          </p>
+        </div>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger asChild>
+            <Button>New Campaign</Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Create Campaign</DialogTitle>
+            </DialogHeader>
+            <CampaignForm onSuccess={() => setIsDialogOpen(false)} />
+          </DialogContent>
+        </Dialog>
       </div>
 
       {campaigns.length === 0 ? (
-        <p className="text-gray-500">No campaigns yet. Create your first one!</p>
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center py-12">
+            <p className="text-muted-foreground text-sm">
+              No campaigns yet. Create your first one!
+            </p>
+          </CardContent>
+        </Card>
       ) : (
-        <ul className="space-y-2">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {campaigns.map(c => (
-            <li key={c.id}>
-              <a
-                href={`/campaigns/${c.id}`}
-                className="block rounded-lg border p-4 hover:border-blue-500"
-              >
-                <h2 className="font-semibold">{c.name}</h2>
-                {c.description && <p className="text-sm text-gray-600">{c.description}</p>}
-              </a>
-            </li>
+            <Link key={c.id} href={`/campaigns/${c.id}`}>
+              <Card className="h-full transition-colors hover:border-primary/50">
+                <CardHeader>
+                  <div className="flex items-start justify-between gap-2">
+                    <CardTitle>{c.name}</CardTitle>
+                    <Badge variant="secondary">{c.status}</Badge>
+                  </div>
+                  {c.description && (
+                    <CardDescription>{c.description}</CardDescription>
+                  )}
+                </CardHeader>
+              </Card>
+            </Link>
           ))}
-        </ul>
-      )}
-
-      {isDialogOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="w-full max-w-md rounded-lg bg-white p-6">
-            <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-xl font-bold">New Campaign</h2>
-              <button
-                onClick={() => setIsDialogOpen(false)}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                ✕
-              </button>
-            </div>
-            <CampaignForm onSuccess={() => setIsDialogOpen(false)} />
-          </div>
         </div>
       )}
     </div>

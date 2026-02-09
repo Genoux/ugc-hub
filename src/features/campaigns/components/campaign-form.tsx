@@ -2,6 +2,10 @@
 
 import { useState } from 'react'
 import { createCampaign } from '../actions/create-campaign'
+import { Button } from '@/shared/components/ui/button'
+import { Input } from '@/shared/components/ui/input'
+import { Label } from '@/shared/components/ui/label'
+import { Textarea } from '@/shared/components/ui/textarea'
 
 export function CampaignForm({ onSuccess }: { onSuccess?: () => void }) {
   const [isLoading, setIsLoading] = useState(false)
@@ -20,7 +24,7 @@ export function CampaignForm({ onSuccess }: { onSuccess?: () => void }) {
         assetRequirements: {
           acceptedTypes: ['image/jpeg', 'image/png', 'video/mp4'],
           maxFiles: 10,
-          maxFileSize: 100 * 1024 * 1024, // 100MB
+          maxFileSize: 100 * 1024 * 1024,
         },
       })
       
@@ -35,51 +39,43 @@ export function CampaignForm({ onSuccess }: { onSuccess?: () => void }) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div>
-        <label htmlFor="name" className="block text-sm font-medium">
-          Campaign Name
-        </label>
-        <input
-          type="text"
+      <div className="space-y-2">
+        <Label htmlFor="name">
+          Campaign Name <span className="text-destructive">*</span>
+        </Label>
+        <Input
           id="name"
           name="name"
+          placeholder="Enter campaign name"
           required
-          className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
         />
       </div>
 
-      <div>
-        <label htmlFor="description" className="block text-sm font-medium">
-          Description
-        </label>
-        <input
-          type="text"
+      <div className="space-y-2">
+        <Label htmlFor="description">Description</Label>
+        <Input
           id="description"
           name="description"
-          className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
+          placeholder="Brief description (optional)"
         />
       </div>
 
-      <div>
-        <label htmlFor="brief" className="block text-sm font-medium">
-          Brief
-        </label>
-        <textarea
+      <div className="space-y-2">
+        <Label htmlFor="brief">
+          Brief <span className="text-destructive">*</span>
+        </Label>
+        <Textarea
           id="brief"
           name="brief"
+          placeholder="Detailed campaign brief for creators"
           required
           rows={4}
-          className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
         />
       </div>
 
-      <button
-        type="submit"
-        disabled={isLoading}
-        className="w-full rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-50"
-      >
+      <Button type="submit" disabled={isLoading} className="w-full">
         {isLoading ? 'Creating...' : 'Create Campaign'}
-      </button>
+      </Button>
     </form>
   )
 }
