@@ -2,19 +2,29 @@
 
 import { db } from '@/shared/lib/db'
 import { links, submissions } from '@/db/schema'
-import { eq, and } from 'drizzle-orm'
-import type { WizardStepOne } from '../schemas'
+import { eq } from 'drizzle-orm'
+import { revalidatePath } from 'next/cache'
 
-export async function submitWizard(token: string, data: WizardStepOne) {
+export async function submitWizard(data: {
+  token: string
+  creatorName: string
+  creatorEmail: string
+  creatorNotes?: string
+}) {
   const link = await db.query.links.findFirst({
-    where: and(
-      eq(links.token, token),
-      eq(links.status, 'active')
-    ),
+    where: eq(links.token, data.token),
   })
 
   if (!link) {
-    throw new Error('Invalid or expired link')
+    throw new Error('Link not found')
+  }
+
+  if (link.status !== 'active') {
+    throw new Error('Link is not active')
+  }
+
+  if (link.expiresAt && new Date(link.expiresAt) < new Date()) {
+    throw new Error('Link has expired')
   }
 
   const [submission] = await db.insert(submissions).values({
@@ -30,5 +40,6 @@ export async function submitWizard(token: string, data: WizardStepOne) {
     .set({ status: 'used' })
     .where(eq(links.id, link.id))
 
+  revalidatePath(`/campaigns/${link.campaignId}`)
   return submission
 }
