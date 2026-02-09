@@ -209,10 +209,6 @@ export function CampaignList({ campaigns }: { campaigns: Campaign[] }) {
   return (
     <div className="w-full flex-col justify-start gap-6">
       <div className="flex items-center justify-between px-4 py-4 lg:px-6">
-        <div>
-          <h2 className="text-xl font-semibold">Campaigns</h2>
-          <p className="text-sm text-muted-foreground">Manage your UGC campaigns and submissions</p>
-        </div>
         <div className="flex items-center gap-2">
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>

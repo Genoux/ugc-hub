@@ -1,6 +1,7 @@
 import { count, eq, sql } from "drizzle-orm";
 import { campaigns, submissions } from "@/db/schema";
 import { CampaignList } from "@/features/campaigns/components/campaign-list";
+import { CampaignOverview } from "@/features/campaigns/components/campaign-overview";
 import { getCurrentUser } from "@/shared/lib/auth";
 import { db } from "@/shared/lib/db";
 
@@ -25,5 +26,21 @@ export default async function CampaignsPage() {
     .groupBy(campaigns.id)
     .orderBy(campaigns.createdAt);
 
-  return <CampaignList campaigns={campaignRows} />;
+  const overviewStats = {
+    totalCampaigns: campaignRows.length,
+    activeCampaigns: campaignRows.filter((c) => c.totalSubmissions > 0).length,
+    totalSubmissions: campaignRows.reduce((sum, c) => sum + c.totalSubmissions, 0),
+    pendingReview: campaignRows.reduce((sum, c) => sum + c.pendingSubmissions, 0),
+  };
+
+  return (
+    <div className="flex flex-col gap-6">
+      <div className="px-4 lg:px-6 flex flex-col gap-1">
+        <h2 className="text-xl font-semibold">Campaigns</h2>
+        <p className="text-sm text-muted-foreground">Manage your UGC campaigns and submissions</p>
+      </div>
+      <CampaignOverview {...overviewStats} />
+      <CampaignList campaigns={campaignRows} />
+    </div>
+  );
 }

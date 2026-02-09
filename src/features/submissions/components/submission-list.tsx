@@ -94,7 +94,7 @@ export function SubmissionList({
             return (
               <div
                 key={submission.id}
-                className="flex items-center justify-between rounded-lg border p-3"
+                className="flex items-center justify-between rounded-lg border p-3 hover:bg-accent/25 cursor-pointer"
               >
                 <div className="flex-1">
                   {submission.status === "awaiting" ? (
@@ -149,7 +149,7 @@ export function SubmissionList({
                     </span>
                   )}
                   <Button
-                    className="text-muted-foreground"
+                    className="text-muted-foreground cursor-pointer"
                     onClick={() => openDeleteDialog(submission.id)}
                     variant="ghost"
                     size="sm"

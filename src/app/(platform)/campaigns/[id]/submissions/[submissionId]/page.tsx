@@ -1,12 +1,14 @@
 import { and, eq } from "drizzle-orm";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { redirect } from "next/navigation";
 import { assets, campaigns, submissions } from "@/db/schema";
 import { SubmissionReview } from "@/features/submissions/components/submission-review";
 import { Button } from "@/shared/components/ui/button";
 import { getCurrentUser } from "@/shared/lib/auth";
 import { db } from "@/shared/lib/db";
+
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export default async function SubmissionDetailPage({
   params,
@@ -16,12 +18,16 @@ export default async function SubmissionDetailPage({
   const { id, submissionId } = await params;
   const user = await getCurrentUser();
 
+  if (!UUID_REGEX.test(id) || !UUID_REGEX.test(submissionId)) {
+    redirect("/");
+  }
+
   const campaign = await db.query.campaigns.findFirst({
     where: and(eq(campaigns.id, id), eq(campaigns.userId, user.id)),
   });
 
   if (!campaign) {
-    notFound();
+    redirect("/");
   }
 
   const submission = await db.query.submissions.findFirst({
@@ -30,7 +36,7 @@ export default async function SubmissionDetailPage({
   });
 
   if (!submission) {
-    notFound();
+    redirect(`/campaigns/${id}`);
   }
 
   const submissionAssets = await db.query.assets.findMany({
