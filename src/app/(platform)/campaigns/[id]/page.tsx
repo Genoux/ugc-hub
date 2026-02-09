@@ -8,7 +8,6 @@ import { ChevronLeft } from 'lucide-react'
 import { LinkList } from '@/features/links/components/link-list'
 import { SubmissionList } from '@/features/submissions/components/submission-list'
 import { Button } from '@/shared/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card'
 import { Badge } from '@/shared/components/ui/badge'
 
 export default async function CampaignDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -37,7 +36,7 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
   })
 
   return (
-    <div className="flex flex-1 flex-col gap-4 p-4">
+    <div className="flex flex-1 flex-col gap-8 p-4">
       <div className="flex items-center gap-2">
         <Button variant="outline" size="icon" asChild>
           <Link href="/campaigns">
@@ -55,14 +54,10 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
         </div>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Brief</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="whitespace-pre-wrap text-sm">{campaign.brief}</p>
-        </CardContent>
-      </Card>
+      <div className="space-y-2">
+        <h2 className="text-sm font-medium text-muted-foreground">Brief</h2>
+        <p className="whitespace-pre-wrap text-sm">{campaign.brief}</p>
+      </div>
 
       <LinkList campaignId={campaign.id} links={campaignLinks} />
       <SubmissionList campaignId={campaign.id} submissions={campaignSubmissions} />

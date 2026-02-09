@@ -2,48 +2,36 @@
 
 import { useWizardState } from '../hooks/use-wizard-state'
 import { Button } from '@/shared/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card'
-import { Separator } from '@/shared/components/ui/separator'
 
 export function WizardStepThree({ onSubmit }: { onSubmit: () => void }) {
   const { stepOneData, stepTwoData, setStep } = useWizardState()
 
   return (
-    <div className="space-y-4">
-      <Card>
-        <CardHeader>
-          <CardTitle>Your Information</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="grid gap-1">
-            <span className="text-xs text-muted-foreground">Name</span>
-            <span className="text-sm font-medium">{stepOneData?.creatorName}</span>
+    <div className="space-y-6">
+      <div className="space-y-3">
+        <h3 className="text-sm font-medium">Your Information</h3>
+        <div className="space-y-2 text-sm">
+          <div>
+            <span className="text-muted-foreground">Name:</span>{' '}
+            <span className="font-medium">{stepOneData?.creatorName}</span>
           </div>
-          <Separator />
-          <div className="grid gap-1">
-            <span className="text-xs text-muted-foreground">Email</span>
-            <span className="text-sm font-medium">{stepOneData?.creatorEmail}</span>
+          <div>
+            <span className="text-muted-foreground">Email:</span>{' '}
+            <span className="font-medium">{stepOneData?.creatorEmail}</span>
           </div>
           {stepOneData?.creatorNotes && (
-            <>
-              <Separator />
-              <div className="grid gap-1">
-                <span className="text-xs text-muted-foreground">Notes</span>
-                <span className="text-sm">{stepOneData.creatorNotes}</span>
-              </div>
-            </>
+            <div>
+              <span className="text-muted-foreground">Notes:</span>{' '}
+              <span>{stepOneData.creatorNotes}</span>
+            </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Files</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm">{stepTwoData?.files.length || 0} file(s) selected</p>
-        </CardContent>
-      </Card>
+      <div className="space-y-3">
+        <h3 className="text-sm font-medium">Files</h3>
+        <p className="text-sm">{stepTwoData?.files.length || 0} file(s) selected</p>
+      </div>
 
       <div className="flex gap-2">
         <Button
