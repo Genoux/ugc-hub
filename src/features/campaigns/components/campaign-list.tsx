@@ -30,9 +30,14 @@ export function CampaignList({ campaigns }: { campaigns: Campaign[] }) {
       ) : (
         <ul className="space-y-2">
           {campaigns.map(c => (
-            <li key={c.id} className="rounded-lg border p-4">
-              <h2 className="font-semibold">{c.name}</h2>
-              {c.description && <p className="text-sm text-gray-600">{c.description}</p>}
+            <li key={c.id}>
+              <a
+                href={`/campaigns/${c.id}`}
+                className="block rounded-lg border p-4 hover:border-blue-500"
+              >
+                <h2 className="font-semibold">{c.name}</h2>
+                {c.description && <p className="text-sm text-gray-600">{c.description}</p>}
+              </a>
             </li>
           ))}
         </ul>
