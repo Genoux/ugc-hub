@@ -9,7 +9,7 @@ import { WizardStepThree } from './wizard-step-three'
 import { submitWizard } from '../actions/submit-wizard'
 import { useMultipartUpload } from '@/features/uploads/hooks/use-multipart-upload'
 
-export function WizardShell({ token, campaignName }: { token: string; campaignName: string }) {
+export function WizardShell({ token, campaignName, campaignBrief }: { token: string; campaignName: string; campaignBrief: string }) {
   const { step, stepOneData, stepTwoFiles, reset } = useWizardState()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isComplete, setIsComplete] = useState(false)
@@ -19,6 +19,8 @@ export function WizardShell({ token, campaignName }: { token: string; campaignNa
     if (!stepOneData) return
 
     setIsSubmitting(true)
+    let submissionId: string | null = null
+    
     try {
       const submission = await submitWizard({
         token,
@@ -26,6 +28,8 @@ export function WizardShell({ token, campaignName }: { token: string; campaignNa
         creatorEmail: stepOneData.creatorEmail,
         creatorNotes: stepOneData.creatorNotes,
       })
+      
+      submissionId = submission.id
 
       if (stepTwoFiles.length > 0) {
         await Promise.all(
@@ -37,6 +41,19 @@ export function WizardShell({ token, campaignName }: { token: string; campaignNa
       reset()
     } catch (error) {
       console.error('Submission failed:', error)
+      
+      if (submissionId) {
+        try {
+          await fetch('/api/submissions/rollback', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ submissionId }),
+          })
+        } catch (rollbackError) {
+          console.error('Rollback failed:', rollbackError)
+        }
+      }
+      
       alert('Failed to submit. Please try again.')
     } finally {
       setIsSubmitting(false)
@@ -66,7 +83,7 @@ export function WizardShell({ token, campaignName }: { token: string; campaignNa
 
   return (
     <div className="flex min-h-screen items-center justify-center p-4">
-      <div className="w-full max-w-lg space-y-6">
+      <div className="w-full max-w-2xl space-y-6">
         <div>
           <h1 className="text-2xl font-semibold">{campaignName}</h1>
           <div className="mt-4 flex items-center gap-2">
@@ -79,6 +96,11 @@ export function WizardShell({ token, campaignName }: { token: string; campaignNa
               />
             ))}
           </div>
+        </div>
+
+        <div className="rounded-lg border p-4">
+          <h2 className="text-sm font-medium text-muted-foreground">Brief</h2>
+          <p className="mt-2 whitespace-pre-wrap text-sm">{campaignBrief}</p>
         </div>
 
         <div className="rounded-lg border p-6">

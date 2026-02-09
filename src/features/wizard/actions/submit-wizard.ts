@@ -27,14 +27,19 @@ export async function submitWizard(data: {
     throw new Error('Link has expired')
   }
 
-  const [submission] = await db.insert(submissions).values({
-    campaignId: link.campaignId,
-    linkId: link.id,
-    creatorName: data.creatorName,
-    creatorEmail: data.creatorEmail,
-    creatorNotes: data.creatorNotes || null,
-    status: 'pending',
-  }).returning()
+  const [submission] = await db.update(submissions)
+    .set({
+      creatorName: data.creatorName,
+      creatorEmail: data.creatorEmail,
+      creatorNotes: data.creatorNotes || null,
+      status: 'pending',
+    })
+    .where(eq(submissions.linkId, link.id))
+    .returning()
+
+  if (!submission) {
+    throw new Error('Submission not found for this link')
+  }
 
   await db.update(links)
     .set({ status: 'used' })

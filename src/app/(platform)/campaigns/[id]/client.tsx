@@ -1,0 +1,85 @@
+"use client";
+
+import { ChevronLeft, Plus } from "lucide-react";
+import Link from "next/link";
+import { useState } from "react";
+import { createLink } from "@/features/links/actions/create-link";
+import { SubmissionList } from "@/features/submissions/components/submission-list";
+import { useRealtimeSubmissions } from "@/features/submissions/hooks/use-realtime-submissions";
+import { Badge } from "@/shared/components/ui/badge";
+import { Button } from "@/shared/components/ui/button";
+
+type Campaign = {
+  id: string;
+  name: string;
+  description: string | null;
+  brief: string;
+  status: string;
+};
+
+type Submission = {
+  id: string;
+  creatorName: string | null;
+  creatorEmail: string | null;
+  status: string;
+  createdAt: Date;
+  link?: {
+    id: string;
+    token: string;
+    status: string;
+  };
+};
+
+export function CampaignDetailClient({
+  campaign,
+  submissions,
+}: {
+  campaign: Campaign;
+  submissions: Submission[];
+}) {
+  const [isCreating, setIsCreating] = useState(false);
+  useRealtimeSubmissions(campaign.id);
+
+  async function handleCreateLink() {
+    setIsCreating(true);
+    try {
+      await createLink({ campaignId: campaign.id });
+    } catch (error) {
+      console.error("Failed to create link:", error);
+    } finally {
+      setIsCreating(false);
+    }
+  }
+
+  return (
+    <div className="flex flex-1 flex-col gap-8 p-4">
+      <div className="flex items-center gap-2">
+        <Button variant="outline" size="icon" asChild>
+          <Link href="/campaigns">
+            <ChevronLeft className="size-4" />
+          </Link>
+        </Button>
+        <div className="flex-1">
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl font-semibold">{campaign.name}</h1>
+            <Badge variant="secondary">{campaign.status}</Badge>
+          </div>
+          {campaign.description && (
+            <p className="text-sm text-muted-foreground">{campaign.description}</p>
+          )}
+        </div>
+        <Button onClick={handleCreateLink} disabled={isCreating} size="sm">
+          <Plus className="size-4" />
+          {isCreating ? "Creating..." : "New Link"}
+        </Button>
+      </div>
+
+      <div className="space-y-2">
+        <h2 className="text-sm font-medium text-muted-foreground">Brief</h2>
+        <p className="whitespace-pre-wrap text-sm">{campaign.brief}</p>
+      </div>
+
+      <SubmissionList campaignId={campaign.id} submissions={submissions} />
+    </div>
+  );
+}

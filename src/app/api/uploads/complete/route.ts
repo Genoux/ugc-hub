@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { CompleteMultipartUploadCommand } from '@aws-sdk/client-s3'
 import { r2Client, R2_BUCKET_NAME } from '@/features/uploads/lib/r2-client'
 import { db } from '@/shared/lib/db'
-import { assets } from '@/db/schema'
+import { assets, submissions } from '@/db/schema'
 import { eq } from 'drizzle-orm'
+import { revalidatePath } from 'next/cache'
 
 export async function POST(request: NextRequest) {
   try {
@@ -29,6 +30,15 @@ export async function POST(request: NextRequest) {
       sizeBytes,
       uploadStatus: 'completed',
     }).returning()
+
+    const submission = await db.query.submissions.findFirst({
+      where: eq(submissions.id, submissionId),
+    })
+
+    if (submission) {
+      revalidatePath(`/campaigns/${submission.campaignId}`)
+      revalidatePath(`/campaigns/${submission.campaignId}/submissions/${submissionId}`)
+    }
 
     return NextResponse.json({ asset })
   } catch (error) {

@@ -1,10 +1,10 @@
 "use client";
 
+import { Upload, X } from "lucide-react";
 import { useState } from "react";
-import { Upload } from "lucide-react";
-import { useWizardState } from "../hooks/use-wizard-state";
 import { Button } from "@/shared/components/ui/button";
 import { Card } from "@/shared/components/ui/card";
+import { useWizardState } from "../hooks/use-wizard-state";
 
 export function WizardStepTwo() {
   const { setStepTwoFiles, setStep, stepTwoFiles } = useWizardState();
@@ -12,8 +12,14 @@ export function WizardStepTwo() {
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     if (e.target.files) {
-      setFiles(Array.from(e.target.files));
+      const newFiles = Array.from(e.target.files);
+      setFiles((prev) => [...prev, ...newFiles]);
     }
+    e.target.value = "";
+  }
+
+  function handleRemoveFile(index: number) {
+    setFiles((prev) => prev.filter((_, i) => i !== index));
   }
 
   function handleNext() {
@@ -48,13 +54,31 @@ export function WizardStepTwo() {
 
       {files.length > 0 && (
         <div className="space-y-2">
-          <p className="text-sm font-medium">Selected Files ({files.length})</p>
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-medium">Selected Files ({files.length})</p>
+            <input
+              type="file"
+              multiple
+              accept="image/*,video/*"
+              onChange={handleFileChange}
+              className="hidden"
+              id="file-upload-more"
+            />
+          </div>
           {files.map((file, idx) => (
-            <div key={idx} className="flex items-center justify-between rounded-lg border p-2">
-              <span className="text-sm">{file.name}</span>
-              <span className="text-xs text-muted-foreground">
-                {(file.size / 1024 / 1024).toFixed(2)} MB
-              </span>
+            <div
+              key={`${file.name}-${idx}`}
+              className="flex items-center justify-between rounded-lg border p-2"
+            >
+              <div className="flex-1 min-w-0">
+                <span className="text-sm truncate block">{file.name}</span>
+                <span className="text-xs text-muted-foreground">
+                  {(file.size / 1024 / 1024).toFixed(2)} MB
+                </span>
+              </div>
+              <Button type="button" variant="ghost" size="sm" onClick={() => handleRemoveFile(idx)}>
+                <X className="size-4" />
+              </Button>
             </div>
           ))}
         </div>
