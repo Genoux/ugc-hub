@@ -1,8 +1,12 @@
 'use client'
 
 import { useState } from 'react'
+import { Copy, Trash2 } from 'lucide-react'
 import { createLink } from '../actions/create-link'
 import { revokeLink } from '../actions/revoke-link'
+import { Button } from '@/shared/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card'
+import { Badge } from '@/shared/components/ui/badge'
 
 type Link = {
   id: string
@@ -28,7 +32,6 @@ export function LinkList({ campaignId, links }: { campaignId: string; links: Lin
   }
 
   async function handleRevoke(linkId: string) {
-    if (!confirm('Are you sure you want to revoke this link?')) return
     try {
       await revokeLink(linkId)
     } catch (error) {
@@ -44,53 +47,63 @@ export function LinkList({ campaignId, links }: { campaignId: string; links: Lin
   }
 
   return (
-    <div className="mt-6">
-      <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-xl font-semibold">Submission Links</h2>
-        <button
-          onClick={handleCreate}
-          disabled={isCreating}
-          className="rounded-md bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700 disabled:opacity-50"
-        >
-          {isCreating ? 'Creating...' : 'Generate Link'}
-        </button>
-      </div>
-
-      {links.length === 0 ? (
-        <p className="text-gray-500">No links yet. Generate one to share with creators.</p>
-      ) : (
-        <div className="space-y-2">
-          {links.map(link => (
-            <div
-              key={link.id}
-              className="flex items-center justify-between rounded-lg border p-3"
-            >
-              <div className="flex-1">
-                <p className="font-mono text-sm">{`/submit/${link.token}`}</p>
-                <p className="text-xs text-gray-500">
-                  Status: {link.status} | Created: {new Date(link.createdAt).toLocaleDateString()}
-                </p>
-              </div>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => handleCopy(link.token)}
-                  className="rounded bg-gray-100 px-3 py-1 text-sm hover:bg-gray-200"
-                >
-                  {copiedToken === link.token ? 'Copied!' : 'Copy URL'}
-                </button>
-                {link.status === 'active' && (
-                  <button
-                    onClick={() => handleRevoke(link.id)}
-                    className="rounded bg-red-100 px-3 py-1 text-sm text-red-700 hover:bg-red-200"
-                  >
-                    Revoke
-                  </button>
-                )}
-              </div>
-            </div>
-          ))}
+    <Card>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <CardTitle>Submission Links</CardTitle>
+          <Button onClick={handleCreate} disabled={isCreating} size="sm">
+            {isCreating ? 'Creating...' : 'Generate Link'}
+          </Button>
         </div>
-      )}
-    </div>
+      </CardHeader>
+      <CardContent>
+        {links.length === 0 ? (
+          <p className="text-sm text-muted-foreground">
+            No links yet. Generate one to share with creators.
+          </p>
+        ) : (
+          <div className="space-y-2">
+            {links.map(link => (
+              <div
+                key={link.id}
+                className="flex items-center justify-between rounded-lg border p-3"
+              >
+                <div className="flex-1 space-y-1">
+                  <p className="font-mono text-sm">{`/submit/${link.token}`}</p>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="secondary" className="text-xs">
+                      {link.status}
+                    </Badge>
+                    <span className="text-xs text-muted-foreground">
+                      {new Date(link.createdAt).toLocaleDateString()}
+                    </span>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    onClick={() => handleCopy(link.token)}
+                    variant="outline"
+                    size="sm"
+                  >
+                    <Copy className="size-4" />
+                    {copiedToken === link.token ? 'Copied!' : 'Copy'}
+                  </Button>
+                  {link.status === 'active' && (
+                    <Button
+                      onClick={() => handleRevoke(link.id)}
+                      variant="outline"
+                      size="sm"
+                    >
+                      <Trash2 className="size-4" />
+                      Revoke
+                    </Button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
   )
 }

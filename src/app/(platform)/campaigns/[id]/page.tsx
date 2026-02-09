@@ -3,8 +3,13 @@ import { campaigns, links, submissions } from '@/db/schema'
 import { getCurrentUser } from '@/shared/lib/auth'
 import { eq, and } from 'drizzle-orm'
 import { notFound } from 'next/navigation'
+import Link from 'next/link'
+import { ChevronLeft } from 'lucide-react'
 import { LinkList } from '@/features/links/components/link-list'
 import { SubmissionList } from '@/features/submissions/components/submission-list'
+import { Button } from '@/shared/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card'
+import { Badge } from '@/shared/components/ui/badge'
 
 export default async function CampaignDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -32,18 +37,32 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
   })
 
   return (
-    <div className="p-8">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold">{campaign.name}</h1>
-        {campaign.description && (
-          <p className="mt-2 text-gray-600">{campaign.description}</p>
-        )}
+    <div className="flex flex-1 flex-col gap-4 p-4">
+      <div className="flex items-center gap-2">
+        <Button variant="outline" size="icon" asChild>
+          <Link href="/campaigns">
+            <ChevronLeft className="size-4" />
+          </Link>
+        </Button>
+        <div className="flex-1">
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl font-semibold">{campaign.name}</h1>
+            <Badge variant="secondary">{campaign.status}</Badge>
+          </div>
+          {campaign.description && (
+            <p className="text-sm text-muted-foreground">{campaign.description}</p>
+          )}
+        </div>
       </div>
 
-      <div className="rounded-lg border p-6">
-        <h2 className="mb-2 font-semibold">Brief</h2>
-        <p className="whitespace-pre-wrap text-gray-700">{campaign.brief}</p>
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Brief</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="whitespace-pre-wrap text-sm">{campaign.brief}</p>
+        </CardContent>
+      </Card>
 
       <LinkList campaignId={campaign.id} links={campaignLinks} />
       <SubmissionList campaignId={campaign.id} submissions={campaignSubmissions} />
