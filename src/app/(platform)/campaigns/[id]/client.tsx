@@ -6,7 +6,6 @@ import { useState } from "react";
 import { createLink } from "@/features/links/actions/create-link";
 import { SubmissionList } from "@/features/submissions/components/submission-list";
 import { useRealtimeSubmissions } from "@/features/submissions/hooks/use-realtime-submissions";
-import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 
 type Campaign = {
@@ -14,7 +13,6 @@ type Campaign = {
   name: string;
   description: string | null;
   brief: string;
-  status: string;
 };
 
 type Submission = {
@@ -59,27 +57,27 @@ export function CampaignDetailClient({
             <ChevronLeft className="size-4" />
           </Link>
         </Button>
+      </div>
+
+      <div className="space-y-6">
         <div className="flex-1">
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-semibold">{campaign.name}</h1>
-            <Badge variant="secondary">{campaign.status}</Badge>
-          </div>
+          <h1 className="text-2xl font-semibold">{campaign.name}</h1>
           {campaign.description && (
             <p className="text-sm text-muted-foreground">{campaign.description}</p>
           )}
         </div>
-        <Button onClick={handleCreateLink} disabled={isCreating} size="sm">
-          <Plus className="size-4" />
-          {isCreating ? "Creating..." : "New Link"}
-        </Button>
+        <div>
+          <h2 className="text-sm font-medium text-muted-foreground">Brief</h2>
+          <p className="whitespace-pre-wrap text-sm">{campaign.brief}</p>
+        </div>
       </div>
 
-      <div className="space-y-2">
-        <h2 className="text-sm font-medium text-muted-foreground">Brief</h2>
-        <p className="whitespace-pre-wrap text-sm">{campaign.brief}</p>
-      </div>
-
-      <SubmissionList campaignId={campaign.id} submissions={submissions} />
+      <SubmissionList
+        campaignId={campaign.id}
+        submissions={submissions}
+        onCreateLink={handleCreateLink}
+        isCreatingLink={isCreating}
+      />
     </div>
   );
 }

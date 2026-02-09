@@ -2,31 +2,27 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { toast } from "sonner";
 
-export function useRealtimeSubmissions(campaignId: string) {
+export function useRealtimeCampaigns() {
   const router = useRouter();
 
   useEffect(() => {
-    const eventSource = new EventSource(`/api/campaigns/${campaignId}/live`);
+    const eventSource = new EventSource("/api/campaigns/live");
 
     eventSource.onmessage = (event) => {
       const data = JSON.parse(event.data);
 
-      // Refresh UI on submission created or initial connection
       if (data.type === "connected" || data.type === "submission_created") {
         router.refresh();
       }
-      // Heartbeat messages don't require refresh
     };
 
     eventSource.onerror = () => {
       eventSource.close();
-      toast.error("Failed to connect to real-time submissions");
     };
 
     return () => {
       eventSource.close();
     };
-  }, [campaignId, router]);
+  }, [router]);
 }

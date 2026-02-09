@@ -1,37 +1,26 @@
-import { AppSidebar } from "@/shared/components/app-sidebar"
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbList,
-  BreadcrumbPage,
-} from "@/shared/components/ui/breadcrumb"
-import { Separator } from "@/shared/components/ui/separator"
-import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from "@/shared/components/ui/sidebar"
+import { AppSidebar } from "@/shared/components/app-sidebar";
+import { SiteHeader } from "@/shared/components/site-header";
+import { SidebarInset, SidebarProvider } from "@/shared/components/ui/sidebar";
 
 export default function PlatformLayout({ children }: { children: React.ReactNode }) {
   return (
-    <SidebarProvider>
-      <AppSidebar />
+    <SidebarProvider
+      style={
+        {
+          "--sidebar-width": "calc(var(--spacing) * 72)",
+          "--header-height": "calc(var(--spacing) * 12)",
+        } as React.CSSProperties
+      }
+    >
+      <AppSidebar variant="inset" />
       <SidebarInset>
-        <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
-          <SidebarTrigger className="-ml-1" />
-          <Separator orientation="vertical" className="mr-2 h-4" />
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbPage>UGC Hub</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-        </header>
+        <SiteHeader />
         <div className="flex flex-1 flex-col">
-          {children}
+          <div className="@container/main mx-auto w-full max-w-7xl flex flex-1 flex-col gap-2">
+            {children}
+          </div>
         </div>
       </SidebarInset>
     </SidebarProvider>
-  )
+  );
 }

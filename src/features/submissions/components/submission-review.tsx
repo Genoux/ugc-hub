@@ -3,14 +3,14 @@
 import { Download } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import { approveSubmission, rejectSubmission } from "../actions/review-submission";
+import { SubmissionStatusBadge } from "./submission-status-badge";
 
 type Submission = {
   id: string;
-  creatorName: string;
-  creatorEmail: string;
+  creatorName: string | null;
+  creatorEmail: string | null;
   creatorNotes: string | null;
   status: string;
   createdAt: Date;
@@ -101,14 +101,21 @@ function AssetPreview({ asset }: { asset: Asset }) {
   );
 }
 
+type SubmissionLink = {
+  token: string;
+  status: string;
+};
+
 export function SubmissionReview({
   campaignName,
   submission,
   assets,
+  submissionLink,
 }: {
   campaignName: string;
   submission: Submission;
   assets: Asset[];
+  submissionLink?: SubmissionLink | null;
 }) {
   const [isReviewing, setIsReviewing] = useState(false);
 
@@ -139,23 +146,11 @@ export function SubmissionReview({
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold">{campaignName}</h1>
-          <p className="text-sm text-muted-foreground">Submission Review</p>
+          <SubmissionStatusBadge status={submission.status as "awaiting" | "pending" | "approved" | "rejected"} />
         </div>
-        <Badge
-          variant={
-            submission.status === "approved"
-              ? "default"
-              : submission.status === "rejected"
-                ? "destructive"
-                : "secondary"
-          }
-        >
-          {submission.status}
-        </Badge>
       </div>
 
       <div className="space-y-3">
-        <h2 className="text-sm font-medium">Creator Information</h2>
         <div className="space-y-3 text-sm">
           <div>
             <span className="text-muted-foreground">Name:</span>{" "}
@@ -183,6 +178,16 @@ export function SubmissionReview({
           )}
         </div>
       </div>
+
+      {submissionLink && (
+        <div className="space-y-3">
+          <h2 className="text-sm font-medium">Submission reference ID</h2>
+          <div className="flex items-center gap-2">
+            <p className="font-mono text-xs text-muted-foreground">{submissionLink.token}</p>
+          </div>
+        </div>
+      )}
+
       {submission.status === "pending" && (
         <div className="flex gap-1 items-start">
           <Button onClick={handleReject} disabled={isReviewing} variant="outline">
@@ -199,7 +204,7 @@ export function SubmissionReview({
         {assets.length === 0 ? (
           <p className="text-sm text-muted-foreground">No assets uploaded</p>
         ) : (
-          <div className="columns-1 gap-4 sm:columns-2 lg:columns-3 xl:columns-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {assets.map((asset) => (
               <AssetPreview key={asset.id} asset={asset} />
             ))}

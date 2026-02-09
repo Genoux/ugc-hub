@@ -2,6 +2,7 @@
 
 import { Upload, X } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 import { Button } from "@/shared/components/ui/button";
 import { Card } from "@/shared/components/ui/card";
 import { useWizardState } from "../hooks/use-wizard-state";
@@ -24,7 +25,7 @@ export function WizardStepTwo() {
 
   function handleNext() {
     if (files.length === 0) {
-      alert("Please select at least one file");
+      toast.error("Please select at least one file");
       return;
     }
 

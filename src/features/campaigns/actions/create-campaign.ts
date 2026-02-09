@@ -16,7 +16,6 @@ export async function createCampaign(input: z.infer<typeof campaignSchema>) {
   const [campaign] = await db.insert(campaigns).values({
     ...data,
     userId,
-    status: 'draft',
   }).returning()
 
   revalidatePath('/campaigns')

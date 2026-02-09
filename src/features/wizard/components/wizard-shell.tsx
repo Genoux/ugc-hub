@@ -1,62 +1,69 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { CheckCircle2 } from 'lucide-react'
-import { useWizardState } from '../hooks/use-wizard-state'
-import { WizardStepOne } from './wizard-step-one'
-import { WizardStepTwo } from './wizard-step-two'
-import { WizardStepThree } from './wizard-step-three'
-import { submitWizard } from '../actions/submit-wizard'
-import { useMultipartUpload } from '@/features/uploads/hooks/use-multipart-upload'
+import { CheckCircle2 } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
+import { useMultipartUpload } from "@/features/uploads/hooks/use-multipart-upload";
+import { submitWizard } from "../actions/submit-wizard";
+import { useWizardState } from "../hooks/use-wizard-state";
+import { WizardStepOne } from "./wizard-step-one";
+import { WizardStepThree } from "./wizard-step-three";
+import { WizardStepTwo } from "./wizard-step-two";
 
-export function WizardShell({ token, campaignName, campaignBrief }: { token: string; campaignName: string; campaignBrief: string }) {
-  const { step, stepOneData, stepTwoFiles, reset } = useWizardState()
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isComplete, setIsComplete] = useState(false)
-  const { uploads, uploadFile } = useMultipartUpload()
+export function WizardShell({
+  token,
+  campaignName,
+  campaignBrief,
+}: {
+  token: string;
+  campaignName: string;
+  campaignBrief: string;
+}) {
+  const { step, stepOneData, stepTwoFiles, reset } = useWizardState();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isComplete, setIsComplete] = useState(false);
+  const { uploads, uploadFile } = useMultipartUpload();
 
   async function handleSubmit() {
-    if (!stepOneData) return
+    if (!stepOneData) return;
 
-    setIsSubmitting(true)
-    let submissionId: string | null = null
-    
+    setIsSubmitting(true);
+    let submissionId: string | null = null;
+
     try {
       const submission = await submitWizard({
         token,
         creatorName: stepOneData.creatorName,
         creatorEmail: stepOneData.creatorEmail,
         creatorNotes: stepOneData.creatorNotes,
-      })
-      
-      submissionId = submission.id
+      });
+
+      submissionId = submission.id;
 
       if (stepTwoFiles.length > 0) {
-        await Promise.all(
-          stepTwoFiles.map(file => uploadFile(file, submission.id))
-        )
+        await Promise.all(stepTwoFiles.map((file) => uploadFile(file, submission.id)));
       }
 
-      setIsComplete(true)
-      reset()
+      setIsComplete(true);
+      reset();
     } catch (error) {
-      console.error('Submission failed:', error)
-      
+      console.error("Submission failed:", error);
+
       if (submissionId) {
         try {
-          await fetch('/api/submissions/rollback', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+          await fetch("/api/submissions/rollback", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ submissionId }),
-          })
+          });
         } catch (rollbackError) {
-          console.error('Rollback failed:', rollbackError)
+          console.error("Rollback failed:", rollbackError);
         }
       }
-      
-      alert('Failed to submit. Please try again.')
+
+      toast.error("Failed to submit. Please try again.");
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
   }
 
@@ -67,19 +74,18 @@ export function WizardShell({ token, campaignName, campaignBrief }: { token: str
           <CheckCircle2 className="size-16 text-green-600" />
           <div>
             <h2 className="text-2xl font-semibold">Submission Complete!</h2>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Thank you for your submission.
-            </p>
+            <p className="mt-2 text-sm text-muted-foreground">Thank you for your submission.</p>
           </div>
         </div>
       </div>
-    )
+    );
   }
 
-  const uploadList = Object.values(uploads)
-  const totalProgress = uploadList.length > 0
-    ? Math.round(uploadList.reduce((sum, u) => sum + u.progress, 0) / uploadList.length)
-    : 0
+  const uploadList = Object.values(uploads);
+  const totalProgress =
+    uploadList.length > 0
+      ? Math.round(uploadList.reduce((sum, u) => sum + u.progress, 0) / uploadList.length)
+      : 0;
 
   return (
     <div className="flex min-h-screen items-center justify-center p-4">
@@ -91,7 +97,7 @@ export function WizardShell({ token, campaignName, campaignBrief }: { token: str
               <div
                 key={s}
                 className={`h-1 flex-1 rounded-full ${
-                  s === step ? 'bg-primary' : s < step ? 'bg-primary/60' : 'bg-muted'
+                  s === step ? "bg-primary" : s < step ? "bg-primary/60" : "bg-muted"
                 }`}
               />
             ))}
@@ -112,7 +118,7 @@ export function WizardShell({ token, campaignName, campaignBrief }: { token: str
         {isSubmitting && (
           <div className="space-y-2">
             <p className="text-center text-sm text-muted-foreground">
-              {uploadList.length > 0 ? 'Uploading files...' : 'Submitting...'}
+              {uploadList.length > 0 ? "Uploading files..." : "Submitting..."}
             </p>
             {uploadList.length > 0 && (
               <>
@@ -123,8 +129,11 @@ export function WizardShell({ token, campaignName, campaignBrief }: { token: str
                   />
                 </div>
                 <div className="space-y-1">
-                  {uploadList.map((upload, idx) => (
-                    <div key={idx} className="flex items-center justify-between text-xs text-muted-foreground">
+                  {uploadList.map((upload, _idx) => (
+                    <div
+                      key={upload.filename}
+                      className="flex items-center justify-between text-xs text-muted-foreground"
+                    >
                       <span className="truncate">{upload.filename}</span>
                       <span>{upload.progress}%</span>
                     </div>
@@ -136,5 +145,5 @@ export function WizardShell({ token, campaignName, campaignBrief }: { token: str
         )}
       </div>
     </div>
-  )
+  );
 }
