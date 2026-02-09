@@ -7,23 +7,32 @@ import { WizardStepOne } from './wizard-step-one'
 import { WizardStepTwo } from './wizard-step-two'
 import { WizardStepThree } from './wizard-step-three'
 import { submitWizard } from '../actions/submit-wizard'
+import { useMultipartUpload } from '@/features/uploads/hooks/use-multipart-upload'
 
 export function WizardShell({ token, campaignName }: { token: string; campaignName: string }) {
-  const { step, stepOneData, reset } = useWizardState()
+  const { step, stepOneData, stepTwoFiles, reset } = useWizardState()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isComplete, setIsComplete] = useState(false)
+  const { uploads, uploadFile } = useMultipartUpload()
 
   async function handleSubmit() {
     if (!stepOneData) return
 
     setIsSubmitting(true)
     try {
-      await submitWizard({
+      const submission = await submitWizard({
         token,
         creatorName: stepOneData.creatorName,
         creatorEmail: stepOneData.creatorEmail,
         creatorNotes: stepOneData.creatorNotes,
       })
+
+      if (stepTwoFiles.length > 0) {
+        await Promise.all(
+          stepTwoFiles.map(file => uploadFile(file, submission.id))
+        )
+      }
+
       setIsComplete(true)
       reset()
     } catch (error) {
@@ -50,6 +59,11 @@ export function WizardShell({ token, campaignName }: { token: string; campaignNa
     )
   }
 
+  const uploadList = Object.values(uploads)
+  const totalProgress = uploadList.length > 0
+    ? Math.round(uploadList.reduce((sum, u) => sum + u.progress, 0) / uploadList.length)
+    : 0
+
   return (
     <div className="flex min-h-screen items-center justify-center p-4">
       <div className="w-full max-w-lg space-y-6">
@@ -74,7 +88,29 @@ export function WizardShell({ token, campaignName }: { token: string; campaignNa
         </div>
 
         {isSubmitting && (
-          <p className="text-center text-sm text-muted-foreground">Submitting...</p>
+          <div className="space-y-2">
+            <p className="text-center text-sm text-muted-foreground">
+              {uploadList.length > 0 ? 'Uploading files...' : 'Submitting...'}
+            </p>
+            {uploadList.length > 0 && (
+              <>
+                <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+                  <div
+                    className="h-full bg-primary transition-all"
+                    style={{ width: `${totalProgress}%` }}
+                  />
+                </div>
+                <div className="space-y-1">
+                  {uploadList.map((upload, idx) => (
+                    <div key={idx} className="flex items-center justify-between text-xs text-muted-foreground">
+                      <span className="truncate">{upload.filename}</span>
+                      <span>{upload.progress}%</span>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
         )}
       </div>
     </div>

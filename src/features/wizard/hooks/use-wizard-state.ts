@@ -1,22 +1,28 @@
 import { create } from 'zustand'
-import type { WizardStepOne, WizardStepTwo } from '../schemas'
+import type { WizardStepOne } from '../schemas'
+
+type FileData = {
+  name: string
+  size: number
+  type: string
+}
 
 type WizardState = {
-  step: number
+  step: 1 | 2 | 3
   stepOneData: WizardStepOne | null
-  stepTwoData: WizardStepTwo | null
-  setStep: (step: number) => void
+  stepTwoFiles: File[]
+  setStep: (step: 1 | 2 | 3) => void
   setStepOneData: (data: WizardStepOne) => void
-  setStepTwoData: (data: WizardStepTwo) => void
+  setStepTwoFiles: (files: File[]) => void
   reset: () => void
 }
 
 export const useWizardState = create<WizardState>((set) => ({
   step: 1,
   stepOneData: null,
-  stepTwoData: null,
+  stepTwoFiles: [],
   setStep: (step) => set({ step }),
   setStepOneData: (data) => set({ stepOneData: data }),
-  setStepTwoData: (data) => set({ stepTwoData: data }),
-  reset: () => set({ step: 1, stepOneData: null, stepTwoData: null }),
+  setStepTwoFiles: (files) => set({ stepTwoFiles: files }),
+  reset: () => set({ step: 1, stepOneData: null, stepTwoFiles: [] }),
 }))

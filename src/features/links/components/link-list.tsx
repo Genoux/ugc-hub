@@ -85,15 +85,13 @@ export function LinkList({ campaignId, links }: { campaignId: string; links: Lin
                   <Copy className="size-4" />
                   {copiedToken === link.token ? 'Copied' : 'Copy'}
                 </Button>
-                {link.status === 'active' && (
-                  <Button
-                    onClick={() => handleRevoke(link.id)}
-                    variant="ghost"
-                    size="sm"
-                  >
-                    <Trash2 className="size-4" />
-                  </Button>
-                )}
+                <Button
+                  onClick={() => handleRevoke(link.id)}
+                  variant="ghost"
+                  size="sm"
+                >
+                  <Trash2 className="size-4" />
+                </Button>
               </div>
             </div>
           ))}

@@ -1,35 +1,29 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { Upload } from 'lucide-react'
-import { useWizardState } from '../hooks/use-wizard-state'
-import { Button } from '@/shared/components/ui/button'
-import { Card } from '@/shared/components/ui/card'
+import { useState } from "react";
+import { Upload } from "lucide-react";
+import { useWizardState } from "../hooks/use-wizard-state";
+import { Button } from "@/shared/components/ui/button";
+import { Card } from "@/shared/components/ui/card";
 
 export function WizardStepTwo() {
-  const { setStepTwoData, setStep } = useWizardState()
-  const [files, setFiles] = useState<File[]>([])
+  const { setStepTwoFiles, setStep, stepTwoFiles } = useWizardState();
+  const [files, setFiles] = useState<File[]>(stepTwoFiles);
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     if (e.target.files) {
-      setFiles(Array.from(e.target.files))
+      setFiles(Array.from(e.target.files));
     }
   }
 
   function handleNext() {
     if (files.length === 0) {
-      alert('Please select at least one file')
-      return
+      alert("Please select at least one file");
+      return;
     }
 
-    setStepTwoData({
-      files: files.map(f => ({
-        name: f.name,
-        size: f.size,
-        type: f.type,
-      })),
-    })
-    setStep(3)
+    setStepTwoFiles(files);
+    setStep(3);
   }
 
   return (
@@ -43,10 +37,7 @@ export function WizardStepTwo() {
           className="hidden"
           id="file-upload"
         />
-        <label
-          htmlFor="file-upload"
-          className="flex cursor-pointer flex-col items-center gap-2"
-        >
+        <label htmlFor="file-upload" className="flex cursor-pointer flex-col items-center gap-2">
           <Upload className="size-8 text-muted-foreground" />
           <div>
             <p className="text-sm font-medium">Click to select files</p>
@@ -70,22 +61,13 @@ export function WizardStepTwo() {
       )}
 
       <div className="flex gap-2">
-        <Button
-          type="button"
-          onClick={() => setStep(1)}
-          variant="outline"
-          className="flex-1"
-        >
+        <Button type="button" onClick={() => setStep(1)} variant="outline" className="flex-1">
           Back
         </Button>
-        <Button
-          type="button"
-          onClick={handleNext}
-          className="flex-1"
-        >
+        <Button type="button" onClick={handleNext} className="flex-1">
           Next
         </Button>
       </div>
     </div>
-  )
+  );
 }

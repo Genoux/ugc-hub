@@ -4,7 +4,7 @@ import { useWizardState } from '../hooks/use-wizard-state'
 import { Button } from '@/shared/components/ui/button'
 
 export function WizardStepThree({ onSubmit }: { onSubmit: () => void }) {
-  const { stepOneData, stepTwoData, setStep } = useWizardState()
+  const { stepOneData, stepTwoFiles, setStep } = useWizardState()
 
   return (
     <div className="space-y-6">
@@ -30,7 +30,7 @@ export function WizardStepThree({ onSubmit }: { onSubmit: () => void }) {
 
       <div className="space-y-3">
         <h3 className="text-sm font-medium">Files</h3>
-        <p className="text-sm">{stepTwoData?.files.length || 0} file(s) selected</p>
+        <p className="text-sm">{stepTwoFiles.length || 0} file(s) selected</p>
       </div>
 
       <div className="flex gap-2">
