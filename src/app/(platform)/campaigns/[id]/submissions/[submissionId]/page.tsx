@@ -3,7 +3,10 @@ import { campaigns, submissions, assets } from '@/db/schema'
 import { getCurrentUser } from '@/shared/lib/auth'
 import { eq, and } from 'drizzle-orm'
 import { notFound } from 'next/navigation'
+import Link from 'next/link'
+import { ChevronLeft } from 'lucide-react'
 import { SubmissionReview } from '@/features/submissions/components/submission-review'
+import { Button } from '@/shared/components/ui/button'
 
 export default async function SubmissionDetailPage({
   params,
@@ -37,15 +40,13 @@ export default async function SubmissionDetailPage({
   })
 
   return (
-    <div className="p-8">
-      <div className="mb-6">
-        <a
-          href={`/campaigns/${id}`}
-          className="text-sm text-blue-600 hover:text-blue-700"
-        >
-          ← Back to Campaign
-        </a>
-      </div>
+    <div className="flex flex-1 flex-col gap-4 p-4">
+      <Button variant="outline" size="sm" asChild className="w-fit">
+        <Link href={`/campaigns/${id}`}>
+          <ChevronLeft className="size-4" />
+          Back to Campaign
+        </Link>
+      </Button>
 
       <SubmissionReview
         campaignName={campaign.name}
