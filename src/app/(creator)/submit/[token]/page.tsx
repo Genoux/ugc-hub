@@ -3,6 +3,8 @@ import { links, campaigns } from '@/db/schema'
 import { eq } from 'drizzle-orm'
 import { notFound } from 'next/navigation'
 import { WizardShell } from '@/features/wizard/components/wizard-shell'
+import { Card, CardContent } from '@/shared/components/ui/card'
+import { AlertCircle } from 'lucide-react'
 
 export default async function SubmitPage({ params }: { params: Promise<{ token: string }> }) {
   const { token } = await params
@@ -17,24 +19,36 @@ export default async function SubmitPage({ params }: { params: Promise<{ token: 
 
   if (link.status !== 'active') {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold">Link Not Available</h1>
-          <p className="mt-2 text-gray-600">
-            This link has been {link.status === 'used' ? 'used' : link.status}.
-          </p>
-        </div>
+      <div className="flex min-h-screen items-center justify-center p-4">
+        <Card className="w-full max-w-md">
+          <CardContent className="flex flex-col items-center gap-4 py-12 text-center">
+            <AlertCircle className="size-12 text-muted-foreground" />
+            <div>
+              <h1 className="text-2xl font-semibold">Link Not Available</h1>
+              <p className="mt-2 text-sm text-muted-foreground">
+                This link has been {link.status === 'used' ? 'used' : link.status}.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     )
   }
 
   if (link.expiresAt && new Date(link.expiresAt) < new Date()) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold">Link Expired</h1>
-          <p className="mt-2 text-gray-600">This submission link has expired.</p>
-        </div>
+      <div className="flex min-h-screen items-center justify-center p-4">
+        <Card className="w-full max-w-md">
+          <CardContent className="flex flex-col items-center gap-4 py-12 text-center">
+            <AlertCircle className="size-12 text-muted-foreground" />
+            <div>
+              <h1 className="text-2xl font-semibold">Link Expired</h1>
+              <p className="mt-2 text-sm text-muted-foreground">
+                This submission link has expired.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     )
   }
