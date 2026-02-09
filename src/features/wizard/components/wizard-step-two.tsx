@@ -1,7 +1,10 @@
 'use client'
 
 import { useState } from 'react'
+import { Upload } from 'lucide-react'
 import { useWizardState } from '../hooks/use-wizard-state'
+import { Button } from '@/shared/components/ui/button'
+import { Card } from '@/shared/components/ui/card'
 
 export function WizardStepTwo() {
   const { setStepTwoData, setStep } = useWizardState()
@@ -31,9 +34,7 @@ export function WizardStepTwo() {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-2xl font-bold">Upload Files</h2>
-
-      <div className="rounded-lg border-2 border-dashed border-gray-300 p-8 text-center">
+      <Card className="border-dashed p-8 text-center">
         <input
           type="file"
           multiple
@@ -44,20 +45,23 @@ export function WizardStepTwo() {
         />
         <label
           htmlFor="file-upload"
-          className="cursor-pointer text-blue-600 hover:text-blue-700"
+          className="flex cursor-pointer flex-col items-center gap-2"
         >
-          Click to select files
+          <Upload className="size-8 text-muted-foreground" />
+          <div>
+            <p className="text-sm font-medium">Click to select files</p>
+            <p className="text-xs text-muted-foreground">or drag and drop</p>
+          </div>
         </label>
-        <p className="mt-2 text-sm text-gray-500">or drag and drop</p>
-      </div>
+      </Card>
 
       {files.length > 0 && (
         <div className="space-y-2">
-          <h3 className="font-semibold">Selected Files ({files.length})</h3>
+          <p className="text-sm font-medium">Selected Files ({files.length})</p>
           {files.map((file, idx) => (
-            <div key={idx} className="flex items-center justify-between rounded border p-2">
+            <div key={idx} className="flex items-center justify-between rounded-lg border p-2">
               <span className="text-sm">{file.name}</span>
-              <span className="text-xs text-gray-500">
+              <span className="text-xs text-muted-foreground">
                 {(file.size / 1024 / 1024).toFixed(2)} MB
               </span>
             </div>
@@ -66,20 +70,21 @@ export function WizardStepTwo() {
       )}
 
       <div className="flex gap-2">
-        <button
+        <Button
           type="button"
           onClick={() => setStep(1)}
-          className="flex-1 rounded-md border border-gray-300 px-4 py-2 hover:bg-gray-50"
+          variant="outline"
+          className="flex-1"
         >
           Back
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
           onClick={handleNext}
-          className="flex-1 rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+          className="flex-1"
         >
           Next
-        </button>
+        </Button>
       </div>
     </div>
   )

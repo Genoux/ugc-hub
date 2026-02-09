@@ -3,6 +3,10 @@
 import { useState } from 'react'
 import { useWizardState } from '../hooks/use-wizard-state'
 import type { WizardStepOne } from '../schemas'
+import { Button } from '@/shared/components/ui/button'
+import { Input } from '@/shared/components/ui/input'
+import { Label } from '@/shared/components/ui/label'
+import { Textarea } from '@/shared/components/ui/textarea'
 
 export function WizardStepOne() {
   const { setStepOneData, setStep } = useWizardState()
@@ -20,55 +24,47 @@ export function WizardStepOne() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <h2 className="text-2xl font-bold">Your Information</h2>
-
-      <div>
-        <label htmlFor="name" className="block text-sm font-medium">
-          Name <span className="text-red-500">*</span>
-        </label>
-        <input
-          type="text"
+      <div className="space-y-2">
+        <Label htmlFor="name">
+          Name <span className="text-destructive">*</span>
+        </Label>
+        <Input
           id="name"
           required
           value={formData.creatorName}
           onChange={(e) => setFormData({ ...formData, creatorName: e.target.value })}
-          className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
+          placeholder="Your name"
         />
       </div>
 
-      <div>
-        <label htmlFor="email" className="block text-sm font-medium">
-          Email <span className="text-red-500">*</span>
-        </label>
-        <input
+      <div className="space-y-2">
+        <Label htmlFor="email">
+          Email <span className="text-destructive">*</span>
+        </Label>
+        <Input
           type="email"
           id="email"
           required
           value={formData.creatorEmail}
           onChange={(e) => setFormData({ ...formData, creatorEmail: e.target.value })}
-          className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
+          placeholder="your@email.com"
         />
       </div>
 
-      <div>
-        <label htmlFor="notes" className="block text-sm font-medium">
-          Notes (optional)
-        </label>
-        <textarea
+      <div className="space-y-2">
+        <Label htmlFor="notes">Notes (optional)</Label>
+        <Textarea
           id="notes"
           rows={4}
           value={formData.creatorNotes}
           onChange={(e) => setFormData({ ...formData, creatorNotes: e.target.value })}
-          className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
+          placeholder="Any additional information..."
         />
       </div>
 
-      <button
-        type="submit"
-        className="w-full rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
-      >
+      <Button type="submit" className="w-full">
         Next
-      </button>
+      </Button>
     </form>
   )
 }

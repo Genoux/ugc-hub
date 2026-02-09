@@ -1,43 +1,66 @@
 'use client'
 
 import { useWizardState } from '../hooks/use-wizard-state'
+import { Button } from '@/shared/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card'
+import { Separator } from '@/shared/components/ui/separator'
 
 export function WizardStepThree({ onSubmit }: { onSubmit: () => void }) {
   const { stepOneData, stepTwoData, setStep } = useWizardState()
 
   return (
     <div className="space-y-4">
-      <h2 className="text-2xl font-bold">Review & Submit</h2>
+      <Card>
+        <CardHeader>
+          <CardTitle>Your Information</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="grid gap-1">
+            <span className="text-xs text-muted-foreground">Name</span>
+            <span className="text-sm font-medium">{stepOneData?.creatorName}</span>
+          </div>
+          <Separator />
+          <div className="grid gap-1">
+            <span className="text-xs text-muted-foreground">Email</span>
+            <span className="text-sm font-medium">{stepOneData?.creatorEmail}</span>
+          </div>
+          {stepOneData?.creatorNotes && (
+            <>
+              <Separator />
+              <div className="grid gap-1">
+                <span className="text-xs text-muted-foreground">Notes</span>
+                <span className="text-sm">{stepOneData.creatorNotes}</span>
+              </div>
+            </>
+          )}
+        </CardContent>
+      </Card>
 
-      <div className="rounded-lg border p-4">
-        <h3 className="mb-2 font-semibold">Your Information</h3>
-        <p><strong>Name:</strong> {stepOneData?.creatorName}</p>
-        <p><strong>Email:</strong> {stepOneData?.creatorEmail}</p>
-        {stepOneData?.creatorNotes && (
-          <p><strong>Notes:</strong> {stepOneData.creatorNotes}</p>
-        )}
-      </div>
-
-      <div className="rounded-lg border p-4">
-        <h3 className="mb-2 font-semibold">Files</h3>
-        <p>{stepTwoData?.files.length || 0} file(s) selected</p>
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Files</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm">{stepTwoData?.files.length || 0} file(s) selected</p>
+        </CardContent>
+      </Card>
 
       <div className="flex gap-2">
-        <button
+        <Button
           type="button"
           onClick={() => setStep(2)}
-          className="flex-1 rounded-md border border-gray-300 px-4 py-2 hover:bg-gray-50"
+          variant="outline"
+          className="flex-1"
         >
           Back
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
           onClick={onSubmit}
-          className="flex-1 rounded-md bg-green-600 px-4 py-2 text-white hover:bg-green-700"
+          className="flex-1"
         >
           Submit
-        </button>
+        </Button>
       </div>
     </div>
   )
