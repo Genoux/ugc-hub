@@ -1,9 +1,10 @@
 import { db } from '@/shared/lib/db'
-import { campaigns, links } from '@/db/schema'
+import { campaigns, links, submissions } from '@/db/schema'
 import { getCurrentUser } from '@/shared/lib/auth'
 import { eq, and } from 'drizzle-orm'
 import { notFound } from 'next/navigation'
 import { LinkList } from '@/features/links/components/link-list'
+import { SubmissionList } from '@/features/submissions/components/submission-list'
 
 export default async function CampaignDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -25,6 +26,11 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
     orderBy: (links, { desc }) => [desc(links.createdAt)],
   })
 
+  const campaignSubmissions = await db.query.submissions.findMany({
+    where: eq(submissions.campaignId, id),
+    orderBy: (submissions, { desc }) => [desc(submissions.createdAt)],
+  })
+
   return (
     <div className="p-8">
       <div className="mb-6">
@@ -40,6 +46,7 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
       </div>
 
       <LinkList campaignId={campaign.id} links={campaignLinks} />
+      <SubmissionList campaignId={campaign.id} submissions={campaignSubmissions} />
     </div>
   )
 }
