@@ -2,6 +2,7 @@ import { db } from '@/shared/lib/db'
 import { campaigns } from '@/db/schema'
 import { getCurrentUser } from '@/shared/lib/auth'
 import { eq } from 'drizzle-orm'
+import { CampaignList } from '@/features/campaigns/components/campaign-list'
 
 export default async function CampaignsPage() {
   const user = await getCurrentUser()
@@ -9,14 +10,5 @@ export default async function CampaignsPage() {
     where: eq(campaigns.userId, user.id),
   })
 
-  return (
-    <div>
-      <h1>Campaigns</h1>
-      <ul>
-        {userCampaigns.map(c => (
-          <li key={c.id}>{c.name}</li>
-        ))}
-      </ul>
-    </div>
-  )
+  return <CampaignList campaigns={userCampaigns} />
 }
