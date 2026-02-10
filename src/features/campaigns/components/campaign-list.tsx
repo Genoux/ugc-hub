@@ -1,16 +1,6 @@
 "use client";
 
-import {
-  IconChevronDown,
-  IconChevronLeft,
-  IconChevronRight,
-  IconChevronsLeft,
-  IconChevronsRight,
-  IconDotsVertical,
-  IconLayoutColumns,
-  IconPlus,
-  IconPointFilled,
-} from "@tabler/icons-react";
+import { IconDotsVertical, IconPlus, IconPointFilled } from "@tabler/icons-react";
 import {
   type ColumnDef,
   type ColumnFiltersState,
@@ -28,7 +18,17 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import * as React from "react";
-
+import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/shared/components/ui/alert-dialog";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import {
@@ -52,6 +52,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/shared/components/ui/table";
+import { deleteCampaign } from "../actions/delete-campaign";
 import { useRealtimeCampaigns } from "../hooks/use-realtime-campaigns";
 import { CampaignForm } from "./campaign-form";
 
@@ -129,14 +130,14 @@ const columns: ColumnDef<Campaign>[] = [
     ),
   },
   {
-    id: "status",
+    id: "notification",
     header: () => null,
     cell: ({ row }) => {
       if (row.original.pendingSubmissions > 0) {
         return (
           <Badge variant="outline" className="text-muted-foreground px-1.5">
             <IconPointFilled className="fill-green-500 dark:fill-green-400 text-green-500 dark:text-green-400" />
-            New
+            New submissions
           </Badge>
         );
       }
@@ -147,28 +148,40 @@ const columns: ColumnDef<Campaign>[] = [
   {
     id: "actions",
     header: () => <div className="text-right"></div>,
-    cell: ({ row }) => (
-      <div className="flex justify-end">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              className="data-[state=open]:bg-muted text-muted-foreground flex size-8"
-              size="icon"
-            >
-              <IconDotsVertical />
-              <span className="sr-only">Open menu</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-32">
-            <DropdownMenuItem asChild>
-              <Link href={`/campaigns/${row.original.id}`}>View</Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-    ),
+    cell: ({ row, table }) => {
+      const onDelete = (table.options.meta as { onDeleteCampaign?: (id: string) => void })
+        ?.onDeleteCampaign;
+      return (
+        <div className="flex justify-end">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                className="data-[state=open]:bg-muted text-muted-foreground flex size-8"
+                size="icon"
+              >
+                <IconDotsVertical />
+                <span className="sr-only">Open menu</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-32">
+              <DropdownMenuItem asChild>
+                <Link href={`/campaigns/${row.original.id}`}>View</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="text-destructive! cursor-pointer"
+                onSelect={(e) => {
+                  e.preventDefault();
+                  onDelete?.(row.original.id);
+                }}
+              >
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      );
+    },
   },
 ];
 
@@ -176,6 +189,8 @@ export function CampaignList({ campaigns }: { campaigns: Campaign[] }) {
   const router = useRouter();
   useRealtimeCampaigns();
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
+  const [campaignToDelete, setCampaignToDelete] = React.useState<string | null>(null);
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
   const [sorting, setSorting] = React.useState<SortingState>([]);
@@ -184,9 +199,29 @@ export function CampaignList({ campaigns }: { campaigns: Campaign[] }) {
     pageSize: 10,
   });
 
+  function openDeleteDialog(campaignId: string) {
+    setCampaignToDelete(campaignId);
+    setDeleteDialogOpen(true);
+  }
+
+  async function confirmDeleteCampaign() {
+    if (!campaignToDelete) return;
+    try {
+      await deleteCampaign(campaignToDelete);
+      toast.success("Campaign deleted");
+      setDeleteDialogOpen(false);
+      setCampaignToDelete(null);
+      router.refresh();
+    } catch (err) {
+      console.error("Failed to delete campaign:", err);
+      toast.error("Failed to delete campaign");
+    }
+  }
+
   const table = useReactTable({
     data: campaigns,
     columns,
+    meta: { onDeleteCampaign: openDeleteDialog },
     state: {
       sorting,
       columnVisibility,
@@ -208,23 +243,21 @@ export function CampaignList({ campaigns }: { campaigns: Campaign[] }) {
 
   return (
     <div className="w-full flex-col justify-start gap-6">
-      <div className="flex items-center justify-between px-4 py-4 lg:px-6">
-        <div className="flex items-center gap-2">
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button variant="outline" size="sm">
-                <IconPlus />
-                <span className="hidden lg:inline">New Campaign</span>
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Create Campaign</DialogTitle>
-              </DialogHeader>
-              <CampaignForm onSuccess={() => setIsDialogOpen(false)} />
-            </DialogContent>
-          </Dialog>
-        </div>
+      <div className="flex items-center justify-end px-4 py-4 lg:px-6">
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger asChild>
+            <Button className="cursor-pointer" variant="outline" size="sm">
+              <IconPlus />
+              <span className="hidden lg:inline">New Campaign</span>
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Create Campaign</DialogTitle>
+            </DialogHeader>
+            <CampaignForm onSuccess={() => setIsDialogOpen(false)} />
+          </DialogContent>
+        </Dialog>
       </div>
       <div className="relative flex flex-col gap-4 overflow-auto px-4 lg:px-6">
         <div className="overflow-hidden rounded-lg border">
@@ -280,6 +313,22 @@ export function CampaignList({ campaigns }: { campaigns: Campaign[] }) {
           </div>
         </div>
       </div>
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete campaign?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete the campaign and all its submissions and links. This
+              action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDeleteCampaign}>Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

@@ -74,13 +74,6 @@ export function CampaignOverview({
           <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
             {pendingReview}
           </CardTitle>
-          {pendingReview > 0 && (
-            <CardAction>
-              <Badge variant="outline" className="text-orange-600 border-orange-600">
-                {pendingReview} awaiting
-              </Badge>
-            </CardAction>
-          )}
         </CardHeader>
         <CardFooter className="flex-col items-start gap-1.5 text-sm">
           <div className="text-muted-foreground">Submissions need review</div>

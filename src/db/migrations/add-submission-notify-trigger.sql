@@ -13,9 +13,9 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Create trigger
+-- Create trigger for both INSERT and UPDATE
 DROP TRIGGER IF EXISTS submission_created_trigger ON submissions;
 CREATE TRIGGER submission_created_trigger
-  AFTER INSERT ON submissions
+  AFTER INSERT OR UPDATE ON submissions
   FOR EACH ROW
   EXECUTE FUNCTION notify_new_submission();

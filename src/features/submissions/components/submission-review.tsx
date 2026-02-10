@@ -146,7 +146,9 @@ export function SubmissionReview({
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold">{campaignName}</h1>
-          <SubmissionStatusBadge status={submission.status as "awaiting" | "pending" | "approved" | "rejected"} />
+          <SubmissionStatusBadge
+            status={submission.status as "awaiting" | "pending" | "approved" | "rejected"}
+          />
         </div>
       </div>
 

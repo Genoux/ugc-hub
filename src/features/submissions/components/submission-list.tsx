@@ -45,6 +45,7 @@ export function SubmissionList({
   const [copiedToken, setCopiedToken] = useState<string | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [submissionToDelete, setSubmissionToDelete] = useState<string | null>(null);
+  const [deletingSubmissionId, setDeletingSubmissionId] = useState<string | null>(null);
 
   function openDeleteDialog(submissionId: string) {
     setSubmissionToDelete(submissionId);
@@ -54,6 +55,9 @@ export function SubmissionList({
   async function confirmDelete() {
     if (!submissionToDelete) return;
 
+    setDeletingSubmissionId(submissionToDelete);
+    setDeleteDialogOpen(false);
+
     try {
       await deleteSubmission(submissionToDelete);
       toast.success("Submission deleted");
@@ -61,8 +65,8 @@ export function SubmissionList({
       console.error("Failed to delete:", error);
       toast.error("Failed to delete submission");
     } finally {
-      setDeleteDialogOpen(false);
       setSubmissionToDelete(null);
+      setDeletingSubmissionId(null);
     }
   }
 
@@ -91,32 +95,61 @@ export function SubmissionList({
         <div className="space-y-2">
           {submissions.map((submission) => {
             const link = submission.link;
-            return (
-              <div
-                key={submission.id}
-                className="flex items-center justify-between rounded-lg border p-3 hover:bg-accent/25 cursor-pointer"
-              >
-                <div className="flex-1">
-                  {submission.status === "awaiting" ? (
+            const submissionUrl = `/campaigns/${campaignId}/submissions/${submission.id}`;
+            const isDeleting = deletingSubmissionId === submission.id;
+            const isAwaiting = submission.status === "awaiting";
+            const baseClassName = `flex items-center justify-between rounded-lg border p-3 transition-opacity ${
+              isDeleting ? "opacity-50 pointer-events-none" : ""
+            }`;
+            const actions = (
+              <div className="flex items-center gap-2 shrink-0">
+                <div className="w-fit">
+                  <SubmissionStatusBadge
+                    key={`${submission.id}-${submission.status}`}
+                    status={submission.status as "awaiting" | "pending" | "approved" | "rejected"}
+                  />
+                </div>
+                {!isAwaiting && (
+                  <span className="text-xs text-muted-foreground">
+                    {new Date(submission.createdAt).toLocaleDateString()}
+                  </span>
+                )}
+                <Button
+                  type="button"
+                  className="text-muted-foreground cursor-pointer"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    openDeleteDialog(submission.id);
+                  }}
+                  variant="ghost"
+                  size="sm"
+                  disabled={isDeleting}
+                >
+                  <Trash2 className="size-4" />
+                </Button>
+              </div>
+            );
+            if (isAwaiting) {
+              return (
+                <div key={submission.id} className={baseClassName}>
+                  <div className="flex-1 min-w-0">
                     <div className="space-y-0.5">
                       <p className="text-sm font-medium text-muted-foreground">
                         Awaiting submission
                       </p>
                       {link && (
                         <div className="flex items-center gap-0.5">
-                          <Link
-                            href={`/submit/${link.token}`}
-                            target="_blank"
-                            className="font-mono text-xs text-muted-foreground hover:underline"
-                          >
-                            /submit/{link.token}
-                          </Link>
                           <button
                             type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleCopy(link.token);
-                            }}
+                            onClick={() => window.open(`/submit/${link.token}`, "_blank")}
+                            className="font-mono text-xs text-muted-foreground hover:underline text-left"
+                          >
+                            /submit/{link.token}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleCopy(link.token)}
                             className="p-1 text-muted-foreground cursor-pointer"
                           >
                             {copiedToken === link.token ? (
@@ -128,36 +161,23 @@ export function SubmissionList({
                         </div>
                       )}
                     </div>
-                  ) : (
-                    <Link href={`/campaigns/${campaignId}/submissions/${submission.id}`}>
-                      <div>
-                        <p className="text-sm font-medium">{submission.creatorName}</p>
-                        <p className="text-xs text-muted-foreground">{submission.creatorEmail}</p>
-                      </div>
-                    </Link>
-                  )}
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-fit">
-                    <SubmissionStatusBadge
-                      status={submission.status as "awaiting" | "pending" | "approved" | "rejected"}
-                    />
                   </div>
-                  {submission.status !== "awaiting" && (
-                    <span className="text-xs text-muted-foreground">
-                      {new Date(submission.createdAt).toLocaleDateString()}
-                    </span>
-                  )}
-                  <Button
-                    className="text-muted-foreground cursor-pointer"
-                    onClick={() => openDeleteDialog(submission.id)}
-                    variant="ghost"
-                    size="sm"
-                  >
-                    <Trash2 className="size-4" />
-                  </Button>
+                  {actions}
                 </div>
-              </div>
+              );
+            }
+            return (
+              <Link
+                key={submission.id}
+                href={submissionUrl}
+                className={`${baseClassName} hover:bg-accent/25 cursor-pointer`}
+              >
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium">{submission.creatorName}</p>
+                  <p className="text-xs text-muted-foreground">{submission.creatorEmail}</p>
+                </div>
+                {actions}
+              </Link>
             );
           })}
         </div>
@@ -168,7 +188,8 @@ export function SubmissionList({
           <AlertDialogHeader>
             <AlertDialogTitle>Delete submission?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the submission.
+              This action cannot be undone. This will permanently delete the submission and all
+              associated files.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

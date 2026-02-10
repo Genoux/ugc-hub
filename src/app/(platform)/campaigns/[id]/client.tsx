@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronLeft, Plus } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { createLink } from "@/features/links/actions/create-link";
@@ -51,10 +51,11 @@ export function CampaignDetailClient({
 
   return (
     <div className="flex flex-1 flex-col gap-8 p-4">
-      <div className="flex items-center gap-2">
-        <Button variant="outline" size="icon" asChild>
+      <div className="flex">
+        <Button variant="outline" size="sm" asChild>
           <Link href="/campaigns">
             <ChevronLeft className="size-4" />
+            Campaigns
           </Link>
         </Button>
       </div>

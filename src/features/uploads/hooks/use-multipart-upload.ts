@@ -1,64 +1,64 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { UPLOAD_CONFIG } from '../lib/upload-config'
+import { useState } from "react";
+import { UPLOAD_CONFIG } from "../lib/upload-config";
 
-type UploadProgress = {
-  filename: string
-  progress: number
-  status: 'pending' | 'uploading' | 'completed' | 'failed'
-}
+type UploadStatus = {
+  filename: string;
+  status: "pending" | "uploading" | "completed" | "failed";
+};
 
 export function useMultipartUpload() {
-  const [uploads, setUploads] = useState<Record<string, UploadProgress>>({})
+  const [uploads, setUploads] = useState<Record<string, UploadStatus>>({});
 
   async function uploadFile(file: File, submissionId: string) {
-    const fileId = `${file.name}-${Date.now()}`
+    const fileId = `${file.name}-${Date.now()}`;
 
-    setUploads(prev => ({
+    setUploads((prev) => ({
       ...prev,
-      [fileId]: { filename: file.name, progress: 0, status: 'pending' },
-    }))
+      [fileId]: { filename: file.name, status: "pending" },
+    }));
 
     try {
-      const presignResponse = await fetch('/api/uploads/presign', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const presignResponse = await fetch("/api/uploads/presign", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           filename: file.name,
           contentType: file.type,
           fileSize: file.size,
+          submissionId,
         }),
-      })
+      });
 
       if (!presignResponse.ok) {
-        throw new Error('Failed to get upload URL')
+        throw new Error("Failed to get upload URL");
       }
 
-      const { uploadUrl, key, isMultipart, uploadId } = await presignResponse.json()
+      const { uploadUrl, key, isMultipart, uploadId } = await presignResponse.json();
 
-      setUploads(prev => ({
+      setUploads((prev) => ({
         ...prev,
-        [fileId]: { ...prev[fileId], status: 'uploading' },
-      }))
+        [fileId]: { ...prev[fileId], status: "uploading" },
+      }));
 
       if (isMultipart) {
-        await uploadMultipart(file, key, uploadId, submissionId, fileId)
+        await uploadMultipart(file, key, uploadId, submissionId);
       } else {
-        await uploadSingle(file, uploadUrl, key, submissionId, fileId)
+        await uploadSingle(file, uploadUrl, key, submissionId);
       }
 
-      setUploads(prev => ({
+      setUploads((prev) => ({
         ...prev,
-        [fileId]: { ...prev[fileId], progress: 100, status: 'completed' },
-      }))
+        [fileId]: { ...prev[fileId], status: "completed" },
+      }));
     } catch (error) {
-      console.error('Upload failed:', error)
-      setUploads(prev => ({
+      console.error("Upload failed:", error);
+      setUploads((prev) => ({
         ...prev,
-        [fileId]: { ...prev[fileId], status: 'failed' },
-      }))
-      throw error
+        [fileId]: { ...prev[fileId], status: "failed" },
+      }));
+      throw error;
     }
   }
 
@@ -67,22 +67,16 @@ export function useMultipartUpload() {
     uploadUrl: string,
     key: string,
     submissionId: string,
-    fileId: string
   ) {
     await fetch(uploadUrl, {
-      method: 'PUT',
+      method: "PUT",
       body: file,
-      headers: { 'Content-Type': file.type },
-    })
+      headers: { "Content-Type": file.type },
+    });
 
-    setUploads(prev => ({
-      ...prev,
-      [fileId]: { ...prev[fileId], progress: 90 },
-    }))
-
-    await fetch('/api/uploads/complete', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+    await fetch("/api/uploads/complete", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         key,
         submissionId,
@@ -90,7 +84,7 @@ export function useMultipartUpload() {
         mimeType: file.type,
         sizeBytes: file.size,
       }),
-    })
+    });
   }
 
   async function uploadMultipart(
@@ -98,42 +92,33 @@ export function useMultipartUpload() {
     key: string,
     uploadId: string,
     submissionId: string,
-    fileId: string
   ) {
-    const chunkSize = UPLOAD_CONFIG.chunkSize
-    const chunks = Math.ceil(file.size / chunkSize)
-    const parts: Array<{ PartNumber: number; ETag: string }> = []
+    const chunkSize = UPLOAD_CONFIG.chunkSize;
+    const chunks = Math.ceil(file.size / chunkSize);
+    const parts: Array<{ PartNumber: number; ETag: string }> = [];
 
     for (let i = 0; i < chunks; i++) {
-      const start = i * chunkSize
-      const end = Math.min(start + chunkSize, file.size)
-      const chunk = file.slice(start, end)
+      const start = i * chunkSize;
+      const end = Math.min(start + chunkSize, file.size);
+      const chunk = file.slice(start, end);
 
-      const partNumber = i + 1
-      const partUrl = `/api/uploads/part?uploadId=${uploadId}&key=${encodeURIComponent(key)}&partNumber=${partNumber}`
+      const partNumber = i + 1;
+      const partUrl = `/api/uploads/part?uploadId=${uploadId}&key=${encodeURIComponent(key)}&partNumber=${partNumber}`;
 
       const response = await fetch(partUrl, {
-        method: 'PUT',
+        method: "PUT",
         body: chunk,
-      })
+      });
 
-      const etag = response.headers.get('ETag')
+      const etag = response.headers.get("ETag");
       if (etag) {
-        parts.push({ PartNumber: partNumber, ETag: etag.replace(/"/g, '') })
+        parts.push({ PartNumber: partNumber, ETag: etag.replace(/"/g, "") });
       }
-
-      setUploads(prev => ({
-        ...prev,
-        [fileId]: {
-          ...prev[fileId],
-          progress: Math.round(((i + 1) / chunks) * 90),
-        },
-      }))
     }
 
-    await fetch('/api/uploads/complete', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+    await fetch("/api/uploads/complete", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         uploadId,
         key,
@@ -143,8 +128,8 @@ export function useMultipartUpload() {
         mimeType: file.type,
         sizeBytes: file.size,
       }),
-    })
+    });
   }
 
-  return { uploads, uploadFile }
+  return { uploads, uploadFile };
 }

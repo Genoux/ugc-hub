@@ -1,4 +1,4 @@
-import { Skeleton } from '@/shared/components/ui/skeleton'
+import { Skeleton } from "@/shared/components/ui/skeleton";
 
 export default function Loading() {
   return (
@@ -16,5 +16,5 @@ export default function Loading() {
         ))}
       </div>
     </div>
-  )
+  );
 }

@@ -1,6 +1,7 @@
 "use client";
 
-import { CheckCircle2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useMultipartUpload } from "@/features/uploads/hooks/use-multipart-upload";
@@ -19,10 +20,10 @@ export function WizardShell({
   campaignName: string;
   campaignBrief: string;
 }) {
-  const { step, stepOneData, stepTwoFiles, reset } = useWizardState();
+  const router = useRouter();
+  const { step, stepOneData, stepTwoFiles } = useWizardState();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isComplete, setIsComplete] = useState(false);
-  const { uploads, uploadFile } = useMultipartUpload();
+  const { uploadFile } = useMultipartUpload();
 
   async function handleSubmit() {
     if (!stepOneData) return;
@@ -44,8 +45,7 @@ export function WizardShell({
         await Promise.all(stepTwoFiles.map((file) => uploadFile(file, submission.id)));
       }
 
-      setIsComplete(true);
-      reset();
+      router.replace(`/submit/${token}`);
     } catch (error) {
       console.error("Submission failed:", error);
 
@@ -62,30 +62,23 @@ export function WizardShell({
       }
 
       toast.error("Failed to submit. Please try again.");
-    } finally {
       setIsSubmitting(false);
     }
   }
 
-  if (isComplete) {
+  if (isSubmitting) {
     return (
       <div className="flex min-h-screen items-center justify-center p-4">
         <div className="flex flex-col items-center gap-4 text-center">
-          <CheckCircle2 className="size-16 text-green-600" />
+          <Loader2 className="size-6 animate-spin text-muted-foreground" />
           <div>
-            <h2 className="text-2xl font-semibold">Submission Complete!</h2>
-            <p className="mt-2 text-sm text-muted-foreground">Thank you for your submission.</p>
+            <h2 className="text-xl font-semibold">Submitting</h2>
+            <p className="mt-1 text-sm text-muted-foreground">Processing your submission...</p>
           </div>
         </div>
       </div>
     );
   }
-
-  const uploadList = Object.values(uploads);
-  const totalProgress =
-    uploadList.length > 0
-      ? Math.round(uploadList.reduce((sum, u) => sum + u.progress, 0) / uploadList.length)
-      : 0;
 
   return (
     <div className="flex min-h-screen items-center justify-center p-4">
@@ -114,35 +107,6 @@ export function WizardShell({
           {step === 2 && <WizardStepTwo />}
           {step === 3 && <WizardStepThree onSubmit={handleSubmit} />}
         </div>
-
-        {isSubmitting && (
-          <div className="space-y-2">
-            <p className="text-center text-sm text-muted-foreground">
-              {uploadList.length > 0 ? "Uploading files..." : "Submitting..."}
-            </p>
-            {uploadList.length > 0 && (
-              <>
-                <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
-                  <div
-                    className="h-full bg-primary transition-all"
-                    style={{ width: `${totalProgress}%` }}
-                  />
-                </div>
-                <div className="space-y-1">
-                  {uploadList.map((upload, _idx) => (
-                    <div
-                      key={upload.filename}
-                      className="flex items-center justify-between text-xs text-muted-foreground"
-                    >
-                      <span className="truncate">{upload.filename}</span>
-                      <span>{upload.progress}%</span>
-                    </div>
-                  ))}
-                </div>
-              </>
-            )}
-          </div>
-        )}
       </div>
     </div>
   );

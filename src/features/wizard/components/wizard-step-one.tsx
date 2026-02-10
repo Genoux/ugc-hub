@@ -1,25 +1,25 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { useWizardState } from '../hooks/use-wizard-state'
-import type { WizardStepOne } from '../schemas'
-import { Button } from '@/shared/components/ui/button'
-import { Input } from '@/shared/components/ui/input'
-import { Label } from '@/shared/components/ui/label'
-import { Textarea } from '@/shared/components/ui/textarea'
+import { useState } from "react";
+import { useWizardState } from "../hooks/use-wizard-state";
+import type { WizardStepOne } from "../schemas";
+import { Button } from "@/shared/components/ui/button";
+import { Input } from "@/shared/components/ui/input";
+import { Label } from "@/shared/components/ui/label";
+import { Textarea } from "@/shared/components/ui/textarea";
 
 export function WizardStepOne() {
-  const { setStepOneData, setStep } = useWizardState()
+  const { setStepOneData, setStep } = useWizardState();
   const [formData, setFormData] = useState<WizardStepOne>({
-    creatorName: '',
-    creatorEmail: '',
-    creatorNotes: '',
-  })
+    creatorName: "",
+    creatorEmail: "",
+    creatorNotes: "",
+  });
 
   function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    setStepOneData(formData)
-    setStep(2)
+    e.preventDefault();
+    setStepOneData(formData);
+    setStep(2);
   }
 
   return (
@@ -66,5 +66,5 @@ export function WizardStepOne() {
         Next
       </Button>
     </form>
-  )
+  );
 }

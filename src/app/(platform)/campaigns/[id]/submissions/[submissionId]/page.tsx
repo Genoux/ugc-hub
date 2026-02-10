@@ -48,7 +48,7 @@ export default async function SubmissionDetailPage({
       <Button variant="outline" size="sm" asChild className="w-fit">
         <Link href={`/campaigns/${id}`}>
           <ChevronLeft className="size-4" />
-          Campaign
+          Submissions
         </Link>
       </Button>
 

@@ -1,41 +1,43 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { createCampaign } from '../actions/create-campaign'
-import { Button } from '@/shared/components/ui/button'
-import { Input } from '@/shared/components/ui/input'
-import { Label } from '@/shared/components/ui/label'
-import { Textarea } from '@/shared/components/ui/textarea'
+import type React from "react";
+import { useState } from "react";
+import { Button } from "@/shared/components/ui/button";
+import { Input } from "@/shared/components/ui/input";
+import { Label } from "@/shared/components/ui/label";
+import { Textarea } from "@/shared/components/ui/textarea";
+import { createCampaign } from "../actions/create-campaign";
 
 export function CampaignForm({ onSuccess }: { onSuccess?: () => void }) {
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(false);
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault()
-    setIsLoading(true)
+  const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsLoading(true);
 
-    const formData = new FormData(e.currentTarget)
-    
+    const form = e.currentTarget;
+    const formData = new FormData(form);
+
     try {
       await createCampaign({
-        name: formData.get('name') as string,
-        description: formData.get('description') as string || undefined,
-        brief: formData.get('brief') as string,
+        name: formData.get("name") as string,
+        description: (formData.get("description") as string) || undefined,
+        brief: formData.get("brief") as string,
         assetRequirements: {
-          acceptedTypes: ['image/jpeg', 'image/png', 'video/mp4'],
+          acceptedTypes: ["image/jpeg", "image/png", "video/mp4"],
           maxFiles: 10,
           maxFileSize: 100 * 1024 * 1024,
         },
-      })
-      
-      onSuccess?.()
-      e.currentTarget.reset()
+      });
+
+      form.reset();
+      onSuccess?.();
     } catch (error) {
-      console.error('Failed to create campaign:', error)
+      console.error("Failed to create campaign:", error);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
@@ -43,21 +45,12 @@ export function CampaignForm({ onSuccess }: { onSuccess?: () => void }) {
         <Label htmlFor="name">
           Campaign Name <span className="text-destructive">*</span>
         </Label>
-        <Input
-          id="name"
-          name="name"
-          placeholder="Enter campaign name"
-          required
-        />
+        <Input id="name" name="name" placeholder="Enter campaign name" required />
       </div>
 
       <div className="space-y-2">
         <Label htmlFor="description">Description</Label>
-        <Input
-          id="description"
-          name="description"
-          placeholder="Brief description (optional)"
-        />
+        <Input id="description" name="description" placeholder="Brief description (optional)" />
       </div>
 
       <div className="space-y-2">
@@ -74,8 +67,8 @@ export function CampaignForm({ onSuccess }: { onSuccess?: () => void }) {
       </div>
 
       <Button type="submit" disabled={isLoading} className="w-full">
-        {isLoading ? 'Creating...' : 'Create Campaign'}
+        {isLoading ? "Creating..." : "Create Campaign"}
       </Button>
     </form>
-  )
+  );
 }

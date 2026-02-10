@@ -5,6 +5,8 @@ import { CampaignOverview } from "@/features/campaigns/components/campaign-overv
 import { getCurrentUser } from "@/shared/lib/auth";
 import { db } from "@/shared/lib/db";
 
+export const dynamic = "force-dynamic";
+
 export default async function CampaignsPage() {
   const user = await getCurrentUser();
 

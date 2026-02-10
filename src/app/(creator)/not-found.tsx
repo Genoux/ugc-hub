@@ -8,7 +8,8 @@ export default function CreatorNotFound() {
         <div className="flex flex-col gap-2">
           <h1 className="text-3xl font-semibold">Submission Link Not Found</h1>
           <p className="text-muted-foreground">
-            This submission link doesn't exist or has been removed. Please contact the campaign organizer for a new link.
+            This submission link doesn't exist or has been removed. Please contact the campaign
+            organizer for a new link.
           </p>
         </div>
       </div>
