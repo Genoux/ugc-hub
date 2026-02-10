@@ -5,7 +5,6 @@ import { useState } from "react";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
-import { Textarea } from "@/shared/components/ui/textarea";
 import { createCampaign } from "../actions/create-campaign";
 
 export function CampaignForm({ onSuccess }: { onSuccess?: () => void }) {
@@ -22,8 +21,7 @@ export function CampaignForm({ onSuccess }: { onSuccess?: () => void }) {
       await createCampaign({
         name: formData.get("name") as string,
         description: (formData.get("description") as string) || undefined,
-        brief: formData.get("brief") as string,
-        assetRequirements: {
+assetRequirements: {
           acceptedTypes: ["image/jpeg", "image/png", "video/mp4"],
           maxFiles: 10,
           maxFileSize: 100 * 1024 * 1024,
@@ -51,19 +49,6 @@ export function CampaignForm({ onSuccess }: { onSuccess?: () => void }) {
       <div className="space-y-2">
         <Label htmlFor="description">Description</Label>
         <Input id="description" name="description" placeholder="Brief description (optional)" />
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="brief">
-          Brief <span className="text-destructive">*</span>
-        </Label>
-        <Textarea
-          id="brief"
-          name="brief"
-          placeholder="Detailed campaign brief for creators"
-          required
-          rows={4}
-        />
       </div>
 
       <Button type="submit" disabled={isLoading} className="w-full">

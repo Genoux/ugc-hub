@@ -19,6 +19,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import * as React from "react";
 import { toast } from "sonner";
+import { SubmissionStatusBadge } from "@/features/submissions/components/submission-status-badge";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -60,7 +61,6 @@ type Campaign = {
   id: string;
   name: string;
   description: string | null;
-  brief: string;
   createdAt: Date;
   totalSubmissions: number;
   approvedSubmissions: number;
@@ -84,9 +84,7 @@ const columns: ColumnDef<Campaign>[] = [
       if (approvedSubmissions > 0) {
         return (
           <div className="w-32">
-            <Badge variant="outline" className="text-green-600 border-green-600">
-              Approved
-            </Badge>
+            <SubmissionStatusBadge status="approved" />
           </div>
         );
       }
@@ -94,9 +92,7 @@ const columns: ColumnDef<Campaign>[] = [
       if (pendingSubmissions > 0) {
         return (
           <div className="w-32">
-            <Badge variant="outline" className="text-orange-600 border-orange-600">
-              {pendingSubmissions} pending review
-            </Badge>
+            <SubmissionStatusBadge status="pending" />
           </div>
         );
       }
@@ -128,22 +124,6 @@ const columns: ColumnDef<Campaign>[] = [
         {new Date(row.original.createdAt).toLocaleDateString()}
       </span>
     ),
-  },
-  {
-    id: "notification",
-    header: () => null,
-    cell: ({ row }) => {
-      if (row.original.pendingSubmissions > 0) {
-        return (
-          <Badge variant="outline" className="text-muted-foreground px-1.5">
-            <IconPointFilled className="fill-green-500 dark:fill-green-400 text-green-500 dark:text-green-400" />
-            New submissions
-          </Badge>
-        );
-      }
-      return null;
-    },
-    enableHiding: false,
   },
   {
     id: "actions",
@@ -300,7 +280,7 @@ export function CampaignList({ campaigns }: { campaigns: Campaign[] }) {
               ) : (
                 <TableRow>
                   <TableCell colSpan={columns.length} className="h-24 text-center">
-                    No campaigns yet. Create your first one!
+                    No campaigns yet.
                   </TableCell>
                 </TableRow>
               )}
@@ -319,8 +299,8 @@ export function CampaignList({ campaigns }: { campaigns: Campaign[] }) {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete campaign?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete the campaign and all its submissions and links. This
-              action cannot be undone.
+              This will permanently delete the campaign and all its submissions. This action cannot
+              be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

@@ -14,11 +14,9 @@ import { WizardStepTwo } from "./wizard-step-two";
 export function WizardShell({
   token,
   campaignName,
-  campaignBrief,
 }: {
   token: string;
   campaignName: string;
-  campaignBrief: string;
 }) {
   const router = useRouter();
   const { step, stepOneData, stepTwoFiles } = useWizardState();
@@ -36,7 +34,6 @@ export function WizardShell({
         token,
         creatorName: stepOneData.creatorName,
         creatorEmail: stepOneData.creatorEmail,
-        creatorNotes: stepOneData.creatorNotes,
       });
 
       submissionId = submission.id;
@@ -95,11 +92,6 @@ export function WizardShell({
               />
             ))}
           </div>
-        </div>
-
-        <div className="rounded-lg border p-4">
-          <h2 className="text-sm font-medium text-muted-foreground">Brief</h2>
-          <p className="mt-2 whitespace-pre-wrap text-sm">{campaignBrief}</p>
         </div>
 
         <div className="rounded-lg border p-6">

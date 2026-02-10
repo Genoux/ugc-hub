@@ -11,7 +11,6 @@ type Submission = {
   id: string;
   creatorName: string | null;
   creatorEmail: string | null;
-  creatorNotes: string | null;
   status: string;
   createdAt: Date;
   reviewedAt: Date | null;
@@ -162,12 +161,6 @@ export function SubmissionReview({
             <span className="text-muted-foreground">Email:</span>{" "}
             <span className="font-medium">{submission.creatorEmail}</span>
           </div>
-          {submission.creatorNotes && (
-            <div>
-              <span className="text-muted-foreground">Notes:</span>{" "}
-              <span>{submission.creatorNotes}</span>
-            </div>
-          )}
           <div>
             <span className="text-muted-foreground">Submitted:</span>{" "}
             {new Date(submission.createdAt).toLocaleString()}

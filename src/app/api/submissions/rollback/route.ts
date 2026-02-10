@@ -23,7 +23,6 @@ export async function POST(request: Request) {
       .set({
         creatorName: null,
         creatorEmail: null,
-        creatorNotes: null,
         status: "awaiting",
       })
       .where(eq(submissions.id, submissionId));

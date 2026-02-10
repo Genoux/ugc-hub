@@ -1,11 +1,12 @@
 "use client";
 
-import { Upload, X } from "lucide-react";
+import { Upload } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/shared/components/ui/button";
 import { Card } from "@/shared/components/ui/card";
 import { useWizardState } from "../hooks/use-wizard-state";
+import { FileList } from "./wizard-file-list";
 
 export function WizardStepTwo() {
   const { setStepTwoFiles, setStep, stepTwoFiles } = useWizardState();
@@ -53,37 +54,7 @@ export function WizardStepTwo() {
         </label>
       </Card>
 
-      {files.length > 0 && (
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <p className="text-sm font-medium">Selected Files ({files.length})</p>
-            <input
-              type="file"
-              multiple
-              accept="image/*,video/*"
-              onChange={handleFileChange}
-              className="hidden"
-              id="file-upload-more"
-            />
-          </div>
-          {files.map((file, idx) => (
-            <div
-              key={`${file.name}-${idx}`}
-              className="flex items-center justify-between rounded-lg border p-2"
-            >
-              <div className="flex-1 min-w-0">
-                <span className="text-sm truncate block">{file.name}</span>
-                <span className="text-xs text-muted-foreground">
-                  {(file.size / 1024 / 1024).toFixed(2)} MB
-                </span>
-              </div>
-              <Button type="button" variant="ghost" size="sm" onClick={() => handleRemoveFile(idx)}>
-                <X className="size-4" />
-              </Button>
-            </div>
-          ))}
-        </div>
-      )}
+      {files.length > 0 && <FileList files={files} onRemove={handleRemoveFile} />}
 
       <div className="flex gap-2">
         <Button type="button" onClick={() => setStep(1)} variant="outline" className="flex-1">

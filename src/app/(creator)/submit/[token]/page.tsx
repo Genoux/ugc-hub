@@ -66,5 +66,5 @@ export default async function SubmitPage({ params }: { params: Promise<{ token: 
     notFound();
   }
 
-  return <WizardShell token={token} campaignName={campaign.name} campaignBrief={campaign.brief} />;
+  return <WizardShell token={token} campaignName={campaign.name} />;
 }

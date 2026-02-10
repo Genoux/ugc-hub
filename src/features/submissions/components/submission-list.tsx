@@ -188,8 +188,8 @@ export function SubmissionList({
           <AlertDialogHeader>
             <AlertDialogTitle>Delete submission?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the submission and all
-              associated files.
+              This will permanently delete the submission and all associated files. This action
+              cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

@@ -12,7 +12,6 @@ type Campaign = {
   id: string;
   name: string;
   description: string | null;
-  brief: string;
 };
 
 type Submission = {
@@ -66,10 +65,6 @@ export function CampaignDetailClient({
           {campaign.description && (
             <p className="text-sm text-muted-foreground">{campaign.description}</p>
           )}
-        </div>
-        <div>
-          <h2 className="text-sm font-medium text-muted-foreground">Brief</h2>
-          <p className="whitespace-pre-wrap text-sm">{campaign.brief}</p>
         </div>
       </div>
 

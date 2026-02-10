@@ -9,7 +9,6 @@ export async function submitWizard(data: {
   token: string;
   creatorName: string;
   creatorEmail: string;
-  creatorNotes?: string;
 }) {
   const link = await db.query.links.findFirst({
     where: eq(links.token, data.token),
@@ -32,8 +31,7 @@ export async function submitWizard(data: {
     .set({
       creatorName: data.creatorName,
       creatorEmail: data.creatorEmail,
-      creatorNotes: data.creatorNotes || null,
-      status: "pending",
+status: "pending",
     })
     .where(eq(submissions.linkId, link.id))
     .returning();

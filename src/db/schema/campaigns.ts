@@ -5,8 +5,7 @@ export const campaigns = pgTable("campaigns", {
   userId: text("user_id").notNull(),
   name: text("name").notNull(),
   description: text("description"),
-  brief: text("brief").notNull(),
-  assetRequirements: jsonb("asset_requirements").notNull(),
+assetRequirements: jsonb("asset_requirements").notNull(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
