@@ -1,8 +1,5 @@
-import { IconTrendingUp } from "@tabler/icons-react";
-import { Badge } from "@/shared/components/ui/badge";
 import {
   Card,
-  CardAction,
   CardDescription,
   CardFooter,
   CardHeader,
@@ -42,14 +39,6 @@ export function CampaignOverview({
           <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
             {activeCampaigns}
           </CardTitle>
-          {activeCampaigns > 0 && (
-            <CardAction>
-              <Badge variant="outline">
-                <IconTrendingUp />
-                Active
-              </Badge>
-            </CardAction>
-          )}
         </CardHeader>
         <CardFooter className="flex-col items-start gap-1.5 text-sm">
           <div className="text-muted-foreground">Campaigns with submissions</div>

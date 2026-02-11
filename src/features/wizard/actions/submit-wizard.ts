@@ -1,7 +1,6 @@
 "use server";
 
 import { eq } from "drizzle-orm";
-import { revalidatePath } from "next/cache";
 import { links, submissions } from "@/db/schema";
 import { db } from "@/shared/lib/db";
 
@@ -31,7 +30,7 @@ export async function submitWizard(data: {
     .set({
       creatorName: data.creatorName,
       creatorEmail: data.creatorEmail,
-status: "pending",
+      status: "pending",
     })
     .where(eq(submissions.linkId, link.id))
     .returning();
@@ -42,6 +41,5 @@ status: "pending",
 
   await db.update(links).set({ status: "used" }).where(eq(links.id, link.id));
 
-  revalidatePath(`/campaigns/${link.campaignId}`);
   return submission;
 }

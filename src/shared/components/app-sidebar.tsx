@@ -1,6 +1,6 @@
 "use client";
 
-import { IconFolder } from "@tabler/icons-react";
+import { Folder } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { NavMain } from "@/shared/components/nav-main";
@@ -19,7 +19,7 @@ const navItems = [
   {
     title: "Campaigns",
     url: "/campaigns",
-    icon: IconFolder,
+    icon: Folder,
   },
 ];
 
@@ -31,7 +31,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarMenuItem>
             <SidebarMenuButton asChild className="data-[slot=sidebar-menu-button]:p-1.5!">
               <Link href="/">
-                <Image src="/inBeat.svg" alt="UGC Hub" width={100} height={100} />
+                <Image src="/inBeat.svg" alt="UGC Hub" width={42} height={42} />
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>

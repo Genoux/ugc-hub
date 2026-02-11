@@ -22,26 +22,26 @@ export default async function SubmissionDetailPage({
     redirect("/");
   }
 
-  const campaign = await db.query.campaigns.findFirst({
-    where: and(eq(campaigns.id, id), eq(campaigns.userId, user.id)),
-  });
+  const [campaign, submission, submissionAssets] = await Promise.all([
+    db.query.campaigns.findFirst({
+      where: and(eq(campaigns.id, id), eq(campaigns.userId, user.id)),
+    }),
+    db.query.submissions.findFirst({
+      where: and(eq(submissions.id, submissionId), eq(submissions.campaignId, id)),
+      with: { link: true },
+    }),
+    db.query.assets.findMany({
+      where: eq(assets.submissionId, submissionId),
+    }),
+  ]);
 
   if (!campaign) {
     redirect("/");
   }
 
-  const submission = await db.query.submissions.findFirst({
-    where: and(eq(submissions.id, submissionId), eq(submissions.campaignId, id)),
-    with: { link: true },
-  });
-
   if (!submission) {
     redirect(`/campaigns/${id}`);
   }
-
-  const submissionAssets = await db.query.assets.findMany({
-    where: eq(assets.submissionId, submissionId),
-  });
 
   return (
     <div className="flex flex-1 flex-col gap-4 p-4">

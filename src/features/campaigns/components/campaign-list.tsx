@@ -1,6 +1,5 @@
 "use client";
 
-import { IconDotsVertical, IconPlus, IconPointFilled } from "@tabler/icons-react";
 import {
   type ColumnDef,
   type ColumnFiltersState,
@@ -15,6 +14,7 @@ import {
   useReactTable,
   type VisibilityState,
 } from "@tanstack/react-table";
+import { MoreVertical, Plus } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import * as React from "react";
@@ -53,7 +53,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/shared/components/ui/table";
-import { deleteCampaign } from "../actions/delete-campaign";
+import { useDeleteCampaignMutation } from "../hooks/use-campaigns-mutations";
 import { useRealtimeCampaigns } from "../hooks/use-realtime-campaigns";
 import { CampaignForm } from "./campaign-form";
 
@@ -140,7 +140,7 @@ const columns: ColumnDef<Campaign>[] = [
                 className="data-[state=open]:bg-muted text-muted-foreground flex size-8"
                 size="icon"
               >
-                <IconDotsVertical />
+                <MoreVertical />
                 <span className="sr-only">Open menu</span>
               </Button>
             </DropdownMenuTrigger>
@@ -168,6 +168,7 @@ const columns: ColumnDef<Campaign>[] = [
 export function CampaignList({ campaigns }: { campaigns: Campaign[] }) {
   const router = useRouter();
   useRealtimeCampaigns();
+  const deleteCampaignMutation = useDeleteCampaignMutation();
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
   const [campaignToDelete, setCampaignToDelete] = React.useState<string | null>(null);
@@ -187,11 +188,10 @@ export function CampaignList({ campaigns }: { campaigns: Campaign[] }) {
   async function confirmDeleteCampaign() {
     if (!campaignToDelete) return;
     try {
-      await deleteCampaign(campaignToDelete);
+      await deleteCampaignMutation.mutateAsync(campaignToDelete);
       toast.success("Campaign deleted");
       setDeleteDialogOpen(false);
       setCampaignToDelete(null);
-      router.refresh();
     } catch (err) {
       console.error("Failed to delete campaign:", err);
       toast.error("Failed to delete campaign");
@@ -227,7 +227,7 @@ export function CampaignList({ campaigns }: { campaigns: Campaign[] }) {
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button className="cursor-pointer" variant="outline" size="sm">
-              <IconPlus />
+              <Plus />
               <span className="hidden lg:inline">New Campaign</span>
             </Button>
           </DialogTrigger>

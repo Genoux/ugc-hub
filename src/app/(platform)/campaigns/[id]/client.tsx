@@ -2,8 +2,7 @@
 
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
-import { createLink } from "@/features/links/actions/create-link";
+import { useCreateLinkMutation } from "@/features/links/hooks/use-links-mutations";
 import { SubmissionList } from "@/features/submissions/components/submission-list";
 import { useRealtimeSubmissions } from "@/features/submissions/hooks/use-realtime-submissions";
 import { Button } from "@/shared/components/ui/button";
@@ -34,18 +33,11 @@ export function CampaignDetailClient({
   campaign: Campaign;
   submissions: Submission[];
 }) {
-  const [isCreating, setIsCreating] = useState(false);
   useRealtimeSubmissions(campaign.id);
+  const createLinkMutation = useCreateLinkMutation(campaign.id);
 
-  async function handleCreateLink() {
-    setIsCreating(true);
-    try {
-      await createLink({ campaignId: campaign.id });
-    } catch (error) {
-      console.error("Failed to create link:", error);
-    } finally {
-      setIsCreating(false);
-    }
+  function handleCreateLink() {
+    createLinkMutation.mutate({ campaignId: campaign.id });
   }
 
   return (
@@ -72,7 +64,7 @@ export function CampaignDetailClient({
         campaignId={campaign.id}
         submissions={submissions}
         onCreateLink={handleCreateLink}
-        isCreatingLink={isCreating}
+        isCreatingLink={createLinkMutation.isPending}
       />
     </div>
   );

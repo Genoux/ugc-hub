@@ -62,12 +62,7 @@ export function useMultipartUpload() {
     }
   }
 
-  async function uploadSingle(
-    file: File,
-    uploadUrl: string,
-    key: string,
-    submissionId: string,
-  ) {
+  async function uploadSingle(file: File, uploadUrl: string, key: string, submissionId: string) {
     await fetch(uploadUrl, {
       method: "PUT",
       body: file,
@@ -87,12 +82,7 @@ export function useMultipartUpload() {
     });
   }
 
-  async function uploadMultipart(
-    file: File,
-    key: string,
-    uploadId: string,
-    submissionId: string,
-  ) {
+  async function uploadMultipart(file: File, key: string, uploadId: string, submissionId: string) {
     const chunkSize = UPLOAD_CONFIG.chunkSize;
     const chunks = Math.ceil(file.size / chunkSize);
     const parts: Array<{ PartNumber: number; ETag: string }> = [];

@@ -2,7 +2,6 @@
 
 import { auth } from "@clerk/nextjs/server";
 import { eq } from "drizzle-orm";
-import { revalidatePath } from "next/cache";
 import { campaigns } from "@/db/schema";
 import { db } from "@/shared/lib/db";
 
@@ -19,6 +18,5 @@ export async function deleteCampaign(campaignId: string) {
   if (campaign.userId !== userId) throw new Error("Forbidden");
 
   await db.delete(campaigns).where(eq(campaigns.id, campaignId));
-  revalidatePath("/campaigns");
   return campaign;
 }

@@ -11,13 +11,7 @@ import { WizardStepOne } from "./wizard-step-one";
 import { WizardStepThree } from "./wizard-step-three";
 import { WizardStepTwo } from "./wizard-step-two";
 
-export function WizardShell({
-  token,
-  campaignName,
-}: {
-  token: string;
-  campaignName: string;
-}) {
+export function WizardShell({ token, campaignName }: { token: string; campaignName: string }) {
   const router = useRouter();
   const { step, stepOneData, stepTwoFiles } = useWizardState();
   const [isSubmitting, setIsSubmitting] = useState(false);

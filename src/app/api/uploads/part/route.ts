@@ -1,6 +1,9 @@
 import { UploadPartCommand } from "@aws-sdk/client-s3";
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { R2_BUCKET_NAME, r2Client } from "@/features/uploads/lib/r2-client";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export async function PUT(request: NextRequest) {
   try {

@@ -1,35 +1,21 @@
-import { and, eq } from "drizzle-orm";
+"use client";
+
 import { redirect } from "next/navigation";
-import { campaigns, submissions } from "@/db/schema";
-import { getCurrentUser } from "@/shared/lib/auth";
-import { db } from "@/shared/lib/db";
+import { use } from "react";
+import { useCampaignQuery } from "@/features/campaigns/hooks/use-campaigns-query";
 import { CampaignDetailClient } from "./client";
 
-export const dynamic = "force-dynamic";
+export default function CampaignDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params);
+  const { data, isLoading } = useCampaignQuery(id);
 
-const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-
-export default async function CampaignDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
-  const user = await getCurrentUser();
-
-  if (!UUID_REGEX.test(id)) {
-    redirect("/");
+  if (isLoading) {
+    return null;
   }
 
-  const campaign = await db.query.campaigns.findFirst({
-    where: and(eq(campaigns.id, id), eq(campaigns.userId, user.id)),
-  });
-
-  if (!campaign) {
-    redirect("/");
+  if (!data?.campaign) {
+    redirect("/campaigns");
   }
 
-  const campaignSubmissions = await db.query.submissions.findMany({
-    where: eq(submissions.campaignId, id),
-    orderBy: (s, { desc }) => [desc(s.createdAt)],
-    with: { link: true },
-  });
-
-  return <CampaignDetailClient campaign={campaign} submissions={campaignSubmissions} />;
+  return <CampaignDetailClient campaign={data.campaign} submissions={data.submissions} />;
 }

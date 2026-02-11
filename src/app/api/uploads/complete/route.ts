@@ -1,10 +1,13 @@
-import { NextRequest, NextResponse } from "next/server";
 import { CompleteMultipartUploadCommand } from "@aws-sdk/client-s3";
-import { r2Client, R2_BUCKET_NAME } from "@/features/uploads/lib/r2-client";
-import { db } from "@/shared/lib/db";
-import { assets, submissions } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { type NextRequest, NextResponse } from "next/server";
+import { assets, submissions } from "@/db/schema";
+import { R2_BUCKET_NAME, r2Client } from "@/features/uploads/lib/r2-client";
+import { db } from "@/shared/lib/db";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export async function POST(request: NextRequest) {
   try {

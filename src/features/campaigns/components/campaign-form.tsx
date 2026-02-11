@@ -1,27 +1,25 @@
 "use client";
 
 import type React from "react";
-import { useState } from "react";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
-import { createCampaign } from "../actions/create-campaign";
+import { useCreateCampaignMutation } from "../hooks/use-campaigns-mutations";
 
 export function CampaignForm({ onSuccess }: { onSuccess?: () => void }) {
-  const [isLoading, setIsLoading] = useState(false);
+  const createCampaignMutation = useCreateCampaignMutation();
 
   const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setIsLoading(true);
 
     const form = e.currentTarget;
     const formData = new FormData(form);
 
     try {
-      await createCampaign({
+      await createCampaignMutation.mutateAsync({
         name: formData.get("name") as string,
         description: (formData.get("description") as string) || undefined,
-assetRequirements: {
+        assetRequirements: {
           acceptedTypes: ["image/jpeg", "image/png", "video/mp4"],
           maxFiles: 10,
           maxFileSize: 100 * 1024 * 1024,
@@ -32,8 +30,6 @@ assetRequirements: {
       onSuccess?.();
     } catch (error) {
       console.error("Failed to create campaign:", error);
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -51,8 +47,8 @@ assetRequirements: {
         <Input id="description" name="description" placeholder="Brief description (optional)" />
       </div>
 
-      <Button type="submit" disabled={isLoading} className="w-full">
-        {isLoading ? "Creating..." : "Create Campaign"}
+      <Button type="submit" disabled={createCampaignMutation.isPending} className="w-full">
+        {createCampaignMutation.isPending ? "Creating..." : "Create Campaign"}
       </Button>
     </form>
   );

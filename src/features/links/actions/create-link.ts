@@ -1,7 +1,6 @@
 "use server";
 
-import { randomBytes } from "crypto";
-import { revalidatePath } from "next/cache";
+import { randomBytes } from "node:crypto";
 import type { z } from "zod";
 import { links, submissions } from "@/db/schema";
 import { db } from "@/shared/lib/db";
@@ -31,6 +30,5 @@ export async function createLink(input: z.infer<typeof createLinkSchema>) {
     status: "awaiting",
   });
 
-  revalidatePath(`/campaigns/${data.campaignId}`);
   return link;
 }

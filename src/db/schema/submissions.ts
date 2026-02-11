@@ -20,7 +20,7 @@ export const submissions = pgTable("submissions", {
     .references(() => links.id, { onDelete: "cascade" }),
   creatorName: text("creator_name"),
   creatorEmail: text("creator_email"),
-status: submissionStatusEnum("status").notNull().default("awaiting"),
+  status: submissionStatusEnum("status").notNull().default("awaiting"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   reviewedAt: timestamp("reviewed_at"),
 });

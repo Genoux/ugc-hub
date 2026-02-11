@@ -3,7 +3,6 @@
 import { Check, Copy, Plus, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
-import { toast } from "sonner";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -15,7 +14,7 @@ import {
   AlertDialogTitle,
 } from "@/shared/components/ui/alert-dialog";
 import { Button } from "@/shared/components/ui/button";
-import { deleteSubmission } from "../actions/delete-submission";
+import { useDeleteSubmissionMutation } from "../hooks/use-submissions-mutations";
 import { SubmissionStatusBadge } from "./submission-status-badge";
 
 type Submission = {
@@ -45,29 +44,18 @@ export function SubmissionList({
   const [copiedToken, setCopiedToken] = useState<string | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [submissionToDelete, setSubmissionToDelete] = useState<string | null>(null);
-  const [deletingSubmissionId, setDeletingSubmissionId] = useState<string | null>(null);
+  const deleteSubmissionMutation = useDeleteSubmissionMutation(campaignId);
 
   function openDeleteDialog(submissionId: string) {
     setSubmissionToDelete(submissionId);
     setDeleteDialogOpen(true);
   }
 
-  async function confirmDelete() {
+  function confirmDelete() {
     if (!submissionToDelete) return;
-
-    setDeletingSubmissionId(submissionToDelete);
+    deleteSubmissionMutation.mutate(submissionToDelete);
     setDeleteDialogOpen(false);
-
-    try {
-      await deleteSubmission(submissionToDelete);
-      toast.success("Submission deleted");
-    } catch (error) {
-      console.error("Failed to delete:", error);
-      toast.error("Failed to delete submission");
-    } finally {
-      setSubmissionToDelete(null);
-      setDeletingSubmissionId(null);
-    }
+    setSubmissionToDelete(null);
   }
 
   async function handleCopy(token: string) {
@@ -96,7 +84,7 @@ export function SubmissionList({
           {submissions.map((submission) => {
             const link = submission.link;
             const submissionUrl = `/campaigns/${campaignId}/submissions/${submission.id}`;
-            const isDeleting = deletingSubmissionId === submission.id;
+            const isDeleting = deleteSubmissionMutation.isPending && submissionToDelete === submission.id;
             const isAwaiting = submission.status === "awaiting";
             const baseClassName = `flex items-center justify-between rounded-lg border p-3 transition-opacity ${
               isDeleting ? "opacity-50 pointer-events-none" : ""
