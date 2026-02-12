@@ -18,7 +18,6 @@ export async function deleteSubmission(submissionId: string) {
     return null;
   }
 
-  // Delete files from R2 storage first (batch delete for efficiency)
   if (submission.assets && submission.assets.length > 0) {
     try {
       await r2Client.send(

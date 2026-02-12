@@ -2,9 +2,7 @@
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { AnimatePresence } from "motion/react";
-import { useEffect, useState } from "react";
-import { LoadingScreen } from "../components/loading-screen";
+import { useState } from "react";
 
 export function QueryProvider({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(
@@ -22,18 +20,8 @@ export function QueryProvider({ children }: { children: React.ReactNode }) {
       }),
   );
 
-  const [isAppReady, setIsAppReady] = useState(false);
-
-  useEffect(() => {
-    // Mark app as ready after initial mount
-    setIsAppReady(true);
-  }, []);
-
   return (
     <QueryClientProvider client={queryClient}>
-      <AnimatePresence mode="wait">
-        {!isAppReady && <LoadingScreen key="loading" />}
-      </AnimatePresence>
       {children}
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>

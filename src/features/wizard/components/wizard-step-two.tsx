@@ -3,6 +3,7 @@
 import { Upload } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { UPLOAD_CONFIG } from "@/features/uploads/lib/upload-config";
 import { Button } from "@/shared/components/ui/button";
 import { Card } from "@/shared/components/ui/card";
 import { useWizardState } from "../hooks/use-wizard-state";
@@ -15,7 +16,24 @@ export function WizardStepTwo() {
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     if (e.target.files) {
       const newFiles = Array.from(e.target.files);
-      setFiles((prev) => [...prev, ...newFiles]);
+      const validFiles: File[] = [];
+      const invalidFiles: string[] = [];
+
+      for (const file of newFiles) {
+        if (!(UPLOAD_CONFIG.allowedMimeTypes as readonly string[]).includes(file.type)) {
+          invalidFiles.push(file.name);
+        } else {
+          validFiles.push(file);
+        }
+      }
+
+      if (invalidFiles.length > 0) {
+        toast.error("File type not supported");
+      }
+
+      if (validFiles.length > 0) {
+        setFiles((prev) => [...prev, ...validFiles]);
+      }
     }
     e.target.value = "";
   }

@@ -2,10 +2,16 @@
 
 import { Download } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Button } from "@/shared/components/ui/button";
 import { AssetCard } from "@/shared/components/asset-card";
+import { StatusBadge } from "@/shared/components/status-badge";
+import { Button } from "@/shared/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/shared/components/ui/tooltip";
 import { approveSubmission, rejectSubmission } from "../actions/review-submission";
-import { SubmissionStatusBadge } from "./submission-status-badge";
 
 type Submission = {
   id: string;
@@ -60,9 +66,23 @@ function AssetPreview({ asset }: { asset: Asset }) {
       isVideo={asset.mimeType.startsWith("video/")}
       isLoading={isLoading}
       action={
-        <Button onClick={handleDownload} variant="link" size="icon-sm" className="hover:opacity-50">
-          <Download className="size-4 text-white" />
-        </Button>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                onClick={handleDownload}
+                variant="link"
+                size="icon-sm"
+                className="hover:bg-white/20"
+              >
+                <Download className="size-4 text-white" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Download asset</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       }
     />
   );
@@ -113,7 +133,7 @@ export function SubmissionReview({
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold">{campaignName}</h1>
-          <SubmissionStatusBadge
+          <StatusBadge
             status={submission.status as "awaiting" | "pending" | "approved" | "rejected"}
           />
         </div>

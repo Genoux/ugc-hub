@@ -41,21 +41,19 @@ export function CampaignDetailClient({
   }
 
   return (
-    <div className="flex flex-1 flex-col gap-8 p-4">
-      <div className="flex">
-        <Button variant="outline" size="sm" asChild>
-          <Link href="/campaigns">
-            <ChevronLeft className="size-4" />
-            Campaigns
-          </Link>
-        </Button>
-      </div>
-
-      <div className="space-y-6">
-        <div className="flex-1">
-          <h1 className="text-2xl font-semibold">{campaign.name}</h1>
+    <div className="flex flex-1 flex-col gap-4">
+      <div className="flex items-center justify-between">
+        <div className="flex flex-col">
+          <div className="flex items-center">
+            <Button variant="outline" size="sm" asChild>
+              <Link href="/campaigns">
+                <ChevronLeft className="size-4" />
+                Campaigns
+              </Link>
+            </Button>
+          </div>
           {campaign.description && (
-            <p className="text-sm text-muted-foreground">{campaign.description}</p>
+            <p className="ml-10 text-sm text-muted-foreground">{campaign.description}</p>
           )}
         </div>
       </div>

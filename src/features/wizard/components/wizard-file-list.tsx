@@ -2,8 +2,14 @@
 
 import { X } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Button } from "@/shared/components/ui/button";
 import { AssetCard } from "@/shared/components/asset-card";
+import { Button } from "@/shared/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/shared/components/ui/tooltip";
 
 function useObjectUrl(file: File) {
   const [objectUrl, setObjectUrl] = useState<string | null>(null);
@@ -27,15 +33,24 @@ function FileItem({ file, onRemove }: { file: File; onRemove?: () => void }) {
       isVideo={file.type.startsWith("video/")}
       action={
         onRemove && (
-          <Button
-            type="button"
-            className="hover:opacity-50"
-            onClick={onRemove}
-            variant="link"
-            size="icon-sm"
-          >
-            <X className="size-4 text-white" />
-          </Button>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  type="button"
+                  className="hover:opacity-50"
+                  onClick={onRemove}
+                  variant="link"
+                  size="icon-sm"
+                >
+                  <X className="size-4 text-white" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Remove asset</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         )
       }
     />

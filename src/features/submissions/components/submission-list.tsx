@@ -1,21 +1,15 @@
 "use client";
 
-import { Check, Copy, Plus, Trash2 } from "lucide-react";
-import Link from "next/link";
-import { useState } from "react";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/shared/components/ui/alert-dialog";
+import { Plus } from "lucide-react";
+import { EmptyState } from "@/shared/components/empty-state";
 import { Button } from "@/shared/components/ui/button";
-import { useDeleteSubmissionMutation } from "../hooks/use-submissions-mutations";
-import { SubmissionStatusBadge } from "./submission-status-badge";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/shared/components/ui/tooltip";
+import { SubmissionItem } from "./submission-item";
 
 type Submission = {
   id: string;
@@ -41,151 +35,48 @@ export function SubmissionList({
   onCreateLink?: () => void;
   isCreatingLink?: boolean;
 }) {
-  const [copiedToken, setCopiedToken] = useState<string | null>(null);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [submissionToDelete, setSubmissionToDelete] = useState<string | null>(null);
-  const deleteSubmissionMutation = useDeleteSubmissionMutation(campaignId);
-
-  function openDeleteDialog(submissionId: string) {
-    setSubmissionToDelete(submissionId);
-    setDeleteDialogOpen(true);
-  }
-
-  function confirmDelete() {
-    if (!submissionToDelete) return;
-    deleteSubmissionMutation.mutate(submissionToDelete);
-    setDeleteDialogOpen(false);
-    setSubmissionToDelete(null);
-  }
-
-  async function handleCopy(token: string) {
-    const url = `${window.location.origin}/submit/${token}`;
-    await navigator.clipboard.writeText(url);
-    setCopiedToken(token);
-    setTimeout(() => setCopiedToken(null), 2000);
-  }
-
   return (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between">
+    <div className="flex flex-col gap-4 flex-1">
+      <div className="flex items-end justify-between">
         <h2 className="text-sm font-medium">Submissions</h2>
         {onCreateLink && (
-          <Button onClick={onCreateLink} disabled={isCreatingLink} size="sm">
-            <Plus className="size-4" />
-            {isCreatingLink ? "Creating..." : "New Link"}
-          </Button>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button onClick={onCreateLink} disabled={isCreatingLink} size="sm">
+                  <Plus className="size-4" />
+                  {isCreatingLink ? "Generating..." : "Generate Link"}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Generate a new submission link</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         )}
       </div>
 
       {submissions.length === 0 ? (
-        <p className="text-sm text-muted-foreground">No submissions yet.</p>
+        <EmptyState
+          title="Submissions"
+          description="Generate a submission link to send to creators"
+          action={
+            onCreateLink
+              ? {
+                  label: isCreatingLink ? "Generating..." : "Generate Link",
+                  onClick: onCreateLink,
+                  icon: <Plus className="size-4" />,
+                }
+              : undefined
+          }
+        />
       ) : (
         <div className="space-y-2">
-          {submissions.map((submission) => {
-            const link = submission.link;
-            const submissionUrl = `/campaigns/${campaignId}/submissions/${submission.id}`;
-            const isDeleting = deleteSubmissionMutation.isPending && submissionToDelete === submission.id;
-            const isAwaiting = submission.status === "awaiting";
-            const baseClassName = `flex items-center justify-between rounded-lg border p-3 transition-opacity ${
-              isDeleting ? "opacity-50 pointer-events-none" : ""
-            }`;
-            const actions = (
-              <div className="flex items-center gap-2 shrink-0">
-                <div className="w-fit">
-                  <SubmissionStatusBadge
-                    key={`${submission.id}-${submission.status}`}
-                    status={submission.status as "awaiting" | "pending" | "approved" | "rejected"}
-                  />
-                </div>
-                {!isAwaiting && (
-                  <span className="text-xs text-muted-foreground">
-                    {new Date(submission.createdAt).toLocaleDateString()}
-                  </span>
-                )}
-                <Button
-                  type="button"
-                  className="text-muted-foreground cursor-pointer"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    openDeleteDialog(submission.id);
-                  }}
-                  variant="ghost"
-                  size="sm"
-                  disabled={isDeleting}
-                >
-                  <Trash2 className="size-4" />
-                </Button>
-              </div>
-            );
-            if (isAwaiting) {
-              return (
-                <div key={submission.id} className={baseClassName}>
-                  <div className="flex-1 min-w-0">
-                    <div className="space-y-0.5">
-                      <p className="text-sm font-medium text-muted-foreground">
-                        Awaiting submission
-                      </p>
-                      {link && (
-                        <div className="flex items-center gap-0.5">
-                          <button
-                            type="button"
-                            onClick={() => window.open(`/submit/${link.token}`, "_blank")}
-                            className="font-mono text-xs text-muted-foreground hover:underline text-left"
-                          >
-                            /submit/{link.token}
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleCopy(link.token)}
-                            className="p-1 text-muted-foreground cursor-pointer"
-                          >
-                            {copiedToken === link.token ? (
-                              <Check className="size-3.5" />
-                            ) : (
-                              <Copy className="size-3.5" />
-                            )}
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  {actions}
-                </div>
-              );
-            }
-            return (
-              <Link
-                key={submission.id}
-                href={submissionUrl}
-                className={`${baseClassName} hover:bg-accent/25 cursor-pointer`}
-              >
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium">{submission.creatorName}</p>
-                  <p className="text-xs text-muted-foreground">{submission.creatorEmail}</p>
-                </div>
-                {actions}
-              </Link>
-            );
-          })}
+          {submissions.map((submission) => (
+            <SubmissionItem key={submission.id} submission={submission} campaignId={campaignId} />
+          ))}
         </div>
       )}
-
-      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete submission?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will permanently delete the submission and all associated files. This action
-              cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete}>Delete</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 }

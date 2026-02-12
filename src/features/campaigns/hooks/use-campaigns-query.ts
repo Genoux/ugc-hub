@@ -54,7 +54,7 @@ export function useCampaignsQuery() {
   });
 }
 
-export function useCampaignQuery(id: string) {
+export function useCampaignQuery(id: string, options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: ["campaign", id],
     queryFn: async () => {
@@ -65,6 +65,6 @@ export function useCampaignQuery(id: string) {
       const data = await res.json();
       return data as { campaign: CampaignDetail; submissions: Submission[] };
     },
-    enabled: !!id,
+    enabled: options?.enabled ?? !!id,
   });
 }

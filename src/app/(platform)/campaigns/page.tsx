@@ -23,12 +23,7 @@ export default function CampaignsPage() {
   };
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="px-4 lg:px-6 flex flex-col gap-1">
-        <h2 className="text-xl font-semibold">Campaigns</h2>
-        <p className="text-sm text-muted-foreground">Manage your UGC campaigns and submissions</p>
-      </div>
-      <CampaignOverview {...overviewStats} />
+    <div className="flex flex-col gap-6 flex-1">
       <CampaignList campaigns={campaigns} />
     </div>
   );
