@@ -1,28 +1,24 @@
 "use client";
 
 import type React from "react";
-import { useState } from "react";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
-import { Textarea } from "@/shared/components/ui/textarea";
-import { createCampaign } from "../actions/create-campaign";
+import { useCreateCampaignMutation } from "../hooks/use-campaigns-mutations";
 
 export function CampaignForm({ onSuccess }: { onSuccess?: () => void }) {
-  const [isLoading, setIsLoading] = useState(false);
+  const createCampaignMutation = useCreateCampaignMutation();
 
   const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setIsLoading(true);
 
     const form = e.currentTarget;
     const formData = new FormData(form);
 
     try {
-      await createCampaign({
+      await createCampaignMutation.mutateAsync({
         name: formData.get("name") as string,
         description: (formData.get("description") as string) || undefined,
-        brief: formData.get("brief") as string,
         assetRequirements: {
           acceptedTypes: ["image/jpeg", "image/png", "video/mp4"],
           maxFiles: 10,
@@ -34,8 +30,6 @@ export function CampaignForm({ onSuccess }: { onSuccess?: () => void }) {
       onSuccess?.();
     } catch (error) {
       console.error("Failed to create campaign:", error);
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -53,21 +47,8 @@ export function CampaignForm({ onSuccess }: { onSuccess?: () => void }) {
         <Input id="description" name="description" placeholder="Brief description (optional)" />
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="brief">
-          Brief <span className="text-destructive">*</span>
-        </Label>
-        <Textarea
-          id="brief"
-          name="brief"
-          placeholder="Detailed campaign brief for creators"
-          required
-          rows={4}
-        />
-      </div>
-
-      <Button type="submit" disabled={isLoading} className="w-full">
-        {isLoading ? "Creating..." : "Create Campaign"}
+      <Button type="submit" disabled={createCampaignMutation.isPending} className="w-full">
+        {createCampaignMutation.isPending ? "Creating..." : "Create Campaign"}
       </Button>
     </form>
   );

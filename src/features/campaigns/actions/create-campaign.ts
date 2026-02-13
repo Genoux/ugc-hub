@@ -1,7 +1,6 @@
 "use server";
 
 import { auth } from "@clerk/nextjs/server";
-import { revalidatePath } from "next/cache";
 import type { z } from "zod";
 import { campaigns } from "@/db/schema";
 import { db } from "@/shared/lib/db";
@@ -21,6 +20,5 @@ export async function createCampaign(input: z.infer<typeof campaignSchema>) {
     })
     .returning();
 
-  revalidatePath("/campaigns");
   return campaign;
 }

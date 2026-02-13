@@ -1,8 +1,6 @@
 "use client";
 
-import { IconFolder } from "@tabler/icons-react";
-import Image from "next/image";
-import Link from "next/link";
+import { Folder } from "lucide-react";
 import { NavMain } from "@/shared/components/nav-main";
 import { NavUser } from "@/shared/components/nav-user";
 import {
@@ -19,7 +17,7 @@ const navItems = [
   {
     title: "Campaigns",
     url: "/campaigns",
-    icon: IconFolder,
+    icon: Folder,
   },
 ];
 
@@ -29,10 +27,26 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild className="data-[slot=sidebar-menu-button]:p-1.5!">
-              <Link href="/">
-                <Image src="/inBeat.svg" alt="UGC Hub" width={100} height={100} />
-              </Link>
+            <SidebarMenuButton className="data-[slot=sidebar-menu-button]:p-1.5!">
+              <span className="flex h-8 w-8 shrink-0 items-center">
+                <svg
+                  viewBox="0 0 33 15"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-full w-auto text-sidebar-foreground"
+                  aria-label="inBeat Logo"
+                >
+                  <title>inBeat Logo</title>
+                  <path
+                    d="M2.15962 12.1231C0.72221 10.7059 0 9.01513 0 7.04373C0 5.12144 0.72221 3.47276 2.15962 2.08365C3.59702 0.694552 5.30087 0 7.27117 0C9.13629 0 10.763 0.694552 12.1584 2.08365C13.5467 3.47276 14.2408 5.12845 14.2408 7.04373C14.2408 9.01513 13.5607 10.7059 12.1934 12.1231C10.8331 13.5332 9.19239 14.2418 7.27117 14.2418C5.30087 14.2418 3.59702 13.5332 2.15962 12.1231Z"
+                    fill="currentColor"
+                  />
+                  <path
+                    d="M24.4798 14.2449C24.4303 14.2449 24.3738 14.2306 24.3313 14.202C23.8717 13.9015 23.3837 13.5725 22.8038 13.1504C21.1066 11.9342 19.7135 10.761 18.5395 9.57347C16.9342 7.94955 16.1917 6.26839 16.2624 4.43701C16.2624 2.30516 17.8394 0.480933 19.9398 0.19478C19.9398 0.19478 20.1095 0.173318 20.159 0.166164C20.2651 0.15901 20.3782 0.151856 20.4914 0.151856C21.2268 0.137549 21.9552 0.280626 22.6058 0.559625C23.3766 0.888702 23.9424 1.41093 24.4728 1.94032C25.0032 1.41093 25.5689 0.888702 26.3397 0.559625C27.0045 0.280626 27.7329 0.144703 28.4471 0.151856C28.5744 0.151856 28.6876 0.15901 28.8007 0.166164C28.8431 0.173318 29.0129 0.187626 29.0129 0.187626C31.1132 0.47378 32.6902 2.29801 32.6902 4.43701C32.7609 6.26839 32.0113 7.94955 30.4131 9.57347C29.2392 10.7682 27.846 11.9342 26.1488 13.1504C25.5689 13.5653 25.0809 13.9015 24.6213 14.202C24.5789 14.2306 24.5293 14.2449 24.4798 14.2449Z"
+                    fill="currentColor"
+                  />
+                </svg>
+              </span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

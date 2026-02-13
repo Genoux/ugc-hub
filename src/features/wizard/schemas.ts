@@ -3,7 +3,6 @@ import { z } from "zod";
 export const wizardStepOneSchema = z.object({
   creatorName: z.string().min(1).max(100),
   creatorEmail: z.string().email(),
-  creatorNotes: z.string().max(1000).optional(),
 });
 
 export const wizardStepTwoSchema = z.object({

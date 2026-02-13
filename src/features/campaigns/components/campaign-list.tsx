@@ -1,6 +1,5 @@
 "use client";
 
-import { IconDotsVertical, IconPlus, IconPointFilled } from "@tabler/icons-react";
 import {
   type ColumnDef,
   type ColumnFiltersState,
@@ -15,10 +14,13 @@ import {
   useReactTable,
   type VisibilityState,
 } from "@tanstack/react-table";
+import { MoreVertical, Plus } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import * as React from "react";
 import { toast } from "sonner";
+import { EmptyState } from "@/shared/components/empty-state";
+import { StatusBadge } from "@/shared/components/status-badge";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -29,7 +31,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/shared/components/ui/alert-dialog";
-import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import {
   Dialog,
@@ -52,7 +53,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/shared/components/ui/table";
-import { deleteCampaign } from "../actions/delete-campaign";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/shared/components/ui/tooltip";
+import { useDeleteCampaignMutation } from "../hooks/use-campaigns-mutations";
 import { useRealtimeCampaigns } from "../hooks/use-realtime-campaigns";
 import { CampaignForm } from "./campaign-form";
 
@@ -60,7 +62,6 @@ type Campaign = {
   id: string;
   name: string;
   description: string | null;
-  brief: string;
   createdAt: Date;
   totalSubmissions: number;
   approvedSubmissions: number;
@@ -82,42 +83,18 @@ const columns: ColumnDef<Campaign>[] = [
       const { approvedSubmissions, pendingSubmissions, awaitingSubmissions } = row.original;
 
       if (approvedSubmissions > 0) {
-        return (
-          <div className="w-32">
-            <Badge variant="outline" className="text-green-600 border-green-600">
-              Approved
-            </Badge>
-          </div>
-        );
+        return <StatusBadge status="approved" />;
       }
 
       if (pendingSubmissions > 0) {
-        return (
-          <div className="w-32">
-            <Badge variant="outline" className="text-orange-600 border-orange-600">
-              {pendingSubmissions} pending review
-            </Badge>
-          </div>
-        );
+        return <StatusBadge status="pending" />;
       }
 
       if (awaitingSubmissions > 0) {
-        return (
-          <div className="w-32">
-            <Badge variant="outline" className="text-muted-foreground">
-              {awaitingSubmissions} awaiting submission
-            </Badge>
-          </div>
-        );
+        return <StatusBadge>{awaitingSubmissions} awaiting submission</StatusBadge>;
       }
 
-      return (
-        <div className="w-32">
-          <Badge variant="outline" className="text-muted-foreground">
-            empty
-          </Badge>
-        </div>
-      );
+      return <StatusBadge>empty</StatusBadge>;
     },
   },
   {
@@ -128,22 +105,6 @@ const columns: ColumnDef<Campaign>[] = [
         {new Date(row.original.createdAt).toLocaleDateString()}
       </span>
     ),
-  },
-  {
-    id: "notification",
-    header: () => null,
-    cell: ({ row }) => {
-      if (row.original.pendingSubmissions > 0) {
-        return (
-          <Badge variant="outline" className="text-muted-foreground px-1.5">
-            <IconPointFilled className="fill-green-500 dark:fill-green-400 text-green-500 dark:text-green-400" />
-            New submissions
-          </Badge>
-        );
-      }
-      return null;
-    },
-    enableHiding: false,
   },
   {
     id: "actions",
@@ -160,7 +121,7 @@ const columns: ColumnDef<Campaign>[] = [
                 className="data-[state=open]:bg-muted text-muted-foreground flex size-8"
                 size="icon"
               >
-                <IconDotsVertical />
+                <MoreVertical />
                 <span className="sr-only">Open menu</span>
               </Button>
             </DropdownMenuTrigger>
@@ -188,6 +149,7 @@ const columns: ColumnDef<Campaign>[] = [
 export function CampaignList({ campaigns }: { campaigns: Campaign[] }) {
   const router = useRouter();
   useRealtimeCampaigns();
+  const deleteCampaignMutation = useDeleteCampaignMutation();
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
   const [campaignToDelete, setCampaignToDelete] = React.useState<string | null>(null);
@@ -207,11 +169,10 @@ export function CampaignList({ campaigns }: { campaigns: Campaign[] }) {
   async function confirmDeleteCampaign() {
     if (!campaignToDelete) return;
     try {
-      await deleteCampaign(campaignToDelete);
+      await deleteCampaignMutation.mutateAsync(campaignToDelete);
       toast.success("Campaign deleted");
       setDeleteDialogOpen(false);
       setCampaignToDelete(null);
-      router.refresh();
     } catch (err) {
       console.error("Failed to delete campaign:", err);
       toast.error("Failed to delete campaign");
@@ -242,15 +203,28 @@ export function CampaignList({ campaigns }: { campaigns: Campaign[] }) {
   });
 
   return (
-    <div className="w-full flex-col justify-start gap-6">
-      <div className="flex items-center justify-end px-4 py-4 lg:px-6">
+    <div
+      className={`w-full flex flex-col justify-between gap-4 ${!table.getRowModel().rows?.length ? "flex-1" : ""}`}
+    >
+      <div className="flex items-end justify-between ">
+        <div className="flex flex-col gap-1">
+          <h2 className="text-xl font-semibold">Campaigns</h2>
+          <p className="text-sm text-muted-foreground">Manage campaigns and track submissions</p>
+        </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button className="cursor-pointer" variant="outline" size="sm">
-              <IconPlus />
-              <span className="hidden lg:inline">New Campaign</span>
-            </Button>
-          </DialogTrigger>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <DialogTrigger asChild>
+                <Button className="cursor-pointer" variant="outline" size="sm">
+                  <Plus />
+                  <span className="hidden lg:inline">New Campaign</span>
+                </Button>
+              </DialogTrigger>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Create a new campaign</p>
+            </TooltipContent>
+          </Tooltip>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Create Campaign</DialogTitle>
@@ -259,9 +233,9 @@ export function CampaignList({ campaigns }: { campaigns: Campaign[] }) {
           </DialogContent>
         </Dialog>
       </div>
-      <div className="relative flex flex-col gap-4 overflow-auto px-4 lg:px-6">
-        <div className="overflow-hidden rounded-lg border">
-          <Table>
+      {table.getRowModel().rows?.length ? (
+        <div className="overflow-hidden rounded-lg border flex flex-col min-h-0">
+          <Table className="flex-1">
             <TableHeader className="bg-muted sticky top-0 z-10">
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id}>
@@ -276,42 +250,42 @@ export function CampaignList({ campaigns }: { campaigns: Campaign[] }) {
               ))}
             </TableHeader>
             <TableBody>
-              {table.getRowModel().rows?.length ? (
-                table.getRowModel().rows.map((row) => (
-                  <TableRow
-                    key={row.id}
-                    className="cursor-pointer"
-                    onClick={() => router.push(`/campaigns/${row.original.id}`)}
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell
-                        key={cell.id}
-                        onClick={(e) => {
-                          if (cell.column.id === "actions") {
-                            e.stopPropagation();
-                          }
-                        }}
-                      >
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={columns.length} className="h-24 text-center">
-                    No campaigns yet. Create your first one!
-                  </TableCell>
+              {table.getRowModel().rows.map((row) => (
+                <TableRow
+                  key={row.id}
+                  className="cursor-pointer"
+                  onClick={() => router.push(`/campaigns/${row.original.id}`)}
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell
+                      key={cell.id}
+                      onClick={(e) => {
+                        if (cell.column.id === "actions") {
+                          e.stopPropagation();
+                        }
+                      }}
+                    >
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </TableCell>
+                  ))}
                 </TableRow>
-              )}
+              ))}
             </TableBody>
           </Table>
         </div>
-        <div className="flex items-center justify-between">
-          <div className="text-muted-foreground hidden flex-1 text-sm lg:flex">
-            {table.getFilteredRowModel().rows.length} campaign(s)
-          </div>
-        </div>
+      ) : (
+        <EmptyState
+          title="Campaigns"
+          description="Create a campaign to collect creator submissions"
+          action={{
+            label: "Create Campaign",
+            onClick: () => setIsDialogOpen(true),
+            icon: <Plus className="size-4" />,
+          }}
+        />
+      )}
+      <div className="text-muted-foreground hidden text-sm lg:flex">
+        {table.getFilteredRowModel().rows.length} campaign(s)
       </div>
 
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
@@ -319,8 +293,8 @@ export function CampaignList({ campaigns }: { campaigns: Campaign[] }) {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete campaign?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete the campaign and all its submissions and links. This
-              action cannot be undone.
+              This will permanently delete the campaign and all its submissions. This action cannot
+              be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

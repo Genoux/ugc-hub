@@ -1,9 +1,14 @@
 import { eq } from "drizzle-orm";
 import { AlertCircle, CheckCircle2 } from "lucide-react";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { campaigns, links } from "@/db/schema";
 import { WizardShell } from "@/features/wizard/components/wizard-shell";
 import { db } from "@/shared/lib/db";
+
+export const metadata: Metadata = {
+  title: "inBeat - Asset Submissions",
+};
 
 export default async function SubmitPage({ params }: { params: Promise<{ token: string }> }) {
   const { token } = await params;
@@ -66,5 +71,5 @@ export default async function SubmitPage({ params }: { params: Promise<{ token: 
     notFound();
   }
 
-  return <WizardShell token={token} campaignName={campaign.name} campaignBrief={campaign.brief} />;
+  return <WizardShell token={token} campaignName={campaign.name} />;
 }

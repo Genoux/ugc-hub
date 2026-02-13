@@ -2,6 +2,9 @@ import { eq } from "drizzle-orm";
 import { links, submissions } from "@/db/schema";
 import { db } from "@/shared/lib/db";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export async function POST(request: Request) {
   try {
     const { submissionId } = await request.json();
@@ -23,7 +26,6 @@ export async function POST(request: Request) {
       .set({
         creatorName: null,
         creatorEmail: null,
-        creatorNotes: null,
         status: "awaiting",
       })
       .where(eq(submissions.id, submissionId));

@@ -1,13 +1,13 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
 
 const RECONNECT_DELAY_MS = 2000;
 const MAX_RECONNECT_ATTEMPTS = 5;
 
 export function useRealtimeCampaigns() {
-  const router = useRouter();
+  const queryClient = useQueryClient();
   const reconnectAttempts = useRef(0);
   const mounted = useRef(true);
 
@@ -31,7 +31,14 @@ export function useRealtimeCampaigns() {
         try {
           const data = JSON.parse(event.data);
           if (data.type === "submission_created" || data.type === "submission_updated") {
-            router.refresh();
+            // Invalidate queries to refetch in background
+            queryClient.invalidateQueries({ queryKey: ["campaigns"] });
+            if (data.payload?.campaign_id) {
+              queryClient.invalidateQueries({
+                queryKey: ["campaign", data.payload.campaign_id],
+              });
+            }
+            // Data updates automatically - no jarring reload!
           }
         } catch {
           // ignore parse errors
@@ -57,5 +64,5 @@ export function useRealtimeCampaigns() {
       eventSourceRef.current?.close();
       eventSourceRef.current = null;
     };
-  }, [router]);
+  }, [queryClient]);
 }

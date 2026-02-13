@@ -12,9 +12,8 @@ export async function approveSubmission(submissionId: string) {
     .where(eq(submissions.id, submissionId))
     .returning();
 
-  if (submission) {
-    revalidatePath(`/campaigns/${submission.campaignId}`);
-  }
+  revalidatePath(`/campaigns/${submission.campaignId}`);
+  revalidatePath(`/campaigns/${submission.campaignId}/submissions/${submissionId}`);
 
   return submission;
 }
@@ -26,9 +25,8 @@ export async function rejectSubmission(submissionId: string) {
     .where(eq(submissions.id, submissionId))
     .returning();
 
-  if (submission) {
-    revalidatePath(`/campaigns/${submission.campaignId}`);
-  }
+  revalidatePath(`/campaigns/${submission.campaignId}`);
+  revalidatePath(`/campaigns/${submission.campaignId}/submissions/${submissionId}`);
 
   return submission;
 }

@@ -2,8 +2,7 @@
 
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
-import { createLink } from "@/features/links/actions/create-link";
+import { useCreateLinkMutation } from "@/features/links/hooks/use-links-mutations";
 import { SubmissionList } from "@/features/submissions/components/submission-list";
 import { useRealtimeSubmissions } from "@/features/submissions/hooks/use-realtime-submissions";
 import { Button } from "@/shared/components/ui/button";
@@ -12,7 +11,6 @@ type Campaign = {
   id: string;
   name: string;
   description: string | null;
-  brief: string;
 };
 
 type Submission = {
@@ -35,41 +33,28 @@ export function CampaignDetailClient({
   campaign: Campaign;
   submissions: Submission[];
 }) {
-  const [isCreating, setIsCreating] = useState(false);
   useRealtimeSubmissions(campaign.id);
+  const createLinkMutation = useCreateLinkMutation(campaign.id);
 
-  async function handleCreateLink() {
-    setIsCreating(true);
-    try {
-      await createLink({ campaignId: campaign.id });
-    } catch (error) {
-      console.error("Failed to create link:", error);
-    } finally {
-      setIsCreating(false);
-    }
+  function handleCreateLink() {
+    createLinkMutation.mutate({ campaignId: campaign.id });
   }
 
   return (
-    <div className="flex flex-1 flex-col gap-8 p-4">
-      <div className="flex">
-        <Button variant="outline" size="sm" asChild>
-          <Link href="/campaigns">
-            <ChevronLeft className="size-4" />
-            Campaigns
-          </Link>
-        </Button>
-      </div>
-
-      <div className="space-y-6">
-        <div className="flex-1">
-          <h1 className="text-2xl font-semibold">{campaign.name}</h1>
+    <div className="flex flex-1 flex-col gap-4">
+      <div className="flex items-center justify-between">
+        <div className="flex flex-col">
+          <div className="flex items-center">
+            <Button variant="outline" size="sm" asChild>
+              <Link href="/campaigns">
+                <ChevronLeft className="size-4" />
+                Campaigns
+              </Link>
+            </Button>
+          </div>
           {campaign.description && (
-            <p className="text-sm text-muted-foreground">{campaign.description}</p>
+            <p className="ml-10 text-sm text-muted-foreground">{campaign.description}</p>
           )}
-        </div>
-        <div>
-          <h2 className="text-sm font-medium text-muted-foreground">Brief</h2>
-          <p className="whitespace-pre-wrap text-sm">{campaign.brief}</p>
         </div>
       </div>
 
@@ -77,7 +62,7 @@ export function CampaignDetailClient({
         campaignId={campaign.id}
         submissions={submissions}
         onCreateLink={handleCreateLink}
-        isCreatingLink={isCreating}
+        isCreatingLink={createLinkMutation.isPending}
       />
     </div>
   );

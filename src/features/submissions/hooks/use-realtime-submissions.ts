@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
 import { toast } from "sonner";
 
@@ -8,7 +8,7 @@ const RECONNECT_DELAY_MS = 2000;
 const MAX_RECONNECT_ATTEMPTS = 5;
 
 export function useRealtimeSubmissions(campaignId: string) {
-  const router = useRouter();
+  const queryClient = useQueryClient();
   const campaignIdRef = useRef(campaignId);
   const reconnectAttempts = useRef(0);
   const mounted = useRef(true);
@@ -35,11 +35,15 @@ export function useRealtimeSubmissions(campaignId: string) {
           const data = JSON.parse(event.data);
           const isRelevantType =
             data.type === "submission_created" || data.type === "submission_updated";
-          const isRelevantCampaign =
-            data.payload?.campaign_id === campaignIdRef.current;
+          const isRelevantCampaign = data.payload?.campaign_id === campaignIdRef.current;
 
           if (isRelevantType && isRelevantCampaign) {
-            router.refresh();
+            // Invalidate queries to refetch in background
+            queryClient.invalidateQueries({ queryKey: ["campaigns"] });
+            queryClient.invalidateQueries({
+              queryKey: ["campaign", campaignIdRef.current],
+            });
+            // Data updates automatically - no jarring reload!
           }
         } catch {
           // ignore parse errors
@@ -67,5 +71,5 @@ export function useRealtimeSubmissions(campaignId: string) {
       eventSourceRef.current?.close();
       eventSourceRef.current = null;
     };
-  }, [router]);
+  }, [queryClient]);
 }
