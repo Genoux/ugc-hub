@@ -1,6 +1,8 @@
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
 import { Download } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { AssetCard } from "@/shared/components/asset-card";
 import { StatusBadge } from "@/shared/components/status-badge";
@@ -15,6 +17,7 @@ import { approveSubmission, rejectSubmission } from "../actions/review-submissio
 
 type Submission = {
   id: string;
+  campaignId: string;
   creatorName: string | null;
   creatorEmail: string | null;
   status: string;
@@ -104,12 +107,16 @@ export function SubmissionReview({
   assets: Asset[];
   submissionLink?: SubmissionLink | null;
 }) {
+  const router = useRouter();
+  const queryClient = useQueryClient();
   const [isReviewing, setIsReviewing] = useState(false);
 
   async function handleApprove() {
     setIsReviewing(true);
     try {
       await approveSubmission(submission.id);
+      await queryClient.invalidateQueries({ queryKey: ["campaign", submission.campaignId] });
+      router.refresh();
     } catch (error) {
       console.error("Failed to approve:", error);
     } finally {
@@ -121,6 +128,8 @@ export function SubmissionReview({
     setIsReviewing(true);
     try {
       await rejectSubmission(submission.id);
+      await queryClient.invalidateQueries({ queryKey: ["campaign", submission.campaignId] });
+      router.refresh();
     } catch (error) {
       console.error("Failed to reject:", error);
     } finally {

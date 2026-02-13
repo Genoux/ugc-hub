@@ -4,6 +4,7 @@ import { useParams, usePathname } from "next/navigation";
 import { useCampaignQuery } from "@/features/campaigns/hooks/use-campaigns-query";
 import { Separator } from "@/shared/components/ui/separator";
 import { SidebarTrigger } from "@/shared/components/ui/sidebar";
+import { ThemeSwitcher } from "./theme-switcher";
 
 export function SiteHeader() {
   const pathname = usePathname();
@@ -20,6 +21,9 @@ export function SiteHeader() {
         <SidebarTrigger className="-ml-1" />
         <Separator orientation="vertical" className="mx-2 data-[orientation=vertical]:h-4" />
         <h1 className="text-base font-medium">{title}</h1>
+        <div className="ml-auto">
+          <ThemeSwitcher />
+        </div>
       </div>
     </header>
   );
