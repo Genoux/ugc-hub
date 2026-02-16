@@ -1,26 +1,31 @@
-import { pgTable, uuid, text, timestamp, pgEnum } from "drizzle-orm/pg-core";
-import { campaigns } from "./campaigns";
-import { links } from "./links";
+import { boolean, jsonb, pgEnum, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 
 export const submissionStatusEnum = pgEnum("submission_status", [
-  "awaiting",
-  "pending",
-  "approved",
-  "rejected",
+  "active",
+  "closed",
 ]);
 
 export const submissions = pgTable("submissions", {
   id: uuid("id").defaultRandom().primaryKey(),
-  campaignId: uuid("campaign_id")
-    .notNull()
-    .references(() => campaigns.id, { onDelete: "cascade" }),
-  linkId: uuid("link_id")
-    .notNull()
-    .unique()
-    .references(() => links.id, { onDelete: "cascade" }),
-  creatorName: text("creator_name"),
-  creatorEmail: text("creator_email"),
-  status: submissionStatusEnum("status").notNull().default("awaiting"),
+  userId: text("user_id").notNull(), // Admin who created it
+
+  // Identity (Client - SOW format)
+  name: text("name").notNull(), // e.g. "Prizepicks - SOW 2"
+  code: text("code").notNull(), // e.g. "PRIZ" for quick reference
+  description: text("description"),
+
+  // Upload access
+  uploadToken: text("upload_token").notNull().unique(),
+
+  // Requirements
+  assetRequirements: jsonb("asset_requirements").notNull(),
+
+  // Status & tracking
+  status: submissionStatusEnum("status").notNull().default("active"),
+  followed: boolean("followed").notNull().default(false), // Admin follow for notifications
+
+  // Timestamps
   createdAt: timestamp("created_at").notNull().defaultNow(),
-  reviewedAt: timestamp("reviewed_at"),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  closedAt: timestamp("closed_at"),
 });

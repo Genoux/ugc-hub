@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const createLinkSchema = z.object({
-  campaignId: z.string().uuid(),
+  submissionId: z.string().uuid(),
   expiresAt: z.date().optional(),
 });
 

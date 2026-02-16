@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams, usePathname } from "next/navigation";
-import { useCampaignQuery } from "@/features/campaigns/hooks/use-campaigns-query";
+import { useSubmissionQuery } from "@/features/submissions/hooks/use-submissions-query";
 import { Separator } from "@/shared/components/ui/separator";
 import { SidebarTrigger } from "@/shared/components/ui/sidebar";
 import { ThemeSwitcher } from "./theme-switcher";
@@ -10,10 +10,10 @@ export function SiteHeader() {
   const pathname = usePathname();
   const params = useParams();
 
-  const isCampaignDetail = pathname?.startsWith("/campaigns/") && params?.id;
-  const { data } = useCampaignQuery(params?.id as string, { enabled: !!isCampaignDetail });
+  const isSubmissionDetail = pathname?.startsWith("/submissions/") && params?.id;
+  const { data } = useSubmissionQuery(params?.id as string, { enabled: !!isSubmissionDetail });
 
-  const title = isCampaignDetail && data?.campaign ? data.campaign.name : "UGC Hub";
+  const title = isSubmissionDetail && data?.submission ? data.submission.name : "UGC Hub";
 
   return (
     <header className="flex h-(--header-height) shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height)">

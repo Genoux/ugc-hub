@@ -31,7 +31,7 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
         <AppSidebar variant="inset" />
         <SidebarInset>
           <SiteHeader />
-          <div className="flex flex-1 flex-col p-8">
+          <div className="flex flex-1 flex-col">
             <div className="@container/main mx-auto w-full max-w-7xl flex flex-1 flex-col gap-2">
               {children}
             </div>

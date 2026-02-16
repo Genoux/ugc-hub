@@ -11,7 +11,7 @@ import { WizardStepOne } from "./wizard-step-one";
 import { WizardStepThree } from "./wizard-step-three";
 import { WizardStepTwo } from "./wizard-step-two";
 
-export function WizardShell({ token, campaignName }: { token: string; campaignName: string }) {
+export function WizardShell({ token, submissionName }: { token: string; submissionName: string }) {
   const router = useRouter();
   const { step, stepOneData, stepTwoFiles } = useWizardState();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -24,16 +24,20 @@ export function WizardShell({ token, campaignName }: { token: string; campaignNa
     let submissionId: string | null = null;
 
     try {
-      const submission = await submitWizard({
+      const result = await submitWizard({
         token,
         creatorName: stepOneData.creatorName,
         creatorEmail: stepOneData.creatorEmail,
       });
 
-      submissionId = submission.id;
+      submissionId = result.batch.id; // Use batch ID for uploads
 
       if (stepTwoFiles.length > 0) {
-        await Promise.all(stepTwoFiles.map((file) => uploadFile(file, submission.id)));
+        await Promise.all(
+          stepTwoFiles.map((file) => 
+            uploadFile(file, result.submission.id, result.folder.id, result.batch.id)
+          )
+        );
       }
 
       router.replace(`/submit/${token}`);
@@ -75,7 +79,7 @@ export function WizardShell({ token, campaignName }: { token: string; campaignNa
     <div className="flex min-h-screen items-center justify-center p-4">
       <div className="w-full max-w-2xl space-y-6">
         <div>
-          <h1 className="text-2xl font-semibold">{campaignName}</h1>
+          <h1 className="text-2xl font-semibold">{submissionName}</h1>
           <div className="mt-4 flex items-center gap-2">
             {[1, 2, 3].map((s) => (
               <div

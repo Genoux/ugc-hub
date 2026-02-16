@@ -1,6 +1,6 @@
 "use client";
 
-import { Folder } from "lucide-react";
+import { Folder, Users } from "lucide-react";
 import { NavMain } from "@/shared/components/nav-main";
 import { NavUser } from "@/shared/components/nav-user";
 import {
@@ -15,9 +15,14 @@ import {
 
 const navItems = [
   {
-    title: "Campaigns",
-    url: "/campaigns",
+    title: "Submissions",
+    url: "/submissions",
     icon: Folder,
+  },
+  {
+    title: "Database",
+    url: "/database",
+    icon: Users,
   },
 ];
 

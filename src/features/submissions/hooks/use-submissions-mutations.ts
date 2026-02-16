@@ -1,70 +1,60 @@
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
+import { createSubmission } from "../actions/create-submission";
 import { deleteSubmission } from "../actions/delete-submission";
 
-type CampaignQueryData = {
-  campaign: {
-    id: string;
-    name: string;
-    description: string | null;
-    createdAt: Date;
-    userId: string;
-  };
-  submissions: Array<{
-    id: string;
-    campaignId: string;
-    linkId: string;
-    creatorName: string | null;
-    creatorEmail: string | null;
-    status: string;
-    createdAt: Date;
-    reviewedAt: Date | null;
-  }>;
+export function useCreateSubmissionMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: createSubmission,
+    onSuccess: async () => {
+      // Force immediate refetch
+      await queryClient.refetchQueries({ 
+        queryKey: ["submissions"],
+        type: 'active'
+      });
+    },
+  });
+}
+
+type Submission = {
+  id: string;
+  name: string;
+  description: string | null;
+  createdAt: Date;
+  totalCreators: number;
+  totalBatches: number;
 };
 
-export function useDeleteSubmissionMutation(campaignId: string) {
+export function useDeleteSubmissionMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: deleteSubmission,
+    // Optimistic update - instant UI
     onMutate: async (submissionId) => {
-      // Cancel any outgoing refetches
-      await queryClient.cancelQueries({ queryKey: ["campaign", campaignId] });
+      await queryClient.cancelQueries({ queryKey: ["submissions"] });
 
-      // Snapshot the previous value
-      const previousData = queryClient.getQueryData<CampaignQueryData>(["campaign", campaignId]);
+      const previousSubmissions = queryClient.getQueryData<Submission[]>(["submissions"]);
 
-      // Optimistically update to the new value
-      queryClient.setQueryData<CampaignQueryData>(["campaign", campaignId], (old) => {
-        if (!old) return old;
-        return {
-          ...old,
-          submissions: old.submissions.filter((s) => s.id !== submissionId),
-        };
-      });
+      // Remove from cache immediately
+      queryClient.setQueryData<Submission[]>(["submissions"], (old) =>
+        old?.filter((c) => c.id !== submissionId),
+      );
 
-      return { previousData };
+      return { previousSubmissions };
     },
     onError: (_err, _variables, context) => {
       // Rollback on error
-      if (context?.previousData) {
-        queryClient.setQueryData(["campaign", campaignId], context.previousData);
+      if (context?.previousSubmissions) {
+        queryClient.setQueryData(["submissions"], context.previousSubmissions);
       }
-      toast.error("Failed to delete submission");
-    },
-    onSuccess: () => {
-      toast.success("Submission deleted");
     },
     onSettled: async () => {
-      // Force immediate refetch, bypassing cache
       await queryClient.refetchQueries({ 
-        queryKey: ["campaign", campaignId],
-        type: 'active'
-      });
-      await queryClient.refetchQueries({ 
-        queryKey: ["campaigns"],
+        queryKey: ["submissions"],
         type: 'active'
       });
     },

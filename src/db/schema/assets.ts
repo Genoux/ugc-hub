@@ -1,5 +1,5 @@
-import { pgTable, uuid, text, timestamp, integer, pgEnum } from "drizzle-orm/pg-core";
-import { submissions } from "./submissions";
+import { integer, pgEnum, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { creatorSubmissions } from "./creator-submissions";
 
 export const assetUploadStatusEnum = pgEnum("asset_upload_status", [
   "uploading",
@@ -9,9 +9,9 @@ export const assetUploadStatusEnum = pgEnum("asset_upload_status", [
 
 export const assets = pgTable("assets", {
   id: uuid("id").defaultRandom().primaryKey(),
-  submissionId: uuid("submission_id")
+  creatorSubmissionId: uuid("creator_submission_id")
     .notNull()
-    .references(() => submissions.id, { onDelete: "cascade" }),
+    .references(() => creatorSubmissions.id, { onDelete: "cascade" }),
   r2Key: text("r2_key").notNull(),
   filename: text("filename").notNull(),
   mimeType: text("mime_type").notNull(),

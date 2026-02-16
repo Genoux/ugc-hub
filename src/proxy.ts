@@ -1,8 +1,20 @@
-import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import { clerkClient, clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { type NextRequest, NextResponse } from "next/server";
 import { rateLimit } from "@/shared/lib/rate-limit";
 
-const isProtectedRoute = createRouteMatcher(["/campaigns(.*)", "/api/campaigns(.*)"]);
+const ALLOWED_DOMAIN = process.env.ALLOWED_DOMAIN;
+if (!ALLOWED_DOMAIN) {
+  throw new Error("ALLOWED_DOMAIN is not set");
+}
+
+// ALL platform routes require @inbeat.agency email
+const isPlatformRoute = createRouteMatcher([
+  "/submissions(.*)",
+  "/database(.*)",
+  "/api/submissions(.*)",
+  "/api/assets(.*)",
+  "/api/live(.*)",
+]);
 
 const rateLimitedRoutes = [
   "/api/uploads/presign",
@@ -35,9 +47,24 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
     }
   }
 
-  // Protect routes that require authentication
-  if (isProtectedRoute(req)) {
+  // Protect platform routes with domain restriction
+  if (isPlatformRoute(req)) {
     await auth.protect();
+
+    // Domain check - ONLY @inbeat.agency
+    const { userId } = await auth();
+    if (!userId) {
+      return NextResponse.redirect(new URL("/sign-in", req.url));
+    }
+
+    const client = await clerkClient();
+    const user = await client.users.getUser(userId);
+    const email = user.primaryEmailAddress?.emailAddress ?? "";
+
+    if (!email.toLowerCase().endsWith(`@${ALLOWED_DOMAIN}`)) {
+      // Wrong domain - redirect to access denied page (not in isPlatformRoute, so no loop)
+      return NextResponse.redirect(new URL("/access-denied", req.url));
+    }
   }
 });
 

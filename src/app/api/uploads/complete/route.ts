@@ -2,7 +2,7 @@ import { CompleteMultipartUploadCommand } from "@aws-sdk/client-s3";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { type NextRequest, NextResponse } from "next/server";
-import { assets, submissions } from "@/db/schema";
+import { assets, creatorSubmissions } from "@/db/schema";
 import { R2_BUCKET_NAME, r2Client } from "@/features/uploads/lib/r2-client";
 import { db } from "@/shared/lib/db";
 
@@ -25,10 +25,11 @@ export async function POST(request: NextRequest) {
       await r2Client.send(command);
     }
 
+    // Note: submissionId now refers to creator_submissions (upload batches)
     const [asset] = await db
       .insert(assets)
       .values({
-        submissionId,
+        creatorSubmissionId: submissionId,
         r2Key: key,
         filename,
         mimeType,
@@ -37,13 +38,17 @@ export async function POST(request: NextRequest) {
       })
       .returning();
 
-    const submission = await db.query.submissions.findFirst({
-      where: eq(submissions.id, submissionId),
+    const batch = await db.query.creatorSubmissions.findFirst({
+      where: eq(creatorSubmissions.id, submissionId),
+      with: {
+        creatorFolder: {
+          columns: { submissionId: true },
+        },
+      },
     });
 
-    if (submission) {
-      revalidatePath(`/campaigns/${submission.campaignId}`);
-      revalidatePath(`/campaigns/${submission.campaignId}/submissions/${submissionId}`);
+    if (batch?.creatorFolder) {
+      revalidatePath(`/submissions/${batch.creatorFolder.submissionId}`);
     }
 
     return NextResponse.json({ asset });

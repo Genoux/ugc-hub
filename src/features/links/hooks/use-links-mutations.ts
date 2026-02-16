@@ -4,7 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { createLink } from "../actions/create-link";
 
-export function useCreateLinkMutation(campaignId: string) {
+export function useCreateLinkMutation(submissionId: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -12,11 +12,11 @@ export function useCreateLinkMutation(campaignId: string) {
     onSuccess: async () => {
       // Force immediate refetch after creating link
       await queryClient.refetchQueries({ 
-        queryKey: ["campaign", campaignId],
+        queryKey: ["submission", submissionId],
         type: 'active'
       });
       await queryClient.refetchQueries({ 
-        queryKey: ["campaigns"],
+        queryKey: ["submissions"],
         type: 'active'
       });
       toast.success("Link created");

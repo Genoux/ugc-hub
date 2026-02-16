@@ -11,7 +11,7 @@ type UploadStatus = {
 export function useMultipartUpload() {
   const [uploads, setUploads] = useState<Record<string, UploadStatus>>({});
 
-  async function uploadFile(file: File, submissionId: string) {
+  async function uploadFile(file: File, submissionId: string, creatorFolderId: string, batchId: string) {
     const fileId = `${file.name}-${Date.now()}`;
 
     setUploads((prev) => ({
@@ -28,6 +28,8 @@ export function useMultipartUpload() {
           contentType: file.type,
           fileSize: file.size,
           submissionId,
+          creatorFolderId,
+          batchId,
         }),
       });
 
@@ -43,9 +45,9 @@ export function useMultipartUpload() {
       }));
 
       if (isMultipart) {
-        await uploadMultipart(file, key, uploadId, submissionId);
+        await uploadMultipart(file, key, uploadId, submissionId, creatorFolderId, batchId);
       } else {
-        await uploadSingle(file, uploadUrl, key, submissionId);
+        await uploadSingle(file, uploadUrl, key, submissionId, creatorFolderId, batchId);
       }
 
       setUploads((prev) => ({
@@ -62,7 +64,14 @@ export function useMultipartUpload() {
     }
   }
 
-  async function uploadSingle(file: File, uploadUrl: string, key: string, submissionId: string) {
+  async function uploadSingle(
+    file: File, 
+    uploadUrl: string, 
+    key: string, 
+    submissionId: string,
+    creatorFolderId: string,
+    batchId: string
+  ) {
     await fetch(uploadUrl, {
       method: "PUT",
       body: file,
@@ -74,7 +83,7 @@ export function useMultipartUpload() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         key,
-        submissionId,
+        submissionId: batchId, // Note: API expects batchId as submissionId for backward compat
         filename: file.name,
         mimeType: file.type,
         sizeBytes: file.size,
@@ -82,7 +91,14 @@ export function useMultipartUpload() {
     });
   }
 
-  async function uploadMultipart(file: File, key: string, uploadId: string, submissionId: string) {
+  async function uploadMultipart(
+    file: File, 
+    key: string, 
+    uploadId: string, 
+    submissionId: string,
+    creatorFolderId: string,
+    batchId: string
+  ) {
     const chunkSize = UPLOAD_CONFIG.chunkSize;
     const chunks = Math.ceil(file.size / chunkSize);
     const parts: Array<{ PartNumber: number; ETag: string }> = [];
@@ -113,7 +129,7 @@ export function useMultipartUpload() {
         uploadId,
         key,
         parts,
-        submissionId,
+        submissionId: batchId, // Note: API expects batchId as submissionId for backward compat
         filename: file.name,
         mimeType: file.type,
         sizeBytes: file.size,

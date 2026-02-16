@@ -1,34 +1,33 @@
 "use server";
 
-import { randomBytes } from "node:crypto";
+import { eq } from "drizzle-orm";
 import type { z } from "zod";
-import { links, submissions } from "@/db/schema";
+import { submissions } from "@/db/schema";
 import { db } from "@/shared/lib/db";
 import { createLinkSchema } from "../schemas";
 
-function generateToken(): string {
-  return randomBytes(16).toString("hex");
-}
-
+// Note: Links are now uploadTokens on submissions table
+// This function is kept for backward compatibility
 export async function createLink(input: z.infer<typeof createLinkSchema>) {
   const data = createLinkSchema.parse(input);
-  const token = generateToken();
 
-  const [link] = await db
-    .insert(links)
-    .values({
-      campaignId: data.campaignId,
-      token,
-      expiresAt: data.expiresAt || null,
-      status: "active",
-    })
-    .returning();
-
-  await db.insert(submissions).values({
-    campaignId: data.campaignId,
-    linkId: link.id,
-    status: "awaiting",
+  // Return the existing submission's uploadToken
+  const submission = await db.query.submissions.findFirst({
+    where: eq(submissions.id, data.submissionId),
+    columns: { id: true, uploadToken: true },
   });
 
-  return link;
+  if (!submission) {
+    throw new Error("Submission not found");
+  }
+
+  // Return token in link format for backward compatibility
+  return {
+    id: submission.id,
+    token: submission.uploadToken,
+    submissionId: data.submissionId,
+    status: "active" as const,
+    createdAt: new Date(),
+    expiresAt: data.expiresAt || null,
+  };
 }
