@@ -52,9 +52,6 @@ export function CampaignDetailClient({
               </Link>
             </Button>
           </div>
-          {campaign.description && (
-            <p className="ml-10 text-sm text-muted-foreground">{campaign.description}</p>
-          )}
         </div>
       </div>
 

@@ -217,7 +217,7 @@ export function CampaignList({ campaigns }: { campaigns: Campaign[] }) {
               <DialogTrigger asChild>
                 <Button className="cursor-pointer" variant="outline" size="sm">
                   <Plus />
-                  <span className="hidden lg:inline">New Campaign</span>
+                  <span className="hidden lg:inline">Create Campaign</span>
                 </Button>
               </DialogTrigger>
             </TooltipTrigger>

@@ -40,7 +40,7 @@ export async function GET() {
     { campaigns: campaignsWithNumbers },
     {
       headers: {
-        "Cache-Control": "public, max-age=10, stale-while-revalidate=30",
+        "Cache-Control": "no-store, must-revalidate",
       },
     },
   );

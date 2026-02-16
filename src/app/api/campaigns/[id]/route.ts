@@ -38,7 +38,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
     { campaign, submissions: campaignSubmissions },
     {
       headers: {
-        "Cache-Control": "public, max-age=10, stale-while-revalidate=30",
+        "Cache-Control": "no-store, must-revalidate",
       },
     },
   );
