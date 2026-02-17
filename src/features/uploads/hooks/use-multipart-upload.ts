@@ -11,7 +11,12 @@ type UploadStatus = {
 export function useMultipartUpload() {
   const [uploads, setUploads] = useState<Record<string, UploadStatus>>({});
 
-  async function uploadFile(file: File, submissionId: string, creatorFolderId: string, batchId: string) {
+  async function uploadFile(
+    file: File,
+    submissionId: string,
+    creatorFolderId: string,
+    batchId: string,
+  ) {
     const fileId = `${file.name}-${Date.now()}`;
 
     setUploads((prev) => ({
@@ -65,12 +70,12 @@ export function useMultipartUpload() {
   }
 
   async function uploadSingle(
-    file: File, 
-    uploadUrl: string, 
-    key: string, 
+    file: File,
+    uploadUrl: string,
+    key: string,
     submissionId: string,
     creatorFolderId: string,
-    batchId: string
+    batchId: string,
   ) {
     await fetch(uploadUrl, {
       method: "PUT",
@@ -92,12 +97,12 @@ export function useMultipartUpload() {
   }
 
   async function uploadMultipart(
-    file: File, 
-    key: string, 
-    uploadId: string, 
+    file: File,
+    key: string,
+    uploadId: string,
     submissionId: string,
     creatorFolderId: string,
-    batchId: string
+    batchId: string,
   ) {
     const chunkSize = UPLOAD_CONFIG.chunkSize;
     const chunks = Math.ceil(file.size / chunkSize);

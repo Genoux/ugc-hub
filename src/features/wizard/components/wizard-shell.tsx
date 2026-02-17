@@ -34,9 +34,9 @@ export function WizardShell({ token, submissionName }: { token: string; submissi
 
       if (stepTwoFiles.length > 0) {
         await Promise.all(
-          stepTwoFiles.map((file) => 
-            uploadFile(file, result.submission.id, result.folder.id, result.batch.id)
-          )
+          stepTwoFiles.map((file) =>
+            uploadFile(file, result.submission.id, result.folder.id, result.batch.id),
+          ),
         );
       }
 

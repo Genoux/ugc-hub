@@ -11,9 +11,9 @@ export function useCreateSubmissionMutation() {
     mutationFn: createSubmission,
     onSuccess: async () => {
       // Force immediate refetch
-      await queryClient.refetchQueries({ 
+      await queryClient.refetchQueries({
         queryKey: ["submissions"],
-        type: 'active'
+        type: "active",
       });
     },
   });
@@ -53,9 +53,9 @@ export function useDeleteSubmissionMutation() {
       }
     },
     onSettled: async () => {
-      await queryClient.refetchQueries({ 
+      await queryClient.refetchQueries({
         queryKey: ["submissions"],
-        type: 'active'
+        type: "active",
       });
     },
   });

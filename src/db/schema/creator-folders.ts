@@ -2,10 +2,7 @@ import { pgEnum, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import { submissions } from "./submissions";
 import { creators } from "./creators";
 
-export const collaborationStatusEnum = pgEnum("collaboration_status", [
-  "active",
-  "closed",
-]);
+export const collaborationStatusEnum = pgEnum("collaboration_status", ["active", "closed"]);
 
 export const creatorFolders = pgTable("creator_folders", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -19,9 +16,7 @@ export const creatorFolders = pgTable("creator_folders", {
     .references(() => creators.id, { onDelete: "cascade" }),
 
   // Collaboration tracking
-  collaborationStatus: collaborationStatusEnum("collaboration_status")
-    .notNull()
-    .default("active"),
+  collaborationStatus: collaborationStatusEnum("collaboration_status").notNull().default("active"),
 
   // Closure details (filled when collaboration is closed)
   closedAt: timestamp("closed_at"),

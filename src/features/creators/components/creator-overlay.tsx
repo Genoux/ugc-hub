@@ -3,11 +3,7 @@
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
 import { Badge } from "@/shared/components/ui/badge";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-} from "@/shared/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader } from "@/shared/components/ui/sheet";
 import type { Creator } from "../schemas";
 
 interface CreatorOverlayProps {
@@ -84,12 +80,7 @@ export function CreatorOverlay({
               <ChevronRight className="h-5 w-5" />
             </Button>
           </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onClose}
-            aria-label="Close creator profile"
-          >
+          <Button variant="ghost" size="icon" onClick={onClose} aria-label="Close creator profile">
             <X className="h-5 w-5" />
           </Button>
         </SheetHeader>
@@ -119,14 +110,10 @@ export function CreatorOverlay({
                 <Badge variant="outline" className={ratingConfig.className}>
                   {creator.overallRating}
                 </Badge>
-                <span className="text-xs text-muted-foreground capitalize">
-                  {creator.status}
-                </span>
+                <span className="text-xs text-muted-foreground capitalize">{creator.status}</span>
               </div>
               {creator.country && (
-                <p className="text-xs text-muted-foreground mb-4">
-                  {creator.country}
-                </p>
+                <p className="text-xs text-muted-foreground mb-4">{creator.country}</p>
               )}
 
               {creator.socialChannels && (
@@ -159,9 +146,7 @@ export function CreatorOverlay({
                   </h3>
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs text-muted-foreground">
-                        Rate Range
-                      </span>
+                      <span className="text-xs text-muted-foreground">Rate Range</span>
                       <span className="text-sm font-semibold text-foreground">
                         ${rateRange.min}–${rateRange.max}
                       </span>
@@ -179,9 +164,7 @@ export function CreatorOverlay({
             {/* Right Content */}
             <div className="flex-1 min-w-0 p-6">
               <div className="bg-muted rounded-2xl p-5 mb-6">
-                <h2 className="text-sm font-semibold text-foreground mb-4">
-                  About
-                </h2>
+                <h2 className="text-sm font-semibold text-foreground mb-4">About</h2>
                 <div className="grid grid-cols-2 gap-x-8 gap-y-4">
                   <div className="space-y-3">
                     {creator.ageDemographic && (
@@ -209,9 +192,7 @@ export function CreatorOverlay({
                         <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">
                           Ethnicity
                         </span>
-                        <p className="text-xs font-medium text-foreground">
-                          {creator.ethnicity}
-                        </p>
+                        <p className="text-xs font-medium text-foreground">{creator.ethnicity}</p>
                       </div>
                     )}
                   </div>
@@ -223,11 +204,7 @@ export function CreatorOverlay({
                         </span>
                         <p className="text-xs font-medium text-foreground">
                           {creator.languages
-                            .map((l) =>
-                              l.accent
-                                ? `${l.language} (${l.accent})`
-                                : l.language
-                            )
+                            .map((l) => (l.accent ? `${l.language} (${l.accent})` : l.language))
                             .join(", ")}
                         </p>
                       </div>
@@ -237,9 +214,7 @@ export function CreatorOverlay({
                         <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">
                           Country
                         </span>
-                        <p className="text-xs font-medium text-foreground">
-                          {creator.country}
-                        </p>
+                        <p className="text-xs font-medium text-foreground">{creator.country}</p>
                       </div>
                     )}
                   </div>

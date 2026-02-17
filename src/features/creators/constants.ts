@@ -36,11 +36,7 @@ export const CONTENT_FORMATS = [
 
 export type ContentFormat = (typeof CONTENT_FORMATS)[number];
 
-export const GENDER_IDENTITIES = [
-  "Male-presenting",
-  "Female-presenting",
-  "Non-binary",
-] as const;
+export const GENDER_IDENTITIES = ["Male-presenting", "Female-presenting", "Non-binary"] as const;
 
 export type GenderIdentity = (typeof GENDER_IDENTITIES)[number];
 
@@ -68,21 +64,11 @@ export const ETHNICITIES = [
 
 export type Ethnicity = (typeof ETHNICITIES)[number];
 
-export const PRIMARY_CHANNELS = [
-  "Instagram",
-  "TikTok",
-  "YouTube",
-] as const;
+export const PRIMARY_CHANNELS = ["Instagram", "TikTok", "YouTube"] as const;
 
 export type PrimaryChannel = (typeof PRIMARY_CHANNELS)[number];
 
-export const RATING_TIERS = [
-  "standout",
-  "good",
-  "sufficient",
-  "problematic",
-  "untested",
-] as const;
+export const RATING_TIERS = ["standout", "good", "sufficient", "problematic", "untested"] as const;
 
 export type RatingTier = (typeof RATING_TIERS)[number];
 
@@ -98,11 +84,7 @@ export const OVERALL_RATING_TIERS = [
 
 export type OverallRatingTier = (typeof OVERALL_RATING_TIERS)[number];
 
-export const CREATOR_STATUSES = [
-  "untested",
-  "active",
-  "blacklisted",
-] as const;
+export const CREATOR_STATUSES = ["untested", "active", "blacklisted"] as const;
 
 export type CreatorDatabaseStatus = (typeof CREATOR_STATUSES)[number];
 

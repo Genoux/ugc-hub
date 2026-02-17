@@ -57,7 +57,12 @@ export default async function SubmissionDetailPage({
         </Link>
       </Button>
 
-      <SubmissionReview submissionName={submission.name} submission={batch as any} assets={batchAssets} submissionLink={null} />
+      <SubmissionReview
+        submissionName={submission.name}
+        submission={batch as any}
+        assets={batchAssets}
+        submissionLink={null}
+      />
     </div>
   );
 }

@@ -11,7 +11,8 @@ export const revalidate = 0;
 
 export async function POST(request: NextRequest) {
   try {
-    const { filename, contentType, fileSize, submissionId, creatorFolderId, batchId } = await request.json();
+    const { filename, contentType, fileSize, submissionId, creatorFolderId, batchId } =
+      await request.json();
 
     if (!UPLOAD_CONFIG.allowedMimeTypes.includes(contentType)) {
       return NextResponse.json({ error: "File type not allowed" }, { status: 400 });
@@ -21,11 +22,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "File size exceeds limit" }, { status: 400 });
     }
 
-    // New structure: submissions/{submissionId}/creators/{creatorFolderId}/batches/{batchId}/file.jpg
-    // Note: batchId is the creator_submissions.id (upload batch)
-    const folder = batchId 
-      ? `submissions/${submissionId}/creators/${creatorFolderId}/batches/${batchId}`
-      : "uploads"; // Fallback for legacy/temp uploads
+    const folder = `submissions/${submissionId}/creators/${creatorFolderId}/batches/${batchId}`;
+
     const key = `${folder}/${randomBytes(16).toString("hex")}-${filename}`;
 
     if (fileSize > UPLOAD_CONFIG.chunkSize) {

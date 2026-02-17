@@ -7,14 +7,18 @@ if (!ALLOWED_DOMAIN) {
   throw new Error("ALLOWED_DOMAIN is not set");
 }
 
-// ALL platform routes require @inbeat.agency email
+const isPublicRoute = createRouteMatcher(["/sign-in(.*)", "/sign-up(.*)", "/", "/unauthorized"]);
+
 const isPlatformRoute = createRouteMatcher([
   "/submissions(.*)",
   "/database(.*)",
+  "/applicants(.*)",
   "/api/submissions(.*)",
   "/api/assets(.*)",
   "/api/live(.*)",
 ]);
+
+const isCreatorRoute = createRouteMatcher(["/creator(.*)"]);
 
 const rateLimitedRoutes = [
   "/api/uploads/presign",
@@ -24,7 +28,6 @@ const rateLimitedRoutes = [
 ];
 
 export default clerkMiddleware(async (auth, req: NextRequest) => {
-  // Apply rate limiting to specific API routes
   if (rateLimitedRoutes.some((route) => req.nextUrl.pathname.startsWith(route))) {
     const ip =
       req.headers.get("x-forwarded-for")?.split(",")[0] ||
@@ -47,11 +50,13 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
     }
   }
 
-  // Protect platform routes with domain restriction
+  if (isPublicRoute(req)) {
+    return;
+  }
+
   if (isPlatformRoute(req)) {
     await auth.protect();
 
-    // Domain check - ONLY @inbeat.agency
     const { userId } = await auth();
     if (!userId) {
       return NextResponse.redirect(new URL("/sign-in", req.url));
@@ -62,17 +67,18 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
     const email = user.primaryEmailAddress?.emailAddress ?? "";
 
     if (!email.toLowerCase().endsWith(`@${ALLOWED_DOMAIN}`)) {
-      // Wrong domain - redirect to access denied page (not in isPlatformRoute, so no loop)
-      return NextResponse.redirect(new URL("/access-denied", req.url));
+      return NextResponse.redirect(new URL("/creator", req.url));
     }
+  }
+
+  if (isCreatorRoute(req)) {
+    await auth.protect();
   }
 });
 
 export const config = {
   matcher: [
-    // Skip Next.js internals and all static files, unless found in search params
     "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
-    // Always run for API routes
     "/(api|trpc)(.*)",
   ],
 };

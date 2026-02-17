@@ -11,13 +11,13 @@ export function useCreateLinkMutation(submissionId: string) {
     mutationFn: createLink,
     onSuccess: async () => {
       // Force immediate refetch after creating link
-      await queryClient.refetchQueries({ 
+      await queryClient.refetchQueries({
         queryKey: ["submission", submissionId],
-        type: 'active'
+        type: "active",
       });
-      await queryClient.refetchQueries({ 
+      await queryClient.refetchQueries({
         queryKey: ["submissions"],
-        type: 'active'
+        type: "active",
       });
       toast.success("Link created");
     },

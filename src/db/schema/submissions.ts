@@ -1,9 +1,6 @@
 import { boolean, jsonb, pgEnum, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 
-export const submissionStatusEnum = pgEnum("submission_status", [
-  "active",
-  "closed",
-]);
+export const submissionStatusEnum = pgEnum("submission_status", ["active", "closed"]);
 
 export const submissions = pgTable("submissions", {
   id: uuid("id").defaultRandom().primaryKey(),

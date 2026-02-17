@@ -73,7 +73,11 @@ export function SubmissionList({
       ) : (
         <div className="space-y-2">
           {submissions.map((submission) => (
-            <SubmissionItem key={submission.id} submission={submission} submissionId={submissionId} />
+            <SubmissionItem
+              key={submission.id}
+              submission={submission}
+              submissionId={submissionId}
+            />
           ))}
         </div>
       )}

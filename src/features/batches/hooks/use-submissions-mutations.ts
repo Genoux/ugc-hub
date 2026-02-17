@@ -33,7 +33,10 @@ export function useDeleteSubmissionMutation(submissionId: string) {
       await queryClient.cancelQueries({ queryKey: ["submission", submissionId] });
 
       // Snapshot the previous value
-      const previousData = queryClient.getQueryData<SubmissionQueryData>(["submission", submissionId]);
+      const previousData = queryClient.getQueryData<SubmissionQueryData>([
+        "submission",
+        submissionId,
+      ]);
 
       // Optimistically update to the new value
       queryClient.setQueryData<SubmissionQueryData>(["submission", submissionId], (old) => {
@@ -58,13 +61,13 @@ export function useDeleteSubmissionMutation(submissionId: string) {
     },
     onSettled: async () => {
       // Force immediate refetch, bypassing cache
-      await queryClient.refetchQueries({ 
+      await queryClient.refetchQueries({
         queryKey: ["submission", submissionId],
-        type: 'active'
+        type: "active",
       });
-      await queryClient.refetchQueries({ 
+      await queryClient.refetchQueries({
         queryKey: ["submissions"],
-        type: 'active'
+        type: "active",
       });
     },
   });

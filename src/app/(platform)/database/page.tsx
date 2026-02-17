@@ -14,26 +14,24 @@ export default async function DatabasePage() {
     return (
       <div className="flex h-full items-center justify-center">
         <div className="text-center">
-          <h2 className="text-lg font-semibold text-foreground mb-2">
-            Failed to load creators
-          </h2>
-          <p className="text-sm text-muted-foreground">
-            {result.error || "An error occurred"}
-          </p>
+          <h2 className="text-lg font-semibold text-foreground mb-2">Failed to load creators</h2>
+          <p className="text-sm text-muted-foreground">{result.error || "An error occurred"}</p>
         </div>
       </div>
     );
   }
 
   // Parse and validate creators
-  const creators = result.creators.map((c) => {
-    try {
-      return creatorSchema.parse(c);
-    } catch (error) {
-      console.error("Failed to parse creator:", error);
-      return null;
-    }
-  }).filter((c): c is NonNullable<typeof c> => c !== null);
+  const creators = result.creators
+    .map((c) => {
+      try {
+        return creatorSchema.parse(c);
+      } catch (error) {
+        console.error("Failed to parse creator:", error);
+        return null;
+      }
+    })
+    .filter((c): c is NonNullable<typeof c> => c !== null);
 
   return <CreatorDatabase creators={creators} />;
 }

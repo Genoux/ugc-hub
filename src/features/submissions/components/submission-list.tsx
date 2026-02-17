@@ -77,16 +77,12 @@ const columns: ColumnDef<Submission>[] = [
   {
     accessorKey: "totalCreators",
     header: "Creators",
-    cell: ({ row }) => (
-      <span className="text-muted-foreground">{row.original.totalCreators}</span>
-    ),
+    cell: ({ row }) => <span className="text-muted-foreground">{row.original.totalCreators}</span>,
   },
   {
     accessorKey: "totalBatches",
     header: "Uploads",
-    cell: ({ row }) => (
-      <span className="text-muted-foreground">{row.original.totalBatches}</span>
-    ),
+    cell: ({ row }) => <span className="text-muted-foreground">{row.original.totalBatches}</span>,
   },
   {
     accessorKey: "createdAt",
@@ -200,7 +196,9 @@ export function SubmissionList({ submissions }: { submissions: Submission[] }) {
       <div className="flex items-end justify-between ">
         <div className="flex flex-col gap-1">
           <h2 className="text-xl font-semibold">Submissions</h2>
-          <p className="text-sm text-muted-foreground">Manage submissions and track creator uploads</p>
+          <p className="text-sm text-muted-foreground">
+            Manage submissions and track creator uploads
+          </p>
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <Tooltip>
@@ -284,8 +282,8 @@ export function SubmissionList({ submissions }: { submissions: Submission[] }) {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete submission?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete the submission folder and all its content. This action cannot
-              be undone.
+              This will permanently delete the submission folder and all its content. This action
+              cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

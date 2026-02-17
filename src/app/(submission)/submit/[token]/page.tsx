@@ -43,7 +43,9 @@ export default async function SubmitPage({ params }: { params: Promise<{ token: 
           <AlertCircle className="size-12 text-muted-foreground" />
           <div>
             <h1 className="text-2xl font-semibold">Link Not Available</h1>
-            <p className="mt-2 text-sm text-muted-foreground">This submission is {submission.status}.</p>
+            <p className="mt-2 text-sm text-muted-foreground">
+              This submission is {submission.status}.
+            </p>
           </div>
         </div>
       </div>

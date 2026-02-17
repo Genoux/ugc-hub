@@ -4,11 +4,7 @@ import { Check, ChevronLeft, Copy } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { Button } from "@/shared/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/shared/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/shared/components/ui/tooltip";
 
 type Submission = {
   id: string;
@@ -84,11 +80,13 @@ export function SubmissionDetailClient({
 
       <div className="flex flex-col gap-4 flex-1">
         <h2 className="text-sm font-medium">Creator Folders ({folders.length})</h2>
-        
+
         {folders.length === 0 ? (
           <div className="flex flex-col items-center justify-center gap-4 py-12 border rounded-lg">
             <p className="text-sm text-muted-foreground">No creator uploads yet</p>
-            <p className="text-xs text-muted-foreground">Share the upload link to start receiving content</p>
+            <p className="text-xs text-muted-foreground">
+              Share the upload link to start receiving content
+            </p>
           </div>
         ) : (
           <div className="space-y-4">
