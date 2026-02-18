@@ -8,7 +8,7 @@ export default async function ApplicantsPage() {
     .select()
     .from(creators)
     .where(
-      inArray(creators.status, ["applicant", "under_review", "approved_not_joined", "rejected"]),
+      inArray(creators.status, ["applicant", "approved_not_joined", "rejected"]),
     )
     .orderBy(creators.appliedAt);
 

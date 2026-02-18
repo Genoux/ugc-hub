@@ -5,35 +5,35 @@ import { redirect } from "next/navigation";
 import { creators } from "@/db/schema";
 import { Separator } from "@/shared/components/ui/separator";
 import { db } from "@/shared/lib/db";
+import { ROUTES } from "@/shared/lib/routes";
 
 export default async function CreatorLayout({ children }: { children: React.ReactNode }) {
   const { userId } = await auth();
-  if (!userId) redirect("/sign-in");
+  if (!userId) redirect(ROUTES.signIn);
 
-  // Not a fan of this. We should be using the sessionClaims metadata to get the creatorId or something
-  // Will do for now.
   const client = await clerkClient();
   const clerkUser = await client.users.getUser(userId);
   const primaryEmail = clerkUser.primaryEmailAddress?.emailAddress;
 
-  if (!primaryEmail) redirect("/sign-in");
+  if (!primaryEmail) redirect(ROUTES.signIn);
 
   const creator = await db.query.creators.findFirst({
     where: or(eq(creators.clerkUserId, userId), eq(creators.email, primaryEmail)),
-    columns: { id: true, clerkUserId: true, status: true },
+    columns: { id: true, clerkUserId: true, status: true, joinedAt: true },
   });
 
-  // No creator record means they weren't invited — deny access
-  if (!creator) redirect("/unauthorized");
+  if (!creator) {
+    const isAdmin = primaryEmail.toLowerCase().endsWith(`@${process.env.ALLOWED_DOMAIN}`);
+    redirect(isAdmin ? ROUTES.adminHome : ROUTES.signIn);
+  }
 
-  // Sync clerkUserId and mark as joined on first visit
-  if (!creator.clerkUserId) {
+  if (!creator.clerkUserId || creator.status === "approved_not_joined") {
     await db
       .update(creators)
       .set({
         clerkUserId: userId,
         status: "joined",
-        joinedAt: new Date(),
+        joinedAt: creator.joinedAt ?? new Date(),
       })
       .where(eq(creators.id, creator.id));
   }

@@ -1,14 +1,28 @@
 "use server";
 
-import { auth } from "@clerk/nextjs/server";
+import { auth, clerkClient } from "@clerk/nextjs/server";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { creators } from "@/db/schema";
+import { toActionError } from "@/shared/lib/action-error";
 import { db } from "@/shared/lib/db";
 
 const schema = z.object({
   creatorId: z.string().uuid(),
+  // Steps 1-2
+  fullName: z.string().min(1),
+  country: z.string().min(1),
+  languages: z.array(z.string()).min(1),
+  socialChannels: z
+    .object({
+      instagram_handle: z.string().optional(),
+      tiktok_handle: z.string().optional(),
+      youtube_handle: z.string().optional(),
+    })
+    .optional(),
+  portfolioUrl: z.string().url().optional().or(z.literal("")),
+  // Steps 3-9
   ugcCategories: z.array(z.string()).min(1),
   contentFormats: z.array(z.string()).min(1),
   profilePhoto: z.string().url().optional(),
@@ -19,25 +33,45 @@ const schema = z.object({
 });
 
 export async function completeFullProfile(input: z.infer<typeof schema>) {
-  const { userId } = await auth();
-  if (!userId) throw new Error("Unauthorized");
+  try {
+    const { userId } = await auth();
+    if (!userId) throw new Error("Unauthorized");
 
-  const validated = schema.parse(input);
+    const validated = schema.parse(input);
 
-  await db
-    .update(creators)
-    .set({
-      ugcCategories: validated.ugcCategories,
-      contentFormats: validated.contentFormats,
-      profilePhoto: validated.profilePhoto ?? null,
-      rateRangeSelf: validated.rateRangeSelf ?? null,
-      genderIdentity: validated.genderIdentity ?? null,
-      ageDemographic: validated.ageDemographic ?? null,
-      ethnicity: validated.ethnicity ?? null,
-      profileCompleted: true,
-      profileCompletedAt: new Date(),
-    })
-    .where(eq(creators.id, validated.creatorId));
+    const record = await db.query.creators.findFirst({
+      where: eq(creators.id, validated.creatorId),
+      columns: { clerkUserId: true, email: true },
+    });
 
-  revalidatePath("/creator");
+    const clerkUser = await (await clerkClient()).users.getUser(userId);
+    const userEmail = clerkUser.primaryEmailAddress?.emailAddress;
+    const isOwner = record?.clerkUserId === userId || record?.email === userEmail;
+    if (!isOwner) throw new Error("Forbidden — you don't own this profile");
+
+    await db
+      .update(creators)
+      .set({
+        fullName: validated.fullName,
+        country: validated.country,
+        // DB stores languages as { language, accent? } objects; wizard sends string[]
+        languages: validated.languages.map((l) => ({ language: l })),
+        socialChannels: validated.socialChannels,
+        portfolioUrl: validated.portfolioUrl || null,
+        ugcCategories: validated.ugcCategories,
+        contentFormats: validated.contentFormats,
+        profilePhoto: validated.profilePhoto ?? null,
+        rateRangeSelf: validated.rateRangeSelf ?? null,
+        genderIdentity: validated.genderIdentity ?? null,
+        ageDemographic: validated.ageDemographic ?? null,
+        ethnicity: validated.ethnicity ?? null,
+        profileCompleted: true,
+        profileCompletedAt: new Date(),
+      })
+      .where(eq(creators.id, validated.creatorId));
+
+    revalidatePath("/creator");
+  } catch (err) {
+    throw toActionError(err);
+  }
 }

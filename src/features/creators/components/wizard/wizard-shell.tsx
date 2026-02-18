@@ -4,7 +4,6 @@ import { useState, useTransition } from "react";
 import { Button } from "@/shared/components/ui/button";
 import { Dialog, DialogContent } from "@/shared/components/ui/dialog";
 import { completeFullProfile } from "../../actions/complete-full-profile";
-import { completeMinimalProfile } from "../../actions/complete-minimal-profile";
 import { Step1BasicInfo } from "./steps/step-1-basic-info";
 import { Step2Socials } from "./steps/step-2-socials";
 import { Step3Categories } from "./steps/step-3-categories";
@@ -22,12 +21,14 @@ import {
   type WizardData,
 } from "./wizard-types";
 
+const TOTAL_STEPS = 9;
+
 function ProgressDots({ current, total }: { current: number; total: number }) {
   return (
     <div className="flex items-center gap-1.5">
       {Array.from({ length: total }, (_, i) => (
         <div
-          key={current}
+          key={`progress-dot-${i + 1}`}
           className={`h-1.5 rounded-full transition-all duration-200 ${
             i + 1 < current
               ? "w-3 bg-foreground"
@@ -66,47 +67,36 @@ function stepContent(step: number, data: WizardData, onChange: (u: Partial<Wizar
   }
 }
 
-export function WizardShell({ creator, onComplete, onClose }: ProfileWizardProps) {
-  // "Onboarding" phase: steps 1–2, submitted for review before approval.
-  // Direct invites bypass this and go straight to the full 9-step wizard.
-  const isOnboarding = !creator.minimalProfileCompleted && creator.source !== "direct_invite";
-  const totalSteps = isOnboarding ? 2 : 9;
-
+export function WizardShell({ creator, initialData, onComplete, onClose }: ProfileWizardProps) {
   const [step, setStep] = useState(1);
-  const [data, setData] = useState<WizardData>(INITIAL_WIZARD_DATA);
+  const [data, setData] = useState<WizardData>({ ...INITIAL_WIZARD_DATA, ...initialData });
   const [isPending, startTransition] = useTransition();
 
   const update = (updates: Partial<WizardData>) => setData((prev) => ({ ...prev, ...updates }));
-  const isLast = step === totalSteps;
+  const isLast = step === TOTAL_STEPS;
   const tip = STEP_TIPS[step];
 
   const handleSubmit = () => {
     startTransition(async () => {
-      if (isOnboarding) {
-        await completeMinimalProfile({
-          creatorId: creator.id,
-          fullName: data.fullName,
-          country: data.country,
-          languages: data.languages,
-          socialChannels: {
-            instagram_handle: data.instagramHandle || undefined,
-            tiktok_handle: data.tiktokHandle || undefined,
-            youtube_handle: data.youtubeHandle || undefined,
-          },
-          portfolioUrl: data.portfolioUrl || undefined,
-        });
-      } else {
-        await completeFullProfile({
-          creatorId: creator.id,
-          ugcCategories: data.ugcCategories,
-          contentFormats: data.contentFormats,
-          profilePhoto: data.profilePhoto || undefined,
-          rateRangeSelf: data.rateRangeSelf ?? undefined,
-          genderIdentity: data.genderIdentity || undefined,
-          ageDemographic: data.ageDemographic || undefined,
-          ethnicity: data.ethnicity || undefined,
-        });
-      }
+      await completeFullProfile({
+        creatorId: creator.id,
+        fullName: data.fullName,
+        country: data.country,
+        languages: data.languages,
+        socialChannels: {
+          instagram_handle: data.instagramHandle || undefined,
+          tiktok_handle: data.tiktokHandle || undefined,
+          youtube_handle: data.youtubeHandle || undefined,
+        },
+        portfolioUrl: data.portfolioUrl || undefined,
+        ugcCategories: data.ugcCategories,
+        contentFormats: data.contentFormats,
+        profilePhoto: data.profilePhoto || undefined,
+        rateRangeSelf: data.rateRangeSelf ?? undefined,
+        genderIdentity: data.genderIdentity || undefined,
+        ageDemographic: data.ageDemographic || undefined,
+        ethnicity: data.ethnicity || undefined,
+      });
       onComplete();
     });
   };
@@ -117,17 +107,22 @@ export function WizardShell({ creator, onComplete, onClose }: ProfileWizardProps
   };
 
   return (
-    <Dialog open onOpenChange={(open) => { if (!open) onClose(); }}>
+    <Dialog
+      open
+      onOpenChange={(open) => {
+        if (!open) onClose();
+      }}
+    >
       <DialogContent className="flex max-h-[90vh] w-full max-w-2xl flex-col gap-0 overflow-hidden p-0">
         {/* Header */}
         <div className="flex items-center justify-between border-b px-6 py-4">
           <div>
             <p className="text-muted-foreground text-xs uppercase tracking-widest">
-              Step {step} of {totalSteps}
+              Step {step} of {TOTAL_STEPS}
             </p>
             <h2 className="text-base font-semibold">{STEP_TITLES[step]}</h2>
           </div>
-          <ProgressDots current={step} total={totalSteps} />
+          <ProgressDots current={step} total={TOTAL_STEPS} />
         </div>
 
         {/* Body */}

@@ -44,12 +44,11 @@ export const INITIAL_WIZARD_DATA: WizardData = {
 
 export interface CreatorForWizard {
   id: string;
-  source: "applicant" | "direct_invite" | "submission_link" | null;
-  minimalProfileCompleted: boolean;
 }
 
 export interface ProfileWizardProps {
   creator: CreatorForWizard;
+  initialData?: Partial<WizardData>;
   onComplete: () => void;
   onClose: () => void;
 }

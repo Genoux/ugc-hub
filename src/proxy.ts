@@ -1,13 +1,14 @@
 import { clerkClient, clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { type NextRequest, NextResponse } from "next/server";
 import { rateLimit } from "@/shared/lib/rate-limit";
+import { ROUTES } from "@/shared/lib/routes";
 
 const ALLOWED_DOMAIN = process.env.ALLOWED_DOMAIN;
 if (!ALLOWED_DOMAIN) {
   throw new Error("ALLOWED_DOMAIN is not set");
 }
 
-const isPublicRoute = createRouteMatcher(["/sign-in(.*)", "/sign-up(.*)", "/", "/unauthorized"]);
+const isPublicRoute = createRouteMatcher(["/sign-in(.*)", "/sign-up(.*)", "/"]);
 
 const isPlatformRoute = createRouteMatcher([
   "/submissions(.*)",
@@ -18,7 +19,7 @@ const isPlatformRoute = createRouteMatcher([
   "/api/live(.*)",
 ]);
 
-const isCreatorRoute = createRouteMatcher(["/creator(.*)"]);
+const isCreatorRoute = createRouteMatcher(["/creator(.*)", "/submit(.*)"]);
 
 const rateLimitedRoutes = [
   "/api/uploads/presign",
@@ -59,15 +60,16 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
 
     const { userId } = await auth();
     if (!userId) {
-      return NextResponse.redirect(new URL("/sign-in", req.url));
+      return NextResponse.redirect(new URL(ROUTES.signIn, req.url));
     }
 
     const client = await clerkClient();
     const user = await client.users.getUser(userId);
     const email = user.primaryEmailAddress?.emailAddress ?? "";
 
+    // Non-admin trying to access platform routes gets redirected to creator portal
     if (!email.toLowerCase().endsWith(`@${ALLOWED_DOMAIN}`)) {
-      return NextResponse.redirect(new URL("/creator", req.url));
+      return NextResponse.redirect(new URL(ROUTES.creatorHome, req.url));
     }
   }
 

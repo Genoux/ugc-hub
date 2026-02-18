@@ -1,15 +1,14 @@
 "use server";
 
-import { auth } from "@clerk/nextjs/server";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { creators } from "@/db/schema";
+import { requireAdmin } from "@/shared/lib/auth";
 import { db } from "@/shared/lib/db";
 import { rejectApplicantSchema } from "../schemas";
 
 export async function rejectApplicant(creatorId: string) {
-  const { userId } = await auth();
-  if (!userId) throw new Error("Unauthorized");
+  await requireAdmin();
 
   const input = rejectApplicantSchema.parse({ creatorId });
 

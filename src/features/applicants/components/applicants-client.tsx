@@ -8,15 +8,10 @@ import type { Creator } from "@/features/applicants/types";
 import { Button } from "@/shared/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/shared/components/ui/tooltip";
 
-type TabKey = "applicant" | "profile_review" | "approved_not_joined" | "rejected";
+type TabKey = "applicant" | "approved_not_joined" | "rejected";
 
 const TABS: { key: TabKey; label: string; tooltip: string }[] = [
   { key: "applicant", label: "New", tooltip: "New applicants waiting for approval" },
-  {
-    key: "profile_review",
-    label: "Profile Review",
-    tooltip: "Creators who submitted their minimal profile and are waiting for review",
-  },
   {
     key: "approved_not_joined",
     label: "Not joined",
@@ -37,10 +32,6 @@ export function ApplicantsClient({ initialCreators }: Props) {
     switch (activeTab) {
       case "applicant":
         return initialCreators.filter((c) => c.status === "applicant");
-      case "profile_review":
-        return initialCreators.filter(
-          (c) => c.status === "under_review" && c.profileReviewStatus === "pending",
-        );
       case "approved_not_joined":
         return initialCreators.filter((c) => c.status === "approved_not_joined");
       case "rejected":
@@ -51,9 +42,6 @@ export function ApplicantsClient({ initialCreators }: Props) {
   const counts = useMemo(
     () => ({
       applicant: initialCreators.filter((c) => c.status === "applicant").length,
-      profile_review: initialCreators.filter(
-        (c) => c.status === "under_review" && c.profileReviewStatus === "pending",
-      ).length,
       approved_not_joined: initialCreators.filter((c) => c.status === "approved_not_joined").length,
       rejected: initialCreators.filter((c) => c.status === "rejected").length,
     }),
@@ -110,11 +98,6 @@ export function ApplicantsClient({ initialCreators }: Props) {
               Creators that were invited but still haven't completed their profiles.
             </p>
           )}
-          {activeTab === "profile_review" && (
-            <p className="text-xs text-muted-foreground mb-3 px-1">
-              Creators who submitted their basic profile — review and approve or decline.
-            </p>
-          )}
 
           <ApplicantList
             creators={filtered}
@@ -127,7 +110,7 @@ export function ApplicantsClient({ initialCreators }: Props) {
           {selected ? (
             <ApplicantDetail
               creator={selected}
-              activeTab={activeTab === "profile_review" ? "profile_review" : selected.status}
+              activeTab={selected.status}
             />
           ) : (
             <div className="flex h-full items-center justify-center text-muted-foreground text-sm">

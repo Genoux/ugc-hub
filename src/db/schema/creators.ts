@@ -3,7 +3,6 @@ import { boolean, jsonb, pgEnum, pgTable, text, timestamp, uuid } from "drizzle-
 export const creatorStatusEnum = pgEnum("creator_status", [
   "applicant",
   "approved_not_joined",
-  "under_review",
   "joined",
   "rejected",
   "blacklisted",
@@ -19,17 +18,15 @@ export const creators = pgTable("creators", {
   status: creatorStatusEnum("status").notNull().default("applicant"),
   source: text("source").$type<"applicant" | "direct_invite" | "submission_link">(),
   profileCompleted: boolean("profile_completed").notNull().default(false),
-  minimalProfileCompleted: boolean("minimal_profile_completed").notNull().default(false),
-  profileReviewStatus: text("profile_review_status").$type<"pending" | "approved" | "declined">(),
 
-  // Basic info (Steps 1-2: Minimal wizard)
+  // Basic info (Steps 1-2)
   fullName: text("full_name").notNull(),
   email: text("email").notNull().unique(),
   country: text("country"),
   languages: jsonb("languages").$type<Array<{ language: string; accent?: string }>>(),
   portfolioUrl: text("portfolio_url"),
 
-  // Social channels (Steps 1-2)
+  // Social channels
   socialChannels: jsonb("social_channels").$type<{
     instagram_handle?: string;
     tiktok_handle?: string;
@@ -37,7 +34,7 @@ export const creators = pgTable("creators", {
     other_links?: string[];
   }>(),
 
-  // Full profile (Steps 3-9: Complete profile)
+  // Full profile (Steps 3-9)
   profilePhoto: text("profile_photo"),
   genderIdentity: text("gender_identity"),
   ageDemographic: text("age_demographic"),
@@ -84,6 +81,7 @@ export const creators = pgTable("creators", {
 
   // Timestamps
   appliedAt: timestamp("applied_at").notNull().defaultNow(),
+  invitedAt: timestamp("invited_at"),
   approvedAt: timestamp("approved_at"),
   joinedAt: timestamp("joined_at"),
   profileCompletedAt: timestamp("profile_completed_at"),

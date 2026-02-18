@@ -1,70 +1,59 @@
 "use server";
 
-import { auth, clerkClient } from "@clerk/nextjs/server";
-import { isClerkAPIResponseError } from "@clerk/nextjs/errors";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { creators } from "@/db/schema";
+import { requireAdmin } from "@/shared/lib/auth";
+import { sendInvitation } from "@/shared/lib/clerk";
 import { db } from "@/shared/lib/db";
+import { ROUTES } from "@/shared/lib/routes";
 import { directInviteSchema } from "../schemas";
 
 export async function directInvite(input: { email: string }) {
-  const { userId } = await auth();
-  if (!userId) throw new Error("Unauthorized");
+  await requireAdmin();
 
   const validated = directInviteSchema.parse(input);
 
   const existing = await db.query.creators.findFirst({
     where: eq(creators.email, validated.email),
-    columns: { id: true, status: true },
+    columns: { id: true },
   });
 
-  let creatorId: string;
-
   if (existing) {
-    if (existing.status === "joined") {
-      return { success: false, error: "already_registered" as const };
-    }
-    creatorId = existing.id;
-    await db
-      .update(creators)
-      .set({ status: "approved_not_joined", source: "direct_invite", profileReviewStatus: "approved", approvedAt: new Date() })
-      .where(eq(creators.id, existing.id));
-  } else {
-    const [newCreator] = await db
-      .insert(creators)
-      .values({
-        email: validated.email,
-        fullName: validated.email.split("@")[0],
-        status: "approved_not_joined",
-        source: "direct_invite",
-        profileReviewStatus: "approved",
-        approvedAt: new Date(),
-      })
-      .returning();
-
-    if (!newCreator) throw new Error("Insert failed");
-    creatorId = newCreator.id;
+    return { success: false, error: "already_exists" as const };
   }
 
-  // Send Clerk invitation — if the user already has a Clerk account they'll
-  // just sign in and the layout will match them by email automatically.
-  const client = await clerkClient();
+  const [newCreator] = await db
+    .insert(creators)
+    .values({
+      email: validated.email,
+      fullName: validated.email.split("@")[0],
+      status: "approved_not_joined",
+      source: "direct_invite",
+      approvedAt: new Date(),
+      invitedAt: new Date(),
+    })
+    .returning();
+
+  if (!newCreator) throw new Error("Insert failed");
+
+  const rollback = () => db.delete(creators).where(eq(creators.id, newCreator.id));
+
+  let result: Awaited<ReturnType<typeof sendInvitation>>;
   try {
-    await client.invitations.createInvitation({
-      emailAddress: validated.email,
-      publicMetadata: { role: "creator", creatorId },
-      redirectUrl: `${process.env.NEXT_PUBLIC_APP_URL}/creator`,
-      ignoreExisting: true,
-    });
+    result = await sendInvitation(
+      validated.email,
+      `${process.env.NEXT_PUBLIC_APP_URL}${ROUTES.signUp}`,
+      { role: "creator", creatorId: newCreator.id },
+    );
   } catch (err) {
-    if (isClerkAPIResponseError(err) && err.status === 422) {
-      if (!existing) {
-        await db.delete(creators).where(eq(creators.id, creatorId));
-      }
-      return { success: false, error: "already_invited_or_exists" as const };
-    }
+    await rollback();
     throw err;
+  }
+
+  if (!result.ok) {
+    await rollback();
+    return { success: false, error: "already_invited_or_exists" as const };
   }
 
   revalidatePath("/applicants");

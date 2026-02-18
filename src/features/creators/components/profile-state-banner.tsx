@@ -10,19 +10,11 @@ interface ProfileStateBannerProps {
 }
 
 const BANNER_CONFIG = {
-  onboarding: {
-    message: "Complete your profile to submit your application.",
-    cta: "Complete profile",
+  pending_approval: {
+    message: "Your application is pending admin review — we'll notify you once approved.",
   },
-  direct_invite_pending: {
+  pending_profile: {
     message: "Complete your profile to go live in the creator database.",
-    cta: "Complete profile",
-  },
-  under_review: {
-    message: "Your profile is under review — we'll notify you within 1–3 business days.",
-  },
-  approved_incomplete: {
-    message: "You've been approved! Complete your full profile to go live.",
     cta: "Complete profile",
   },
   live: {
@@ -32,11 +24,10 @@ const BANNER_CONFIG = {
     variant: "destructive" as const,
     message: "Your application was not approved at this time.",
   },
-} satisfies Partial<Record<CreatorUIState, { variant?: "default" | "destructive"; message: string; cta?: string }>>;
+} satisfies Record<CreatorUIState, { variant?: "default" | "destructive"; message: string; cta?: string }>;
 
 export function ProfileStateBanner({ uiState, onOpenWizard }: ProfileStateBannerProps) {
-  const config = BANNER_CONFIG[uiState as keyof typeof BANNER_CONFIG];
-  if (!config) return null;
+  const config = BANNER_CONFIG[uiState];
 
   return (
     <Alert variant={"variant" in config ? config.variant : "default"}>

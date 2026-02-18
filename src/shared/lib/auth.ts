@@ -1,4 +1,4 @@
-import { auth } from "@clerk/nextjs/server";
+import { auth, clerkClient } from "@clerk/nextjs/server";
 import { cache } from "react";
 
 export const getCurrentUser = cache(async () => {
@@ -7,17 +7,14 @@ export const getCurrentUser = cache(async () => {
   return { id: userId };
 });
 
-export const isCreator = cache(async () => {
-  const { sessionClaims } = await auth();
-  return sessionClaims?.metadata?.role === "creator";
-});
-
-export const getCreatorProfile = cache(async () => {
-  const { userId, sessionClaims } = await auth();
-  if (!userId) return null;
-
-  const creatorId = sessionClaims?.metadata?.creatorId;
-  if (!creatorId) return null;
-
-  return { creatorId, userId };
+export const requireAdmin = cache(async () => {
+  const { userId } = await auth();
+  if (!userId) throw new Error("Unauthorized");
+  const client = await clerkClient();
+  const user = await client.users.getUser(userId);
+  const email = user.primaryEmailAddress?.emailAddress ?? "";
+  if (!email.toLowerCase().endsWith(`@${process.env.ALLOWED_DOMAIN}`)) {
+    throw new Error("Forbidden");
+  }
+  return { userId };
 });

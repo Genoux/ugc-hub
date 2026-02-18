@@ -4,13 +4,13 @@ import { Check, Copy, ExternalLink, Globe, Instagram, Mail } from "lucide-react"
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import type { Creator } from "@/features/applicants/types";
-import { approveProfileReview, declineProfileReview } from "@/features/creators/actions/review-profile";
 import { Button } from "@/shared/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/shared/components/ui/tooltip";
 import { approveApplicant } from "../actions/approve-applicant";
 import { rejectApplicant } from "../actions/reject-applicant";
+import { reinviteCreator } from "../actions/reinvite-creator";
 
-type ActiveTab = Creator["status"] | "profile_review";
+type ActiveTab = Creator["status"];
 
 interface Props {
   creator: Creator;
@@ -124,30 +124,19 @@ export function ApplicantDetail({ creator, activeTab }: Props) {
     });
   };
 
-  const handleApproveReview = () => {
+  const handleReinvite = () => {
     startTransition(async () => {
       try {
-        await approveProfileReview(creator.id);
-        toast.success("Profile approved");
+        await reinviteCreator(creator.id);
+        toast.success("Invitation resent");
       } catch (error) {
-        toast.error(error instanceof Error ? error.message : "Failed to approve profile");
+        toast.error(error instanceof Error ? error.message : "Failed to resend invitation");
       }
     });
   };
 
-  const handleDeclineReview = () => {
-    startTransition(async () => {
-      try {
-        await declineProfileReview(creator.id);
-        toast.success("Profile declined");
-      } catch (error) {
-        toast.error(error instanceof Error ? error.message : "Failed to decline profile");
-      }
-    });
-  };
-
-  const showApproveActions = activeTab === "applicant" || activeTab === "under_review";
-  const showProfileReviewActions = activeTab === "profile_review";
+  const showApproveActions = activeTab === "applicant";
+  const showResendAction = activeTab === "approved_not_joined";
   const showReinviteAction = activeTab === "rejected";
 
   const socialChannels = creator.socialChannels as {
@@ -230,6 +219,24 @@ export function ApplicantDetail({ creator, activeTab }: Props) {
           </div>
         )}
 
+        {showResendAction && (
+          <div className="mt-6 pt-4 border-t border-border">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  onClick={handleReinvite}
+                  disabled={isPending}
+                  variant="outline"
+                  className="w-full h-12"
+                >
+                  {isPending ? "Sending..." : "Resend Invitation"}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Resend the Clerk invitation email</TooltipContent>
+            </Tooltip>
+          </div>
+        )}
+
         {showReinviteAction && (
           <div className="mt-6 pt-4 border-t border-border">
             <Tooltip>
@@ -244,32 +251,6 @@ export function ApplicantDetail({ creator, activeTab }: Props) {
                 </Button>
               </TooltipTrigger>
               <TooltipContent>Re-invite this creator to the pool</TooltipContent>
-            </Tooltip>
-          </div>
-        )}
-
-        {showProfileReviewActions && (
-          <div className="mt-6 pt-4 border-t border-border flex gap-3">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button onClick={handleApproveReview} disabled={isPending} className="flex-1 h-12">
-                  Approve Profile
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Approve minimal profile and unlock full profile wizard</TooltipContent>
-            </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  onClick={handleDeclineReview}
-                  disabled={isPending}
-                  variant="outline"
-                  className="flex-1 h-12 hover:bg-destructive hover:text-destructive-foreground hover:border-destructive"
-                >
-                  Decline
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Decline this creator's application</TooltipContent>
             </Tooltip>
           </div>
         )}

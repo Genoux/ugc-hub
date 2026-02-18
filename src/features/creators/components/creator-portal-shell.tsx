@@ -20,13 +20,24 @@ interface CreatorPortalShellProps {
 }
 
 export function CreatorPortalShell({ creator, uiState }: CreatorPortalShellProps) {
-  const [wizardOpen, setWizardOpen] = useState(
-    uiState === "onboarding" || uiState === "direct_invite_pending",
-  );
+  const [wizardOpen, setWizardOpen] = useState(uiState === "pending_profile");
 
   const handleWizardComplete = () => {
     // Re-fetch server state after wizard completes
     window.location.reload();
+  };
+
+  // Pre-fill steps 1-2 from existing DB record (set when creator applied via form)
+  const initialData = {
+    fullName: creator.fullName ?? "",
+    country: creator.country ?? "",
+    languages: Array.isArray(creator.languages)
+      ? (creator.languages as Array<{ language: string }>).map((l) => l.language)
+      : [],
+    instagramHandle: (creator.socialChannels as { instagram_handle?: string } | null)?.instagram_handle ?? "",
+    tiktokHandle: (creator.socialChannels as { tiktok_handle?: string } | null)?.tiktok_handle ?? "",
+    youtubeHandle: (creator.socialChannels as { youtube_handle?: string } | null)?.youtube_handle ?? "",
+    portfolioUrl: creator.portfolioUrl ?? "",
   };
 
   return (
@@ -34,13 +45,7 @@ export function CreatorPortalShell({ creator, uiState }: CreatorPortalShellProps
       <div className="mx-auto w-full max-w-3xl space-y-4">
         <ProfileStateBanner
           uiState={uiState}
-          onOpenWizard={
-            uiState === "onboarding" ||
-            uiState === "direct_invite_pending" ||
-            uiState === "approved_incomplete"
-              ? () => setWizardOpen(true)
-              : undefined
-          }
+          onOpenWizard={uiState === "pending_profile" ? () => setWizardOpen(true) : undefined}
         />
 
         <Tabs defaultValue="profile">
@@ -139,6 +144,7 @@ export function CreatorPortalShell({ creator, uiState }: CreatorPortalShellProps
       {wizardOpen && (
         <ProfileWizard
           creator={creator}
+          initialData={initialData}
           onComplete={handleWizardComplete}
           onClose={() => setWizardOpen(false)}
         />
