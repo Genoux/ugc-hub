@@ -1,18 +1,15 @@
-//TODO: Update this to use update neon DB shema
-
 "use client";
 
-import { useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef } from "react";
 
 const RECONNECT_DELAY_MS = 2000;
 const MAX_RECONNECT_ATTEMPTS = 5;
 
 export function useRealtimeSubmissions() {
-  const queryClient = useQueryClient();
+  const router = useRouter();
   const reconnectAttempts = useRef(0);
   const mounted = useRef(true);
-
   const eventSourceRef = useRef<EventSource | null>(null);
   const reconnectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -33,13 +30,8 @@ export function useRealtimeSubmissions() {
         try {
           const data = JSON.parse(event.data);
           if (data.type === "submission_created" || data.type === "submission_updated") {
-            // Invalidate queries to refetch in background
-            queryClient.invalidateQueries({ queryKey: ["submissions"] });
-            if (data.payload?.submission_id) {
-              queryClient.invalidateQueries({
-                queryKey: ["submission", data.payload.submission_id],
-              });
-            }
+            // Re-run the server component to get fresh data
+            router.refresh();
           }
         } catch {
           // ignore parse errors
@@ -65,5 +57,5 @@ export function useRealtimeSubmissions() {
       eventSourceRef.current?.close();
       eventSourceRef.current = null;
     };
-  }, [queryClient]);
+  }, [router]);
 }

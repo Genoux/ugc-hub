@@ -9,17 +9,20 @@ import {
   CardTitle,
 } from "@/shared/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
+import type { CreatorContent } from "../actions/get-creator-content";
 import type { CreatorUIState } from "../lib/get-creator-ui-state";
 import type { Creator } from "../types";
+import { CreatorContentTab } from "./creator-content-tab";
 import { ProfileStateBanner } from "./profile-state-banner";
 import { ProfileWizard } from "./wizard";
 
 interface CreatorPortalShellProps {
   creator: Creator;
   uiState: CreatorUIState;
+  content: CreatorContent;
 }
 
-export function CreatorPortalShell({ creator, uiState }: CreatorPortalShellProps) {
+export function CreatorPortalShell({ creator, uiState, content }: CreatorPortalShellProps) {
   const [wizardOpen, setWizardOpen] = useState(uiState === "pending_profile");
 
   const handleWizardComplete = () => {
@@ -131,11 +134,11 @@ export function CreatorPortalShell({ creator, uiState }: CreatorPortalShellProps
             <Card>
               <CardHeader>
                 <CardTitle className="text-base">Content Submissions</CardTitle>
-                <CardDescription>
-                  Projects you've submitted content for will appear here.
-                </CardDescription>
+                <CardDescription>Assets you've submitted across all projects.</CardDescription>
               </CardHeader>
-              <CardContent />
+              <CardContent>
+                <CreatorContentTab content={content} />
+              </CardContent>
             </Card>
           </TabsContent>
         </Tabs>

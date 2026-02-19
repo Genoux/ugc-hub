@@ -74,7 +74,12 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
   }
 
   if (isCreatorRoute(req)) {
-    await auth.protect();
+    const { userId } = await auth();
+    if (!userId) {
+      const signInUrl = new URL(ROUTES.signIn, req.url);
+      signInUrl.searchParams.set("redirect_url", req.nextUrl.pathname);
+      return NextResponse.redirect(signInUrl);
+    }
   }
 });
 

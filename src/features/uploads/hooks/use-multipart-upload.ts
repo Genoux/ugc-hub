@@ -42,7 +42,7 @@ export function useMultipartUpload() {
         throw new Error("Failed to get upload URL");
       }
 
-      const { uploadUrl, key, isMultipart, uploadId } = await presignResponse.json();
+      const { uploadUrl, key, isMultipart, uploadId, partUrls } = await presignResponse.json();
 
       setUploads((prev) => ({
         ...prev,
@@ -50,9 +50,9 @@ export function useMultipartUpload() {
       }));
 
       if (isMultipart) {
-        await uploadMultipart(file, key, uploadId, submissionId, creatorFolderId, batchId);
+        await uploadMultipart(file, key, uploadId, partUrls, batchId);
       } else {
-        await uploadSingle(file, uploadUrl, key, submissionId, creatorFolderId, batchId);
+        await uploadSingle(file, uploadUrl, key, batchId);
       }
 
       setUploads((prev) => ({
@@ -69,14 +69,7 @@ export function useMultipartUpload() {
     }
   }
 
-  async function uploadSingle(
-    file: File,
-    uploadUrl: string,
-    key: string,
-    submissionId: string,
-    creatorFolderId: string,
-    batchId: string,
-  ) {
+  async function uploadSingle(file: File, uploadUrl: string, key: string, batchId: string) {
     await fetch(uploadUrl, {
       method: "PUT",
       body: file,
@@ -88,7 +81,7 @@ export function useMultipartUpload() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         key,
-        submissionId: batchId, // Note: API expects batchId as submissionId for backward compat
+        submissionId: batchId,
         filename: file.name,
         mimeType: file.type,
         sizeBytes: file.size,
@@ -100,32 +93,23 @@ export function useMultipartUpload() {
     file: File,
     key: string,
     uploadId: string,
-    submissionId: string,
-    creatorFolderId: string,
+    partUrls: string[],
     batchId: string,
   ) {
     const chunkSize = UPLOAD_CONFIG.chunkSize;
-    const chunks = Math.ceil(file.size / chunkSize);
-    const parts: Array<{ PartNumber: number; ETag: string }> = [];
 
-    for (let i = 0; i < chunks; i++) {
-      const start = i * chunkSize;
-      const end = Math.min(start + chunkSize, file.size);
-      const chunk = file.slice(start, end);
+    // Upload all parts directly to R2 in parallel using presigned URLs
+    const parts = await Promise.all(
+      partUrls.map(async (partUrl, i) => {
+        const start = i * chunkSize;
+        const end = Math.min(start + chunkSize, file.size);
+        const chunk = file.slice(start, end);
 
-      const partNumber = i + 1;
-      const partUrl = `/api/uploads/part?uploadId=${uploadId}&key=${encodeURIComponent(key)}&partNumber=${partNumber}`;
-
-      const response = await fetch(partUrl, {
-        method: "PUT",
-        body: chunk,
-      });
-
-      const etag = response.headers.get("ETag");
-      if (etag) {
-        parts.push({ PartNumber: partNumber, ETag: etag.replace(/"/g, "") });
-      }
-    }
+        const response = await fetch(partUrl, { method: "PUT", body: chunk });
+        const etag = response.headers.get("ETag") ?? "";
+        return { PartNumber: i + 1, ETag: etag.replace(/"/g, "") };
+      }),
+    );
 
     await fetch("/api/uploads/complete", {
       method: "POST",
@@ -134,7 +118,7 @@ export function useMultipartUpload() {
         uploadId,
         key,
         parts,
-        submissionId: batchId, // Note: API expects batchId as submissionId for backward compat
+        submissionId: batchId,
         filename: file.name,
         mimeType: file.type,
         sizeBytes: file.size,

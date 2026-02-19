@@ -1,57 +1,46 @@
 "use client";
 
-import { useState } from "react";
+import Image from "next/image";
 import { Button } from "@/shared/components/ui/button";
-import { Input } from "@/shared/components/ui/input";
-import { Label } from "@/shared/components/ui/label";
 import { useWizardState } from "../hooks/use-wizard-state";
-import type { WizardStepOne as WizardStepOneData } from "../schemas";
 
-export function WizardStepOne() {
-  const { setStepOneData, setStep } = useWizardState();
-  const [formData, setFormData] = useState<WizardStepOneData>({
-    creatorName: "",
-    creatorEmail: "",
-  });
+interface WizardStepOneProps {
+  creatorName: string;
+  creatorEmail: string;
+  creatorImageUrl: string | null;
+}
 
-  function handleSubmit(e: React.SyntheticEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setStepOneData(formData);
-    setStep(2);
-  }
+export function WizardStepOne({ creatorName, creatorEmail, creatorImageUrl }: WizardStepOneProps) {
+  const { setStep } = useWizardState();
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="space-y-2">
-        <Label htmlFor="name">
-          Name <span className="text-destructive">*</span>
-        </Label>
-        <Input
-          id="name"
-          required
-          value={formData.creatorName}
-          onChange={(e) => setFormData({ ...formData, creatorName: e.target.value })}
-          placeholder="Your name"
-        />
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-base font-semibold">Submitting as</h2>
+        <p className="text-sm text-muted-foreground mt-0.5">
+          Your assets will be linked to this account.
+        </p>
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="email">
-          Email <span className="text-destructive">*</span>
-        </Label>
-        <Input
-          type="email"
-          id="email"
-          required
-          value={formData.creatorEmail}
-          onChange={(e) => setFormData({ ...formData, creatorEmail: e.target.value })}
-          placeholder="your@email.com"
-        />
+      <div className="flex items-center gap-4 rounded-lg border bg-muted/40 px-4 py-3">
+        <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full bg-muted">
+          {creatorImageUrl ? (
+            <Image src={creatorImageUrl} alt={creatorName} fill className="object-cover" />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center text-lg font-medium text-muted-foreground">
+              {creatorName[0]}
+            </div>
+          )}
+        </div>
+        <div className="min-w-0">
+          <p className="font-medium text-foreground truncate">{creatorName}</p>
+          <p className="text-sm text-muted-foreground truncate">{creatorEmail}</p>
+        </div>
       </div>
 
-      <Button type="submit" className="w-full">
-        Next
+      <Button type="button" className="w-full" onClick={() => setStep(2)}>
+        Continue
       </Button>
-    </form>
+    </div>
   );
 }

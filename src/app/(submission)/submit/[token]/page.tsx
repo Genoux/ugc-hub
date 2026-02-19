@@ -115,11 +115,16 @@ export default async function SubmitPage({ params }: { params: Promise<{ token: 
     );
   }
 
-  // Approved but profile not complete → redirect to finish onboarding
-  if (!creator.profileCompleted) {
-    redirect(ROUTES.creatorHome);
-  }
-
-  // Approved + profile complete → upload wizard
-  return <WizardShell token={token} submissionName={submission.name} />;
+  // Approved (joined or approved_not_joined) → allow upload; profile completion not required
+  // TODO: Use either profile photo or imageUrl from clerkUser
+  return (
+    <WizardShell
+      token={token}
+      submissionName={submission.name}
+      creatorId={creator.id}
+      creatorName={creator.fullName}
+      creatorEmail={primaryEmail}
+      creatorImageUrl={creator.profilePhoto ?? clerkUser.imageUrl ?? null}
+    />
+  );
 }

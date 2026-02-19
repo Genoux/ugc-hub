@@ -1,8 +1,9 @@
 "use client";
 
-import { Check, ChevronLeft, Copy } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, Copy, Folder } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/shared/components/ui/tooltip";
 
@@ -22,13 +23,8 @@ type CreatorFolder = {
   };
   creatorSubmissions: Array<{
     id: string;
-    label: string;
     isNew: boolean;
-    deliveredAt: Date;
-    assets: Array<{
-      id: string;
-      filename: string;
-    }>;
+    assets: Array<{ id: string }>;
   }>;
 };
 
@@ -48,9 +44,15 @@ export function SubmissionDetailClient({
     setTimeout(() => setCopiedToken(false), 2000);
   }
 
+  const totalNew = folders.reduce(
+    (s, f) => s + f.creatorSubmissions.filter((b) => b.isNew).length,
+    0,
+  );
+
   return (
-    <div className="flex flex-1 flex-col gap-4 p-8">
-      <div className="flex items-center justify-between">
+    <div className="flex flex-1 flex-col gap-6 p-8">
+      {/* Header */}
+      <div className="flex items-start justify-between gap-4">
         <div className="flex flex-col gap-2">
           <Button variant="outline" size="sm" asChild className="w-fit">
             <Link href="/submissions">
@@ -59,7 +61,10 @@ export function SubmissionDetailClient({
             </Link>
           </Button>
           <div>
-            <h1 className="text-2xl font-semibold">{submission.name}</h1>
+            <div className="flex items-center gap-2">
+              <Folder className="h-5 w-5 text-muted-foreground" />
+              <h1 className="text-2xl font-semibold tracking-tight">{submission.name}</h1>
+            </div>
             {submission.description && (
               <p className="text-sm text-muted-foreground mt-1">{submission.description}</p>
             )}
@@ -67,7 +72,7 @@ export function SubmissionDetailClient({
         </div>
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button onClick={handleCopyToken} variant="outline" size="sm">
+            <Button onClick={handleCopyToken} variant="outline" size="sm" className="shrink-0">
               {copiedToken ? <Check className="size-4" /> : <Copy className="size-4" />}
               {copiedToken ? "Copied!" : "Copy Upload Link"}
             </Button>
@@ -78,55 +83,63 @@ export function SubmissionDetailClient({
         </Tooltip>
       </div>
 
-      <div className="flex flex-col gap-4 flex-1">
-        <h2 className="text-sm font-medium">Creator Folders ({folders.length})</h2>
+      {/* Creator list */}
+      <div className="flex flex-col gap-3">
+        <p className="text-sm text-muted-foreground">
+          {folders.length} creator{folders.length !== 1 ? "s" : ""}
+          {totalNew > 0 && ` · ${totalNew} new batch${totalNew !== 1 ? "es" : ""}`}
+        </p>
 
         {folders.length === 0 ? (
-          <div className="flex flex-col items-center justify-center gap-4 py-12 border rounded-lg">
-            <p className="text-sm text-muted-foreground">No creator uploads yet</p>
-            <p className="text-xs text-muted-foreground">
-              Share the upload link to start receiving content
-            </p>
+          <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed py-16 text-center">
+            <Folder className="h-8 w-8 text-muted-foreground/50" />
+            <div>
+              <p className="text-sm font-medium">No uploads yet</p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Share the upload link to start receiving content
+              </p>
+            </div>
           </div>
         ) : (
-          <div className="space-y-4">
-            {folders.map((folder) => (
-              <div key={folder.id} className="border rounded-lg p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <div>
-                    <p className="font-medium">{folder.creator.fullName}</p>
-                    <p className="text-xs text-muted-foreground">{folder.creator.email}</p>
+          <div className="space-y-2">
+            {folders.map((folder) => {
+              const newCount = folder.creatorSubmissions.filter((b) => b.isNew).length;
+              const totalFiles = folder.creatorSubmissions.reduce(
+                (s, b) => s + b.assets.length,
+                0,
+              );
+
+              return (
+                <Link
+                  key={folder.id}
+                  href={`/submissions/${submission.id}/creators/${folder.id}`}
+                  className="flex items-center justify-between rounded-xl border bg-card px-5 py-4 hover:bg-accent/40 transition-colors group"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted text-sm font-medium text-foreground">
+                      {folder.creator.fullName[0]}
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-foreground leading-none">
+                        {folder.creator.fullName}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-0.5">{folder.creator.email}</p>
+                    </div>
                   </div>
-                  <span className="text-xs text-muted-foreground">
-                    {folder.creatorSubmissions.length} batch(es)
-                  </span>
-                </div>
-                <div className="space-y-2">
-                  {folder.creatorSubmissions.map((batch) => (
-                    <Link
-                      key={batch.id}
-                      href={`/submissions/${submission.id}/submissions/${batch.id}`}
-                      className="flex items-center justify-between p-2 rounded hover:bg-accent/25 border"
-                    >
-                      <div className="flex items-center gap-3">
-                        <span className="text-sm font-medium">{batch.label}</span>
-                        {batch.isNew && (
-                          <span className="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">
-                            New
-                          </span>
-                        )}
-                        <span className="text-xs text-muted-foreground">
-                          {batch.assets.length} file(s)
-                        </span>
-                      </div>
-                      <span className="text-xs text-muted-foreground">
-                        {new Date(batch.deliveredAt).toLocaleDateString()}
-                      </span>
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            ))}
+                  <div className="flex items-center gap-3 shrink-0">
+                    {newCount > 0 && (
+                      <Badge className="bg-blue-100 text-blue-700 border-blue-200 hover:bg-blue-100">
+                        {newCount} new
+                      </Badge>
+                    )}
+                    <span className="text-xs text-muted-foreground">
+                      {folder.creatorSubmissions.length} batch{folder.creatorSubmissions.length !== 1 ? "es" : ""} · {totalFiles} file{totalFiles !== 1 ? "s" : ""}
+                    </span>
+                    <ChevronRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </div>
+                </Link>
+              );
+            })}
           </div>
         )}
       </div>

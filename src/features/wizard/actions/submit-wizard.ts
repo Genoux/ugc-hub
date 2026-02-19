@@ -1,14 +1,14 @@
 "use server";
 
-import { eq } from "drizzle-orm";
+import { auth } from "@clerk/nextjs/server";
+import { and, eq } from "drizzle-orm";
 import { creatorFolders, creatorSubmissions, creators, submissions } from "@/db/schema";
 import { db } from "@/shared/lib/db";
 
-export async function submitWizard(data: {
-  token: string;
-  creatorName: string;
-  creatorEmail: string;
-}) {
+export async function submitWizard(data: { token: string; creatorId: string }) {
+  const { userId } = await auth();
+  if (!userId) throw new Error("Unauthorized");
+
   const submission = await db.query.submissions.findFirst({
     where: eq(submissions.uploadToken, data.token),
   });
@@ -16,40 +16,39 @@ export async function submitWizard(data: {
   if (!submission) throw new Error("Submission not found");
   if (submission.status !== "active") throw new Error("Submission is not active");
 
-  let creator = await db.query.creators.findFirst({
-    where: eq(creators.email, data.creatorEmail),
-    columns: { id: true },
+  const creator = await db.query.creators.findFirst({
+    where: eq(creators.id, data.creatorId),
+    columns: { id: true, clerkUserId: true },
   });
 
-  if (!creator) {
+  if (!creator) throw new Error("Creator not found");
+  if (creator.clerkUserId !== userId) throw new Error("Forbidden");
+
+  // Reuse existing folder for this creator+project; create one on first submission
+  let folder = await db.query.creatorFolders.findFirst({
+    where: and(
+      eq(creatorFolders.submissionId, submission.id),
+      eq(creatorFolders.creatorId, creator.id),
+    ),
+    with: { creatorSubmissions: { columns: { batchNumber: true } } },
+  });
+
+  if (!folder) {
     const [inserted] = await db
-      .insert(creators)
-      .values({
-        email: data.creatorEmail,
-        fullName: data.creatorName,
-        source: "submission_link",
-        status: "applicant",
-      })
-      .returning({ id: creators.id });
-    if (!inserted) throw new Error("Failed to create creator");
-    creator = inserted;
+      .insert(creatorFolders)
+      .values({ submissionId: submission.id, creatorId: creator.id, collaborationStatus: "active" })
+      .returning();
+    folder = { ...inserted, creatorSubmissions: [] };
   }
 
-  const [folder] = await db
-    .insert(creatorFolders)
-    .values({
-      submissionId: submission.id,
-      creatorId: creator.id,
-      collaborationStatus: "active",
-    })
-    .returning();
+  const nextBatchNumber = folder.creatorSubmissions.length + 1;
 
   const [batch] = await db
     .insert(creatorSubmissions)
     .values({
       creatorFolderId: folder.id,
-      label: "Submission 1",
-      batchNumber: 1,
+      label: `Submission ${nextBatchNumber}`,
+      batchNumber: nextBatchNumber,
       isNew: true,
     })
     .returning();

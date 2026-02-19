@@ -1,7 +1,7 @@
 // Based on prototype ugc-hub-pool/src/data/creatorTypes.ts
 
 export const UGC_CATEGORIES = [
-  "Sport & Outdoors",
+  "Sports & Outdoors",
   "Lifestyle",
   "Beauty",
   "Selfcare & Wellness",
@@ -84,7 +84,23 @@ export const OVERALL_RATING_TIERS = [
 
 export type OverallRatingTier = (typeof OVERALL_RATING_TIERS)[number];
 
-export const CREATOR_STATUSES = ["untested", "active", "blacklisted"] as const;
+export const RATING_CONFIG: Record<string, { className: string }> = {
+  "top creator": { className: "bg-amber-100 text-amber-700 border-amber-200" },
+  standout: { className: "bg-emerald-100 text-emerald-700 border-emerald-200" },
+  good: { className: "bg-sky-100 text-sky-700 border-sky-200" },
+  sufficient: { className: "bg-slate-100 text-slate-600 border-slate-200" },
+  problematic: { className: "bg-orange-100 text-orange-600 border-orange-200" },
+  untested: { className: "bg-gray-50 text-gray-500 border-gray-200" },
+  blacklisted: { className: "bg-rose-100 text-rose-700 border-rose-200" },
+};
+
+export const CREATOR_STATUSES = [
+  "applicant",
+  "approved_not_joined",
+  "joined",
+  "rejected",
+  "blacklisted",
+] as const;
 
 export type CreatorDatabaseStatus = (typeof CREATOR_STATUSES)[number];
 

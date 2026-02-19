@@ -1,9 +1,11 @@
 "use client";
 
-import { X, ChevronLeft, ChevronRight } from "lucide-react";
-import { Button } from "@/shared/components/ui/button";
+import { ChevronLeft, ChevronRight, X } from "lucide-react";
+import Image from "next/image";
 import { Badge } from "@/shared/components/ui/badge";
+import { Button } from "@/shared/components/ui/button";
 import { Sheet, SheetContent, SheetHeader } from "@/shared/components/ui/sheet";
+import { RATING_CONFIG } from "../constants";
 import type { Creator } from "../schemas";
 
 interface CreatorOverlayProps {
@@ -13,30 +15,6 @@ interface CreatorOverlayProps {
   onPrev: () => void;
   onNext: () => void;
 }
-
-const RATING_CONFIG: Record<string, { className: string }> = {
-  "top creator": {
-    className: "bg-amber-100 text-amber-700 border-amber-200",
-  },
-  standout: {
-    className: "bg-emerald-100 text-emerald-700 border-emerald-200",
-  },
-  good: {
-    className: "bg-sky-100 text-sky-700 border-sky-200",
-  },
-  sufficient: {
-    className: "bg-slate-100 text-slate-600 border-slate-200",
-  },
-  problematic: {
-    className: "bg-orange-100 text-orange-600 border-orange-200",
-  },
-  untested: {
-    className: "bg-gray-50 text-gray-500 border-gray-200",
-  },
-  blacklisted: {
-    className: "bg-rose-100 text-rose-700 border-rose-200",
-  },
-};
 
 export function CreatorOverlay({
   creator,
@@ -57,9 +35,9 @@ export function CreatorOverlay({
     <Sheet open onOpenChange={onClose}>
       <SheetContent
         side="bottom"
-        className="h-[calc(100%-32px)] max-w-none w-full p-0 rounded-t-2xl"
+        className="h-[calc(100%-32px)] max-w-none w-full p-0 rounded-t-2xl gap-0 [&>button.absolute]:hidden"
       >
-        <SheetHeader className="sticky top-0 z-10 flex flex-row items-center justify-between border-b border-border bg-background px-6 py-4 space-y-0">
+        <SheetHeader className="shrink-0 flex flex-row items-center justify-between border-b border-border bg-background px-6 py-4">
           <div className="flex items-center gap-3">
             <Button
               variant="ghost"
@@ -85,19 +63,20 @@ export function CreatorOverlay({
           </Button>
         </SheetHeader>
 
-        <div className="overflow-y-auto h-full pb-8">
+        <div className="flex-1 min-h-0 overflow-y-auto pb-8">
           <div className="flex min-h-full">
             {/* Left Sidebar */}
             <div className="w-80 shrink-0 border-r border-border p-6">
-              <div className="relative mb-4">
+              <div className="relative mb-4 aspect-[4/5] w-full rounded-2xl overflow-hidden bg-muted">
                 {creator.profilePhoto ? (
-                  <img
+                  <Image
                     src={creator.profilePhoto}
                     alt={creator.fullName}
-                    className="w-full aspect-[4/5] rounded-2xl object-cover bg-muted"
+                    fill
+                    className="object-cover"
                   />
                 ) : (
-                  <div className="w-full aspect-[4/5] rounded-2xl bg-muted flex items-center justify-center text-6xl text-muted-foreground">
+                  <div className="flex h-full w-full items-center justify-center text-6xl font-light text-muted-foreground">
                     {creator.fullName[0]}
                   </div>
                 )}
@@ -110,7 +89,6 @@ export function CreatorOverlay({
                 <Badge variant="outline" className={ratingConfig.className}>
                   {creator.overallRating}
                 </Badge>
-                <span className="text-xs text-muted-foreground capitalize">{creator.status}</span>
               </div>
               {creator.country && (
                 <p className="text-xs text-muted-foreground mb-4">{creator.country}</p>

@@ -1,5 +1,9 @@
 import { randomBytes } from "node:crypto";
-import { CreateMultipartUploadCommand, PutObjectCommand } from "@aws-sdk/client-s3";
+import {
+  CreateMultipartUploadCommand,
+  PutObjectCommand,
+  UploadPartCommand,
+} from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
@@ -23,40 +27,45 @@ export async function POST(request: NextRequest) {
     }
 
     const folder = `submissions/${submissionId}/creators/${creatorFolderId}/batches/${batchId}`;
-
     const key = `${folder}/${randomBytes(16).toString("hex")}-${filename}`;
 
     if (fileSize > UPLOAD_CONFIG.chunkSize) {
-      const multipartCommand = new CreateMultipartUploadCommand({
-        Bucket: R2_BUCKET_NAME,
-        Key: key,
-        ContentType: contentType,
-      });
+      const { UploadId: uploadId } = await r2Client.send(
+        new CreateMultipartUploadCommand({
+          Bucket: R2_BUCKET_NAME,
+          Key: key,
+          ContentType: contentType,
+        }),
+      );
 
-      const multipartUpload = await r2Client.send(multipartCommand);
+      const numParts = Math.ceil(fileSize / UPLOAD_CONFIG.chunkSize);
 
-      return NextResponse.json({
-        uploadId: multipartUpload.UploadId,
-        key,
-        isMultipart: true,
-      });
-    } else {
-      const command = new PutObjectCommand({
-        Bucket: R2_BUCKET_NAME,
-        Key: key,
-        ContentType: contentType,
-      });
+      // Presign every part URL so the browser can upload directly to R2 in parallel
+      const partUrls = await Promise.all(
+        Array.from({ length: numParts }, (_, i) =>
+          getSignedUrl(
+            r2Client,
+            new UploadPartCommand({
+              Bucket: R2_BUCKET_NAME,
+              Key: key,
+              UploadId: uploadId,
+              PartNumber: i + 1,
+            }),
+            { expiresIn: 3600 },
+          ),
+        ),
+      );
 
-      const signedUrl = await getSignedUrl(r2Client, command, {
-        expiresIn: 3600,
-      });
-
-      return NextResponse.json({
-        uploadUrl: signedUrl,
-        key,
-        isMultipart: false,
-      });
+      return NextResponse.json({ uploadId, key, isMultipart: true, partUrls });
     }
+
+    const uploadUrl = await getSignedUrl(
+      r2Client,
+      new PutObjectCommand({ Bucket: R2_BUCKET_NAME, Key: key, ContentType: contentType }),
+      { expiresIn: 3600 },
+    );
+
+    return NextResponse.json({ uploadUrl, key, isMultipart: false });
   } catch (error) {
     console.error("Presign error:", error);
     return NextResponse.json({ error: "Failed to generate upload URL" }, { status: 500 });

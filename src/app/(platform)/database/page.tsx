@@ -12,10 +12,10 @@ export default async function DatabasePage() {
 
   if (!result.success || !result.creators) {
     return (
-      <div className="flex h-full items-center justify-center">
+      <div className="flex flex-1 items-center justify-center px-8">
         <div className="text-center">
           <h2 className="text-lg font-semibold text-foreground mb-2">Failed to load creators</h2>
-          <p className="text-sm text-muted-foreground">{result.error || "An error occurred"}</p>
+          <p className="text-sm text-muted-foreground">{result.error ?? "An error occurred"}</p>
         </div>
       </div>
     );

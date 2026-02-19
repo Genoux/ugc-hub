@@ -69,7 +69,7 @@ export const creatorSchema = z.object({
   blacklistReason: z.string().nullable(),
   blacklistedAt: z.date().nullable(),
   blacklistedBy: z.string().nullable(),
-  joinedAt: z.date(),
+  joinedAt: z.date().nullable(),
 });
 
 export type Creator = z.infer<typeof creatorSchema>;

@@ -1,21 +1,35 @@
-"use client";
-
+import { eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
-import { use } from "react";
-import { useSubmissionQuery } from "@/features/submissions/hooks/use-submissions-query";
+import { creatorFolders, submissions } from "@/db/schema";
+import { db } from "@/shared/lib/db";
 import { SubmissionDetailClient } from "./client";
 
-export default function SubmissionDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params);
-  const { data, isLoading } = useSubmissionQuery(id);
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-  if (isLoading) {
-    return null;
-  }
+export default async function SubmissionDetailPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
 
-  if (!data?.submission) {
-    redirect("/submissions");
-  }
+  if (!UUID_REGEX.test(id)) redirect("/submissions");
 
-  return <SubmissionDetailClient submission={data.submission} folders={data.folders} />;
+  const [submission, folders] = await Promise.all([
+    db.query.submissions.findFirst({ where: eq(submissions.id, id) }),
+    db.query.creatorFolders.findMany({
+      where: eq(creatorFolders.submissionId, id),
+      orderBy: (f, { desc }) => [desc(f.createdAt)],
+      with: {
+        creator: { columns: { id: true, fullName: true, email: true } },
+        creatorSubmissions: {
+          with: { assets: { columns: { id: true } } },
+        },
+      },
+    }),
+  ]);
+
+  if (!submission) redirect("/submissions");
+
+  return <SubmissionDetailClient submission={submission} folders={folders} />;
 }
