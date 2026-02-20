@@ -1,10 +1,8 @@
 "use client";
 
-import { Check, ChevronLeft, ChevronRight, Copy, Download, Folder } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, Copy, Folder } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
-import { toast } from "sonner";
-import { downloadAssets } from "@/features/submissions/lib/download-assets";
 import { Button } from "@/shared/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/shared/components/ui/tooltip";
 
@@ -37,23 +35,6 @@ export function SubmissionDetailClient({
 }) {
   const [copiedToken, setCopiedToken] = useState(false);
 
-  const allAssets = folders.flatMap((f) =>
-    f.creatorSubmissions.flatMap((b) =>
-      b.submissionAssets.map((a) => ({ id: a.id, filename: a.filename })),
-    ),
-  );
-
-  async function handleDownloadAll() {
-    if (allAssets.length === 0) {
-      toast.info("No assets to download");
-      return;
-    }
-    await downloadAssets(allAssets, {
-      onError: (filename) => toast.error(`Failed to download ${filename}`),
-      zipName: submission.name,
-    });
-  }
-
   async function handleCopyToken() {
     const url = `${window.location.origin}/submit/${submission.uploadToken}`;
     await navigator.clipboard.writeText(url);
@@ -64,31 +45,21 @@ export function SubmissionDetailClient({
   return (
     <div className="flex flex-1 flex-col gap-6 p-8">
       {/* Header */}
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex flex-col gap-2">
-          <Button variant="outline" size="sm" asChild className="w-fit">
-            <Link href="/submissions">
-              <ChevronLeft className="size-4" />
-              Submissions
-            </Link>
-          </Button>
-          <div>
-            <div className="flex items-center gap-2">
-              <Folder className="h-5 w-5 text-muted-foreground" />
-              <h1 className="text-2xl font-semibold tracking-tight">{submission.name}</h1>
-            </div>
+      <div className="flex flex-col gap-6">
+        <Button variant="outline" size="sm" asChild className="w-fit">
+          <Link href="/submissions">
+            <ChevronLeft className="size-4" />
+            Submissions
+          </Link>
+        </Button>
+        <div className="flex gap-2 w-full justify-between">
+          <div className="flex items-center gap-2">
+            <Folder className="h-5 w-5 text-muted-foreground" />
+            <h1 className="text-2xl font-semibold tracking-tight">{submission.name}</h1>
             {submission.description && (
               <p className="text-sm text-muted-foreground mt-1">{submission.description}</p>
             )}
           </div>
-        </div>
-        <div className="flex items-center gap-2 shrink-0">
-          {allAssets.length > 0 && (
-            <Button variant="outline" size="sm" onClick={handleDownloadAll} className="gap-2">
-              <Download className="size-4" />
-              Download all
-            </Button>
-          )}
           <Tooltip>
             <TooltipTrigger asChild>
               <Button onClick={handleCopyToken} variant="outline" size="sm">
