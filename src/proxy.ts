@@ -16,7 +16,6 @@ const isPlatformRoute = createRouteMatcher([
   "/applicants(.*)",
   "/api/submissions(.*)",
   "/api/assets(.*)",
-  "/api/live(.*)",
 ]);
 
 const isCreatorRoute = createRouteMatcher(["/creator(.*)", "/submit(.*)"]);
@@ -60,16 +59,19 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
   if (isPlatformRoute(req)) {
     await auth.protect();
 
-    const { userId } = await auth();
+    const { userId, sessionClaims } = await auth();
     if (!userId) {
       return NextResponse.redirect(new URL(ROUTES.signIn, req.url));
     }
 
-    const client = await clerkClient();
-    const user = await client.users.getUser(userId);
-    const email = user.primaryEmailAddress?.emailAddress ?? "";
+    // Use email from session token when available (no API call). Add "primaryEmail": "{{user.primary_email_address}}" in Clerk Dashboard → Sessions → Customize session token.
+    let email = (sessionClaims?.primaryEmail as string | undefined) ?? "";
+    if (!email) {
+      const client = await clerkClient();
+      const user = await client.users.getUser(userId);
+      email = user.primaryEmailAddress?.emailAddress ?? "";
+    }
 
-    // Non-admin trying to access platform routes gets redirected to creator portal
     if (!email.toLowerCase().endsWith(`@${ALLOWED_DOMAIN}`)) {
       return NextResponse.redirect(new URL(ROUTES.creatorHome, req.url));
     }

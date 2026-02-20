@@ -14,23 +14,12 @@ import {
   useReactTable,
   type VisibilityState,
 } from "@tanstack/react-table";
-import { MoreVertical, Plus } from "lucide-react";
+import { Download, MoreVertical, Plus } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import * as React from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { EmptyState } from "@/shared/components/empty-state";
-import { StatusBadge } from "@/shared/components/status-badge";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/shared/components/ui/alert-dialog";
 import { Button } from "@/shared/components/ui/button";
 import {
   Dialog,
@@ -54,8 +43,8 @@ import {
   TableRow,
 } from "@/shared/components/ui/table";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/shared/components/ui/tooltip";
-import { useRealtimeSubmissions } from "../hooks/use-realtime-submissions";
-import { useDeleteSubmissionMutation } from "../hooks/use-submissions-mutations";
+import { downloadAssets } from "../lib/download-assets";
+import { getAssets } from "../actions/get-assets";
 import { SubmissionForm } from "./submission-form";
 
 type Submission = {
@@ -97,8 +86,7 @@ const columns: ColumnDef<Submission>[] = [
     id: "actions",
     header: () => <div className="text-right"></div>,
     cell: ({ row, table }) => {
-      const onDelete = (table.options.meta as { onDeleteSubmission?: (id: string) => void })
-        ?.onDeleteSubmission;
+      const meta = table.options.meta as { onDownloadSubmission?: (id: string, name: string) => void };
       return (
         <div className="flex justify-end">
           <DropdownMenu>
@@ -112,18 +100,19 @@ const columns: ColumnDef<Submission>[] = [
                 <span className="sr-only">Open menu</span>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-32">
+            <DropdownMenuContent align="end" className="w-40">
               <DropdownMenuItem asChild>
                 <Link href={`/submissions/${row.original.id}`}>View</Link>
               </DropdownMenuItem>
               <DropdownMenuItem
-                className="text-destructive! cursor-pointer"
+                className="cursor-pointer gap-2"
                 onSelect={(e) => {
                   e.preventDefault();
-                  onDelete?.(row.original.id);
+                  meta.onDownloadSubmission?.(row.original.id, row.original.name);
                 }}
               >
-                Delete
+                <Download className="size-4" />
+                Download all
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -135,41 +124,31 @@ const columns: ColumnDef<Submission>[] = [
 
 export function SubmissionList({ submissions }: { submissions: Submission[] }) {
   const router = useRouter();
-  useRealtimeSubmissions();
-  const deleteSubmissionMutation = useDeleteSubmissionMutation();
-  const [isDialogOpen, setIsDialogOpen] = React.useState(false);
-  const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
-  const [submissionToDelete, setSubmissionToDelete] = React.useState<string | null>(null);
-  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
-  const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [pagination, setPagination] = React.useState({
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: 10,
   });
 
-  function openDeleteDialog(submissionId: string) {
-    setSubmissionToDelete(submissionId);
-    setDeleteDialogOpen(true);
-  }
-
-  async function confirmDeleteSubmission() {
-    if (!submissionToDelete) return;
-    try {
-      await deleteSubmissionMutation.mutateAsync(submissionToDelete);
-      toast.success("Submission deleted");
-      setDeleteDialogOpen(false);
-      setSubmissionToDelete(null);
-    } catch (err) {
-      console.error("Failed to delete submission:", err);
-      toast.error("Failed to delete submission");
+  async function handleDownloadSubmission(submissionId: string, submissionName: string) {
+    const { data } = await getAssets({ submissionId });
+    if (!data?.length) {
+      toast.info("No assets to download");
+      return;
     }
+    await downloadAssets(data, {
+      onError: (filename) => toast.error(`Failed to download ${filename}`),
+      zipName: submissionName,
+    });
   }
 
   const table = useReactTable({
     data: submissions,
     columns,
-    meta: { onDeleteSubmission: openDeleteDialog },
+    meta: { onDownloadSubmission: handleDownloadSubmission },
     state: {
       sorting,
       columnVisibility,
@@ -276,22 +255,6 @@ export function SubmissionList({ submissions }: { submissions: Submission[] }) {
       <div className="text-muted-foreground hidden text-sm lg:flex">
         {table.getFilteredRowModel().rows.length} submission(s)
       </div>
-
-      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Close project?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will permanently remove the project and all its uploads. This action cannot be
-              undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDeleteSubmission}>Close project</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 }

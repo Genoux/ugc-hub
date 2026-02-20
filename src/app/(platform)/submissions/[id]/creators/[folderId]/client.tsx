@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { CloseCollaborationWizard } from "@/features/collaborations/components/close-collaboration-wizard";
+import { downloadAssets } from "@/features/submissions/lib/download-assets";
 import { AssetCard } from "@/shared/components/asset-card";
 import { Button } from "@/shared/components/ui/button";
 
@@ -43,35 +44,61 @@ function AssetPreview({ asset }: { asset: Asset }) {
       .finally(() => setIsLoading(false));
   }, [asset.id]);
 
-  async function handleDownload() {
-    try {
-      const href =
-        url ||
-        (await fetch(`/api/assets/${asset.id}/download`)
-          .then((r) => r.json())
-          .then((d) => d.url));
-      const a = document.createElement("a");
-      a.href = href;
-      a.download = asset.filename;
-      a.click();
-    } catch {
-      toast.error("Download failed");
-    }
+  function handleDownload() {
+    downloadAssets([{ id: asset.id, filename: asset.filename }], {
+      onError: () => toast.error("Download failed"),
+    });
   }
 
   return (
-    <button type="button" className="w-full text-left" onClick={handleDownload}>
+    <div className="relative w-full group/card">
       <AssetCard
         src={url}
         filename={asset.filename}
         isVideo={asset.mimeType.startsWith("video/")}
         isLoading={isLoading}
+        action={
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 text-white hover:bg-white/20"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              handleDownload();
+            }}
+          >
+            <Download className="h-4 w-4" />
+            <span className="sr-only">Download</span>
+          </Button>
+        }
       />
-    </button>
+    </div>
   );
 }
 
-function BatchSection({ batch }: { batch: Batch }) {
+function BatchSection({
+  batch,
+  submissionName,
+  creatorFullName,
+}: {
+  batch: Batch;
+  submissionName: string;
+  creatorFullName: string;
+}) {
+  const batchAssets = batch.submissionAssets.map((a) => ({ id: a.id, filename: a.filename }));
+
+  async function handleDownloadBatch() {
+    if (batchAssets.length === 0) {
+      toast.info("No assets to download");
+      return;
+    }
+    await downloadAssets(batchAssets, {
+      onError: (filename) => toast.error(`Failed to download ${filename}`),
+      zipName: `${submissionName} - Submission ${batch.batchNumber} - ${creatorFullName}`,
+    });
+  }
+
   return (
     <div className="rounded-xl border border-border bg-card overflow-hidden">
       <div className="flex items-center justify-between px-5 py-4 border-b border-border">
@@ -81,9 +108,17 @@ function BatchSection({ batch }: { batch: Batch }) {
             {batch.submissionAssets.length} file{batch.submissionAssets.length !== 1 ? "s" : ""}
           </span>
         </div>
-        <span className="text-xs text-muted-foreground">
-          {new Date(batch.deliveredAt).toLocaleDateString()}
-        </span>
+        <div className="flex items-center gap-2">
+          {batchAssets.length > 0 && (
+            <Button variant="ghost" size="sm" onClick={handleDownloadBatch} className="gap-1.5">
+              <Download className="h-3.5 w-3.5" />
+              Download all
+            </Button>
+          )}
+          <span className="text-xs text-muted-foreground">
+            {new Date(batch.deliveredAt).toLocaleDateString()}
+          </span>
+        </div>
       </div>
 
       <div className="p-5">
@@ -124,23 +159,17 @@ export function CreatorFolderClient({
   const [showCloseWizard, setShowCloseWizard] = useState(false);
 
   async function handleDownloadAll() {
-    const allAssets = batches.flatMap((b) => b.submissionAssets);
+    const allAssets = batches.flatMap((b) =>
+      b.submissionAssets.map((a) => ({ id: a.id, filename: a.filename })),
+    );
     if (allAssets.length === 0) {
       toast.info("No assets to download");
       return;
     }
-    for (const asset of allAssets) {
-      try {
-        const { url } = await fetch(`/api/assets/${asset.id}/download`).then((r) => r.json());
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = asset.filename;
-        a.click();
-        await new Promise((r) => setTimeout(r, 300));
-      } catch {
-        toast.error(`Failed to download ${asset.filename}`);
-      }
-    }
+    await downloadAssets(allAssets, {
+      onError: (filename) => toast.error(`Failed to download ${filename}`),
+      zipName: `${submissionName} - ${creator.fullName}`,
+    });
   }
 
   return (
@@ -212,7 +241,12 @@ export function CreatorFolderClient({
       ) : (
         <div className="space-y-4">
           {batches.map((batch) => (
-            <BatchSection key={batch.id} batch={batch} />
+            <BatchSection
+              key={batch.id}
+              batch={batch}
+              submissionName={submissionName}
+              creatorFullName={creator.fullName}
+            />
           ))}
         </div>
       )}

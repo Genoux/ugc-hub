@@ -23,7 +23,7 @@ export default async function SubmissionDetailPage({
       with: {
         creator: { columns: { id: true, fullName: true, email: true } },
         creatorSubmissions: {
-          with: { submissionAssets: { columns: { id: true } } },
+          with: { submissionAssets: { columns: { id: true, filename: true } } },
         },
       },
     }),

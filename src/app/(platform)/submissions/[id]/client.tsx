@@ -1,8 +1,10 @@
 "use client";
 
-import { Check, ChevronLeft, ChevronRight, Copy, Folder } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, Copy, Download, Folder } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import { toast } from "sonner";
+import { downloadAssets } from "@/features/submissions/lib/download-assets";
 import { Button } from "@/shared/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/shared/components/ui/tooltip";
 
@@ -22,7 +24,7 @@ type CreatorFolder = {
   };
   creatorSubmissions: Array<{
     id: string;
-    submissionAssets: Array<{ id: string }>;
+    submissionAssets: Array<{ id: string; filename: string }>;
   }>;
 };
 
@@ -34,6 +36,23 @@ export function SubmissionDetailClient({
   folders: CreatorFolder[];
 }) {
   const [copiedToken, setCopiedToken] = useState(false);
+
+  const allAssets = folders.flatMap((f) =>
+    f.creatorSubmissions.flatMap((b) =>
+      b.submissionAssets.map((a) => ({ id: a.id, filename: a.filename })),
+    ),
+  );
+
+  async function handleDownloadAll() {
+    if (allAssets.length === 0) {
+      toast.info("No assets to download");
+      return;
+    }
+    await downloadAssets(allAssets, {
+      onError: (filename) => toast.error(`Failed to download ${filename}`),
+      zipName: submission.name,
+    });
+  }
 
   async function handleCopyToken() {
     const url = `${window.location.origin}/submit/${submission.uploadToken}`;
@@ -63,17 +82,25 @@ export function SubmissionDetailClient({
             )}
           </div>
         </div>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button onClick={handleCopyToken} variant="outline" size="sm" className="shrink-0">
-              {copiedToken ? <Check className="size-4" /> : <Copy className="size-4" />}
-              {copiedToken ? "Copied!" : "Copy Upload Link"}
+        <div className="flex items-center gap-2 shrink-0">
+          {allAssets.length > 0 && (
+            <Button variant="outline" size="sm" onClick={handleDownloadAll} className="gap-2">
+              <Download className="size-4" />
+              Download all
             </Button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>Share this link with creators to upload content</p>
-          </TooltipContent>
-        </Tooltip>
+          )}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button onClick={handleCopyToken} variant="outline" size="sm">
+                {copiedToken ? <Check className="size-4" /> : <Copy className="size-4" />}
+                {copiedToken ? "Copied!" : "Copy Upload Link"}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Share this link with creators to upload content</p>
+            </TooltipContent>
+          </Tooltip>
+        </div>
       </div>
 
       {/* Creator list */}
@@ -95,7 +122,10 @@ export function SubmissionDetailClient({
         ) : (
           <div className="space-y-2">
             {folders.map((folder) => {
-              const totalFiles = folder.creatorSubmissions.reduce((s, b) => s + b.submissionAssets.length, 0);
+              const totalFiles = folder.creatorSubmissions.reduce(
+                (s, b) => s + b.submissionAssets.length,
+                0,
+              );
 
               return (
                 <Link
