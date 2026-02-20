@@ -1,8 +1,8 @@
 "use client";
 
+import type { CreatorUIState } from "@/features/creators/lib/get-creator-ui-state";
 import { Alert, AlertDescription } from "@/shared/components/ui/alert";
 import { Button } from "@/shared/components/ui/button";
-import type { CreatorUIState } from "../lib/get-creator-ui-state";
 
 interface ProfileStateBannerProps {
   uiState: CreatorUIState;

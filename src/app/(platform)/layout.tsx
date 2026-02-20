@@ -1,7 +1,7 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { AnimatePresence } from "motion/react";
+import { useRouter } from "next/navigation";
 import { ThemeProvider } from "next-themes";
 import { useEffect, useState } from "react";
 import { AppSidebar } from "@/shared/components/app-sidebar";
@@ -28,6 +28,7 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
   return (
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
       <SidebarProvider
+        className="h-svh overflow-hidden"
         style={
           {
             "--sidebar-width": "220px",
@@ -39,12 +40,10 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
           {!isAppReady && <LoadingScreen key="loading" />}
         </AnimatePresence>
         <AppSidebar variant="inset" />
-        <SidebarInset>
+        <SidebarInset className="min-h-0 max-h-[calc(100svh-1rem)] overflow-hidden">
           <SiteHeader />
-          <div className="flex flex-1 flex-col">
-            <div className="@container/main mx-auto w-full max-w-7xl flex flex-1 flex-col gap-2">
-              {children}
-            </div>
+          <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+            {children}
           </div>
         </SidebarInset>
       </SidebarProvider>

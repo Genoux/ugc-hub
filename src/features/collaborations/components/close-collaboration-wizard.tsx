@@ -26,7 +26,7 @@ interface CloseCollaborationWizardProps {
   open: boolean;
   onClose: () => void;
   onSuccess: () => void;
-  folderId: string;
+  collaborationId: string;
   creatorId: string;
   creatorName: string;
   submissionName: string;
@@ -36,7 +36,7 @@ export function CloseCollaborationWizard({
   open,
   onClose,
   onSuccess,
-  folderId,
+  collaborationId,
   creatorId,
   creatorName,
   submissionName,
@@ -84,7 +84,7 @@ export function CloseCollaborationWizard({
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-              creatorFolderId: folderId,
+              creatorCollaborationId: collaborationId,
               creatorId,
               filename: pf.file.name,
               mimeType: pf.file.type,
@@ -106,7 +106,7 @@ export function CloseCollaborationWizard({
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-              creatorFolderId: folderId,
+              creatorCollaborationId: collaborationId,
               creatorId,
               key,
               filename: pf.file.name,
@@ -128,7 +128,7 @@ export function CloseCollaborationWizard({
       setIsUploading(false);
       return updated;
     },
-    [folderId, creatorId],
+    [collaborationId, creatorId],
   );
 
   function handleNext() {
@@ -146,7 +146,7 @@ export function CloseCollaborationWizard({
           setIsUploading(false);
         }
         await closeCollaboration({
-          folderId,
+          collaborationId,
           creatorId,
           submissionName,
           overallRating: calculateOverallRating(ratings as CollaborationRatingsInput),

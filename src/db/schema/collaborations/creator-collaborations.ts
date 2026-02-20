@@ -4,10 +4,9 @@ import { submissions } from "../core/submissions";
 
 export const collaborationStatusEnum = pgEnum("collaboration_status", ["active", "closed"]);
 
-// One folder per (creator, submission). Folder has many creator_submissions (batches).
-// Creators can keep uploading batches even when collaborationStatus is closed.
-export const creatorFolders = pgTable(
-  "creator_folders",
+// One collaboration per (creator, submission). Has many creator_submissions (upload batches).
+export const creatorCollaborations = pgTable(
+  "creator_collaborations",
   {
     id: uuid("id").defaultRandom().primaryKey(),
 
@@ -37,5 +36,5 @@ export const creatorFolders = pgTable(
     // Timestamps
     createdAt: timestamp("created_at").notNull().defaultNow(),
   },
-  (t) => [unique("creator_folders_creator_submission_unique").on(t.creatorId, t.submissionId)],
+  (t) => [unique("creator_collaborations_creator_submission_unique").on(t.creatorId, t.submissionId)],
 );

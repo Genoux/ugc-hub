@@ -10,16 +10,16 @@ export const revalidate = 0;
 export async function POST(request: NextRequest) {
   try {
     const { userId } = await requireAdmin();
-    const { creatorFolderId, creatorId, key, filename, mimeType, sizeBytes } = await request.json();
+    const { creatorCollaborationId, creatorId, key, filename, mimeType, sizeBytes } = await request.json();
 
-    if (!creatorFolderId || !creatorId || !key || !filename || !mimeType || sizeBytes == null) {
+    if (!creatorCollaborationId || !creatorId || !key || !filename || !mimeType || sizeBytes == null) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
     const [asset] = await db
       .insert(creatorPortfolioAssets)
       .values({
-        creatorFolderId,
+        creatorCollaborationId,
         creatorId,
         r2Key: key,
         filename,

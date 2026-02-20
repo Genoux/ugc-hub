@@ -14,7 +14,7 @@ export function useMultipartUpload() {
   async function uploadFile(
     file: File,
     submissionId: string,
-    creatorFolderId: string,
+    creatorCollaborationId: string,
     batchId: string,
   ) {
     const fileId = `${file.name}-${Date.now()}`;
@@ -33,7 +33,7 @@ export function useMultipartUpload() {
           contentType: file.type,
           fileSize: file.size,
           submissionId,
-          creatorFolderId,
+          creatorCollaborationId,
           batchId,
         }),
       });

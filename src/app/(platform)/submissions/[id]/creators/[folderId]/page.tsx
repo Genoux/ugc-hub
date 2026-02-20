@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
-import { creatorFolders } from "@/db/schema";
+import { creatorCollaborations } from "@/db/schema";
 import { db } from "@/shared/lib/db";
 import { CreatorFolderClient } from "./client";
 
@@ -15,8 +15,8 @@ export default async function CreatorFolderPage({
 
   if (!UUID_REGEX.test(id) || !UUID_REGEX.test(folderId)) redirect("/submissions");
 
-  const folder = await db.query.creatorFolders.findFirst({
-    where: eq(creatorFolders.id, folderId),
+  const folder = await db.query.creatorCollaborations.findFirst({
+    where: eq(creatorCollaborations.id, folderId),
     with: {
       submission: { columns: { id: true, name: true } },
       creator: { columns: { id: true, fullName: true, email: true } },
@@ -42,7 +42,7 @@ export default async function CreatorFolderPage({
     <CreatorFolderClient
       submissionId={id}
       submissionName={folder.submission.name}
-      folderId={folderId}
+      collaborationId={folderId}
       creator={folder.creator}
       collaborationStatus={folder.collaborationStatus}
       batches={folder.creatorSubmissions}

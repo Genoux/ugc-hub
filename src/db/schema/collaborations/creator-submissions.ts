@@ -1,13 +1,13 @@
 import { integer, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
-import { creatorFolders } from "./creator-folders";
+import { creatorCollaborations } from "./creator-collaborations";
 
 export const creatorSubmissions = pgTable("creator_submissions", {
   id: uuid("id").defaultRandom().primaryKey(),
 
   // Parent reference
-  creatorFolderId: uuid("creator_folder_id")
+  creatorCollaborationId: uuid("creator_collaboration_id")
     .notNull()
-    .references(() => creatorFolders.id, { onDelete: "cascade" }),
+    .references(() => creatorCollaborations.id, { onDelete: "cascade" }),
 
   // Batch metadata
   label: text("label").notNull(), // "Submission 1", "Submission 2", etc.

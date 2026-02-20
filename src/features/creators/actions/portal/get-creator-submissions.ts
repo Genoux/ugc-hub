@@ -1,12 +1,12 @@
 "use server";
 
 import { eq } from "drizzle-orm";
-import { creatorFolders } from "@/db/schema";
+import { creatorCollaborations } from "@/db/schema";
 import { db } from "@/shared/lib/db";
 
 export async function getCreatorSubmissions(creatorId: string) {
-  const folders = await db.query.creatorFolders.findMany({
-    where: eq(creatorFolders.creatorId, creatorId),
+  const collabs = await db.query.creatorCollaborations.findMany({
+    where: eq(creatorCollaborations.creatorId, creatorId),
     with: {
       submission: {
         columns: { id: true, name: true },
@@ -22,10 +22,10 @@ export async function getCreatorSubmissions(creatorId: string) {
     },
   });
 
-  return folders.map((folder) => ({
-    submissionId: folder.submission.id,
-    submissionName: folder.submission.name,
-    batches: folder.creatorSubmissions.map((batch) => ({
+  return collabs.map((collab) => ({
+    submissionId: collab.submission.id,
+    submissionName: collab.submission.name,
+    batches: collab.creatorSubmissions.map((batch) => ({
       id: batch.id,
       label: batch.label,
       batchNumber: batch.batchNumber,

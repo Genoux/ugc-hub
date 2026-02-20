@@ -13,7 +13,7 @@ type Submission = {
   uploadToken: string;
 };
 
-type CreatorFolder = {
+type CreatorCollaboration = {
   id: string;
   creator: {
     id: string;
@@ -31,7 +31,7 @@ export function SubmissionDetailClient({
   folders,
 }: {
   submission: Submission;
-  folders: CreatorFolder[];
+  folders: CreatorCollaboration[];
 }) {
   const [copiedToken, setCopiedToken] = useState(false);
 

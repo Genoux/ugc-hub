@@ -18,7 +18,7 @@ export async function approveApplicant(creatorId: string) {
 
   if (!creator) throw new Error("Creator not found");
 
-  if (creator.status !== "applicant") {
+  if (creator.status !== "applicant" && creator.status !== "rejected") {
     throw new Error("Creator is not in applicant status");
   }
 

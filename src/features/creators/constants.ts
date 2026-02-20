@@ -94,15 +94,20 @@ export const RATING_CONFIG: Record<string, { className: string }> = {
   blacklisted: { className: "bg-rose-100 text-rose-700 border-rose-200" },
 };
 
-export const CREATOR_STATUSES = [
+// Actual Postgres enum values (source of truth)
+export const DB_CREATOR_STATUSES = [
   "applicant",
   "approved_not_joined",
   "joined",
   "rejected",
   "blacklisted",
 ] as const;
+export type DbCreatorStatus = (typeof DB_CREATOR_STATUSES)[number];
 
+// UI filter labels shown in the database filter panel
+export const CREATOR_STATUSES = ["untested", "active", "blacklisted"] as const;
 export type CreatorDatabaseStatus = (typeof CREATOR_STATUSES)[number];
+
 
 export const RATING_LABELS: Record<keyof CollaborationRatings, string> = {
   visual_quality: "Visual Quality",

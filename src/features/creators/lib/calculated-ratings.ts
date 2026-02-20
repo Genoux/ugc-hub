@@ -1,5 +1,6 @@
 import { calculateOverallRating } from "@/features/collaborations/lib/calculate-overall-rating";
 import type { RatingTier } from "@/features/creators/constants";
+import type { ClosedCollaboration } from "../actions/admin/get-creator-profile-assets";
 import type { OverallRatingTier } from "../constants";
 
 const SCORE: Record<string, number> = {
@@ -18,14 +19,6 @@ function scoreToTier(avg: number): RatingTier {
   return "untested";
 }
 
-export type CollaborationRatingItem = {
-  ratings: {
-    visual_quality: string;
-    acting_line_delivery: string;
-    reliability_speed: string;
-  };
-};
-
 export type CalculatedRatingsResult = {
   overall: OverallRatingTier;
   visual_quality: RatingTier;
@@ -33,40 +26,25 @@ export type CalculatedRatingsResult = {
   reliability_speed: RatingTier;
 };
 
-/**
- * Average each dimension across all collaborations, map to tier; overall from same formula as single collab.
- */
 export function calculateRatingsFromCollaborations(
-  collaborations: CollaborationRatingItem[],
+  collabs: ClosedCollaboration[],
 ): CalculatedRatingsResult | null {
-  if (!collaborations?.length) return null;
+  const rated = collabs.filter(
+    (c) => c.ratingVisualQuality && c.ratingActingDelivery && c.ratingReliabilitySpeed,
+  );
+  if (!rated.length) return null;
 
-  const n = collaborations.length;
-  let sumV = 0;
-  let sumA = 0;
-  let sumR = 0;
-
-  for (const c of collaborations) {
-    const r = c.ratings;
-    if (r) {
-      sumV += SCORE[r.visual_quality] ?? 0;
-      sumA += SCORE[r.acting_line_delivery] ?? 0;
-      sumR += SCORE[r.reliability_speed] ?? 0;
-    }
-  }
+  const n = rated.length;
+  const sumV = rated.reduce((s, c) => s + (SCORE[c.ratingVisualQuality!] ?? 0), 0);
+  const sumA = rated.reduce((s, c) => s + (SCORE[c.ratingActingDelivery!] ?? 0), 0);
+  const sumR = rated.reduce((s, c) => s + (SCORE[c.ratingReliabilitySpeed!] ?? 0), 0);
 
   const visual_quality = scoreToTier(sumV / n);
   const acting_line_delivery = scoreToTier(sumA / n);
   const reliability_speed = scoreToTier(sumR / n);
 
-  const overall = calculateOverallRating({
-    visual_quality,
-    acting_line_delivery,
-    reliability_speed,
-  });
-
   return {
-    overall,
+    overall: calculateOverallRating({ visual_quality, acting_line_delivery, reliability_speed }),
     visual_quality,
     acting_line_delivery,
     reliability_speed,

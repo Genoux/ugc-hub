@@ -2,28 +2,28 @@ import { relations } from "drizzle-orm";
 import { creatorPortfolioAssets } from "./assets/creator-portfolio-assets";
 import { creatorProfileAssets } from "./assets/creator-profile-assets";
 import { submissionAssets } from "./assets/submission-assets";
-import { creatorFolders } from "./collaborations/creator-folders";
+import { creatorCollaborations } from "./collaborations/creator-collaborations";
 import { creatorSubmissions } from "./collaborations/creator-submissions";
 import { creators } from "./core/creators";
 import { submissions } from "./core/submissions";
 
 export const submissionsRelations = relations(submissions, ({ many }) => ({
-  creatorFolders: many(creatorFolders),
+  creatorCollaborations: many(creatorCollaborations),
 }));
 
 export const creatorsRelations = relations(creators, ({ many }) => ({
-  creatorFolders: many(creatorFolders),
+  creatorCollaborations: many(creatorCollaborations),
   creatorProfileAssets: many(creatorProfileAssets),
   creatorPortfolioAssets: many(creatorPortfolioAssets),
 }));
 
-export const creatorFoldersRelations = relations(creatorFolders, ({ one, many }) => ({
+export const creatorCollaborationsRelations = relations(creatorCollaborations, ({ one, many }) => ({
   submission: one(submissions, {
-    fields: [creatorFolders.submissionId],
+    fields: [creatorCollaborations.submissionId],
     references: [submissions.id],
   }),
   creator: one(creators, {
-    fields: [creatorFolders.creatorId],
+    fields: [creatorCollaborations.creatorId],
     references: [creators.id],
   }),
   creatorSubmissions: many(creatorSubmissions),
@@ -31,9 +31,9 @@ export const creatorFoldersRelations = relations(creatorFolders, ({ one, many })
 }));
 
 export const creatorSubmissionsRelations = relations(creatorSubmissions, ({ one, many }) => ({
-  creatorFolder: one(creatorFolders, {
-    fields: [creatorSubmissions.creatorFolderId],
-    references: [creatorFolders.id],
+  creatorCollaboration: one(creatorCollaborations, {
+    fields: [creatorSubmissions.creatorCollaborationId],
+    references: [creatorCollaborations.id],
   }),
   submissionAssets: many(submissionAssets),
 }));
@@ -53,9 +53,9 @@ export const creatorProfileAssetsRelations = relations(creatorProfileAssets, ({ 
 }));
 
 export const creatorPortfolioAssetsRelations = relations(creatorPortfolioAssets, ({ one }) => ({
-  creatorFolder: one(creatorFolders, {
-    fields: [creatorPortfolioAssets.creatorFolderId],
-    references: [creatorFolders.id],
+  creatorCollaboration: one(creatorCollaborations, {
+    fields: [creatorPortfolioAssets.creatorCollaborationId],
+    references: [creatorCollaborations.id],
   }),
   creator: one(creators, {
     fields: [creatorPortfolioAssets.creatorId],

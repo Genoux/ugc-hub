@@ -2,7 +2,7 @@
 
 import { auth } from "@clerk/nextjs/server";
 import { and, eq } from "drizzle-orm";
-import { creatorFolders, creatorSubmissions, creators, submissions } from "@/db/schema";
+import { creatorCollaborations, creatorSubmissions, creators, submissions } from "@/db/schema";
 import { db } from "@/shared/lib/db";
 
 export async function submitWizard(data: { token: string; creatorId: string }) {
@@ -24,33 +24,33 @@ export async function submitWizard(data: { token: string; creatorId: string }) {
   if (!creator) throw new Error("Creator not found");
   if (creator.clerkUserId !== userId) throw new Error("Forbidden");
 
-  // Reuse existing folder for this creator+project; create one on first submission
-  let folder = await db.query.creatorFolders.findFirst({
+  // Reuse existing collaboration for this creator+project; create one on first submission
+  let collab = await db.query.creatorCollaborations.findFirst({
     where: and(
-      eq(creatorFolders.submissionId, submission.id),
-      eq(creatorFolders.creatorId, creator.id),
+      eq(creatorCollaborations.submissionId, submission.id),
+      eq(creatorCollaborations.creatorId, creator.id),
     ),
     with: { creatorSubmissions: { columns: { batchNumber: true } } },
   });
 
-  if (!folder) {
+  if (!collab) {
     const [inserted] = await db
-      .insert(creatorFolders)
+      .insert(creatorCollaborations)
       .values({ submissionId: submission.id, creatorId: creator.id, collaborationStatus: "active" })
       .returning();
-    folder = { ...inserted, creatorSubmissions: [] };
+    collab = { ...inserted, creatorSubmissions: [] };
   }
 
-  const nextBatchNumber = folder.creatorSubmissions.length + 1;
+  const nextBatchNumber = collab.creatorSubmissions.length + 1;
 
   const [batch] = await db
     .insert(creatorSubmissions)
     .values({
-      creatorFolderId: folder.id,
+      creatorCollaborationId: collab.id,
       label: `Submission ${nextBatchNumber}`,
       batchNumber: nextBatchNumber,
     })
     .returning();
 
-  return { submission, folder, batch };
+  return { submission, folder: collab, batch };
 }

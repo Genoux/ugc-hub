@@ -8,7 +8,7 @@ export const collaborationRatingsSchema = z.object({
 });
 
 export const closeCollaborationSchema = z.object({
-  folderId: z.string().uuid(),
+  collaborationId: z.string().uuid(),
   creatorId: z.string().uuid(),
   submissionName: z.string().min(1),
   overallRating: z.enum(OVERALL_RATING_TIERS),

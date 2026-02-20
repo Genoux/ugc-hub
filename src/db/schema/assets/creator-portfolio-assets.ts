@@ -1,14 +1,14 @@
 import { bigint, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
-import { creatorFolders } from "../collaborations/creator-folders";
+import { creatorCollaborations } from "../collaborations/creator-collaborations";
 import { creators } from "../core/creators";
 
 export const creatorPortfolioAssets = pgTable("creator_portfolio_assets", {
   id: uuid("id").defaultRandom().primaryKey(),
 
   // Parent references
-  creatorFolderId: uuid("creator_folder_id")
+  creatorCollaborationId: uuid("creator_collaboration_id")
     .notNull()
-    .references(() => creatorFolders.id, { onDelete: "cascade" }),
+    .references(() => creatorCollaborations.id, { onDelete: "cascade" }),
   creatorId: uuid("creator_id")
     .notNull()
     .references(() => creators.id, { onDelete: "cascade" }),

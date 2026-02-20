@@ -1,5 +1,5 @@
-import { listCreators } from "@/features/creators/actions/list-creators";
-import { CreatorDatabase } from "@/features/creators/components/creator-database";
+import { listCreators } from "@/features/creators/actions/admin/list-creators";
+import { CreatorDatabase } from "@/features/creators/components/admin/creator-database";
 import { creatorSchema } from "@/features/creators/schemas";
 
 export const metadata = {

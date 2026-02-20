@@ -1,22 +1,22 @@
 "use client";
 
-import { ChevronLeft, ChevronRight, Copy, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Copy, Download, X } from "lucide-react";
 import Image from "next/image";
-import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import type { CreatorProfileAssetsResult } from "@/features/creators/actions/admin/get-creator-profile-assets";
+import { RATING_CONFIG, RATING_LABELS } from "@/features/creators/constants";
+import { calculateRatingsFromCollaborations } from "@/features/creators/lib/calculated-ratings";
+import type { Creator } from "@/features/creators/schemas";
+import { downloadAssets } from "@/features/submissions/lib/download-assets";
 import { AssetCard } from "@/shared/components/asset-card";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import { Sheet, SheetContent, SheetHeader } from "@/shared/components/ui/sheet";
-import type { CreatorProfileAssetsResult } from "../actions/get-creator-profile-assets";
-import { getCreatorProfileAssets } from "../actions/get-creator-profile-assets";
-import { RATING_CONFIG, RATING_LABELS } from "../constants";
-import { calculateRatingsFromCollaborations } from "../lib/calculated-ratings";
-import type { Creator } from "../schemas";
 
 interface CreatorOverlayProps {
   creator: Creator;
   creators: Creator[];
+  profileAssets: CreatorProfileAssetsResult | null;
   onClose: () => void;
   onPrev: () => void;
   onNext: () => void;
@@ -25,6 +25,7 @@ interface CreatorOverlayProps {
 export function CreatorOverlay({
   creator,
   creators,
+  profileAssets,
   onClose,
   onPrev,
   onNext,
@@ -33,68 +34,51 @@ export function CreatorOverlay({
   const hasPrev = currentIdx > 0;
   const hasNext = currentIdx < creators.length - 1;
 
-  const [profileAssets, setProfileAssets] = useState<CreatorProfileAssetsResult | null>(null);
-  const [profileAssetsLoading, setProfileAssetsLoading] = useState(true);
-
-  useEffect(() => {
-    let cancelled = false;
-    setProfileAssetsLoading(true);
-    setProfileAssets(null);
-    getCreatorProfileAssets(creator.id)
-      .then((data) => {
-        if (!cancelled) setProfileAssets(data);
-      })
-      .finally(() => {
-        if (!cancelled) setProfileAssetsLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [creator.id]);
-
-  const calculatedRatings = calculateRatingsFromCollaborations(creator.collaborations ?? []);
+  const closedCollabs = profileAssets?.closedCollaborations ?? [];
+  const calculatedRatings = calculateRatingsFromCollaborations(closedCollabs);
   const overallRating = calculatedRatings?.overall ?? creator.overallRating;
   const ratingConfig = RATING_CONFIG[overallRating] || RATING_CONFIG.untested;
   const rateRange = creator.rateRangeInternal || creator.rateRangeSelf;
-  const hasCollabs = creator.collaborations && creator.collaborations.length > 0;
 
   return (
     <Sheet open onOpenChange={onClose}>
-      <SheetContent
-        side="bottom"
-        className="h-[calc(100%-32px)] max-w-none w-full p-0 rounded-t-2xl gap-0 [&>button.absolute]:hidden"
-      >
-        <SheetHeader className="shrink-0 flex flex-row items-center justify-between border-b border-border bg-background px-6 py-4">
-          <div className="flex items-center gap-3">
+      <SheetContent side="bottom" showCloseButton={false} className="rounded-t-2xl overflow-hidden">
+        <div className="flex h-[calc(100vh-5rem)] flex-col">
+          <SheetHeader className="shrink-0 flex flex-row items-center justify-between border-b border-border px-6 py-4">
+            <div className="flex items-center gap-3">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={onPrev}
+                disabled={!hasPrev}
+                aria-label="Previous creator"
+              >
+                <ChevronLeft className="h-5 w-5" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={onNext}
+                disabled={!hasNext}
+                aria-label="Next creator"
+              >
+                <ChevronRight className="h-5 w-5" />
+              </Button>
+            </div>
             <Button
               variant="ghost"
               size="icon"
-              onClick={onPrev}
-              disabled={!hasPrev}
-              aria-label="Previous creator"
+              onClick={onClose}
+              aria-label="Close creator profile"
             >
-              <ChevronLeft className="h-5 w-5" />
+              <X className="h-5 w-5" />
             </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={onNext}
-              disabled={!hasNext}
-              aria-label="Next creator"
-            >
-              <ChevronRight className="h-5 w-5" />
-            </Button>
-          </div>
-          <Button variant="ghost" size="icon" onClick={onClose} aria-label="Close creator profile">
-            <X className="h-5 w-5" />
-          </Button>
-        </SheetHeader>
+          </SheetHeader>
 
-        <div className="flex-1 min-h-0 overflow-y-auto pb-8">
-          <div className="flex min-h-full">
+          <div className="flex flex-1 min-h-0">
             {/* Left Sidebar */}
-            <div className="w-80 shrink-0 border-r border-border p-6">
-              <div className="relative mb-4 aspect-[4/5] w-full rounded-2xl overflow-hidden bg-muted">
+            <div className="w-80 shrink-0 border-r border-border p-6 overflow-y-auto">
+              <div className="relative mb-4 aspect-square w-full rounded-2xl overflow-hidden bg-muted">
                 {creator.profilePhoto ? (
                   <Image
                     src={creator.profilePhoto}
@@ -135,8 +119,8 @@ export function CreatorOverlay({
                 </Badge>
                 {calculatedRatings && (
                   <span className="text-[10px] text-muted-foreground">
-                    (avg of {creator.collaborations?.length ?? 0} collaboration
-                    {(creator.collaborations?.length ?? 0) === 1 ? "" : "s"})
+                    (avg of {closedCollabs.length} collaboration
+                    {closedCollabs.length === 1 ? "" : "s"})
                   </span>
                 )}
               </div>
@@ -241,7 +225,7 @@ export function CreatorOverlay({
             </div>
 
             {/* Right Content */}
-            <div className="flex-1 min-w-0 p-6">
+            <div className="flex-1 min-w-0 p-6 overflow-y-auto pb-8">
               <div className="bg-muted rounded-2xl p-5 mb-6">
                 <h2 className="text-sm font-semibold text-foreground mb-4">About</h2>
                 <div className="grid grid-cols-2 gap-x-8 gap-y-4">
@@ -349,16 +333,7 @@ export function CreatorOverlay({
                     </span>
                   )}
                 </h2>
-                {profileAssetsLoading ? (
-                  <div className="columns-2 gap-2 sm:columns-3 lg:columns-4">
-                    {[1, 2, 3].map((i) => (
-                      <div
-                        key={i}
-                        className="aspect-video w-full animate-pulse bg-muted rounded-lg mb-2 break-inside-avoid"
-                      />
-                    ))}
-                  </div>
-                ) : profileAssets && profileAssets.pastWork.length > 0 ? (
+                {profileAssets && profileAssets.pastWork.length > 0 ? (
                   <div className="columns-2 gap-2 sm:columns-3 lg:columns-4">
                     {profileAssets.pastWork.map((asset) => (
                       <AssetCard
@@ -366,121 +341,149 @@ export function CreatorOverlay({
                         src={asset.url}
                         filename={asset.filename}
                         isVideo={asset.mimeType.startsWith("video/")}
+                        action={
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-white hover:bg-white/20"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              downloadAssets([{ id: asset.id, filename: asset.filename }], {
+                                onError: () => toast.error("Download failed"),
+                              });
+                            }}
+                          >
+                            <Download className="h-4 w-4" />
+                            <span className="sr-only">Download</span>
+                          </Button>
+                        }
                       />
                     ))}
                   </div>
-                ) : (
+                ) : profileAssets ? (
                   <p className="text-sm text-muted-foreground py-4">No past work uploaded yet.</p>
-                )}
-              </div>
-
-              {/* Fieldtrip portfolio (curated by us) */}
-              <div className="mb-8">
-                <h2 className="text-base font-semibold text-foreground mb-4">
-                  Fieldtrip portfolio
-                  {profileAssets && (
-                    <span className="text-muted-foreground font-normal ml-2">
-                      ({profileAssets.creatorPortfolioAssets.length})
-                    </span>
-                  )}
-                </h2>
-                {profileAssetsLoading ? (
-                  <div className="columns-2 gap-2 sm:columns-3 lg:columns-4">
-                    {[1, 2, 3].map((i) => (
-                      <div
-                        key={i}
-                        className="aspect-video w-full animate-pulse bg-muted rounded-lg mb-2 break-inside-avoid"
-                      />
-                    ))}
-                  </div>
-                ) : profileAssets && profileAssets.creatorPortfolioAssets.length > 0 ? (
-                  <div className="columns-2 gap-2 sm:columns-3 lg:columns-4">
-                    {profileAssets.creatorPortfolioAssets.map((asset) => (
-                      <AssetCard
-                        key={asset.id}
-                        src={asset.url}
-                        filename={asset.filename}
-                        isVideo={asset.mimeType.startsWith("video/")}
-                      />
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-sm text-muted-foreground py-4">
-                    No portfolio assets yet. Add when closing a collaboration.
-                  </p>
-                )}
+                ) : null}
               </div>
 
               <div>
                 <h2 className="text-base font-semibold text-foreground mb-4">
-                  Collaborations{" "}
-                  {hasCollabs && (
-                    <span className="text-muted-foreground font-normal">
-                      ({creator.collaborations.length})
+                  Collaborations
+                  {closedCollabs.length > 0 && (
+                    <span className="text-muted-foreground font-normal ml-2">
+                      ({closedCollabs.length})
                     </span>
                   )}
                 </h2>
-                {hasCollabs ? (
+                {closedCollabs.length > 0 ? (
                   <div className="space-y-3">
-                    {creator.collaborations.map((collab) => (
-                      <div
-                        key={collab.id}
-                        className="rounded-2xl border border-border bg-card overflow-hidden"
-                      >
-                        <div className="px-6 py-5">
-                          <div className="flex items-center justify-between mb-2">
-                            <h3 className="text-base font-semibold text-foreground">
-                              {collab.brand}
-                            </h3>
-                            <span className="text-lg font-bold text-foreground">
-                              ${collab.total_paid.toLocaleString()}
-                            </span>
-                          </div>
-                          <p className="text-xs text-muted-foreground">
-                            {new Date(collab.date).toLocaleDateString()}
-                          </p>
-                        </div>
-                        <div className="border-t border-border px-6 py-4">
-                          <div className="grid grid-cols-3 gap-4">
-                            <div className="bg-muted/60 rounded-xl px-4 py-3">
-                              <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">
-                                Per piece
-                              </span>
-                              <p className="text-base font-semibold text-foreground mt-1">
-                                ${collab.per_piece_rate}
-                              </p>
+                    {closedCollabs.map((collab) => {
+                      const totalPaid = collab.totalPaidCents != null ? collab.totalPaidCents / 100 : null;
+                      const perPiece =
+                        totalPaid != null && collab.piecesOfContent
+                          ? totalPaid / collab.piecesOfContent
+                          : null;
+                      return (
+                        <div
+                          key={collab.id}
+                          className="rounded-2xl border border-border bg-card overflow-hidden"
+                        >
+                          <div className="px-6 py-5">
+                            <div className="flex items-center justify-between mb-2">
+                              <h3 className="text-base font-semibold text-foreground">
+                                {collab.submissionName}
+                              </h3>
+                              {totalPaid != null && (
+                                <span className="text-lg font-bold text-foreground">
+                                  ${totalPaid.toLocaleString()}
+                                </span>
+                              )}
                             </div>
-                            <div className="bg-muted/60 rounded-xl px-4 py-3">
-                              <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">
-                                Total paid
-                              </span>
-                              <p className="text-base font-semibold text-foreground mt-1">
-                                ${collab.total_paid.toLocaleString()}
-                              </p>
-                            </div>
-                            <div className="bg-muted/60 rounded-xl px-4 py-3">
-                              <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">
-                                Content pieces
-                              </span>
-                              <p className="text-base font-semibold text-foreground mt-1">
-                                {collab.pieces_of_content}
-                              </p>
-                            </div>
-                          </div>
-                          {collab.notes && (
-                            <p className="text-sm text-muted-foreground italic mt-3 border-l-2 border-border pl-3">
-                              "{collab.notes}"
+                            <p className="text-xs text-muted-foreground">
+                              {collab.closedAt.toLocaleDateString()}
                             </p>
-                          )}
+                          </div>
+                          <div className="border-t border-border px-6 py-4">
+                            <div className="grid grid-cols-3 gap-4">
+                              {perPiece != null && (
+                                <div className="bg-muted/60 rounded-xl px-4 py-3">
+                                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">
+                                    Per piece
+                                  </span>
+                                  <p className="text-base font-semibold text-foreground mt-1">
+                                    ${perPiece.toFixed(2)}
+                                  </p>
+                                </div>
+                              )}
+                              {totalPaid != null && (
+                                <div className="bg-muted/60 rounded-xl px-4 py-3">
+                                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">
+                                    Total paid
+                                  </span>
+                                  <p className="text-base font-semibold text-foreground mt-1">
+                                    ${totalPaid.toLocaleString()}
+                                  </p>
+                                </div>
+                              )}
+                              {collab.piecesOfContent != null && (
+                                <div className="bg-muted/60 rounded-xl px-4 py-3">
+                                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">
+                                    Content pieces
+                                  </span>
+                                  <p className="text-base font-semibold text-foreground mt-1">
+                                    {collab.piecesOfContent}
+                                  </p>
+                                </div>
+                              )}
+                            </div>
+                            {collab.reviewNotes && (
+                              <p className="text-sm text-muted-foreground italic mt-3 border-l-2 border-border pl-3">
+                                "{collab.reviewNotes}"
+                              </p>
+                            )}
+                            {collab.portfolioAssets.length > 0 && (
+                              <div className="mt-4">
+                                <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium mb-2">
+                                  Fieldtrip portfolio ({collab.portfolioAssets.length})
+                                </p>
+                                <div className="columns-2 gap-2 sm:columns-3 lg:columns-4">
+                                  {collab.portfolioAssets.map((asset) => (
+                                    <AssetCard
+                                      key={asset.id}
+                                      src={asset.url}
+                                      filename={asset.filename}
+                                      isVideo={asset.mimeType.startsWith("video/")}
+                                      action={
+                                        <Button
+                                          variant="ghost"
+                                          size="icon"
+                                          className="h-8 w-8 text-white hover:bg-white/20"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            downloadAssets(
+                                              [{ id: asset.id, filename: asset.filename }],
+                                              { onError: () => toast.error("Download failed") },
+                                            );
+                                          }}
+                                        >
+                                          <Download className="h-4 w-4" />
+                                          <span className="sr-only">Download</span>
+                                        </Button>
+                                      }
+                                    />
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
-                ) : (
+                ) : profileAssets ? (
                   <p className="text-sm text-muted-foreground py-6 text-center">
                     No collaborations logged yet.
                   </p>
-                )}
+                ) : null}
               </div>
             </div>
           </div>

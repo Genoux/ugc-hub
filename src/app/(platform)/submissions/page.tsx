@@ -1,5 +1,5 @@
 import { count, eq, sql } from "drizzle-orm";
-import { creatorFolders, creatorSubmissions, submissions } from "@/db/schema";
+import { creatorCollaborations, creatorSubmissions, submissions } from "@/db/schema";
 import { SubmissionList } from "@/features/submissions/components/submission-list";
 import { db } from "@/shared/lib/db";
 
@@ -10,12 +10,12 @@ export default async function SubmissionsPage() {
       name: submissions.name,
       description: submissions.description,
       createdAt: submissions.createdAt,
-      totalCreators: count(creatorFolders.id),
+      totalCreators: count(creatorCollaborations.id),
       totalBatches: sql<number>`COUNT(DISTINCT ${creatorSubmissions.id})`,
     })
     .from(submissions)
-    .leftJoin(creatorFolders, eq(creatorFolders.submissionId, submissions.id))
-    .leftJoin(creatorSubmissions, eq(creatorSubmissions.creatorFolderId, creatorFolders.id))
+    .leftJoin(creatorCollaborations, eq(creatorCollaborations.submissionId, submissions.id))
+    .leftJoin(creatorSubmissions, eq(creatorSubmissions.creatorCollaborationId, creatorCollaborations.id))
     .groupBy(submissions.id)
     .orderBy(submissions.createdAt);
 

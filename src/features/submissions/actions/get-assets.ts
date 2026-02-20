@@ -1,12 +1,15 @@
 "use server";
 
 import { eq } from "drizzle-orm";
-import { creatorFolders, creatorSubmissions, submissionAssets } from "@/db/schema";
+import { creatorCollaborations, creatorSubmissions, submissionAssets } from "@/db/schema";
 import { toActionError } from "@/shared/lib/action-error";
 import { requireAdmin } from "@/shared/lib/auth";
 import { db } from "@/shared/lib/db";
 
-type Scope = { submissionId: string } | { folderId: string } | { creatorSubmissionId: string };
+type Scope =
+  | { submissionId: string }
+  | { collaborationId: string }
+  | { creatorSubmissionId: string };
 
 export async function getAssets(scope: Scope) {
   try {
@@ -20,7 +23,7 @@ export async function getAssets(scope: Scope) {
       return { data: rows };
     }
 
-    if ("folderId" in scope) {
+    if ("collaborationId" in scope) {
       const rows = await db
         .select({ id: submissionAssets.id, filename: submissionAssets.filename })
         .from(submissionAssets)
@@ -28,7 +31,7 @@ export async function getAssets(scope: Scope) {
           creatorSubmissions,
           eq(submissionAssets.creatorSubmissionId, creatorSubmissions.id),
         )
-        .where(eq(creatorSubmissions.creatorFolderId, scope.folderId));
+        .where(eq(creatorSubmissions.creatorCollaborationId, scope.collaborationId));
       return { data: rows };
     }
 
@@ -39,8 +42,8 @@ export async function getAssets(scope: Scope) {
         creatorSubmissions,
         eq(submissionAssets.creatorSubmissionId, creatorSubmissions.id),
       )
-      .innerJoin(creatorFolders, eq(creatorSubmissions.creatorFolderId, creatorFolders.id))
-      .where(eq(creatorFolders.submissionId, scope.submissionId));
+      .innerJoin(creatorCollaborations, eq(creatorSubmissions.creatorCollaborationId, creatorCollaborations.id))
+      .where(eq(creatorCollaborations.submissionId, scope.submissionId));
 
     return { data: rows };
   } catch (err) {

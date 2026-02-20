@@ -13,9 +13,9 @@ export const revalidate = 0;
 export async function POST(request: NextRequest) {
   try {
     await requireAdmin();
-    const { creatorFolderId, creatorId, filename, mimeType, fileSize } = await request.json();
+    const { creatorCollaborationId, creatorId, filename, mimeType, fileSize } = await request.json();
 
-    if (!creatorFolderId || !creatorId || !filename || !mimeType) {
+    if (!creatorCollaborationId || !creatorId || !filename || !mimeType) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "File size exceeds limit" }, { status: 400 });
     }
 
-    const key = `creators/${creatorId}/portfolio/${creatorFolderId}/${randomBytes(16).toString("hex")}-${filename}`;
+    const key = `creators/${creatorId}/portfolio/${creatorCollaborationId}/${randomBytes(16).toString("hex")}-${filename}`;
 
     const uploadUrl = await getSignedUrl(
       r2Client,

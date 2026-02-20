@@ -2,8 +2,8 @@
 
 import { ChevronRight, Files, Folder } from "lucide-react";
 import { useEffect, useState } from "react";
+import type { CreatorSubmissions } from "@/features/creators/actions/portal/get-creator-submissions";
 import { AssetCard } from "@/shared/components/asset-card";
-import type { CreatorSubmissions } from "../actions/get-creator-submissions";
 
 function AssetPreview({
   assetId,

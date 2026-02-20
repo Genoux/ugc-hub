@@ -15,7 +15,7 @@ export const revalidate = 0;
 
 export async function POST(request: NextRequest) {
   try {
-    const { filename, contentType, fileSize, submissionId, creatorFolderId, batchId } =
+    const { filename, contentType, fileSize, submissionId, creatorCollaborationId, batchId } =
       await request.json();
 
     if (!UPLOAD_CONFIG.allowedMimeTypes.includes(contentType)) {
@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "File size exceeds limit" }, { status: 400 });
     }
 
-    const folder = `submissions/${submissionId}/creators/${creatorFolderId}/batches/${batchId}`;
+    const folder = `submissions/${submissionId}/creators/${creatorCollaborationId}/batches/${batchId}`;
     const key = `${folder}/${randomBytes(16).toString("hex")}-${filename}`;
 
     if (fileSize > UPLOAD_CONFIG.chunkSize) {

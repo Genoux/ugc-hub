@@ -1,6 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
 import { eq } from "drizzle-orm";
-import { creatorFolders, submissions } from "@/db/schema";
+import { creatorCollaborations, submissions } from "@/db/schema";
 import { db } from "@/shared/lib/db";
 
 export const dynamic = "force-dynamic";
@@ -24,8 +24,8 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
     db.query.submissions.findFirst({
       where: eq(submissions.id, id),
     }),
-    db.query.creatorFolders.findMany({
-      where: eq(creatorFolders.submissionId, id),
+    db.query.creatorCollaborations.findMany({
+      where: eq(creatorCollaborations.submissionId, id),
       orderBy: (f, { desc }) => [desc(f.createdAt)],
       with: {
         creator: true,

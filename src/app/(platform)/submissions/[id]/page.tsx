@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
-import { creatorFolders, submissions } from "@/db/schema";
+import { creatorCollaborations, submissions } from "@/db/schema";
 import { db } from "@/shared/lib/db";
 import { SubmissionDetailClient } from "./client";
 
@@ -17,8 +17,8 @@ export default async function SubmissionDetailPage({
 
   const [submission, folders] = await Promise.all([
     db.query.submissions.findFirst({ where: eq(submissions.id, id) }),
-    db.query.creatorFolders.findMany({
-      where: eq(creatorFolders.submissionId, id),
+    db.query.creatorCollaborations.findMany({
+      where: eq(creatorCollaborations.submissionId, id),
       orderBy: (f, { desc }) => [desc(f.createdAt)],
       with: {
         creator: { columns: { id: true, fullName: true, email: true } },

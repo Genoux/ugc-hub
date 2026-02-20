@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { completeCreatorProfile } from "@/features/creators/actions/portal/complete-creator-profile";
 import { Button } from "@/shared/components/ui/button";
 import { Dialog, DialogContent } from "@/shared/components/ui/dialog";
-import { completeCreatorProfile } from "../../actions/complete-creator-profile";
 import { Step1BasicInfo } from "./steps/step-1-basic-info";
 import { Step2Socials } from "./steps/step-2-socials";
 import { Step3Categories } from "./steps/step-3-categories";

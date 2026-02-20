@@ -1,6 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import type { CreatorSubmissions } from "@/features/creators/actions/portal/get-creator-submissions";
+import type { CreatorUIState } from "@/features/creators/lib/get-creator-ui-state";
+import type { Creator } from "@/features/creators/schemas";
 import {
   Card,
   CardContent,
@@ -9,9 +12,6 @@ import {
   CardTitle,
 } from "@/shared/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
-import type { CreatorSubmissions } from "../actions/get-creator-submissions";
-import type { CreatorUIState } from "../lib/get-creator-ui-state";
-import type { Creator } from "../types";
 import { CreatorContentTab } from "./creator-content-tab";
 import { ProfileStateBanner } from "./profile-state-banner";
 import { ProfileWizard } from "./wizard";

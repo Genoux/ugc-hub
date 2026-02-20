@@ -139,7 +139,7 @@ function BatchSection({
 interface CreatorFolderClientProps {
   submissionId: string;
   submissionName: string;
-  folderId: string;
+  collaborationId: string;
   creator: { id: string; fullName: string; email: string };
   collaborationStatus: "active" | "closed";
   batches: Batch[];
@@ -149,7 +149,7 @@ interface CreatorFolderClientProps {
 export function CreatorFolderClient({
   submissionId,
   submissionName,
-  folderId,
+  collaborationId,
   creator,
   collaborationStatus,
   batches,
@@ -255,7 +255,7 @@ export function CreatorFolderClient({
         open={showCloseWizard}
         onClose={() => setShowCloseWizard(false)}
         onSuccess={() => setIsClosed(true)}
-        folderId={folderId}
+        collaborationId={collaborationId}
         creatorId={creator.id}
         creatorName={creator.fullName}
         submissionName={submissionName}

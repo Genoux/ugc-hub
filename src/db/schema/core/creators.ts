@@ -52,28 +52,6 @@ export const creators = pgTable("creators", {
   // Performance & status (Admin-managed)
   overallRating: text("overall_rating").notNull().default("untested"),
 
-  // Collaboration history
-  collaborations: jsonb("collaborations")
-    .$type<
-      Array<{
-        id: string;
-        creator_id: string;
-        brand: string;
-        date: string;
-        pieces_of_content: number;
-        total_paid: number;
-        per_piece_rate: number;
-        notes?: string;
-        ratings: {
-          visual_quality: string;
-          acting_line_delivery: string;
-          reliability_speed: string;
-        };
-        content_thumbnails?: string[];
-      }>
-    >()
-    .default([]),
-
   // Blacklist info
   blacklistReason: text("blacklist_reason"),
   blacklistedAt: timestamp("blacklisted_at"),
