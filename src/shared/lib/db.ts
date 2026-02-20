@@ -1,5 +1,5 @@
-import { loadEnvConfig } from "@next/env";
 import { neon } from "@neondatabase/serverless";
+import { loadEnvConfig } from "@next/env";
 import { drizzle } from "drizzle-orm/neon-http";
 import * as schema from "@/db/schema";
 

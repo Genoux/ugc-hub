@@ -1,6 +1,7 @@
 "use client";
 
 import { AnimatePresence } from "motion/react";
+import { useRouter } from "next/navigation";
 import { ThemeProvider } from "next-themes";
 import { useEffect, useState } from "react";
 import { AppSidebar } from "@/shared/components/app-sidebar";
@@ -8,16 +9,26 @@ import { LoadingScreen } from "@/shared/components/loading-screen";
 import { SiteHeader } from "@/shared/components/site-header";
 import { SidebarInset, SidebarProvider } from "@/shared/components/ui/sidebar";
 
+const PLATFORM_ROUTES = ["/applicants", "/database", "/submissions"] as const;
+
 export default function PlatformLayout({ children }: { children: React.ReactNode }) {
   const [isAppReady, setIsAppReady] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     setIsAppReady(true);
   }, []);
 
+  useEffect(() => {
+    for (const route of PLATFORM_ROUTES) {
+      router.prefetch(route);
+    }
+  }, [router]);
+
   return (
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
       <SidebarProvider
+        className="h-svh overflow-hidden"
         style={
           {
             "--sidebar-width": "220px",
@@ -29,12 +40,10 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
           {!isAppReady && <LoadingScreen key="loading" />}
         </AnimatePresence>
         <AppSidebar variant="inset" />
-        <SidebarInset>
+        <SidebarInset className="min-h-0 max-h-[calc(100svh-1rem)] overflow-hidden">
           <SiteHeader />
-          <div className="flex flex-1 flex-col p-8">
-            <div className="@container/main mx-auto w-full max-w-7xl flex flex-1 flex-col gap-2">
-              {children}
-            </div>
+          <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+            {children}
           </div>
         </SidebarInset>
       </SidebarProvider>

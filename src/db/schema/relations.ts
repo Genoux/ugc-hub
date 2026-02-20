@@ -1,40 +1,64 @@
 import { relations } from "drizzle-orm";
-import { assets } from "./assets";
-import { campaigns } from "./campaigns";
-import { links } from "./links";
-import { submissions } from "./submissions";
+import { creatorPortfolioAssets } from "./assets/creator-portfolio-assets";
+import { creatorProfileAssets } from "./assets/creator-profile-assets";
+import { submissionAssets } from "./assets/submission-assets";
+import { creatorCollaborations } from "./collaborations/creator-collaborations";
+import { creatorSubmissions } from "./collaborations/creator-submissions";
+import { creators } from "./core/creators";
+import { submissions } from "./core/submissions";
 
-export const campaignsRelations = relations(campaigns, ({ many }) => ({
-  links: many(links),
-  submissions: many(submissions),
+export const submissionsRelations = relations(submissions, ({ many }) => ({
+  creatorCollaborations: many(creatorCollaborations),
 }));
 
-export const linksRelations = relations(links, ({ one }) => ({
-  campaign: one(campaigns, {
-    fields: [links.campaignId],
-    references: [campaigns.id],
-  }),
+export const creatorsRelations = relations(creators, ({ many }) => ({
+  creatorCollaborations: many(creatorCollaborations),
+  creatorProfileAssets: many(creatorProfileAssets),
+  creatorPortfolioAssets: many(creatorPortfolioAssets),
+}));
+
+export const creatorCollaborationsRelations = relations(creatorCollaborations, ({ one, many }) => ({
   submission: one(submissions, {
-    fields: [links.id],
-    references: [submissions.linkId],
-  }),
-}));
-
-export const submissionsRelations = relations(submissions, ({ one, many }) => ({
-  campaign: one(campaigns, {
-    fields: [submissions.campaignId],
-    references: [campaigns.id],
-  }),
-  link: one(links, {
-    fields: [submissions.linkId],
-    references: [links.id],
-  }),
-  assets: many(assets),
-}));
-
-export const assetsRelations = relations(assets, ({ one }) => ({
-  submission: one(submissions, {
-    fields: [assets.submissionId],
+    fields: [creatorCollaborations.submissionId],
     references: [submissions.id],
+  }),
+  creator: one(creators, {
+    fields: [creatorCollaborations.creatorId],
+    references: [creators.id],
+  }),
+  creatorSubmissions: many(creatorSubmissions),
+  creatorPortfolioAssets: many(creatorPortfolioAssets),
+}));
+
+export const creatorSubmissionsRelations = relations(creatorSubmissions, ({ one, many }) => ({
+  creatorCollaboration: one(creatorCollaborations, {
+    fields: [creatorSubmissions.creatorCollaborationId],
+    references: [creatorCollaborations.id],
+  }),
+  submissionAssets: many(submissionAssets),
+}));
+
+export const submissionAssetsRelations = relations(submissionAssets, ({ one }) => ({
+  creatorSubmission: one(creatorSubmissions, {
+    fields: [submissionAssets.creatorSubmissionId],
+    references: [creatorSubmissions.id],
+  }),
+}));
+
+export const creatorProfileAssetsRelations = relations(creatorProfileAssets, ({ one }) => ({
+  creator: one(creators, {
+    fields: [creatorProfileAssets.creatorId],
+    references: [creators.id],
+  }),
+}));
+
+export const creatorPortfolioAssetsRelations = relations(creatorPortfolioAssets, ({ one }) => ({
+  creatorCollaboration: one(creatorCollaborations, {
+    fields: [creatorPortfolioAssets.creatorCollaborationId],
+    references: [creatorCollaborations.id],
+  }),
+  creator: one(creators, {
+    fields: [creatorPortfolioAssets.creatorId],
+    references: [creators.id],
   }),
 }));

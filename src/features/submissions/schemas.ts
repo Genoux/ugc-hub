@@ -1,8 +1,13 @@
 import { z } from "zod";
 
-export const reviewSubmissionSchema = z.object({
-  submissionId: z.string().uuid(),
-  status: z.enum(["approved", "rejected"]),
+export const submissionSchema = z.object({
+  name: z.string().min(1).max(100),
+  description: z.string().max(500).optional(),
+  assetRequirements: z.object({
+    acceptedTypes: z.array(z.string()),
+    maxFiles: z.number().int().min(1).max(50),
+    maxFileSize: z.number().int(),
+  }),
 });
 
-export type ReviewSubmission = z.infer<typeof reviewSubmissionSchema>;
+export type Submission = z.infer<typeof submissionSchema>;

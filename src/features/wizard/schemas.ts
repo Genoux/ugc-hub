@@ -1,10 +1,5 @@
 import { z } from "zod";
 
-export const wizardStepOneSchema = z.object({
-  creatorName: z.string().min(1).max(100),
-  creatorEmail: z.string().email(),
-});
-
 export const wizardStepTwoSchema = z.object({
   files: z
     .array(
@@ -18,5 +13,4 @@ export const wizardStepTwoSchema = z.object({
     .max(50),
 });
 
-export type WizardStepOne = z.infer<typeof wizardStepOneSchema>;
 export type WizardStepTwo = z.infer<typeof wizardStepTwoSchema>;
