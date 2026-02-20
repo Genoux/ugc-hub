@@ -45,10 +45,13 @@ export function DirectInviteButton() {
         const result = await directInvite({ email: email.trim() });
         if (!result.success) {
           const messages = {
-            already_exists: "This email is already in the system — use the applicants page instead.",
+            already_exists:
+              "This email is already in the system — use the applicants page instead.",
             already_invited_or_exists: "This email already has a Clerk account.",
           } as const;
-          toast.error(messages[result.error] ?? "Failed to send invitation");
+          toast.error(
+            (result.error ? messages[result.error] : undefined) ?? "Failed to send invitation",
+          );
           return;
         }
         toast.success(`Invitation sent to ${email.trim()}`);

@@ -3,7 +3,6 @@
 import { Check, ChevronLeft, ChevronRight, Copy, Folder } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
-import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/shared/components/ui/tooltip";
 
@@ -23,8 +22,7 @@ type CreatorFolder = {
   };
   creatorSubmissions: Array<{
     id: string;
-    isNew: boolean;
-    assets: Array<{ id: string }>;
+    submissionAssets: Array<{ id: string }>;
   }>;
 };
 
@@ -43,11 +41,6 @@ export function SubmissionDetailClient({
     setCopiedToken(true);
     setTimeout(() => setCopiedToken(false), 2000);
   }
-
-  const totalNew = folders.reduce(
-    (s, f) => s + f.creatorSubmissions.filter((b) => b.isNew).length,
-    0,
-  );
 
   return (
     <div className="flex flex-1 flex-col gap-6 p-8">
@@ -87,7 +80,6 @@ export function SubmissionDetailClient({
       <div className="flex flex-col gap-3">
         <p className="text-sm text-muted-foreground">
           {folders.length} creator{folders.length !== 1 ? "s" : ""}
-          {totalNew > 0 && ` · ${totalNew} new batch${totalNew !== 1 ? "es" : ""}`}
         </p>
 
         {folders.length === 0 ? (
@@ -103,11 +95,7 @@ export function SubmissionDetailClient({
         ) : (
           <div className="space-y-2">
             {folders.map((folder) => {
-              const newCount = folder.creatorSubmissions.filter((b) => b.isNew).length;
-              const totalFiles = folder.creatorSubmissions.reduce(
-                (s, b) => s + b.assets.length,
-                0,
-              );
+              const totalFiles = folder.creatorSubmissions.reduce((s, b) => s + b.submissionAssets.length, 0);
 
               return (
                 <Link
@@ -127,13 +115,10 @@ export function SubmissionDetailClient({
                     </div>
                   </div>
                   <div className="flex items-center gap-3 shrink-0">
-                    {newCount > 0 && (
-                      <Badge className="bg-blue-100 text-blue-700 border-blue-200 hover:bg-blue-100">
-                        {newCount} new
-                      </Badge>
-                    )}
                     <span className="text-xs text-muted-foreground">
-                      {folder.creatorSubmissions.length} batch{folder.creatorSubmissions.length !== 1 ? "es" : ""} · {totalFiles} file{totalFiles !== 1 ? "s" : ""}
+                      {folder.creatorSubmissions.length} batch
+                      {folder.creatorSubmissions.length !== 1 ? "es" : ""} · {totalFiles} file
+                      {totalFiles !== 1 ? "s" : ""}
                     </span>
                     <ChevronRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                   </div>

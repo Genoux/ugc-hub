@@ -20,7 +20,7 @@ export function Step5Photo({ data, onChange }: Props) {
     setError(null);
     setUploading(true);
     try {
-      const res = await fetch("/api/uploads/presign", {
+      const res = await fetch("/api/uploads/submission/presign", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ filename: file.name, contentType: file.type, fileSize: file.size }),

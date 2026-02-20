@@ -18,7 +18,7 @@ const bodySchema = z.object({
       other_links: z.array(z.string()).optional(),
     })
     .optional(),
-  portfolioUrl: z.string().url().optional(),
+  portfolioUrl: z.url().optional(),
 });
 
 function verifySignature(payload: string, signature: string, secret: string): boolean {

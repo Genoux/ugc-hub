@@ -24,7 +24,12 @@ export async function approveApplicant(creatorId: string) {
 
   await db
     .update(creators)
-    .set({ status: "approved_not_joined", source: "applicant", approvedAt: new Date(), invitedAt: new Date() })
+    .set({
+      status: "approved_not_joined",
+      source: "applicant",
+      approvedAt: new Date(),
+      invitedAt: new Date(),
+    })
     .where(eq(creators.id, input.creatorId));
 
   const revert = () =>
@@ -35,7 +40,10 @@ export async function approveApplicant(creatorId: string) {
 
   let result: Awaited<ReturnType<typeof sendInvitation>>;
   try {
-    result = await sendInvitation(creator.email, `${process.env.NEXT_PUBLIC_APP_URL}${ROUTES.signUp}`);
+    result = await sendInvitation(
+      creator.email,
+      `${process.env.NEXT_PUBLIC_APP_URL}${ROUTES.signUp}`,
+    );
   } catch (err) {
     await revert();
     throw err;

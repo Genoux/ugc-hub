@@ -1,11 +1,17 @@
 "use client";
 
-import { ChevronLeft, ChevronRight, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Copy, X } from "lucide-react";
 import Image from "next/image";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+import { AssetCard } from "@/shared/components/asset-card";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import { Sheet, SheetContent, SheetHeader } from "@/shared/components/ui/sheet";
-import { RATING_CONFIG } from "../constants";
+import type { CreatorProfileAssetsResult } from "../actions/get-creator-profile-assets";
+import { getCreatorProfileAssets } from "../actions/get-creator-profile-assets";
+import { RATING_CONFIG, RATING_LABELS } from "../constants";
+import { calculateRatingsFromCollaborations } from "../lib/calculated-ratings";
 import type { Creator } from "../schemas";
 
 interface CreatorOverlayProps {
@@ -27,7 +33,28 @@ export function CreatorOverlay({
   const hasPrev = currentIdx > 0;
   const hasNext = currentIdx < creators.length - 1;
 
-  const ratingConfig = RATING_CONFIG[creator.overallRating] || RATING_CONFIG.untested;
+  const [profileAssets, setProfileAssets] = useState<CreatorProfileAssetsResult | null>(null);
+  const [profileAssetsLoading, setProfileAssetsLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    setProfileAssetsLoading(true);
+    setProfileAssets(null);
+    getCreatorProfileAssets(creator.id)
+      .then((data) => {
+        if (!cancelled) setProfileAssets(data);
+      })
+      .finally(() => {
+        if (!cancelled) setProfileAssetsLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [creator.id]);
+
+  const calculatedRatings = calculateRatingsFromCollaborations(creator.collaborations ?? []);
+  const overallRating = calculatedRatings?.overall ?? creator.overallRating;
+  const ratingConfig = RATING_CONFIG[overallRating] || RATING_CONFIG.untested;
   const rateRange = creator.rateRangeInternal || creator.rateRangeSelf;
   const hasCollabs = creator.collaborations && creator.collaborations.length > 0;
 
@@ -82,14 +109,88 @@ export function CreatorOverlay({
                 )}
               </div>
 
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="w-full gap-2 mb-4"
+                onClick={() => {
+                  if (creator.email) {
+                    void navigator.clipboard.writeText(creator.email);
+                    toast.success("Email copied");
+                  }
+                }}
+                disabled={!creator.email}
+              >
+                <Copy className="h-3.5 w-3.5" />
+                Copy email
+              </Button>
+
               <h1 className="text-lg font-bold text-foreground leading-tight">
                 {creator.fullName}
               </h1>
               <div className="flex items-center gap-2 mt-1.5 mb-1">
                 <Badge variant="outline" className={ratingConfig.className}>
-                  {creator.overallRating}
+                  {overallRating}
                 </Badge>
+                {calculatedRatings && (
+                  <span className="text-[10px] text-muted-foreground">
+                    (avg of {creator.collaborations?.length ?? 0} collaboration
+                    {(creator.collaborations?.length ?? 0) === 1 ? "" : "s"})
+                  </span>
+                )}
               </div>
+              {calculatedRatings && (
+                <div className="border-t border-border pt-4 mb-4">
+                  <h3 className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium mb-2">
+                    Ratings
+                  </h3>
+                  <p className="text-[10px] text-muted-foreground mb-2">
+                    Overall and each dimension calculated from collaboration averages.
+                  </p>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-xs text-muted-foreground">Overall</span>
+                      <Badge variant="outline" className={`text-[10px] ${ratingConfig.className}`}>
+                        {calculatedRatings.overall}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-xs text-muted-foreground">
+                        {RATING_LABELS.visual_quality}
+                      </span>
+                      <Badge
+                        variant="outline"
+                        className={`text-[10px] ${(RATING_CONFIG[calculatedRatings.visual_quality] ?? RATING_CONFIG.untested).className}`}
+                      >
+                        {calculatedRatings.visual_quality}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-xs text-muted-foreground">
+                        {RATING_LABELS.acting_line_delivery}
+                      </span>
+                      <Badge
+                        variant="outline"
+                        className={`text-[10px] ${(RATING_CONFIG[calculatedRatings.acting_line_delivery] ?? RATING_CONFIG.untested).className}`}
+                      >
+                        {calculatedRatings.acting_line_delivery}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-xs text-muted-foreground">
+                        {RATING_LABELS.reliability_speed}
+                      </span>
+                      <Badge
+                        variant="outline"
+                        className={`text-[10px] ${(RATING_CONFIG[calculatedRatings.reliability_speed] ?? RATING_CONFIG.untested).className}`}
+                      >
+                        {calculatedRatings.reliability_speed}
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+              )}
               {creator.country && (
                 <p className="text-xs text-muted-foreground mb-4">{creator.country}</p>
               )}
@@ -235,6 +336,78 @@ export function CreatorOverlay({
                       ))}
                     </div>
                   </div>
+                )}
+              </div>
+
+              {/* Past work (creator uploads) */}
+              <div className="mb-8">
+                <h2 className="text-base font-semibold text-foreground mb-4">
+                  Past work
+                  {profileAssets && (
+                    <span className="text-muted-foreground font-normal ml-2">
+                      ({profileAssets.pastWork.length})
+                    </span>
+                  )}
+                </h2>
+                {profileAssetsLoading ? (
+                  <div className="columns-2 gap-2 sm:columns-3 lg:columns-4">
+                    {[1, 2, 3].map((i) => (
+                      <div
+                        key={i}
+                        className="aspect-video w-full animate-pulse bg-muted rounded-lg mb-2 break-inside-avoid"
+                      />
+                    ))}
+                  </div>
+                ) : profileAssets && profileAssets.pastWork.length > 0 ? (
+                  <div className="columns-2 gap-2 sm:columns-3 lg:columns-4">
+                    {profileAssets.pastWork.map((asset) => (
+                      <AssetCard
+                        key={asset.id}
+                        src={asset.url}
+                        filename={asset.filename}
+                        isVideo={asset.mimeType.startsWith("video/")}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground py-4">No past work uploaded yet.</p>
+                )}
+              </div>
+
+              {/* Fieldtrip portfolio (curated by us) */}
+              <div className="mb-8">
+                <h2 className="text-base font-semibold text-foreground mb-4">
+                  Fieldtrip portfolio
+                  {profileAssets && (
+                    <span className="text-muted-foreground font-normal ml-2">
+                      ({profileAssets.creatorPortfolioAssets.length})
+                    </span>
+                  )}
+                </h2>
+                {profileAssetsLoading ? (
+                  <div className="columns-2 gap-2 sm:columns-3 lg:columns-4">
+                    {[1, 2, 3].map((i) => (
+                      <div
+                        key={i}
+                        className="aspect-video w-full animate-pulse bg-muted rounded-lg mb-2 break-inside-avoid"
+                      />
+                    ))}
+                  </div>
+                ) : profileAssets && profileAssets.creatorPortfolioAssets.length > 0 ? (
+                  <div className="columns-2 gap-2 sm:columns-3 lg:columns-4">
+                    {profileAssets.creatorPortfolioAssets.map((asset) => (
+                      <AssetCard
+                        key={asset.id}
+                        src={asset.url}
+                        filename={asset.filename}
+                        isVideo={asset.mimeType.startsWith("video/")}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground py-4">
+                    No portfolio assets yet. Add when closing a collaboration.
+                  </p>
                 )}
               </div>
 

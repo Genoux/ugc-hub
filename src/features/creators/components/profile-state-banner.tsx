@@ -24,7 +24,10 @@ const BANNER_CONFIG = {
     variant: "destructive" as const,
     message: "Your application was not approved at this time.",
   },
-} satisfies Record<CreatorUIState, { variant?: "default" | "destructive"; message: string; cta?: string }>;
+} satisfies Record<
+  CreatorUIState,
+  { variant?: "default" | "destructive"; message: string; cta?: string }
+>;
 
 export function ProfileStateBanner({ uiState, onOpenWizard }: ProfileStateBannerProps) {
   const config = BANNER_CONFIG[uiState];

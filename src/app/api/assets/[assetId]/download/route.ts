@@ -1,7 +1,7 @@
 import { GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { eq } from "drizzle-orm";
-import { assets } from "@/db/schema";
+import { submissionAssets } from "@/db/schema";
 import { R2_BUCKET_NAME, r2Client } from "@/features/uploads/lib/r2-client";
 import { db } from "@/shared/lib/db";
 
@@ -9,8 +9,8 @@ export async function GET(_request: Request, { params }: { params: Promise<{ ass
   try {
     const { assetId } = await params;
 
-    const asset = await db.query.assets.findFirst({
-      where: eq(assets.id, assetId),
+    const asset = await db.query.submissionAssets.findFirst({
+      where: eq(submissionAssets.id, assetId),
     });
 
     if (!asset) {

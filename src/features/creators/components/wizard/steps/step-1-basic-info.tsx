@@ -45,7 +45,9 @@ export function Step1BasicInfo({ data, onChange }: Props) {
           </SelectTrigger>
           <SelectContent>
             {COUNTRIES.map((c) => (
-              <SelectItem key={c} value={c}>{c}</SelectItem>
+              <SelectItem key={c} value={c}>
+                {c}
+              </SelectItem>
             ))}
           </SelectContent>
         </Select>

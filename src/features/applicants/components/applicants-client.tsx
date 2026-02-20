@@ -108,10 +108,7 @@ export function ApplicantsClient({ initialCreators }: Props) {
 
         <main className="flex-1 pb-8 min-w-0">
           {selected ? (
-            <ApplicantDetail
-              creator={selected}
-              activeTab={selected.status}
-            />
+            <ApplicantDetail creator={selected} activeTab={selected.status} />
           ) : (
             <div className="flex h-full items-center justify-center text-muted-foreground text-sm">
               No applicants in this tab.

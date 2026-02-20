@@ -2,6 +2,7 @@ import { Instagram, Music, Youtube } from "lucide-react";
 import Image from "next/image";
 import { Badge } from "@/shared/components/ui/badge";
 import { RATING_CONFIG } from "../constants";
+import { calculateRatingsFromCollaborations } from "../lib/calculated-ratings";
 import type { Creator } from "../schemas";
 
 interface CreatorCardProps {
@@ -16,7 +17,9 @@ const CHANNEL_ICON_MAP = {
 };
 
 export function CreatorCard({ creator, onClick }: CreatorCardProps) {
-  const ratingConfig = RATING_CONFIG[creator.overallRating] || RATING_CONFIG.untested;
+  const calculated = calculateRatingsFromCollaborations(creator.collaborations ?? []);
+  const overallRating = calculated?.overall ?? creator.overallRating;
+  const ratingConfig = RATING_CONFIG[overallRating] || RATING_CONFIG.untested;
   const ChannelIcon = creator.primaryChannel
     ? CHANNEL_ICON_MAP[creator.primaryChannel as keyof typeof CHANNEL_ICON_MAP]
     : null;
@@ -33,12 +36,7 @@ export function CreatorCard({ creator, onClick }: CreatorCardProps) {
     >
       <div className="relative mb-3 aspect-square w-full overflow-hidden rounded-lg bg-muted">
         {creator.profilePhoto ? (
-          <Image
-            src={creator.profilePhoto}
-            alt={creator.fullName}
-            fill
-            className="object-cover"
-          />
+          <Image src={creator.profilePhoto} alt={creator.fullName} fill className="object-cover" />
         ) : (
           <div className="flex h-full w-full items-center justify-center text-4xl font-light text-muted-foreground">
             {creator.fullName[0]}
@@ -50,7 +48,7 @@ export function CreatorCard({ creator, onClick }: CreatorCardProps) {
 
       <div className="flex items-center gap-2 mb-2">
         <Badge variant="outline" className={ratingConfig.className}>
-          {creator.overallRating}
+          {overallRating}
         </Badge>
         {ChannelIcon && (
           <div className="flex items-center justify-center h-5 w-5 rounded-full bg-muted">

@@ -27,14 +27,11 @@ export default async function CreatorLayout({ children }: { children: React.Reac
     redirect(isAdmin ? ROUTES.adminHome : ROUTES.signIn);
   }
 
-  if (!creator.clerkUserId || creator.status === "approved_not_joined") {
+  // Link Clerk account on first visit; status stays approved_not_joined until profile is completed
+  if (!creator.clerkUserId) {
     await db
       .update(creators)
-      .set({
-        clerkUserId: userId,
-        status: "joined",
-        joinedAt: creator.joinedAt ?? new Date(),
-      })
+      .set({ clerkUserId: userId })
       .where(eq(creators.id, creator.id));
   }
 

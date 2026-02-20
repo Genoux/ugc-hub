@@ -21,12 +21,17 @@ export default async function CreatorFolderPage({
       submission: { columns: { id: true, name: true } },
       creator: { columns: { id: true, fullName: true, email: true } },
       creatorSubmissions: {
+        columns: { id: true, label: true, batchNumber: true, deliveredAt: true },
         orderBy: (cs, { asc }) => [asc(cs.batchNumber)],
         with: {
-          assets: {
+          submissionAssets: {
             columns: { id: true, filename: true, mimeType: true, sizeBytes: true },
           },
         },
+      },
+      creatorPortfolioAssets: {
+        columns: { id: true, filename: true, mimeType: true, sizeBytes: true, createdAt: true },
+        orderBy: (pa, { asc }) => [asc(pa.createdAt)],
       },
     },
   });
@@ -37,8 +42,11 @@ export default async function CreatorFolderPage({
     <CreatorFolderClient
       submissionId={id}
       submissionName={folder.submission.name}
+      folderId={folderId}
       creator={folder.creator}
+      collaborationStatus={folder.collaborationStatus}
       batches={folder.creatorSubmissions}
+      portfolioAssets={folder.creatorPortfolioAssets}
     />
   );
 }

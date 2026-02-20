@@ -1,14 +1,20 @@
 "use client";
 
-import { Check, Copy, ExternalLink, Globe, Instagram, Mail } from "lucide-react";
+import { Check, Copy, ExternalLink, Globe, Instagram, Mail, MoreVertical } from "lucide-react";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import type { Creator } from "@/features/applicants/types";
 import { Button } from "@/shared/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/shared/components/ui/dropdown-menu";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/shared/components/ui/tooltip";
 import { approveApplicant } from "../actions/approve-applicant";
-import { rejectApplicant } from "../actions/reject-applicant";
 import { reinviteCreator } from "../actions/reinvite-creator";
+import { rejectApplicant } from "../actions/reject-applicant";
 
 type ActiveTab = Creator["status"];
 
@@ -145,21 +151,33 @@ export function ApplicantDetail({ creator, activeTab }: Props) {
     youtube_handle?: string;
   } | null;
 
+  const showActionsMenu = showResendAction;
+
   return (
     <div className="w-full animate-in fade-in duration-150">
       <div className="border border-border rounded-lg p-6">
-        <div className="flex items-center gap-4 pb-5">
-          <div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center shrink-0">
-            <span className="text-2xl font-semibold">
-              {creator.fullName.charAt(0).toUpperCase()}
-            </span>
-          </div>
-          <div className="min-w-0">
+        <div className="flex items-start gap-4 pb-5">
+          <div className="min-w-0 flex-1">
             <h2 className="text-xl font-semibold text-foreground">{creator.fullName}</h2>
             <p className="mt-0.5 text-sm text-muted-foreground">
               {creator.country || "Location not specified"}
             </p>
           </div>
+          {showActionsMenu && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
+                  <MoreVertical className="h-4 w-4" aria-hidden />
+                  <span className="sr-only">Actions</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={handleReinvite} disabled={isPending}>
+                  {isPending ? "Sending…" : "Resend invitation"}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
         </div>
 
         <div>
@@ -219,24 +237,6 @@ export function ApplicantDetail({ creator, activeTab }: Props) {
           </div>
         )}
 
-        {showResendAction && (
-          <div className="mt-6 pt-4 border-t border-border">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  onClick={handleReinvite}
-                  disabled={isPending}
-                  variant="outline"
-                  className="w-full h-12"
-                >
-                  {isPending ? "Sending..." : "Resend Invitation"}
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Resend the Clerk invitation email</TooltipContent>
-            </Tooltip>
-          </div>
-        )}
-
         {showReinviteAction && (
           <div className="mt-6 pt-4 border-t border-border">
             <Tooltip>
@@ -247,7 +247,7 @@ export function ApplicantDetail({ creator, activeTab }: Props) {
                   variant="outline"
                   className="w-full h-12"
                 >
-                  Invite to Pool
+                  {isPending ? "Sending…" : "Re-invite to pool"}
                 </Button>
               </TooltipTrigger>
               <TooltipContent>Re-invite this creator to the pool</TooltipContent>

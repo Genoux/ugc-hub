@@ -30,7 +30,11 @@ export function Step4Formats({ data, onChange }: Props) {
                 : "border-border hover:border-foreground/30"
             }`}
           >
-            <Checkbox checked={checked} onCheckedChange={() => toggle(format)} className="shrink-0" />
+            <Checkbox
+              checked={checked}
+              onCheckedChange={() => toggle(format)}
+              className="shrink-0"
+            />
             <span className="leading-tight">{format}</span>
           </label>
         );

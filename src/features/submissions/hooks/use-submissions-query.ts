@@ -34,7 +34,7 @@ type CreatorFolder = {
     label: string;
     isNew: boolean;
     deliveredAt: Date;
-    assets: Array<{
+    submissionAssets: Array<{
       id: string;
       filename: string;
     }>;

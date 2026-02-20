@@ -29,7 +29,9 @@ export function Step8Demographics({ data, onChange }: Props) {
           </SelectTrigger>
           <SelectContent>
             {GENDER_OPTIONS.map((g) => (
-              <SelectItem key={g} value={g}>{g}</SelectItem>
+              <SelectItem key={g} value={g}>
+                {g}
+              </SelectItem>
             ))}
           </SelectContent>
         </Select>
@@ -45,7 +47,9 @@ export function Step8Demographics({ data, onChange }: Props) {
           </SelectTrigger>
           <SelectContent>
             {BIRTH_YEARS.map((y) => (
-              <SelectItem key={y} value={y}>{y}</SelectItem>
+              <SelectItem key={y} value={y}>
+                {y}
+              </SelectItem>
             ))}
           </SelectContent>
         </Select>
@@ -61,7 +65,9 @@ export function Step8Demographics({ data, onChange }: Props) {
           </SelectTrigger>
           <SelectContent>
             {ETHNICITY_OPTIONS.map((e) => (
-              <SelectItem key={e} value={e}>{e}</SelectItem>
+              <SelectItem key={e} value={e}>
+                {e}
+              </SelectItem>
             ))}
           </SelectContent>
         </Select>

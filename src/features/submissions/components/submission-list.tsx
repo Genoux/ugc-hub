@@ -54,8 +54,8 @@ import {
   TableRow,
 } from "@/shared/components/ui/table";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/shared/components/ui/tooltip";
-import { useDeleteSubmissionMutation } from "../hooks/use-submissions-mutations";
 import { useRealtimeSubmissions } from "../hooks/use-realtime-submissions";
+import { useDeleteSubmissionMutation } from "../hooks/use-submissions-mutations";
 import { SubmissionForm } from "./submission-form";
 
 type Submission = {
@@ -280,15 +280,15 @@ export function SubmissionList({ submissions }: { submissions: Submission[] }) {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete submission?</AlertDialogTitle>
+            <AlertDialogTitle>Close project?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete the submission folder and all its content. This action
-              cannot be undone.
+              This will permanently remove the project and all its uploads. This action cannot be
+              undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDeleteSubmission}>Delete</AlertDialogAction>
+            <AlertDialogAction onClick={confirmDeleteSubmission}>Close project</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

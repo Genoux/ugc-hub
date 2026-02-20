@@ -63,8 +63,7 @@ export function Step2Socials({ data, onChange }: Props) {
 
       <div className="space-y-1.5">
         <Label htmlFor="portfolio">
-          Portfolio URL{" "}
-          <span className="text-muted-foreground">(optional)</span>
+          Portfolio URL <span className="text-muted-foreground">(optional)</span>
         </Label>
         <Input
           id="portfolio"

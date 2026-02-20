@@ -1,14 +1,44 @@
 export const COUNTRIES = [
-  "United States", "United Kingdom", "Canada", "Australia", "France",
-  "Germany", "Spain", "Italy", "Brazil", "Mexico", "Netherlands",
-  "Sweden", "Norway", "Denmark", "Finland", "Japan", "South Korea",
-  "India", "South Africa", "Nigeria", "Other",
+  "United States",
+  "United Kingdom",
+  "Canada",
+  "Australia",
+  "France",
+  "Germany",
+  "Spain",
+  "Italy",
+  "Brazil",
+  "Mexico",
+  "Netherlands",
+  "Sweden",
+  "Norway",
+  "Denmark",
+  "Finland",
+  "Japan",
+  "South Korea",
+  "India",
+  "South Africa",
+  "Nigeria",
+  "Other",
 ];
 
 export const LANGUAGES = [
-  "English", "French", "Spanish", "Portuguese", "German", "Italian",
-  "Dutch", "Swedish", "Norwegian", "Danish", "Finnish", "Japanese",
-  "Korean", "Hindi", "Arabic", "Other",
+  "English",
+  "French",
+  "Spanish",
+  "Portuguese",
+  "German",
+  "Italian",
+  "Dutch",
+  "Swedish",
+  "Norwegian",
+  "Danish",
+  "Finnish",
+  "Japanese",
+  "Korean",
+  "Hindi",
+  "Arabic",
+  "Other",
 ];
 
 export const ACCENTS: Record<string, string[]> = {
@@ -19,16 +49,34 @@ export const ACCENTS: Record<string, string[]> = {
 };
 
 export const UGC_CATEGORIES = [
-  "Beauty & Skincare", "Fashion & Style", "Fitness & Wellness", "Food & Beverage",
-  "Home & Lifestyle", "Tech & Gadgets", "Travel & Adventure", "Pet & Animal",
-  "Baby & Parenting", "Finance & Business", "Health & Medical", "Gaming",
+  "Beauty & Skincare",
+  "Fashion & Style",
+  "Fitness & Wellness",
+  "Food & Beverage",
+  "Home & Lifestyle",
+  "Tech & Gadgets",
+  "Travel & Adventure",
+  "Pet & Animal",
+  "Baby & Parenting",
+  "Finance & Business",
+  "Health & Medical",
+  "Gaming",
   "Automotive",
 ];
 
 export const CONTENT_FORMATS = [
-  "Unboxing", "Tutorial / How-to", "Review / Testimonial", "Day in the Life",
-  "Get Ready With Me", "Before & After", "Transformation", "Recipe",
-  "Challenge / Trend", "Q&A", "Story / Narrative", "Explainer",
+  "Unboxing",
+  "Tutorial / How-to",
+  "Review / Testimonial",
+  "Day in the Life",
+  "Get Ready With Me",
+  "Before & After",
+  "Transformation",
+  "Recipe",
+  "Challenge / Trend",
+  "Q&A",
+  "Story / Narrative",
+  "Explainer",
   "Comparison",
 ];
 
@@ -43,8 +91,13 @@ export const RATE_BANDS = [
 export const GENDER_OPTIONS = ["Woman", "Man", "Non-binary", "Prefer not to say"];
 
 export const ETHNICITY_OPTIONS = [
-  "Asian", "Black / African", "Hispanic / Latino", "Middle Eastern",
-  "Mixed / Multiracial", "White / Caucasian", "Prefer not to say",
+  "Asian",
+  "Black / African",
+  "Hispanic / Latino",
+  "Middle Eastern",
+  "Mixed / Multiracial",
+  "White / Caucasian",
+  "Prefer not to say",
 ];
 
 export const BIRTH_YEARS = Array.from({ length: 50 }, (_, i) => String(2006 - i));

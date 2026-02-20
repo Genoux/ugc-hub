@@ -9,7 +9,7 @@ import {
   CardTitle,
 } from "@/shared/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
-import type { CreatorContent } from "../actions/get-creator-content";
+import type { CreatorSubmissions } from "../actions/get-creator-submissions";
 import type { CreatorUIState } from "../lib/get-creator-ui-state";
 import type { Creator } from "../types";
 import { CreatorContentTab } from "./creator-content-tab";
@@ -19,7 +19,7 @@ import { ProfileWizard } from "./wizard";
 interface CreatorPortalShellProps {
   creator: Creator;
   uiState: CreatorUIState;
-  content: CreatorContent;
+  content: CreatorSubmissions;
 }
 
 export function CreatorPortalShell({ creator, uiState, content }: CreatorPortalShellProps) {
@@ -37,9 +37,12 @@ export function CreatorPortalShell({ creator, uiState, content }: CreatorPortalS
     languages: Array.isArray(creator.languages)
       ? (creator.languages as Array<{ language: string }>).map((l) => l.language)
       : [],
-    instagramHandle: (creator.socialChannels as { instagram_handle?: string } | null)?.instagram_handle ?? "",
-    tiktokHandle: (creator.socialChannels as { tiktok_handle?: string } | null)?.tiktok_handle ?? "",
-    youtubeHandle: (creator.socialChannels as { youtube_handle?: string } | null)?.youtube_handle ?? "",
+    instagramHandle:
+      (creator.socialChannels as { instagram_handle?: string } | null)?.instagram_handle ?? "",
+    tiktokHandle:
+      (creator.socialChannels as { tiktok_handle?: string } | null)?.tiktok_handle ?? "",
+    youtubeHandle:
+      (creator.socialChannels as { youtube_handle?: string } | null)?.youtube_handle ?? "",
     portfolioUrl: creator.portfolioUrl ?? "",
   };
 

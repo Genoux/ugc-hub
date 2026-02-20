@@ -1,11 +1,9 @@
 "use client";
 
-import { Upload } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-import { UPLOAD_CONFIG } from "@/features/uploads/lib/upload-config";
+import { FileDropZone } from "@/shared/components/file-drop-zone";
 import { Button } from "@/shared/components/ui/button";
-import { Card } from "@/shared/components/ui/card";
 import { useWizardState } from "../hooks/use-wizard-state";
 import { FileList } from "./wizard-file-list";
 
@@ -13,29 +11,9 @@ export function WizardStepTwo() {
   const { setStepTwoFiles, setStep, stepTwoFiles } = useWizardState();
   const [files, setFiles] = useState<File[]>(stepTwoFiles);
 
-  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    if (e.target.files) {
-      const newFiles = Array.from(e.target.files);
-      const validFiles: File[] = [];
-      const invalidFiles: string[] = [];
-
-      for (const file of newFiles) {
-        if (!(UPLOAD_CONFIG.allowedMimeTypes as readonly string[]).includes(file.type)) {
-          invalidFiles.push(file.name);
-        } else {
-          validFiles.push(file);
-        }
-      }
-
-      if (invalidFiles.length > 0) {
-        toast.error("File type not supported");
-      }
-
-      if (validFiles.length > 0) {
-        setFiles((prev) => [...prev, ...validFiles]);
-      }
-    }
-    e.target.value = "";
+  function handleInvalidFiles(rejected: { names: string[]; reason: "type" | "size" }) {
+    if (rejected.reason === "type") toast.error("File type not supported");
+    else toast.error("File too large (max 500MB)");
   }
 
   function handleRemoveFile(index: number) {
@@ -54,23 +32,11 @@ export function WizardStepTwo() {
 
   return (
     <div className="space-y-4">
-      <Card className="border-dashed p-8 text-center">
-        <input
-          type="file"
-          multiple
-          accept="image/*,video/*"
-          onChange={handleFileChange}
-          className="hidden"
-          id="file-upload"
-        />
-        <label htmlFor="file-upload" className="flex cursor-pointer flex-col items-center gap-2">
-          <Upload className="size-8 text-muted-foreground" />
-          <div>
-            <p className="text-sm font-medium">Click to select files</p>
-            <p className="text-xs text-muted-foreground">or drag and drop</p>
-          </div>
-        </label>
-      </Card>
+      <FileDropZone
+        onFilesAdd={(added) => setFiles((prev) => [...prev, ...added])}
+        onInvalidFiles={handleInvalidFiles}
+        hint="MP4, MOV, images up to 500MB each"
+      />
 
       {files.length > 0 && <FileList files={files} onRemove={handleRemoveFile} />}
 

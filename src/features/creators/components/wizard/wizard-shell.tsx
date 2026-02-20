@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { Button } from "@/shared/components/ui/button";
 import { Dialog, DialogContent } from "@/shared/components/ui/dialog";
-import { completeFullProfile } from "../../actions/complete-full-profile";
+import { completeCreatorProfile } from "../../actions/complete-creator-profile";
 import { Step1BasicInfo } from "./steps/step-1-basic-info";
 import { Step2Socials } from "./steps/step-2-socials";
 import { Step3Categories } from "./steps/step-3-categories";
@@ -78,7 +78,7 @@ export function WizardShell({ creator, initialData, onComplete, onClose }: Profi
 
   const handleSubmit = () => {
     startTransition(async () => {
-      await completeFullProfile({
+      await completeCreatorProfile({
         creatorId: creator.id,
         fullName: data.fullName,
         country: data.country,

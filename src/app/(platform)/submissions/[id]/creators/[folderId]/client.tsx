@@ -1,12 +1,11 @@
 "use client";
 
-import { ChevronLeft } from "lucide-react";
+import { CheckCircle2, ChevronLeft, Download } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { approveSubmission } from "@/features/batches/actions/review-submission";
+import { CloseCollaborationWizard } from "@/features/collaborations/components/close-collaboration-wizard";
 import { AssetCard } from "@/shared/components/asset-card";
-import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 
 type Asset = {
@@ -20,9 +19,16 @@ type Batch = {
   id: string;
   label: string;
   batchNumber: number;
-  isNew: boolean;
   deliveredAt: Date;
-  assets: Asset[];
+  submissionAssets: Asset[];
+};
+
+type PortfolioAsset = {
+  id: string;
+  filename: string;
+  mimeType: string;
+  sizeBytes: number;
+  createdAt: Date;
 };
 
 function AssetPreview({ asset }: { asset: Asset }) {
@@ -37,29 +43,42 @@ function AssetPreview({ asset }: { asset: Asset }) {
       .finally(() => setIsLoading(false));
   }, [asset.id]);
 
+  async function handleDownload() {
+    try {
+      const href =
+        url ||
+        (await fetch(`/api/assets/${asset.id}/download`)
+          .then((r) => r.json())
+          .then((d) => d.url));
+      const a = document.createElement("a");
+      a.href = href;
+      a.download = asset.filename;
+      a.click();
+    } catch {
+      toast.error("Download failed");
+    }
+  }
+
   return (
-    <AssetCard
-      src={url}
-      filename={asset.filename}
-      isVideo={asset.mimeType.startsWith("video/")}
-      isLoading={isLoading}
-    />
+    <button type="button" className="w-full text-left" onClick={handleDownload}>
+      <AssetCard
+        src={url}
+        filename={asset.filename}
+        isVideo={asset.mimeType.startsWith("video/")}
+        isLoading={isLoading}
+      />
+    </button>
   );
 }
 
-function BatchSection({ batch, reviewed }: { batch: Batch; reviewed: boolean }) {
+function BatchSection({ batch }: { batch: Batch }) {
   return (
     <div className="rounded-xl border border-border bg-card overflow-hidden">
       <div className="flex items-center justify-between px-5 py-4 border-b border-border">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-wrap">
           <span className="font-medium text-foreground">{batch.label}</span>
-          {!reviewed && batch.isNew && (
-            <Badge className="bg-blue-100 text-blue-700 border-blue-200 hover:bg-blue-100">
-              New
-            </Badge>
-          )}
           <span className="text-xs text-muted-foreground">
-            {batch.assets.length} file{batch.assets.length !== 1 ? "s" : ""}
+            {batch.submissionAssets.length} file{batch.submissionAssets.length !== 1 ? "s" : ""}
           </span>
         </div>
         <span className="text-xs text-muted-foreground">
@@ -68,11 +87,11 @@ function BatchSection({ batch, reviewed }: { batch: Batch; reviewed: boolean }) 
       </div>
 
       <div className="p-5">
-        {batch.assets.length === 0 ? (
+        {batch.submissionAssets.length === 0 ? (
           <p className="text-sm text-muted-foreground">No files in this batch.</p>
         ) : (
           <div className="columns-2 gap-2 sm:columns-3 lg:columns-4">
-            {batch.assets.map((asset) => (
+            {batch.submissionAssets.map((asset) => (
               <AssetPreview key={asset.id} asset={asset} />
             ))}
           </div>
@@ -85,29 +104,42 @@ function BatchSection({ batch, reviewed }: { batch: Batch; reviewed: boolean }) 
 interface CreatorFolderClientProps {
   submissionId: string;
   submissionName: string;
+  folderId: string;
   creator: { id: string; fullName: string; email: string };
+  collaborationStatus: "active" | "closed";
   batches: Batch[];
+  portfolioAssets: PortfolioAsset[];
 }
 
 export function CreatorFolderClient({
   submissionId,
   submissionName,
+  folderId,
   creator,
+  collaborationStatus,
   batches,
+  portfolioAssets,
 }: CreatorFolderClientProps) {
-  const newBatches = batches.filter((b) => b.isNew);
-  const [reviewed, setReviewed] = useState(newBatches.length === 0);
-  const [isMarking, setIsMarking] = useState(false);
+  const [isClosed, setIsClosed] = useState(collaborationStatus === "closed");
+  const [showCloseWizard, setShowCloseWizard] = useState(false);
 
-  async function handleMarkAllReviewed() {
-    setIsMarking(true);
-    try {
-      await Promise.all(newBatches.map((b) => approveSubmission(b.id)));
-      setReviewed(true);
-    } catch {
-      toast.error("Failed to mark as reviewed.");
-    } finally {
-      setIsMarking(false);
+  async function handleDownloadAll() {
+    const allAssets = batches.flatMap((b) => b.submissionAssets);
+    if (allAssets.length === 0) {
+      toast.info("No assets to download");
+      return;
+    }
+    for (const asset of allAssets) {
+      try {
+        const { url } = await fetch(`/api/assets/${asset.id}/download`).then((r) => r.json());
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = asset.filename;
+        a.click();
+        await new Promise((r) => setTimeout(r, 300));
+      } catch {
+        toast.error(`Failed to download ${asset.filename}`);
+      }
     }
   }
 
@@ -128,22 +160,49 @@ export function CreatorFolderClient({
             </div>
             <div>
               <h1 className="text-2xl font-semibold tracking-tight">{creator.fullName}</h1>
-              <p className="text-sm text-muted-foreground">{creator.email}</p>
+              <div className="flex items-center gap-2">
+                <p className="text-sm text-muted-foreground">{creator.email}</p>
+                {isClosed && (
+                  <div className="flex items-center gap-1 text-xs font-medium text-emerald-600">
+                    <CheckCircle2 className="h-3.5 w-3.5" />
+                    Collaboration closed
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
 
-        {!reviewed && (
-          <Button
-            size="sm"
-            onClick={handleMarkAllReviewed}
-            disabled={isMarking}
-            className="shrink-0 mt-8"
-          >
-            Mark all as reviewed
+        <div className="flex items-center gap-2 mt-8 shrink-0">
+          <Button variant="outline" size="sm" onClick={handleDownloadAll} className="gap-2">
+            Download all
+            <Download className="h-4 w-4" />
           </Button>
-        )}
+          {!isClosed && (
+            <Button size="sm" onClick={() => setShowCloseWizard(true)}>
+              Close Collaboration
+            </Button>
+          )}
+        </div>
       </div>
+
+      {/* Project portfolio (shown after close when assets were uploaded) */}
+      {portfolioAssets.length > 0 && (
+        <div className="space-y-3">
+          <h2 className="text-sm font-semibold text-foreground">Project Portfolio</h2>
+          <div className="columns-2 gap-2 sm:columns-3 lg:columns-4">
+            {portfolioAssets.map((asset) => (
+              <AssetCard
+                key={asset.id}
+                src={null}
+                filename={asset.filename}
+                isVideo={asset.mimeType.startsWith("video/")}
+                isLoading={false}
+              />
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Batches */}
       {batches.length === 0 ? (
@@ -153,10 +212,20 @@ export function CreatorFolderClient({
       ) : (
         <div className="space-y-4">
           {batches.map((batch) => (
-            <BatchSection key={batch.id} batch={batch} reviewed={reviewed} />
+            <BatchSection key={batch.id} batch={batch} />
           ))}
         </div>
       )}
+
+      <CloseCollaborationWizard
+        open={showCloseWizard}
+        onClose={() => setShowCloseWizard(false)}
+        onSuccess={() => setIsClosed(true)}
+        folderId={folderId}
+        creatorId={creator.id}
+        creatorName={creator.fullName}
+        submissionName={submissionName}
+      />
     </div>
   );
 }

@@ -25,7 +25,7 @@ export function useMultipartUpload() {
     }));
 
     try {
-      const presignResponse = await fetch("/api/uploads/presign", {
+      const presignResponse = await fetch("/api/uploads/submission/presign", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -76,7 +76,7 @@ export function useMultipartUpload() {
       headers: { "Content-Type": file.type },
     });
 
-    await fetch("/api/uploads/complete", {
+    await fetch("/api/uploads/submission/complete", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -111,7 +111,7 @@ export function useMultipartUpload() {
       }),
     );
 
-    await fetch("/api/uploads/complete", {
+    await fetch("/api/uploads/submission/complete", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

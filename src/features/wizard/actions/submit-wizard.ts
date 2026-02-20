@@ -49,7 +49,6 @@ export async function submitWizard(data: { token: string; creatorId: string }) {
       creatorFolderId: folder.id,
       label: `Submission ${nextBatchNumber}`,
       batchNumber: nextBatchNumber,
-      isNew: true,
     })
     .returning();
 

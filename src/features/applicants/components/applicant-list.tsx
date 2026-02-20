@@ -31,9 +31,6 @@ export function ApplicantList({ creators, selectedId, onSelect }: Props) {
               selectedId === c.id ? "bg-muted" : "hover:bg-muted/50",
             )}
           >
-            <div className="h-10 w-10 rounded-full shrink-0 bg-muted flex items-center justify-center">
-              <span className="text-sm font-medium">{c.fullName.charAt(0).toUpperCase()}</span>
-            </div>
             <div className="min-w-0 flex-1">
               <span className="text-sm font-medium text-foreground block truncate">
                 {c.fullName}

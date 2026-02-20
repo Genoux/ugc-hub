@@ -3,7 +3,7 @@
 import { ChevronRight, Files, Folder } from "lucide-react";
 import { useEffect, useState } from "react";
 import { AssetCard } from "@/shared/components/asset-card";
-import type { CreatorContent } from "../actions/get-creator-content";
+import type { CreatorSubmissions } from "../actions/get-creator-submissions";
 
 function AssetPreview({
   assetId,
@@ -35,7 +35,7 @@ function AssetPreview({
   );
 }
 
-type Batch = CreatorContent[number]["batches"][number];
+type Batch = CreatorSubmissions[number]["batches"][number];
 
 function BatchRow({ batch }: { batch: Batch }) {
   const [open, setOpen] = useState(false);
@@ -87,7 +87,7 @@ function BatchRow({ batch }: { batch: Batch }) {
 }
 
 interface CreatorContentTabProps {
-  content: CreatorContent;
+  content: CreatorSubmissions;
 }
 
 export function CreatorContentTab({ content }: CreatorContentTabProps) {
@@ -111,9 +111,12 @@ export function CreatorContentTab({ content }: CreatorContentTabProps) {
           <div key={project.submissionId}>
             <div className="flex items-center gap-2 mb-3">
               <Folder className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm font-semibold text-foreground">{project.submissionName}</span>
+              <span className="text-sm font-semibold text-foreground">
+                {project.submissionName}
+              </span>
               <span className="text-xs text-muted-foreground ml-auto">
-                {project.batches.length} batch{project.batches.length !== 1 ? "es" : ""} · {totalFiles} file{totalFiles !== 1 ? "s" : ""}
+                {project.batches.length} batch{project.batches.length !== 1 ? "es" : ""} ·{" "}
+                {totalFiles} file{totalFiles !== 1 ? "s" : ""}
               </span>
             </div>
             <div className="space-y-2 pl-6">

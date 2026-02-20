@@ -22,9 +22,11 @@ const isPlatformRoute = createRouteMatcher([
 const isCreatorRoute = createRouteMatcher(["/creator(.*)", "/submit(.*)"]);
 
 const rateLimitedRoutes = [
-  "/api/uploads/presign",
-  "/api/uploads/part",
-  "/api/uploads/complete",
+  "/api/uploads/submission/presign",
+  "/api/uploads/submission/part",
+  "/api/uploads/submission/complete",
+  "/api/uploads/portfolio/presign",
+  "/api/uploads/portfolio/complete",
   "/api/submissions/rollback",
 ];
 
