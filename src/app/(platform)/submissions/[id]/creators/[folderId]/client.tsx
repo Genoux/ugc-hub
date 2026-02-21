@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { CloseCollaborationWizard } from "@/features/collaborations/components/close-collaboration-wizard";
 import { downloadAssets } from "@/features/submissions/lib/download-assets";
 import { AssetCard } from "@/shared/components/asset-card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/ui/avatar";
 import { Button } from "@/shared/components/ui/button";
 
 type Asset = {
@@ -140,7 +141,7 @@ interface CreatorFolderClientProps {
   submissionId: string;
   submissionName: string;
   collaborationId: string;
-  creator: { id: string; fullName: string; email: string };
+  creator: { id: string; fullName: string; email: string; profilePhoto: string | null };
   collaborationStatus: "active" | "closed";
   batches: Batch[];
   portfolioAssets: PortfolioAsset[];
@@ -184,9 +185,12 @@ export function CreatorFolderClient({
             </Link>
           </Button>
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-muted text-base font-medium text-foreground">
-              {creator.fullName[0]}
-            </div>
+            <Avatar className="h-9 w-9">
+              {creator.profilePhoto && (
+                <AvatarImage src={creator.profilePhoto} alt={creator.fullName} />
+              )}
+              <AvatarFallback className="text-base">{creator.fullName[0]}</AvatarFallback>
+            </Avatar>
             <div>
               <h1 className="text-2xl font-semibold tracking-tight">{creator.fullName}</h1>
               <div className="flex items-center gap-2">

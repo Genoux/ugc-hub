@@ -3,6 +3,7 @@
 import { Check, ChevronLeft, ChevronRight, Copy, Folder } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/ui/avatar";
 import { Button } from "@/shared/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/shared/components/ui/tooltip";
 
@@ -19,6 +20,7 @@ type CreatorCollaboration = {
     id: string;
     fullName: string;
     email: string;
+    profilePhoto: string | null;
   };
   creatorSubmissions: Array<{
     id: string;
@@ -105,9 +107,15 @@ export function SubmissionDetailClient({
                   className="flex items-center justify-between rounded-xl border bg-card px-5 py-4 hover:bg-accent/40 transition-colors group"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted text-sm font-medium text-foreground">
-                      {folder.creator.fullName[0]}
-                    </div>
+                    <Avatar className="h-8 w-8">
+                      {folder.creator.profilePhoto && (
+                        <AvatarImage
+                          src={folder.creator.profilePhoto}
+                          alt={folder.creator.fullName}
+                        />
+                      )}
+                      <AvatarFallback>{folder.creator.fullName[0]}</AvatarFallback>
+                    </Avatar>
                     <div>
                       <p className="text-sm font-medium text-foreground leading-none">
                         {folder.creator.fullName}

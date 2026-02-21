@@ -21,7 +21,7 @@ export default async function SubmissionDetailPage({
       where: eq(creatorCollaborations.submissionId, id),
       orderBy: (f, { desc }) => [desc(f.createdAt)],
       with: {
-        creator: { columns: { id: true, fullName: true, email: true } },
+        creator: { columns: { id: true, fullName: true, email: true, profilePhoto: true } },
         creatorSubmissions: {
           with: { submissionAssets: { columns: { id: true, filename: true } } },
         },

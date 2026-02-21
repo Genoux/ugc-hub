@@ -1,12 +1,16 @@
 "use client";
 
-import { UserButton, UserProfile } from "@clerk/nextjs";
+import { UserButton } from "@clerk/nextjs";
+import { dark } from "@clerk/themes";
+import { useTheme } from "next-themes";
 import { useRef } from "react";
 
 import { SidebarMenu, SidebarMenuItem } from "@/shared/components/ui/sidebar";
 
 export function NavUser() {
   const triggerRef = useRef<HTMLDivElement>(null);
+  const { resolvedTheme } = useTheme();
+  const clerkAppearance = resolvedTheme === "dark" ? { baseTheme: dark } : undefined;
 
   return (
     <SidebarMenu>
@@ -30,7 +34,10 @@ export function NavUser() {
           }}
         >
           <div ref={triggerRef}>
-            <UserButton />
+            <UserButton
+              appearance={clerkAppearance}
+              userProfileProps={{ appearance: clerkAppearance }}
+            />
           </div>
           <div className="grid flex-1 text-left text-sm leading-tight">
             <span className="truncate font-medium">Account</span>

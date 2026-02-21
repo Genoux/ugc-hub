@@ -1,9 +1,9 @@
-import { UserButton } from "@clerk/nextjs";
 import { auth, clerkClient } from "@clerk/nextjs/server";
 import { eq, or } from "drizzle-orm";
 import { redirect } from "next/navigation";
+import { ThemeProvider } from "next-themes";
 import { creators } from "@/db/schema";
-import { Separator } from "@/shared/components/ui/separator";
+import { CreatorPortalClientShell } from "@/features/creators/components/portal/creator-portal-client-shell";
 import { db } from "@/shared/lib/db";
 import { ROUTES } from "@/shared/lib/routes";
 
@@ -36,13 +36,8 @@ export default async function CreatorLayout({ children }: { children: React.Reac
   }
 
   return (
-    <div className="flex h-screen flex-col bg-background">
-      <header className="flex h-14 shrink-0 items-center justify-between px-6">
-        <span className="text-sm font-semibold tracking-tight">pool</span>
-        <UserButton />
-      </header>
-      <Separator />
-      <main className="flex-1 overflow-hidden">{children}</main>
-    </div>
+    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+      <CreatorPortalClientShell>{children}</CreatorPortalClientShell>
+    </ThemeProvider>
   );
 }

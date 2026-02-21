@@ -15,7 +15,6 @@ const isPlatformRoute = createRouteMatcher([
   "/database(.*)",
   "/applicants(.*)",
   "/api/submissions(.*)",
-  "/api/assets(.*)",
 ]);
 
 const isCreatorRoute = createRouteMatcher(["/creator(.*)", "/submit(.*)"]);

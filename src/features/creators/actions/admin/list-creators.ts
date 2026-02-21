@@ -25,7 +25,7 @@ export async function listCreators() {
       .orderBy(desc(creators.joinedAt));
 
     const parsed = rows.map(({ creator, collabCount }) =>
-      creatorSchema.parse({ ...creator, collabCount }),
+      creatorSchema.parse({ ...creator, collabCount: collabCount ?? 0 }),
     );
 
     return { success: true, creators: parsed };

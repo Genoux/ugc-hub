@@ -19,7 +19,7 @@ export default async function CreatorFolderPage({
     where: eq(creatorCollaborations.id, folderId),
     with: {
       submission: { columns: { id: true, name: true } },
-      creator: { columns: { id: true, fullName: true, email: true } },
+      creator: { columns: { id: true, fullName: true, email: true, profilePhoto: true } },
       creatorSubmissions: {
         columns: { id: true, label: true, batchNumber: true, deliveredAt: true },
         orderBy: (cs, { asc }) => [asc(cs.batchNumber)],

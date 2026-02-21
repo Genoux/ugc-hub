@@ -48,7 +48,7 @@ export const creatorSchema = z.object({
   status: z.enum(DB_CREATOR_STATUSES),
   profileCompleted: z.boolean(),
   profileCompletedAt: z.date().nullable().optional(),
-  collabCount: z.number(),
+  collabCount: z.number().default(0),
   blacklistReason: z.string().nullable(),
   blacklistedAt: z.date().nullable(),
   blacklistedBy: z.string().nullable(),

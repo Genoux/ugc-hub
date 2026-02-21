@@ -1,4 +1,4 @@
-import { SignIn } from "@clerk/nextjs";
+import { ThemedSignIn } from "@/shared/components/themed-sign-in";
 
 export default async function SignInPage({
   searchParams,
@@ -8,7 +8,7 @@ export default async function SignInPage({
   const { redirect_url } = await searchParams;
   return (
     <div className="flex min-h-screen items-center justify-center">
-      <SignIn fallbackRedirectUrl={redirect_url ?? "/"} />
+      <ThemedSignIn fallbackRedirectUrl={redirect_url ?? "/"} />
     </div>
   );
 }
