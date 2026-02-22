@@ -30,20 +30,32 @@ export function CreatorPortalShell({ creator, uiState, content }: CreatorPortalS
     window.location.reload();
   };
 
-  // Pre-fill steps 1-2 from existing DB record (set when creator applied via form)
+  // Pre-fill all steps from existing DB record so creators can resume where they left off.
   const initialData = {
+    // Step 1
     fullName: creator.fullName ?? "",
     country: creator.country ?? "",
     languages: Array.isArray(creator.languages)
       ? (creator.languages as Array<{ language: string }>).map((l) => l.language)
       : [],
-    instagramHandle:
-      (creator.socialChannels as { instagram_handle?: string } | null)?.instagram_handle ?? "",
-    tiktokHandle:
-      (creator.socialChannels as { tiktok_handle?: string } | null)?.tiktok_handle ?? "",
-    youtubeHandle:
-      (creator.socialChannels as { youtube_handle?: string } | null)?.youtube_handle ?? "",
+    // Step 2
+    instagramHandle: creator.socialChannels?.instagram_handle ?? "",
+    tiktokHandle: creator.socialChannels?.tiktok_handle ?? "",
+    youtubeHandle: creator.socialChannels?.youtube_handle ?? "",
     portfolioUrl: creator.portfolioUrl ?? "",
+    // Step 3
+    ugcCategories: creator.ugcCategories ?? [],
+    // Step 4
+    contentFormats: creator.contentFormats ?? [],
+    // Step 5
+    profilePhoto: creator.profilePhoto ?? "",
+    // Step 6 (video URLs) — not persisted in creators table, starts empty
+    // Step 7
+    rateRangeSelf: creator.rateRangeSelf ?? null,
+    // Step 8
+    genderIdentity: creator.genderIdentity ?? "",
+    ageDemographic: creator.ageDemographic ?? "",
+    ethnicity: creator.ethnicity ?? "",
   };
 
   return (

@@ -8,7 +8,13 @@ if (!ALLOWED_DOMAIN) {
   throw new Error("ALLOWED_DOMAIN is not set");
 }
 
-const isPublicRoute = createRouteMatcher(["/sign-in(.*)", "/sign-up(.*)", "/"]);
+const isPublicRoute = createRouteMatcher([
+  "/sign-in(.*)",
+  "/sign-up(.*)",
+  "/",
+  "/sign-out(.*)",
+  "/api/auth/sign-out(.*)",
+]);
 
 const isPlatformRoute = createRouteMatcher([
   "/submissions(.*)",
@@ -21,7 +27,6 @@ const isCreatorRoute = createRouteMatcher(["/creator(.*)", "/submit(.*)"]);
 
 const rateLimitedRoutes = [
   "/api/uploads/submission/presign",
-  "/api/uploads/submission/part",
   "/api/uploads/submission/complete",
   "/api/uploads/portfolio/presign",
   "/api/uploads/portfolio/complete",

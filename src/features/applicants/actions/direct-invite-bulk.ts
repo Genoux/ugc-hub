@@ -29,7 +29,6 @@ export async function directInviteBulk(input: {
 
   const existingEmails = new Set(existing.map((c) => c.email));
 
-  // Existing records belong to the applicants flow, not direct invite
   const skipped = normalised.filter((e) => existingEmails.has(e));
   const toInvite = normalised.filter((e) => !existingEmails.has(e));
 
@@ -42,7 +41,7 @@ export async function directInviteBulk(input: {
     .values(
       toInvite.map((email) => ({
         email,
-        fullName: email.split("@")[0],
+        fullName: "",
         status: "approved_not_joined" as const,
         source: "direct_invite" as const,
         approvedAt: new Date(),

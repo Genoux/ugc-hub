@@ -49,7 +49,7 @@ export async function getCreatorProfileAssets(
     db.query.creatorProfileAssets.findMany({
       where: and(
         eq(creatorProfileAssets.creatorId, creatorId),
-        eq(creatorProfileAssets.assetType, "past_work"),
+        eq(creatorProfileAssets.assetType, "portfolio_video"),
       ),
       columns: { id: true, filename: true, mimeType: true, sizeBytes: true, r2Key: true },
       orderBy: (a, { desc }) => [desc(a.createdAt)],

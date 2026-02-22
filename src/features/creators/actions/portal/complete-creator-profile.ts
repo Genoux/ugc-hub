@@ -25,7 +25,7 @@ const schema = z.object({
   // Steps 3-9
   ugcCategories: z.array(z.string()).min(1),
   contentFormats: z.array(z.string()).min(1),
-  profilePhoto: z.url().optional(),
+  profilePhoto: z.string().optional(),
   rateRangeSelf: z.object({ min: z.number(), max: z.number() }).optional(),
   genderIdentity: z.string().optional(),
   ageDemographic: z.string().optional(),
@@ -45,8 +45,8 @@ export async function completeCreatorProfile(input: z.infer<typeof schema>) {
     });
 
     const clerkUser = await (await clerkClient()).users.getUser(userId);
-    const userEmail = clerkUser.primaryEmailAddress?.emailAddress;
-    const isOwner = record?.clerkUserId === userId || record?.email === userEmail;
+    const userEmail = clerkUser.primaryEmailAddress?.emailAddress?.toLowerCase().trim();
+    const isOwner = record?.clerkUserId === userId || (userEmail !== undefined && record?.email?.toLowerCase().trim() === userEmail);
     if (!isOwner) throw new Error("Forbidden — you don't own this profile");
 
     await db

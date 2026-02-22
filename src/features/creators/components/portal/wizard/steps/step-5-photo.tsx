@@ -1,79 +1,78 @@
 "use client";
 
-import { useState } from "react";
-import { Check, Plus, X } from "lucide-react";
+import { CameraIcon, Loader2 } from "lucide-react";
+import Image from "next/image";
+import type { ProfilePhotoManager } from "@/features/creators/hooks/use-profile-photo-manager";
+import { useCreatorAssetUpload } from "@/features/creators/hooks/use-creator-asset-upload";
 import { Button } from "@/shared/components/ui/button";
-import type { WizardData } from "../wizard-types";
 
 interface Props {
-  data: WizardData;
-  onChange: (updates: Partial<WizardData>) => void;
+  photoKey: string;
+  photoManager: ProfilePhotoManager;
+  onChange: (profilePhotoKey: string) => void;
+  creatorId: string;
 }
 
-export function Step5Photo({ data, onChange }: Props) {
-  const [uploading, setUploading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+export function Step5Photo({ photoKey, photoManager, onChange, creatorId }: Props) {
+  const { upload, error } = useCreatorAssetUpload(creatorId, "profile_picture");
 
-  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const hasPhoto = !!photoManager.previewUrl || !!photoKey;
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    e.target.value = "";
     if (!file) return;
-    setError(null);
-    setUploading(true);
+
+    if (photoManager.previewUrl) URL.revokeObjectURL(photoManager.previewUrl);
+    photoManager.setPreviewUrl(URL.createObjectURL(file));
+
+    photoManager.setUploading(true);
     try {
-      const res = await fetch("/api/uploads/submission/presign", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ filename: file.name, contentType: file.type, fileSize: file.size }),
-      });
-      if (!res.ok) throw new Error();
-      const { uploadUrl, key } = await res.json();
-      await fetch(uploadUrl, { method: "PUT", body: file, headers: { "Content-Type": file.type } });
-      onChange({ profilePhoto: key });
+      const { key } = await upload(file);
+      onChange(key);
     } catch {
-      setError("Upload failed. Please try again.");
+      photoManager.setPreviewUrl(null);
     } finally {
-      setUploading(false);
+      photoManager.setUploading(false);
     }
   };
 
   return (
-    <div className="flex flex-col items-center gap-4 py-2">
-      {data.profilePhoto ? (
-        <div className="relative">
-          <div className="bg-muted flex h-24 w-24 items-center justify-center rounded-full">
-            <Check className="size-8 text-green-600" />
-          </div>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className="absolute -right-2 -top-2 h-6 w-6 rounded-full"
-            onClick={() => onChange({ profilePhoto: "" })}
-          >
-            <X className="size-3" />
-          </Button>
-        </div>
-      ) : (
-        <div className="bg-muted flex h-24 w-24 items-center justify-center rounded-full">
-          <Plus className="text-muted-foreground size-8" />
-        </div>
-      )}
+    <div className="flex flex-col items-center gap-5 py-2">
+      <div className="bg-muted relative flex h-52 w-52 shrink-0 items-center justify-center overflow-hidden rounded-lg border">
+        {photoManager.previewUrl ? (
+          <Image src={photoManager.previewUrl} alt="Creator" fill className="object-cover" />
+        ) : (
+          <CameraIcon className="size-5 text-muted-foreground" />
+        )}
+      </div>
 
       <label className="cursor-pointer">
-        <span className="bg-foreground text-background hover:bg-foreground/90 rounded-md px-4 py-2 text-sm font-medium transition-colors">
-          {uploading ? "Uploading…" : data.profilePhoto ? "Change photo" : "Upload photo"}
-        </span>
+        <Button type="button" variant="outline" size="sm" disabled={photoManager.isUploading} asChild>
+          <span>
+            {photoManager.isUploading ? (
+              <>
+                <Loader2 className="size-3.5 animate-spin" />
+                Uploading…
+              </>
+            ) : hasPhoto ? (
+              "Replace photo"
+            ) : (
+              "Upload photo"
+            )}
+          </span>
+        </Button>
         <input
           type="file"
           accept="image/jpeg,image/png,image/webp"
           className="sr-only"
-          onChange={handleFile}
-          disabled={uploading}
+          onChange={handleFileChange}
+          disabled={photoManager.isUploading}
         />
       </label>
 
       {error && <p className="text-destructive text-sm">{error}</p>}
-      <p className="text-muted-foreground text-center text-xs">JPG, PNG or WebP · Max 5 MB</p>
+      <p className="text-muted-foreground text-xs">JPG, PNG or WebP · Max 5 MB</p>
     </div>
   );
 }

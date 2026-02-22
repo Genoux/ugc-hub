@@ -8,7 +8,7 @@ export const UPLOAD_CONFIG = {
     "video/quicktime",
     "video/x-msvideo",
   ],
-  maxFileSize: 500 * 1024 * 1024, // 500MB
+  maxFileSize: 5 * 1024 * 1024 * 1024, // 5GB
   maxFiles: 50,
   chunkSize: 5 * 1024 * 1024, // 5MB chunks for multipart
 } as const;

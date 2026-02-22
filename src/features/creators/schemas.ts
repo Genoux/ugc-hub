@@ -1,13 +1,11 @@
 import { z } from "zod";
 import {
   AGE_DEMOGRAPHICS,
-  CONTENT_FORMATS,
   DB_CREATOR_STATUSES,
   ETHNICITIES,
   GENDER_IDENTITIES,
   OVERALL_RATING_TIERS,
   PRIMARY_CHANNELS,
-  UGC_CATEGORIES,
 } from "./constants";
 
 export const languageTagSchema = z.object({
@@ -40,8 +38,10 @@ export const creatorSchema = z.object({
   portfolioUrl: z.string().nullable(),
   primaryChannel: z.enum(PRIMARY_CHANNELS).nullable(),
   socialChannels: socialChannelsSchema.nullable(),
-  ugcCategories: z.array(z.enum(UGC_CATEGORIES)).nullable(),
-  contentFormats: z.array(z.enum(CONTENT_FORMATS)).nullable(),
+  // z.string() intentionally — enum validation belongs at the input layer (server action),
+  // not when reading back from the DB where old values may exist.
+  ugcCategories: z.array(z.string()).nullable(),
+  contentFormats: z.array(z.string()).nullable(),
   rateRangeSelf: rateRangeSchema.nullable(),
   rateRangeInternal: rateRangeSchema.nullable(),
   overallRating: z.enum(OVERALL_RATING_TIERS),

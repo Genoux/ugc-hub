@@ -27,7 +27,7 @@ export async function directInvite(input: { email: string }) {
     .insert(creators)
     .values({
       email: validated.email,
-      fullName: validated.email.split("@")[0],
+      fullName: "",
       status: "approved_not_joined",
       source: "direct_invite",
       approvedAt: new Date(),

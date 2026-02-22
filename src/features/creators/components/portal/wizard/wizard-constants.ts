@@ -48,38 +48,6 @@ export const ACCENTS: Record<string, string[]> = {
   Portuguese: ["European", "Brazilian"],
 };
 
-export const UGC_CATEGORIES = [
-  "Beauty & Skincare",
-  "Fashion & Style",
-  "Fitness & Wellness",
-  "Food & Beverage",
-  "Home & Lifestyle",
-  "Tech & Gadgets",
-  "Travel & Adventure",
-  "Pet & Animal",
-  "Baby & Parenting",
-  "Finance & Business",
-  "Health & Medical",
-  "Gaming",
-  "Automotive",
-];
-
-export const CONTENT_FORMATS = [
-  "Unboxing",
-  "Tutorial / How-to",
-  "Review / Testimonial",
-  "Day in the Life",
-  "Get Ready With Me",
-  "Before & After",
-  "Transformation",
-  "Recipe",
-  "Challenge / Trend",
-  "Q&A",
-  "Story / Narrative",
-  "Explainer",
-  "Comparison",
-];
-
 export const RATE_BANDS = [
   { label: "$50 – $150", value: { min: 50, max: 150 } },
   { label: "$150 – $300", value: { min: 150, max: 300 } },
@@ -137,7 +105,7 @@ export const STEP_TIPS: Record<number, { heading: string; body: string }> = {
   },
   6: {
     heading: "Let your work speak",
-    body: "Share 2–5 of your best vertical videos. Focus on production quality, clarity, and natural delivery.",
+    body: "Upload 2–5 of your best UGC videos. Brands review these to assess your production quality and on-camera presence.",
   },
   7: {
     heading: "Set fair rates",

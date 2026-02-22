@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { putToR2 } from "../lib/r2-upload";
 import { UPLOAD_CONFIG } from "../lib/upload-config";
 
 type UploadStatus = {
@@ -70,11 +71,7 @@ export function useMultipartUpload() {
   }
 
   async function uploadSingle(file: File, uploadUrl: string, key: string, batchId: string) {
-    await fetch(uploadUrl, {
-      method: "PUT",
-      body: file,
-      headers: { "Content-Type": file.type },
-    });
+    await putToR2(file, uploadUrl);
 
     await fetch("/api/uploads/submission/complete", {
       method: "POST",

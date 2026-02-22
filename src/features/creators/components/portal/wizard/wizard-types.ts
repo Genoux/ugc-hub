@@ -1,3 +1,24 @@
+export interface PortfolioVideo {
+  assetId: string;
+  key: string;
+  filename: string;
+}
+
+/** Completed in-wizard entry — extends PortfolioVideo with a local blob URL for preview. */
+export interface PortfolioVideoEntry extends PortfolioVideo {
+  objectUrl: string;
+}
+
+/** Transient in-wizard entry — exists while a file is uploading. */
+export interface UploadingVideoEntry {
+  tempId: string;
+  objectUrl: string;
+  filename: string;
+}
+
+export const MIN_PORTFOLIO_VIDEOS = 2;
+export const MAX_PORTFOLIO_VIDEOS = 5;
+
 export interface WizardData {
   // Step 1
   fullName: string;
@@ -14,8 +35,6 @@ export interface WizardData {
   contentFormats: string[];
   // Step 5
   profilePhoto: string;
-  // Step 6
-  portfolioVideoUrls: string[];
   // Step 7
   rateRangeSelf: { min: number; max: number } | null;
   // Step 8
@@ -35,7 +54,6 @@ export const INITIAL_WIZARD_DATA: WizardData = {
   ugcCategories: [],
   contentFormats: [],
   profilePhoto: "",
-  portfolioVideoUrls: ["", ""],
   rateRangeSelf: null,
   genderIdentity: "",
   ageDemographic: "",
@@ -53,7 +71,7 @@ export interface ProfileWizardProps {
   onClose: () => void;
 }
 
-export function canProceed(step: number, data: WizardData): boolean {
+export function canProceed(step: number, data: WizardData, portfolioVideoCount = 0): boolean {
   switch (step) {
     case 1:
       return (
@@ -72,7 +90,7 @@ export function canProceed(step: number, data: WizardData): boolean {
     case 5:
       return true; // optional
     case 6:
-      return data.portfolioVideoUrls.filter((u) => u.trim()).length >= 2;
+      return portfolioVideoCount >= MIN_PORTFOLIO_VIDEOS;
     case 7:
       return data.rateRangeSelf !== null;
     case 8:

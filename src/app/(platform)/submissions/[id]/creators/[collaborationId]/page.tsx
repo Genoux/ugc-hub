@@ -9,14 +9,14 @@ const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12
 export default async function CreatorFolderPage({
   params,
 }: {
-  params: Promise<{ id: string; folderId: string }>;
+  params: Promise<{ id: string; collaborationId: string }>;
 }) {
-  const { id, folderId } = await params;
+  const { id, collaborationId } = await params;
 
-  if (!UUID_REGEX.test(id) || !UUID_REGEX.test(folderId)) redirect("/submissions");
+  if (!UUID_REGEX.test(id) || !UUID_REGEX.test(collaborationId)) redirect("/submissions");
 
   const folder = await db.query.creatorCollaborations.findFirst({
-    where: eq(creatorCollaborations.id, folderId),
+    where: eq(creatorCollaborations.id, collaborationId),
     with: {
       submission: { columns: { id: true, name: true } },
       creator: { columns: { id: true, fullName: true, email: true, profilePhoto: true } },
@@ -42,7 +42,7 @@ export default async function CreatorFolderPage({
     <CreatorFolderClient
       submissionId={id}
       submissionName={folder.submission.name}
-      collaborationId={folderId}
+      collaborationId={collaborationId}
       creator={folder.creator}
       collaborationStatus={folder.collaborationStatus}
       batches={folder.creatorSubmissions}

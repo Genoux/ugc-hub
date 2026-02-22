@@ -35,7 +35,7 @@ export async function closeCollaboration(input: CloseCollaborationInput) {
         .where(eq(creators.id, data.creatorId));
     });
 
-    revalidatePath("/submissions/[id]/creators/[folderId]", "page");
+    revalidatePath("/submissions/[id]/creators/[collaborationId]", "page");
     revalidatePath("/database");
   } catch (err) {
     throw toActionError(err);

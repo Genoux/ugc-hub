@@ -3,7 +3,7 @@ import { creators } from "../core/creators";
 
 export const creatorProfileAssetTypeEnum = pgEnum("creator_profile_asset_type", [
   "profile_picture",
-  "past_work",
+  "portfolio_video",
   "other",
 ]);
 
