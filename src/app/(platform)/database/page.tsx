@@ -1,6 +1,5 @@
-import { listCreators } from "@/features/creators/actions/admin/list-creators";
+import { getCreators } from "@/features/creators/actions/admin/get-creators";
 import { CreatorDatabase } from "@/features/creators/components/admin/creator-database";
-import { creatorSchema } from "@/features/creators/schemas";
 
 export const metadata = {
   title: "Creator Database | UGC Hub",
@@ -8,9 +7,9 @@ export const metadata = {
 };
 
 export default async function DatabasePage() {
-  const result = await listCreators();
+  const result = await getCreators();
 
-  if (!result.success || !result.creators) {
+  if (!result.success) {
     return (
       <div className="flex flex-1 items-center justify-center px-8">
         <div className="text-center">
@@ -21,17 +20,5 @@ export default async function DatabasePage() {
     );
   }
 
-  // Parse and validate creators
-  const creators = result.creators
-    .map((c) => {
-      try {
-        return creatorSchema.parse(c);
-      } catch (error) {
-        console.error("Failed to parse creator:", error);
-        return null;
-      }
-    })
-    .filter((c): c is NonNullable<typeof c> => c !== null);
-
-  return <CreatorDatabase creators={creators} />;
+  return <CreatorDatabase creators={result.creators} />;
 }

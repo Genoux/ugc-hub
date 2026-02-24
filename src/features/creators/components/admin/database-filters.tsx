@@ -1,17 +1,7 @@
 "use client";
 
 import type { LucideIcon } from "lucide-react";
-import {
-  Calendar,
-  ChevronDown,
-  Film,
-  Globe,
-  Grid3X3,
-  Shield,
-  Star,
-  Tv,
-  Users,
-} from "lucide-react";
+import { Calendar, ChevronDown, Film, Globe, Grid3X3, Shield, Star, Tv, Users } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/shared/components/ui/button";
 import { Checkbox } from "@/shared/components/ui/checkbox";

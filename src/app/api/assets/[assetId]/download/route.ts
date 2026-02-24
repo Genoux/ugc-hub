@@ -1,14 +1,7 @@
-import { GetObjectCommand } from "@aws-sdk/client-s3";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { auth } from "@clerk/nextjs/server";
 import { eq } from "drizzle-orm";
-import {
-  creatorCollaborations,
-  creatorSubmissions,
-  creators,
-  submissionAssets,
-} from "@/db/schema";
-import { R2_BUCKET_NAME, r2Client } from "@/features/uploads/lib/r2-client";
+import { assets, collaborations, creators, submissions } from "@/db/schema";
+import { getR2SignedUrl, r2JsonResponse } from "@/features/uploads/lib/r2-serve";
 import { db } from "@/shared/lib/db";
 
 const ALLOWED_DOMAIN = process.env.ALLOWED_DOMAIN;
@@ -24,17 +17,14 @@ export async function GET(_request: Request, { params }: { params: Promise<{ ass
 
     const rows = await db
       .select({
-        r2Key: submissionAssets.r2Key,
+        r2Key: assets.r2Key,
         ownerClerkUserId: creators.clerkUserId,
       })
-      .from(submissionAssets)
-      .innerJoin(creatorSubmissions, eq(creatorSubmissions.id, submissionAssets.creatorSubmissionId))
-      .innerJoin(
-        creatorCollaborations,
-        eq(creatorCollaborations.id, creatorSubmissions.creatorCollaborationId),
-      )
-      .innerJoin(creators, eq(creators.id, creatorCollaborations.creatorId))
-      .where(eq(submissionAssets.id, assetId))
+      .from(assets)
+      .innerJoin(submissions, eq(submissions.id, assets.submissionId))
+      .innerJoin(collaborations, eq(collaborations.id, submissions.collaborationId))
+      .innerJoin(creators, eq(creators.id, collaborations.creatorId))
+      .where(eq(assets.id, assetId))
       .limit(1);
 
     if (rows.length === 0) {
@@ -51,23 +41,9 @@ export async function GET(_request: Request, { params }: { params: Promise<{ ass
       return Response.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const command = new GetObjectCommand({
-      Bucket: R2_BUCKET_NAME,
-      Key: r2Key,
-    });
-
-    const signedUrl = await getSignedUrl(r2Client, command, {
-      expiresIn: 3600,
-    });
-
-    return Response.json(
-      { url: signedUrl },
-      {
-        headers: {
-          "Cache-Control": "public, s-maxage=60, stale-while-revalidate=120",
-        },
-      },
-    );
+    const signedUrl = await getR2SignedUrl(r2Key);
+    if (!signedUrl) return Response.json({ error: "Asset not found" }, { status: 404 });
+    return r2JsonResponse(signedUrl);
   } catch (error) {
     console.error("Download URL generation error:", error);
     return Response.json({ error: "Failed to generate download URL" }, { status: 500 });

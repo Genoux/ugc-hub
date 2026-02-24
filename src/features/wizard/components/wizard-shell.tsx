@@ -3,8 +3,8 @@
 import { CheckCircle2, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Button } from "@/shared/components/ui/button";
 import { useMultipartUpload } from "@/features/uploads/hooks/use-multipart-upload";
+import { Button } from "@/shared/components/ui/button";
 import { submitWizard } from "../actions/submit-wizard";
 import { useWizardState } from "../hooks/use-wizard-state";
 import { WizardStepOne } from "./wizard-step-one";
@@ -46,7 +46,7 @@ export function WizardShell({
       if (stepTwoFiles.length > 0) {
         await Promise.all(
           stepTwoFiles.map((file) =>
-            uploadFile(file, result.submission.id, result.folder.id, result.batch.id),
+            uploadFile(file, result.project.id, result.folder.id, result.batch.id),
           ),
         );
       }
@@ -58,7 +58,7 @@ export function WizardShell({
 
       if (batchId) {
         try {
-          await fetch("/api/submissions/rollback", {
+          await fetch("/api/projects/rollback", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ submissionId: batchId }),

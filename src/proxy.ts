@@ -17,10 +17,10 @@ const isPublicRoute = createRouteMatcher([
 ]);
 
 const isPlatformRoute = createRouteMatcher([
-  "/submissions(.*)",
+  "/projects(.*)",
   "/database(.*)",
   "/applicants(.*)",
-  "/api/submissions(.*)",
+  "/api/projects(.*)",
 ]);
 
 const isCreatorRoute = createRouteMatcher(["/creator(.*)", "/submit(.*)"]);
@@ -30,7 +30,7 @@ const rateLimitedRoutes = [
   "/api/uploads/submission/complete",
   "/api/uploads/portfolio/presign",
   "/api/uploads/portfolio/complete",
-  "/api/submissions/rollback",
+  "/api/projects/rollback",
 ];
 
 export default clerkMiddleware(async (auth, req: NextRequest) => {

@@ -64,7 +64,60 @@ export const ETHNICITIES = [
 
 export type Ethnicity = (typeof ETHNICITIES)[number];
 
+export const LANGUAGES = [
+  "English",
+  "French",
+  "Spanish",
+  "Portuguese",
+  "German",
+  "Italian",
+  "Dutch",
+  "Swedish",
+  "Norwegian",
+  "Danish",
+  "Finnish",
+  "Japanese",
+  "Korean",
+  "Hindi",
+  "Arabic",
+  "Other",
+] as const;
+
+export type Language = (typeof LANGUAGES)[number];
+
 export const PRIMARY_CHANNELS = ["Instagram", "TikTok", "YouTube"] as const;
+
+export const COUNTRIES = [
+  "United States",
+  "United Kingdom",
+  "Canada",
+  "Australia",
+  "France",
+  "Germany",
+  "Spain",
+  "Italy",
+  "Brazil",
+  "Mexico",
+  "Netherlands",
+  "Sweden",
+  "Norway",
+  "Denmark",
+  "Finland",
+  "Japan",
+  "South Korea",
+  "India",
+  "South Africa",
+  "Nigeria",
+  "Other",
+];
+
+export const RATE_BANDS = [
+  { label: "$50 – $150", value: { min: 50, max: 150 } },
+  { label: "$150 – $300", value: { min: 150, max: 300 } },
+  { label: "$300 – $600", value: { min: 300, max: 600 } },
+  { label: "$600 – $1,000", value: { min: 600, max: 1000 } },
+  { label: "$1,000+", value: { min: 1000, max: 9999 } },
+];
 
 export type PrimaryChannel = (typeof PRIMARY_CHANNELS)[number];
 
@@ -108,45 +161,25 @@ export type DbCreatorStatus = (typeof DB_CREATOR_STATUSES)[number];
 export const CREATOR_STATUSES = ["untested", "active", "blacklisted"] as const;
 export type CreatorDatabaseStatus = (typeof CREATOR_STATUSES)[number];
 
-
-export const RATING_LABELS: Record<keyof CollaborationRatings, string> = {
+export const RATING_LABELS: Record<string, string> = {
   visual_quality: "Visual Quality",
   acting_line_delivery: "Acting & Delivery",
   reliability_speed: "Reliability & Speed",
 };
 
-export interface LanguageTag {
-  language: string;
-  accent?: string;
-}
-
-export interface SocialChannels {
-  instagram_handle?: string;
-  tiktok_handle?: string;
-  youtube_handle?: string;
-  other_links?: string[];
-}
-
-export interface RateRange {
-  min: number;
-  max: number;
-}
-
-export interface CollaborationRatings {
-  visual_quality: RatingTier;
-  acting_line_delivery: RatingTier;
-  reliability_speed: RatingTier;
-}
-
-export interface Collaboration {
+export interface PortfolioVideoEntry {
   id: string;
-  creator_id: string;
-  brand: string;
-  date: string;
-  pieces_of_content: number;
-  total_paid: number;
-  per_piece_rate: number;
-  notes?: string;
-  ratings: CollaborationRatings;
-  content_thumbnails?: string[];
+  r2Key: string;
+  filename: string;
+  mimeType: string;
+  sizeBytes: number;
+}
+
+export interface CollaborationHighlight {
+  id: string;
+  r2Key: string;
+  filename: string;
+  mimeType: string;
+  sizeBytes: number;
+  uploadedBy: string;
 }

@@ -3,8 +3,8 @@ import { eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { ThemeProvider } from "next-themes";
 import { creators } from "@/db/schema";
+import { CreatorPortalLayout } from "@/features/creators/components/portal/creator-portal-layout";
 import { getSessionCreator } from "@/features/creators/lib/get-session-creator";
-import { CreatorPortalClientShell } from "@/features/creators/components/portal/creator-portal-client-shell";
 import { db } from "@/shared/lib/db";
 import { ROUTES } from "@/shared/lib/routes";
 
@@ -26,7 +26,7 @@ export default async function CreatorLayout({ children }: { children: React.Reac
 
   return (
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-      <CreatorPortalClientShell>{children}</CreatorPortalClientShell>
+      <CreatorPortalLayout>{children}</CreatorPortalLayout>
     </ThemeProvider>
   );
 }

@@ -5,6 +5,7 @@ import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { creators } from "@/db/schema";
+import { AGE_DEMOGRAPHICS, ETHNICITIES, GENDER_IDENTITIES } from "@/features/creators/constants";
 import { toActionError } from "@/shared/lib/action-error";
 import { db } from "@/shared/lib/db";
 
@@ -35,9 +36,9 @@ const schema = z.object({
   contentFormats: z.array(z.string()).min(1),
   profilePhoto: z.string().optional(),
   rateRangeSelf: z.object({ min: z.number(), max: z.number() }).optional(),
-  genderIdentity: z.string().optional(),
-  ageDemographic: z.string().optional(),
-  ethnicity: z.string().optional(),
+  genderIdentity: z.enum(GENDER_IDENTITIES).optional(),
+  ageDemographic: z.enum(AGE_DEMOGRAPHICS).optional(),
+  ethnicity: z.enum(ETHNICITIES).optional(),
 });
 
 export async function completeCreatorProfile(input: z.infer<typeof schema>) {
@@ -52,6 +53,8 @@ export async function completeCreatorProfile(input: z.infer<typeof schema>) {
       columns: { clerkUserId: true, email: true },
     });
 
+    if (!record) throw new Error("Creator profile not found");
+
     const clerkUser = await (await clerkClient()).users.getUser(userId);
     const userEmail = clerkUser.primaryEmailAddress?.emailAddress?.toLowerCase().trim();
     const isOwner =
@@ -64,8 +67,7 @@ export async function completeCreatorProfile(input: z.infer<typeof schema>) {
       .set({
         fullName: validated.fullName,
         country: validated.country,
-        // DB stores languages as { language, accent? } objects; wizard sends string[]
-        languages: validated.languages.map((l) => ({ language: l })),
+        languages: validated.languages,
         socialChannels: validated.socialChannels,
         portfolioUrl: validated.portfolioUrl || null,
         ugcCategories: validated.ugcCategories,

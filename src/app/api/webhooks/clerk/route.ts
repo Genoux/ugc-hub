@@ -26,10 +26,7 @@ export async function POST(req: NextRequest) {
     if (evt.type === "user.deleted") {
       const { id } = evt.data;
       if (id) {
-        await db
-          .update(creators)
-          .set({ clerkUserId: null })
-          .where(eq(creators.clerkUserId, id));
+        await db.update(creators).set({ clerkUserId: null }).where(eq(creators.clerkUserId, id));
       }
     }
 

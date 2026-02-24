@@ -23,7 +23,7 @@ export const creators = pgTable("creators", {
   fullName: text("full_name").notNull(),
   email: text("email").notNull().unique(),
   country: text("country"),
-  languages: jsonb("languages").$type<Array<{ language: string; accent?: string }>>(),
+  languages: jsonb("languages").$type<string[]>(),
   portfolioUrl: text("portfolio_url"),
 
   // Social channels
@@ -48,6 +48,19 @@ export const creators = pgTable("creators", {
   // Rates
   rateRangeSelf: jsonb("rate_range_self").$type<{ min: number; max: number }>(),
   rateRangeInternal: jsonb("rate_range_internal").$type<{ min: number; max: number }>(),
+
+  // Creator-uploaded portfolio videos (showreel)
+  portfolioVideos: jsonb("portfolio_videos")
+    .$type<
+      {
+        id: string;
+        r2Key: string;
+        filename: string;
+        mimeType: string;
+        sizeBytes: number;
+      }[]
+    >()
+    .default([]),
 
   // Performance & status (Admin-managed)
   overallRating: text("overall_rating").notNull().default("untested"),

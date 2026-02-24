@@ -2,11 +2,11 @@
 
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
-import type { WizardData } from "../onboarding-types";
+import type { OnboardingData } from "../onboarding-types";
 
 interface Props {
-  data: WizardData;
-  onChange: (updates: Partial<WizardData>) => void;
+  data: OnboardingData;
+  onChange: (updates: Partial<OnboardingData>) => void;
 }
 
 function HandleInput({

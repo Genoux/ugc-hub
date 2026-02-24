@@ -1,6 +1,6 @@
 "use client";
 
-import { CONTENT_FORMATS } from "@/features/creators/constants";
+import { CONTENT_FORMATS, type ContentFormat } from "@/features/creators/constants";
 import { Button } from "@/shared/components/ui/button";
 import type { OnboardingData } from "../onboarding-types";
 
@@ -11,9 +11,9 @@ interface Props {
 
 export function StepStyle({ data, onChange }: Props) {
   const toggle = (value: string) => {
-    const next = data.contentFormats.includes(value)
+    const next = data.contentFormats.includes(value as ContentFormat)
       ? data.contentFormats.filter((v) => v !== value)
-      : [...data.contentFormats, value];
+      : [...data.contentFormats, value as ContentFormat];
     onChange({ contentFormats: next });
   };
 

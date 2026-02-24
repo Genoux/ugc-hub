@@ -25,8 +25,8 @@ const navItems = [
     icon: Users,
   },
   {
-    title: "Submissions",
-    url: "/submissions",
+    title: "Projects",
+    url: "/projects",
     icon: Folder,
   },
 ];

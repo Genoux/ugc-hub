@@ -3,7 +3,8 @@ import { eq, or } from "drizzle-orm";
 import { AlertCircle, CheckCircle2, Clock } from "lucide-react";
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
-import { creators, submissions } from "@/db/schema";
+import { creators, projects } from "@/db/schema";
+import { getR2SignedUrl } from "@/features/uploads/lib/r2-serve";
 import { WizardShell } from "@/features/wizard/components/wizard-shell";
 import { db } from "@/shared/lib/db";
 import { ROUTES } from "@/shared/lib/routes";
@@ -15,8 +16,8 @@ export const metadata: Metadata = {
 export default async function SubmitPage({ params }: { params: Promise<{ token: string }> }) {
   const { token } = await params;
 
-  const submission = await db.query.submissions.findFirst({
-    where: eq(submissions.uploadToken, token),
+  const submission = await db.query.projects.findFirst({
+    where: eq(projects.uploadToken, token),
   });
 
   if (!submission) {
@@ -124,7 +125,7 @@ export default async function SubmitPage({ params }: { params: Promise<{ token: 
       creatorId={creator.id}
       creatorName={creator.fullName}
       creatorEmail={primaryEmail}
-      creatorImageUrl={creator.profilePhoto ?? clerkUser.imageUrl ?? null}
+      creatorImageUrl={(await getR2SignedUrl(creator.profilePhoto)) ?? clerkUser.imageUrl ?? null}
     />
   );
 }

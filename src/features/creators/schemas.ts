@@ -1,14 +1,12 @@
 import { z } from "zod";
 import {
+  CONTENT_FORMATS,
   DB_CREATOR_STATUSES,
+  LANGUAGES,
   OVERALL_RATING_TIERS,
   PRIMARY_CHANNELS,
+  UGC_CATEGORIES,
 } from "./constants";
-
-export const languageTagSchema = z.object({
-  language: z.string(),
-  accent: z.string().optional(),
-});
 
 export const socialChannelsSchema = z.object({
   instagram_handle: z.string().optional(),
@@ -23,7 +21,7 @@ export const rateRangeSchema = z.object({
 });
 
 export const creatorSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   fullName: z.string(),
   email: z.string().email(),
   profilePhoto: z.string().nullable(),
@@ -33,14 +31,14 @@ export const creatorSchema = z.object({
   genderIdentity: z.string().nullable(),
   ageDemographic: z.string().nullable(),
   ethnicity: z.string().nullable(),
-  languages: z.array(languageTagSchema).nullable(),
+  languages: z.array(z.enum(LANGUAGES)).nullable(),
   portfolioUrl: z.string().nullable(),
   primaryChannel: z.enum(PRIMARY_CHANNELS).nullable(),
   socialChannels: socialChannelsSchema.nullable(),
   // z.string() intentionally — enum validation belongs at the input layer (server action),
   // not when reading back from the DB where old values may exist.
-  ugcCategories: z.array(z.string()).nullable(),
-  contentFormats: z.array(z.string()).nullable(),
+  ugcCategories: z.array(z.enum(UGC_CATEGORIES)).nullable(),
+  contentFormats: z.array(z.enum(CONTENT_FORMATS)).nullable(),
   rateRangeSelf: rateRangeSchema.nullable(),
   rateRangeInternal: rateRangeSchema.nullable(),
   overallRating: z.enum(OVERALL_RATING_TIERS),
@@ -57,4 +55,3 @@ export const creatorSchema = z.object({
 export type Creator = z.infer<typeof creatorSchema>;
 export type SocialChannels = z.infer<typeof socialChannelsSchema>;
 export type RateRange = z.infer<typeof rateRangeSchema>;
-export type LanguageTag = z.infer<typeof languageTagSchema>;

@@ -25,10 +25,11 @@ import {
   AlertDialogTitle,
 } from "@/shared/components/ui/alert-dialog";
 import { Button } from "@/shared/components/ui/button";
-import { EASING_FUNCTION, STEP_TIPS } from "./onboarding-constants";
+import { EASING_FUNCTION } from "@/shared/lib/constant";
+import { STEP_TIPS } from "./onboarding-constants";
 import {
+  buildOnboardingData,
   canProceed,
-  INITIAL_ONBOARDING_DATA,
   type OnboardingData,
   type OnboardingProps,
 } from "./onboarding-types";
@@ -44,7 +45,15 @@ import { StepVideos } from "./steps/step-videos";
 
 const TOTAL_STEPS = 9;
 
-function ProgressDots({ current, total }: { current: number; total: number }) {
+function ProgressDots({
+  current,
+  total,
+  label,
+}: {
+  current: number;
+  total: number;
+  label: string;
+}) {
   return (
     <div
       className="flex items-center gap-1.5"
@@ -52,7 +61,7 @@ function ProgressDots({ current, total }: { current: number; total: number }) {
       aria-valuenow={current}
       aria-valuemin={1}
       aria-valuemax={total}
-      aria-label={`Step ${current} of ${total}`}
+      aria-label={label}
     >
       {Array.from({ length: total }, (_, i) => (
         <div
@@ -134,13 +143,20 @@ function StepContent({
   }
 }
 
-export function OnboardingShell({ creator, initialData, onComplete, onClose }: OnboardingProps) {
+export function OnboardingShell({ creator, onComplete, onClose }: OnboardingProps) {
   const [step, setStep] = useState(1);
-  const [data, setData] = useState<OnboardingData>({ ...INITIAL_ONBOARDING_DATA, ...initialData });
+  const [data, setData] = useState<OnboardingData>(() => buildOnboardingData(creator));
   const [isPending, startTransition] = useTransition();
   const [confirmingClose, setConfirmingClose] = useState(false);
-  const photoManager = useProfilePhotoManager();
-  const videoManager = usePortfolioVideoManager();
+  const photoManager = useProfilePhotoManager(creator.profilePhotoUrl);
+  const videoManager = usePortfolioVideoManager(
+    creator.portfolioVideos.map((v) => ({
+      assetId: v.id,
+      key: v.url,
+      filename: v.filename,
+      objectUrl: v.url,
+    })),
+  );
 
   const [submitError, setSubmitError] = useState<string | null>(null);
   const update = (updates: Partial<OnboardingData>) => setData((prev) => ({ ...prev, ...updates }));
@@ -269,6 +285,7 @@ export function OnboardingShell({ creator, initialData, onComplete, onClose }: O
                         onExitResult={handleExitResult}
                         onRetryResult={() => handleStepChange(8)}
                       />
+                      <ProgressDots current={step} total={TOTAL_STEPS} label="Step progress" />
                     </div>
 
                     {!isResultStep && (

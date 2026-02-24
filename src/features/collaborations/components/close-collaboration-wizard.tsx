@@ -9,7 +9,7 @@ import { closeCollaboration } from "../actions/close-collaboration";
 import { calculateOverallRating } from "../lib/calculate-overall-rating";
 import type { CollaborationRatingsInput } from "../schemas";
 import { StepCloseConfirm } from "./steps/step-close-confirm";
-import { StepPortfolio, type PortfolioFile } from "./steps/step-portfolio";
+import { type PortfolioFile, StepPortfolio } from "./steps/step-portfolio";
 import { StepRates } from "./steps/step-rates";
 import { StepRatings } from "./steps/step-ratings";
 
@@ -106,8 +106,7 @@ export function CloseCollaborationWizard({
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-              creatorCollaborationId: collaborationId,
-              creatorId,
+              collaborationId,
               key,
               filename: pf.file.name,
               mimeType: pf.file.type,
@@ -116,7 +115,7 @@ export function CloseCollaborationWizard({
           });
           if (!completeRes.ok) throw new Error("Failed to register upload");
 
-          const idx = updated.findIndex((f) => f === pf);
+          const idx = updated.indexOf(pf);
           if (idx !== -1) {
             updated[idx] = { ...updated[idx], key, uploaded: true };
           }
@@ -144,6 +143,13 @@ export function CloseCollaborationWizard({
           const uploaded = await uploadPortfolioFiles(portfolioFiles);
           setPortfolioFiles(uploaded);
           setIsUploading(false);
+          const stillPending = uploaded.filter((f) => !f.uploaded);
+          if (stillPending.length > 0) {
+            toast.error(
+              "Some files could not be uploaded. Remove them or try again before closing.",
+            );
+            return;
+          }
         }
         await closeCollaboration({
           collaborationId,
@@ -296,7 +302,7 @@ export function CloseCollaborationWizard({
             ) : (
               <Button
                 size="sm"
-                variant="destructive"
+                variant="default"
                 onClick={() => void handleSubmit()}
                 disabled={isPending || isUploading}
               >

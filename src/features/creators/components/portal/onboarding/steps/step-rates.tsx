@@ -1,11 +1,11 @@
 "use client";
 
-import { RATE_BANDS } from "../onboarding-constants";
-import type { WizardData } from "../onboarding-types";
+import { RATE_BANDS } from "@/features/creators/constants";
+import type { OnboardingData } from "../onboarding-types";
 
 interface Props {
-  data: WizardData;
-  onChange: (updates: Partial<WizardData>) => void;
+  data: OnboardingData;
+  onChange: (updates: Partial<OnboardingData>) => void;
 }
 
 export function StepRates({ data, onChange }: Props) {

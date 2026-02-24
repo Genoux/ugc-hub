@@ -2,7 +2,7 @@
 
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { creatorCollaborations, creators } from "@/db/schema";
+import { collaborations, creators } from "@/db/schema";
 import { toActionError } from "@/shared/lib/action-error";
 import { requireAdmin } from "@/shared/lib/auth";
 import { db } from "@/shared/lib/db";
@@ -13,29 +13,27 @@ export async function closeCollaboration(input: CloseCollaborationInput) {
     const { userId } = await requireAdmin();
     const data = closeCollaborationSchema.parse(input);
 
-    await db.transaction(async (tx) => {
-      await tx
-        .update(creatorCollaborations)
-        .set({
-          collaborationStatus: "closed",
-          closedAt: new Date(),
-          closedBy: userId,
-          ratingVisualQuality: data.ratings.visual_quality,
-          ratingActingDelivery: data.ratings.acting_line_delivery,
-          ratingReliabilitySpeed: data.ratings.reliability_speed,
-          piecesOfContent: data.piecesOfContent,
-          totalPaid: Math.round(data.totalPaid * 100), // dollars → cents
-          reviewNotes: data.notes,
-        })
-        .where(eq(creatorCollaborations.id, data.collaborationId));
+    await db
+      .update(collaborations)
+      .set({
+        status: "closed",
+        closedAt: new Date(),
+        closedBy: userId,
+        ratingVisualQuality: data.ratings.visual_quality,
+        ratingActingDelivery: data.ratings.acting_line_delivery,
+        ratingReliabilitySpeed: data.ratings.reliability_speed,
+        piecesOfContent: data.piecesOfContent,
+        totalPaid: Math.round(data.totalPaid * 100), // dollars → cents
+        reviewNotes: data.notes,
+      })
+      .where(eq(collaborations.id, data.collaborationId));
 
-      await tx
-        .update(creators)
-        .set({ overallRating: data.overallRating })
-        .where(eq(creators.id, data.creatorId));
-    });
+    await db
+      .update(creators)
+      .set({ overallRating: data.overallRating })
+      .where(eq(creators.id, data.creatorId));
 
-    revalidatePath("/submissions/[id]/creators/[collaborationId]", "page");
+    revalidatePath("/projects/[id]/creators/[collaborationId]", "page");
     revalidatePath("/database");
   } catch (err) {
     throw toActionError(err);

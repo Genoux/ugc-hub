@@ -13,7 +13,8 @@ export const revalidate = 0;
 export async function POST(request: NextRequest) {
   try {
     await requireAdmin();
-    const { creatorCollaborationId, creatorId, filename, mimeType, fileSize } = await request.json();
+    const { creatorCollaborationId, creatorId, filename, mimeType, fileSize } =
+      await request.json();
 
     if (!creatorCollaborationId || !creatorId || !filename || !mimeType) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });

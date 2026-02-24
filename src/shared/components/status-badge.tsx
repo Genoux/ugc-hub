@@ -1,6 +1,6 @@
 import { Badge } from "@/shared/components/ui/badge";
 
-type Status = "awaiting" | "pending" | "approved" | "rejected";
+type Status = "awaiting" | "pending" | "approved" | "rejected" | "closed" | "active";
 
 const statusConfig = {
   awaiting: {
@@ -22,10 +22,20 @@ const statusConfig = {
     className:
       "text-red-600 dark:text-red-400 border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-950/30",
   },
+  closed: {
+    label: "closed",
+    className:
+      "text-red-600 dark:text-red-400 border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-950/30",
+  },
+  active: {
+    label: "active",
+    className:
+      "text-green-600 dark:text-green-400 border-green-300 dark:border-green-700 bg-green-50 dark:bg-green-950/30",
+  },
 } as const;
 
 interface StatusBadgeProps {
-  status?: Status;
+  status: Status;
   children?: React.ReactNode;
 }
 

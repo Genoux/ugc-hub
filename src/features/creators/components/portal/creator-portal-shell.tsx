@@ -2,25 +2,19 @@
 
 import { AnimatePresence } from "motion/react";
 import { useState } from "react";
+import type { CreatorProfile } from "@/features/creators/actions/portal/get-creator-profile";
 import type { CreatorSubmissions } from "@/features/creators/actions/portal/get-creator-submissions";
 import { resetCreatorProfile } from "@/features/creators/actions/portal/reset-creator-profile";
 import type { CreatorUIState } from "@/features/creators/lib/get-creator-ui-state";
-import type { Creator } from "@/features/creators/schemas";
 import { DevToolbar } from "@/shared/components/tools/dev-toolbar";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/shared/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
-import { CreatorContentTab } from "./creator-content-tab";
 import { OnboardingShell } from "./onboarding";
 import { ProfileStateBanner } from "./profile-state-banner";
+import { CreatorContentTab } from "./tabs/creator-content-tab";
+import { CreatorProfileTab } from "./tabs/creator-profile-tab";
 
 interface CreatorPortalShellProps {
-  creator: Creator;
+  creator: CreatorProfile;
   uiState: CreatorUIState;
   content: CreatorSubmissions;
 }
@@ -28,42 +22,9 @@ interface CreatorPortalShellProps {
 export function CreatorPortalShell({ creator, uiState, content }: CreatorPortalShellProps) {
   const [onboardingOpen, setOnboardingOpen] = useState(uiState === "pending_profile");
 
-  const handleOnboardingComplete = () => {
-    // Re-fetch server state after onboarding completes
-    window.location.reload();
-  };
-
-  // Pre-fill all steps from existing DB record so creators can resume where they left off.
-  const initialData = {
-    // Step 1
-    fullName: creator.fullName ?? "",
-    country: creator.country ?? "",
-    languages: Array.isArray(creator.languages)
-      ? (creator.languages as Array<{ language: string }>).map((l) => l.language)
-      : [],
-    // Step 2
-    instagramHandle: creator.socialChannels?.instagram_handle ?? "",
-    tiktokHandle: creator.socialChannels?.tiktok_handle ?? "",
-    youtubeHandle: creator.socialChannels?.youtube_handle ?? "",
-    portfolioUrl: creator.portfolioUrl ?? "",
-    // Step 3
-    ugcCategories: creator.ugcCategories ?? [],
-    // Step 4
-    contentFormats: creator.contentFormats ?? [],
-    // Step 5
-    profilePhoto: creator.profilePhoto ?? "",
-    // Step 6 (video URLs) — not persisted in creators table, starts empty
-    // Step 7
-    rateRangeSelf: creator.rateRangeSelf ?? null,
-    // Step 8
-    genderIdentity: creator.genderIdentity ?? "",
-    ageDemographic: creator.ageDemographic ?? "",
-    ethnicity: creator.ethnicity ?? "",
-  };
-
   return (
     <div className="flex h-full flex-col overflow-y-auto p-6">
-      <div className="mx-auto w-full max-w-3xl space-y-4">
+      <div className="mx-auto w-full max-w-7xl space-y-4">
         <ProfileStateBanner
           uiState={uiState}
           onOpenOnboarding={
@@ -77,89 +38,12 @@ export function CreatorPortalShell({ creator, uiState, content }: CreatorPortalS
             <TabsTrigger value="content">Submitted Content</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="profile">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">Profile</CardTitle>
-                <CardDescription>
-                  {creator.profileCompleted
-                    ? "Your creator profile."
-                    : "Your creator profile will appear here once it's set up."}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {creator.profileCompleted && (
-                  <div className="space-y-3 text-sm">
-                    {creator.fullName && (
-                      <div>
-                        <p className="text-muted-foreground">Name</p>
-                        <p className="font-medium">{creator.fullName}</p>
-                      </div>
-                    )}
-                    {creator.country && (
-                      <div>
-                        <p className="text-muted-foreground">Country</p>
-                        <p className="font-medium">{creator.country}</p>
-                      </div>
-                    )}
-                    {creator.socialChannels && (
-                      <div>
-                        <p className="text-muted-foreground">Socials</p>
-                        <div className="mt-1 flex flex-wrap gap-2">
-                          {creator.socialChannels.instagram_handle && (
-                            <span className="bg-muted rounded px-2 py-0.5 text-xs">
-                              @{creator.socialChannels.instagram_handle} · Instagram
-                            </span>
-                          )}
-                          {creator.socialChannels.tiktok_handle && (
-                            <span className="bg-muted rounded px-2 py-0.5 text-xs">
-                              @{creator.socialChannels.tiktok_handle} · TikTok
-                            </span>
-                          )}
-                          {creator.socialChannels.youtube_handle && (
-                            <span className="bg-muted rounded px-2 py-0.5 text-xs">
-                              @{creator.socialChannels.youtube_handle} · YouTube
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                    {creator.ugcCategories && creator.ugcCategories.length > 0 && (
-                      <div>
-                        <p className="text-muted-foreground">Categories</p>
-                        <div className="mt-1 flex flex-wrap gap-1.5">
-                          {creator.ugcCategories.map((c) => (
-                            <span key={c} className="bg-muted rounded px-2 py-0.5 text-xs">
-                              {c}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                    {creator.rateRangeSelf && (
-                      <div>
-                        <p className="text-muted-foreground">Rate range</p>
-                        <p className="font-medium">
-                          ${creator.rateRangeSelf.min} – ${creator.rateRangeSelf.max} per video
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+          <TabsContent value="profile" forceMount className="data-[state=inactive]:hidden">
+            <CreatorProfileTab creator={creator} />
           </TabsContent>
 
-          <TabsContent value="content">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">Content Submissions</CardTitle>
-                <CardDescription>Assets you've submitted across all projects.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <CreatorContentTab content={content} />
-              </CardContent>
-            </Card>
+          <TabsContent value="content" forceMount className="data-[state=inactive]:hidden">
+            <CreatorContentTab content={content} />
           </TabsContent>
         </Tabs>
       </div>
@@ -168,8 +52,7 @@ export function CreatorPortalShell({ creator, uiState, content }: CreatorPortalS
         {onboardingOpen && (
           <OnboardingShell
             creator={creator}
-            initialData={initialData}
-            onComplete={handleOnboardingComplete}
+            onComplete={() => window.location.reload()}
             onClose={() => setOnboardingOpen(false)}
           />
         )}

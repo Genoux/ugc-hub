@@ -1,12 +1,14 @@
 "use client";
 
 import { ArrowUpDown, Search, SlidersHorizontal, X } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
-import type { CreatorProfileAssetsResult } from "@/features/creators/actions/admin/get-creator-profile-assets";
-import { getCreatorProfileAssets } from "@/features/creators/actions/admin/get-creator-profile-assets";
+import { useEffect, useMemo, useState } from "react";
+import {
+  type CreatorProfile,
+  getCreatorProfile,
+} from "@/features/creators/actions/admin/get-creator-profile";
 import type { OverallRatingTier } from "@/features/creators/constants";
 import { OVERALL_RATING_TIERS } from "@/features/creators/constants";
-import type { Creator } from "@/features/creators/schemas";
+import type { CreatorListItem } from "@/features/creators/actions/admin/get-creators";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import {
@@ -41,8 +43,12 @@ const RATING_ORDER: Record<OverallRatingTier, number> = Object.fromEntries(
   OVERALL_RATING_TIERS.map((tier, i) => [tier, i]),
 ) as Record<OverallRatingTier, number>;
 
+// Module-level cache — persists across component remounts so signed URLs
+// remain stable and the browser can serve them from its HTTP cache.
+const assetsCache = new Map<string, CreatorProfile>();
+
 interface CreatorDatabaseProps {
-  creators: Creator[];
+  creators: CreatorListItem[];
 }
 
 export function CreatorDatabase({ creators }: CreatorDatabaseProps) {
@@ -51,21 +57,22 @@ export function CreatorDatabase({ creators }: CreatorDatabaseProps) {
   const [filters, setFilters] = useState<Filters>(emptyFilters);
   const [selectedCreatorId, setSelectedCreatorId] = useState<string | null>(null);
   const [filtersOpen, setFiltersOpen] = useState(true);
-  const [profileAssets, setProfileAssets] = useState<CreatorProfileAssetsResult | null>(null);
-  const assetsCache = useRef(new Map<string, CreatorProfileAssetsResult>());
+  const [creator, setCreatorAssets] = useState<CreatorProfile | null>(null);
 
   useEffect(() => {
     if (!selectedCreatorId) return;
-    const cached = assetsCache.current.get(selectedCreatorId);
+    const cached = assetsCache.get(selectedCreatorId);
     if (cached) {
-      setProfileAssets(cached);
+      setCreatorAssets(cached);
       return;
     }
-    setProfileAssets(null);
+    setCreatorAssets(null);
     let cancelled = false;
-    getCreatorProfileAssets(selectedCreatorId).then((data) => {
-      assetsCache.current.set(selectedCreatorId, data);
-      if (!cancelled) setProfileAssets(data);
+    getCreatorProfile(selectedCreatorId).then((data) => {
+      if (!cancelled) {
+        assetsCache.set(selectedCreatorId, data);
+        setCreatorAssets(data);
+      }
     });
     return () => {
       cancelled = true;
@@ -99,13 +106,15 @@ export function CreatorDatabase({ creators }: CreatorDatabaseProps) {
       )
         return false;
       if (filters.genderIdentity.length) {
-        if (!c.genderIdentity || !filters.genderIdentity.includes(c.genderIdentity)) return false;
+        if (!c.genderIdentity || !filters.genderIdentity.includes(c.genderIdentity as never))
+          return false;
       }
       if (filters.ageDemographic.length) {
-        if (!c.ageDemographic || !filters.ageDemographic.includes(c.ageDemographic)) return false;
+        if (!c.ageDemographic || !filters.ageDemographic.includes(c.ageDemographic as never))
+          return false;
       }
       if (filters.ethnicity.length) {
-        if (!c.ethnicity || !filters.ethnicity.includes(c.ethnicity)) return false;
+        if (!c.ethnicity || !filters.ethnicity.includes(c.ethnicity as never)) return false;
       }
       if (filters.hasInstagram && !c.socialChannels?.instagram_handle) return false;
       if (filters.hasTikTok && !c.socialChannels?.tiktok_handle) return false;
@@ -134,15 +143,16 @@ export function CreatorDatabase({ creators }: CreatorDatabaseProps) {
     }
   }, [filtered, sort]);
 
-  const selectedCreator = sorted.find((c) => c.id === selectedCreatorId) ?? null;
+  const selectedCreatorIdx = selectedCreatorId
+    ? sorted.findIndex((c) => c.id === selectedCreatorId)
+    : -1;
   const activeLabels = getActiveFilterLabels(filters);
   const activeCount = countActiveFilters(filters);
   const currentSortLabel = SORT_OPTIONS.find((s) => s.key === sort)?.label ?? "Sort";
 
   const navigateCreator = (direction: 1 | -1) => {
-    if (!selectedCreatorId) return;
-    const idx = sorted.findIndex((c) => c.id === selectedCreatorId);
-    const next = sorted[idx + direction];
+    if (selectedCreatorIdx < 0) return;
+    const next = sorted[selectedCreatorIdx + direction];
     if (next) setSelectedCreatorId(next.id);
   };
 
@@ -269,11 +279,11 @@ export function CreatorDatabase({ creators }: CreatorDatabaseProps) {
         </div>
       </div>
 
-      {selectedCreator && (
+      {selectedCreatorId && (
         <CreatorOverlay
-          creator={selectedCreator}
-          creators={sorted}
-          profileAssets={profileAssets}
+          creator={creator}
+          hasPrev={selectedCreatorIdx > 0}
+          hasNext={selectedCreatorIdx < sorted.length - 1}
           onClose={() => setSelectedCreatorId(null)}
           onPrev={() => navigateCreator(-1)}
           onNext={() => navigateCreator(1)}

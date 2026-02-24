@@ -1,9 +1,10 @@
 import { DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { auth } from "@clerk/nextjs/server";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-import { creatorProfileAssets } from "@/db/schema";
+import { creators } from "@/db/schema";
+import type { PortfolioVideoEntry } from "@/features/creators/constants";
 import { getSessionCreator } from "@/features/creators/lib/get-session-creator";
 import { R2_BUCKET_NAME, r2Client } from "@/features/uploads/lib/r2-client";
 import { db } from "@/shared/lib/db";
@@ -22,24 +23,29 @@ export async function DELETE(
     }
 
     const { assetId } = await params;
-
-    const asset = await db.query.creatorProfileAssets.findFirst({
-      where: eq(creatorProfileAssets.id, assetId),
-      columns: { id: true, creatorId: true, r2Key: true },
-    });
-
-    if (!asset) {
-      return NextResponse.json({ error: "Asset not found" }, { status: 404 });
-    }
-
     const { creator } = await getSessionCreator(userId);
-    if (!creator || creator.id !== asset.creatorId) {
+    if (!creator) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
+    const videos = (creator.portfolioVideos ?? []) as PortfolioVideoEntry[];
+    const target = videos.find((v) => v.id === assetId);
+    if (!target) {
+      return NextResponse.json({ error: "Asset not found" }, { status: 404 });
+    }
+
     await Promise.all([
-      db.delete(creatorProfileAssets).where(eq(creatorProfileAssets.id, assetId)),
-      r2Client.send(new DeleteObjectCommand({ Bucket: R2_BUCKET_NAME, Key: asset.r2Key })),
+      db
+        .update(creators)
+        .set({
+          portfolioVideos: sql`(
+            SELECT COALESCE(jsonb_agg(elem), '[]'::jsonb)
+            FROM jsonb_array_elements(COALESCE(${creators.portfolioVideos}, '[]'::jsonb)) elem
+            WHERE elem->>'id' != ${assetId}
+          )`,
+        })
+        .where(eq(creators.id, creator.id)),
+      r2Client.send(new DeleteObjectCommand({ Bucket: R2_BUCKET_NAME, Key: target.r2Key })),
     ]);
 
     return NextResponse.json({ ok: true });

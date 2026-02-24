@@ -1,10 +1,10 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
+import { getCreatorProfile } from "@/features/creators/actions/portal/get-creator-profile";
 import { getCreatorSubmissions } from "@/features/creators/actions/portal/get-creator-submissions";
 import { CreatorPortalShell } from "@/features/creators/components/portal/creator-portal-shell";
 import { getCreatorUIState } from "@/features/creators/lib/get-creator-ui-state";
 import { getSessionCreator } from "@/features/creators/lib/get-session-creator";
-import { creatorSchema } from "@/features/creators/schemas";
 import { ROUTES } from "@/shared/lib/routes";
 
 export default async function CreatorPage() {
@@ -15,8 +15,8 @@ export default async function CreatorPage() {
   const { creator: row } = await getSessionCreator(userId);
   if (!row) redirect(ROUTES.signOut);
 
-  const creator = creatorSchema.parse(row);
-  const [uiState, content] = await Promise.all([
+  const [creator, uiState, content] = await Promise.all([
+    getCreatorProfile(row.id),
     getCreatorUIState(row),
     getCreatorSubmissions(row.id),
   ]);

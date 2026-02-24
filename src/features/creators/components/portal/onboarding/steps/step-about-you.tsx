@@ -1,6 +1,16 @@
 "use client";
 
-import { AGE_DEMOGRAPHICS, ETHNICITIES, GENDER_IDENTITIES } from "@/features/creators/constants";
+import {
+  AGE_DEMOGRAPHICS,
+  type AgeDemographic,
+  COUNTRIES,
+  ETHNICITIES,
+  type Ethnicity,
+  GENDER_IDENTITIES,
+  type GenderIdentity,
+  LANGUAGES,
+  type Language,
+} from "@/features/creators/constants";
 import { Button } from "@/shared/components/ui/button";
 import { Label } from "@/shared/components/ui/label";
 import {
@@ -10,7 +20,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/shared/components/ui/select";
-import { COUNTRIES, LANGUAGES } from "../onboarding-constants";
 import type { OnboardingData } from "../onboarding-types";
 
 interface Props {
@@ -20,9 +29,9 @@ interface Props {
 
 export function StepAboutYou({ data, onChange }: Props) {
   const toggleLanguage = (lang: string) => {
-    const next = data.languages.includes(lang)
+    const next = data.languages.includes(lang as Language)
       ? data.languages.filter((l) => l !== lang)
-      : [...data.languages, lang];
+      : [...data.languages, lang as Language];
     onChange({ languages: next });
   };
 
@@ -55,7 +64,7 @@ export function StepAboutYou({ data, onChange }: Props) {
           <Select
             clearable
             value={data.genderIdentity}
-            onValueChange={(v) => onChange({ genderIdentity: v })}
+            onValueChange={(v) => onChange({ genderIdentity: v as GenderIdentity | "" })}
           >
             <SelectTrigger>
               <SelectValue placeholder="Select" />
@@ -77,7 +86,7 @@ export function StepAboutYou({ data, onChange }: Props) {
           <Select
             clearable
             value={data.ageDemographic}
-            onValueChange={(v) => onChange({ ageDemographic: v })}
+            onValueChange={(v) => onChange({ ageDemographic: v as AgeDemographic | "" })}
           >
             <SelectTrigger>
               <SelectValue placeholder="Select age group" />
@@ -99,7 +108,7 @@ export function StepAboutYou({ data, onChange }: Props) {
           <Select
             clearable
             value={data.ethnicity}
-            onValueChange={(v) => onChange({ ethnicity: v })}
+            onValueChange={(v) => onChange({ ethnicity: v as Ethnicity | "" })}
           >
             <SelectTrigger>
               <SelectValue placeholder="Select" />

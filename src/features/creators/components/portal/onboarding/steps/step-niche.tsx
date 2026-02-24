@@ -1,6 +1,6 @@
 "use client";
 
-import { UGC_CATEGORIES } from "@/features/creators/constants";
+import { UGC_CATEGORIES, type UgcCategory } from "@/features/creators/constants";
 import { Button } from "@/shared/components/ui/button";
 import type { OnboardingData } from "../onboarding-types";
 
@@ -11,9 +11,9 @@ interface Props {
 
 export function StepNiche({ data, onChange }: Props) {
   const toggle = (value: string) => {
-    const next = data.ugcCategories.includes(value)
+    const next = data.ugcCategories.includes(value as UgcCategory)
       ? data.ugcCategories.filter((v) => v !== value)
-      : [...data.ugcCategories, value];
+      : [...data.ugcCategories, value as UgcCategory];
     onChange({ ugcCategories: next });
   };
 

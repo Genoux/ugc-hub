@@ -48,8 +48,10 @@ export function FileDropZone({
       }
     }
 
-    if (invalidType.length && onInvalidFiles) onInvalidFiles({ names: invalidType, reason: "type" });
-    if (invalidSize.length && onInvalidFiles) onInvalidFiles({ names: invalidSize, reason: "size" });
+    if (invalidType.length && onInvalidFiles)
+      onInvalidFiles({ names: invalidType, reason: "type" });
+    if (invalidSize.length && onInvalidFiles)
+      onInvalidFiles({ names: invalidSize, reason: "size" });
     if (valid.length) onFilesAdd(multiple ? valid : valid.slice(0, 1));
   }
 

@@ -19,34 +19,43 @@ export interface UploadingVideoEntry {
 export const MIN_PORTFOLIO_VIDEOS = 2;
 export const MAX_PORTFOLIO_VIDEOS = 5;
 
+import type {
+  AgeDemographic,
+  ContentFormat,
+  Ethnicity,
+  GenderIdentity,
+  Language,
+  UgcCategory,
+} from "@/features/creators/constants";
+
 export interface OnboardingData {
   // Step 1
   fullName: string;
   country: string;
-  languages: string[];
+  languages: Language[];
   // Step 2
   instagramHandle: string;
   tiktokHandle: string;
   youtubeHandle: string;
   portfolioUrl: string;
   // Step 3
-  ugcCategories: string[];
+  ugcCategories: UgcCategory[];
   // Step 4
-  contentFormats: string[];
+  contentFormats: ContentFormat[];
   // Step 5
   profilePhoto: string;
   // Step 7
   rateRangeSelf: { min: number; max: number } | null;
   // Step 8
-  genderIdentity: string;
-  ageDemographic: string;
-  ethnicity: string;
+  genderIdentity: GenderIdentity | "";
+  ageDemographic: AgeDemographic | "";
+  ethnicity: Ethnicity | "";
 }
 
 export const INITIAL_ONBOARDING_DATA: OnboardingData = {
   fullName: "",
   country: "",
-  languages: ["English"],
+  languages: [],
   instagramHandle: "",
   tiktokHandle: "",
   youtubeHandle: "",
@@ -60,13 +69,31 @@ export const INITIAL_ONBOARDING_DATA: OnboardingData = {
   ethnicity: "",
 };
 
-export interface CreatorForOnboarding {
-  id: string;
+import type { Creator } from "@/features/creators/schemas";
+
+export function buildOnboardingData(creator: Creator): OnboardingData {
+  return {
+    fullName: creator.fullName ?? "",
+    country: creator.country ?? "",
+    languages: (creator.languages ?? []) as Language[],
+    instagramHandle: creator.socialChannels?.instagram_handle ?? "",
+    tiktokHandle: creator.socialChannels?.tiktok_handle ?? "",
+    youtubeHandle: creator.socialChannels?.youtube_handle ?? "",
+    portfolioUrl: creator.portfolioUrl ?? "",
+    ugcCategories: (creator.ugcCategories ?? []) as UgcCategory[],
+    contentFormats: (creator.contentFormats ?? []) as ContentFormat[],
+    profilePhoto: creator.profilePhoto ?? "",
+    rateRangeSelf: creator.rateRangeSelf ?? null,
+    genderIdentity: (creator.genderIdentity ?? "") as GenderIdentity | "",
+    ageDemographic: (creator.ageDemographic ?? "") as AgeDemographic | "",
+    ethnicity: (creator.ethnicity ?? "") as Ethnicity | "",
+  };
 }
 
+import type { CreatorProfile } from "@/features/creators/actions/portal/get-creator-profile";
+
 export interface OnboardingProps {
-  creator: CreatorForOnboarding;
-  initialData?: Partial<OnboardingData>;
+  creator: CreatorProfile;
   onComplete: () => void;
   onClose: () => void;
 }

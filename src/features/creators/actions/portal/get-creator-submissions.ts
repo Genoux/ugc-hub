@@ -1,20 +1,21 @@
 "use server";
 
 import { eq } from "drizzle-orm";
-import { creatorCollaborations } from "@/db/schema";
+import { collaborations } from "@/db/schema";
+import { getR2SignedUrl } from "@/features/uploads/lib/r2-serve";
 import { db } from "@/shared/lib/db";
 
 export async function getCreatorSubmissions(creatorId: string) {
-  const collabs = await db.query.creatorCollaborations.findMany({
-    where: eq(creatorCollaborations.creatorId, creatorId),
+  const collabs = await db.query.collaborations.findMany({
+    where: eq(collaborations.creatorId, creatorId),
     with: {
-      submission: {
+      project: {
         columns: { id: true, name: true },
       },
-      creatorSubmissions: {
+      submissions: {
         with: {
-          submissionAssets: {
-            columns: { id: true, filename: true, mimeType: true, sizeBytes: true },
+          assets: {
+            columns: { id: true, filename: true, mimeType: true, sizeBytes: true, r2Key: true },
           },
         },
         orderBy: (cs, { asc }) => [asc(cs.batchNumber)],
@@ -22,17 +23,30 @@ export async function getCreatorSubmissions(creatorId: string) {
     },
   });
 
-  return collabs.map((collab) => ({
-    submissionId: collab.submission.id,
-    submissionName: collab.submission.name,
-    batches: collab.creatorSubmissions.map((batch) => ({
-      id: batch.id,
-      label: batch.label,
-      batchNumber: batch.batchNumber,
-      deliveredAt: batch.deliveredAt,
-      assets: batch.submissionAssets,
+  return Promise.all(
+    collabs.map(async (collab) => ({
+      projectId: collab.project.id,
+      projectName: collab.project.name,
+      status: collab.status,
+      batches: await Promise.all(
+        collab.submissions.map(async (batch) => ({
+          id: batch.id,
+          label: batch.label,
+          batchNumber: batch.batchNumber,
+          deliveredAt: batch.deliveredAt,
+          assets: await Promise.all(
+            batch.assets.map(async (asset) => ({
+              id: asset.id,
+              filename: asset.filename,
+              mimeType: asset.mimeType,
+              sizeBytes: asset.sizeBytes,
+              url: (await getR2SignedUrl(asset.r2Key)) ?? "",
+            })),
+          ),
+        })),
+      ),
     })),
-  }));
+  );
 }
 
 export type CreatorSubmissions = Awaited<ReturnType<typeof getCreatorSubmissions>>;

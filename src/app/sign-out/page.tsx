@@ -1,18 +1,10 @@
-"use client";
-
-import { useClerk } from "@clerk/nextjs";
-import { useSearchParams } from "next/navigation";
-import { useEffect } from "react";
-import { ROUTES } from "@/shared/lib/routes";
+import { Suspense } from "react";
+import SigningOutClient from "./client";
 
 export default function SigningOutPage() {
-  const { signOut } = useClerk();
-  const searchParams = useSearchParams();
-  const reason = searchParams.get("reason") ?? "no_account";
-
-  useEffect(() => {
-    signOut({ redirectUrl: `${ROUTES.signIn}?reason=${reason}` });
-  }, [signOut, reason]);
-
-  return null;
+  return (
+    <Suspense>
+      <SigningOutClient />
+    </Suspense>
+  );
 }

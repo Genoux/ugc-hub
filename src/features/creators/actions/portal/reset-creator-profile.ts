@@ -21,6 +21,8 @@ export async function resetCreatorProfile(creatorId: string) {
       columns: { clerkUserId: true, email: true },
     });
 
+    if (!record) throw new Error("Creator profile not found");
+
     const clerkUser = await (await clerkClient()).users.getUser(userId);
     const userEmail = clerkUser.primaryEmailAddress?.emailAddress?.toLowerCase().trim();
     const isOwner =

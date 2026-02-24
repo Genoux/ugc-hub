@@ -2,29 +2,26 @@
 
 import { eq } from "drizzle-orm";
 import type { z } from "zod";
-import { submissions } from "@/db/schema";
+import { projects } from "@/db/schema";
 import { db } from "@/shared/lib/db";
 import { createLinkSchema } from "../schemas";
 
-// Note: Links are now uploadTokens on submissions table
-// This function is kept for backward compatibility
+// Note: Links are now uploadTokens on the projects table
 export async function createLink(input: z.infer<typeof createLinkSchema>) {
   const data = createLinkSchema.parse(input);
 
-  // Return the existing submission's uploadToken
-  const submission = await db.query.submissions.findFirst({
-    where: eq(submissions.id, data.submissionId),
+  const project = await db.query.projects.findFirst({
+    where: eq(projects.id, data.submissionId),
     columns: { id: true, uploadToken: true },
   });
 
-  if (!submission) {
-    throw new Error("Submission not found");
+  if (!project) {
+    throw new Error("Project not found");
   }
 
-  // Return token in link format for backward compatibility
   return {
-    id: submission.id,
-    token: submission.uploadToken,
+    id: project.id,
+    token: project.uploadToken,
     submissionId: data.submissionId,
     status: "active" as const,
     createdAt: new Date(),

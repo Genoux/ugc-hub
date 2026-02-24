@@ -1,7 +1,8 @@
 "use client";
 
 import { useParams, usePathname } from "next/navigation";
-import { useSubmissionQuery } from "@/features/submissions/hooks/use-submissions-query";
+import { useEffect, useState } from "react";
+import { getProjectName } from "@/features/projects/actions/get-project-name";
 import { Separator } from "@/shared/components/ui/separator";
 import { SidebarTrigger } from "@/shared/components/ui/sidebar";
 import { ThemeSwitcher } from "./theme-switcher";
@@ -9,11 +10,16 @@ import { ThemeSwitcher } from "./theme-switcher";
 export function SiteHeader() {
   const pathname = usePathname();
   const params = useParams();
+  const [projectName, setProjectName] = useState<string | null>(null);
 
-  const isSubmissionDetail = pathname?.startsWith("/submissions/") && params?.id;
-  const { data } = useSubmissionQuery(params?.id as string, { enabled: !!isSubmissionDetail });
+  const isProjectDetail = pathname?.startsWith("/projects/") && !!params?.id;
 
-  const title = isSubmissionDetail && data?.submission ? data.submission.name : "UGC Hub";
+  useEffect(() => {
+    if (!isProjectDetail || !params?.id) return;
+    getProjectName(params.id as string).then(setProjectName);
+  }, [isProjectDetail, params?.id]);
+
+  const title = isProjectDetail && projectName ? projectName : "UGC Hub";
 
   return (
     <header className="flex h-(--header-height) shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height)">

@@ -9,7 +9,7 @@ import { LoadingScreen } from "@/shared/components/loading-screen";
 import { SiteHeader } from "@/shared/components/site-header";
 import { SidebarInset, SidebarProvider } from "@/shared/components/ui/sidebar";
 
-const PLATFORM_ROUTES = ["/applicants", "/database", "/submissions"] as const;
+const PLATFORM_ROUTES = ["/applicants", "/database", "/projects"] as const;
 
 export default function PlatformLayout({ children }: { children: React.ReactNode }) {
   const [isAppReady, setIsAppReady] = useState(false);
@@ -42,9 +42,7 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
         <AppSidebar variant="inset" />
         <SidebarInset className="min-h-0 max-h-[calc(100svh-1rem)] overflow-hidden">
           <SiteHeader />
-          <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-            {children}
-          </div>
+          <div className="flex min-h-0 flex-1 flex-col overflow-hidden">{children}</div>
         </SidebarInset>
       </SidebarProvider>
     </ThemeProvider>

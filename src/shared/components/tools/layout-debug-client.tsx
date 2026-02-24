@@ -8,6 +8,7 @@ import { LayoutDebug } from "layout-debug-tool";
  * above the app, only BorderInspector (injected outline) is visible.
  */
 export function LayoutDebugClient() {
+  if (process.env.NODE_ENV !== "development") return null;
   return (
     <div style={{ position: "fixed", zIndex: 9999 }}>
       <LayoutDebug />

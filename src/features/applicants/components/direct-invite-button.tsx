@@ -15,8 +15,8 @@ import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
 import { Tabs, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
 import { Textarea } from "@/shared/components/ui/textarea";
-import { directInviteBulk } from "../actions/direct-invite-bulk";
 import { directInvite } from "../actions/direct-invite";
+import { directInviteBulk } from "../actions/direct-invite-bulk";
 
 type Mode = "single" | "bulk";
 

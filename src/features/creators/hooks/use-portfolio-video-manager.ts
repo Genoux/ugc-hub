@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type {
   PortfolioVideoEntry,
   UploadingVideoEntry,
@@ -24,6 +24,9 @@ export function usePortfolioVideoManager(
   initialEntries?: PortfolioVideoEntry[],
 ): PortfolioVideoManager {
   const [doneEntries, setDoneEntries] = useState<PortfolioVideoEntry[]>(initialEntries ?? []);
+  // Track IDs of videos that existed before this wizard session opened.
+  // abandonAll must not delete pre-existing assets.
+  const preExistingIds = useRef(new Set(initialEntries?.map((e) => e.assetId) ?? []));
   const [uploadingEntries, setUploadingEntries] = useState<UploadingVideoEntry[]>([]);
 
   const add = (entry: PortfolioVideoEntry) => {
@@ -51,6 +54,7 @@ export function usePortfolioVideoManager(
 
   const abandonAll = () => {
     for (const entry of doneEntries) {
+      if (preExistingIds.current.has(entry.assetId)) continue;
       URL.revokeObjectURL(entry.objectUrl);
       fetch(`/api/uploads/creator-profile/${entry.assetId}`, { method: "DELETE" }).catch((err) =>
         console.error("[wizard abandon cleanup]", err),
