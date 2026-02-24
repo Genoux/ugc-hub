@@ -5,7 +5,7 @@ import { ZodError } from "zod";
 export function toActionError(err: unknown): Error {
   if (err instanceof ZodError) {
     const msgs = err.issues.map((e) => `${e.path.join(".")}: ${e.message}`).join(", ");
-    return new Error(`Validation failed — ${msgs}`);
+    return new Error(`Validation failed. ${msgs}`);
   }
 
   if (err instanceof Error) return err;

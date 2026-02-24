@@ -1,3 +1,8 @@
+export const EASING_FUNCTION = {
+  exponential: [0.16, 1, 0.3, 1],
+  quartic: [0.78, 0, 0.22, 1],
+} as const;
+
 export const COUNTRIES = [
   "United States",
   "United Kingdom",
@@ -70,53 +75,37 @@ export const ETHNICITY_OPTIONS = [
 
 export const BIRTH_YEARS = Array.from({ length: 50 }, (_, i) => String(2006 - i));
 
-export const STEP_TITLES: Record<number, string> = {
-  1: "Basic info",
-  2: "Social channels",
-  3: "UGC categories",
-  4: "Content formats",
-  5: "Profile photo",
-  6: "Portfolio videos",
-  7: "Rate range",
-  8: "About you",
-  9: "Complete",
-};
-
-export const STEP_TIPS: Record<number, { heading: string; body: string }> = {
+export const STEP_TIPS: Record<number, { header: string; body: string }> = {
   1: {
-    heading: "Keep it real",
-    body: "Use your legal name and the country where you primarily create content. This helps brands find the right fit.",
+    header: "What's your name?",
+    body: "Use the name our team will see on your profile. You can always update it later.",
   },
   2: {
-    heading: "Link your best channels",
-    body: "At least one social handle is required. If you have a portfolio site, include it — it strengthens your application.",
+    header: "Your channels",
+    body: "Add the platform where you speak to the camera most often. Multiple platforms are a plus.",
   },
   3: {
-    heading: "Be specific",
-    body: "Select categories where you have real experience. Quality beats quantity — 2–3 strong niches beat 10 weak ones.",
+    header: "Your niche",
+    body: "Select the niches that best describe your content universe.",
   },
   4: {
-    heading: "Show your range",
+    header: "Your style",
     body: "Select every format you're comfortable with. Brands look for creators who can execute multiple styles.",
   },
   5: {
-    heading: "First impressions matter",
+    header: "Your look",
     body: "Use a clear, well-lit headshot or creator photo. This is what brands see first when browsing the database.",
   },
   6: {
-    heading: "Let your work speak",
-    body: "Upload 2–5 of your best UGC videos. Brands review these to assess your production quality and on-camera presence.",
+    header: "Your work",
+    body: "Upload 2–5 vertical videos that showcase your on-camera presence and editing style.",
   },
   7: {
-    heading: "Set fair rates",
-    body: "Choose the range that reflects your experience. You can always negotiate per project — this is just a starting point.",
+    header: "Your rate",
+    body: "What do you charge per video?",
   },
   8: {
-    heading: "Help brands find you",
-    body: "Demographic info helps brands match creators to their target audience. All fields are optional.",
-  },
-  9: {
-    heading: "You're all set!",
-    body: "Your profile is now complete. Brands will be able to discover you in the creator database.",
+    header: "About you",
+    body: "Help brands find you with some demographic info",
   },
 };

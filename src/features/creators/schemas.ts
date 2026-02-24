@@ -1,9 +1,6 @@
 import { z } from "zod";
 import {
-  AGE_DEMOGRAPHICS,
   DB_CREATOR_STATUSES,
-  ETHNICITIES,
-  GENDER_IDENTITIES,
   OVERALL_RATING_TIERS,
   PRIMARY_CHANNELS,
 } from "./constants";
@@ -31,9 +28,11 @@ export const creatorSchema = z.object({
   email: z.string().email(),
   profilePhoto: z.string().nullable(),
   country: z.string().nullable(),
-  genderIdentity: z.enum(GENDER_IDENTITIES).nullable(),
-  ageDemographic: z.enum(AGE_DEMOGRAPHICS).nullable(),
-  ethnicity: z.enum(ETHNICITIES).nullable(),
+  // z.string() intentionally — enum validation belongs at the input layer (server action),
+  // not when reading back from the DB where old values may exist.
+  genderIdentity: z.string().nullable(),
+  ageDemographic: z.string().nullable(),
+  ethnicity: z.string().nullable(),
   languages: z.array(languageTagSchema).nullable(),
   portfolioUrl: z.string().nullable(),
   primaryChannel: z.enum(PRIMARY_CHANNELS).nullable(),

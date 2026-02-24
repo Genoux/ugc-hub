@@ -1,13 +1,44 @@
 "use client";
 
-import * as React from "react";
 import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from "lucide-react";
 import { Select as SelectPrimitive } from "radix-ui";
+import * as React from "react";
 
 import { cn } from "@/shared/lib/utils";
 
-function Select({ ...props }: React.ComponentProps<typeof SelectPrimitive.Root>) {
-  return <SelectPrimitive.Root data-slot="select" {...props} />;
+// Sentinel used internally so Radix never sees two items with the same value/key.
+// Consumers never deal with this — Select and SelectContent handle it transparently.
+const CLEAR_SENTINEL = "__clear__";
+
+type SelectClearableContext = { clearable: boolean; noneSelected: boolean };
+const ClearableCtx = React.createContext<SelectClearableContext>({
+  clearable: false,
+  noneSelected: false,
+});
+
+function Select({
+  clearable = false,
+  value,
+  onValueChange,
+  ...props
+}: React.ComponentProps<typeof SelectPrimitive.Root> & { clearable?: boolean }) {
+  const effectiveValue = clearable ? value || CLEAR_SENTINEL : value;
+  const noneSelected = clearable && !value;
+  const handleChange = React.useCallback(
+    (v: string) => onValueChange?.(clearable && v === CLEAR_SENTINEL ? "" : v),
+    [clearable, onValueChange],
+  );
+
+  return (
+    <ClearableCtx.Provider value={{ clearable, noneSelected }}>
+      <SelectPrimitive.Root
+        data-slot="select"
+        value={effectiveValue}
+        onValueChange={handleChange}
+        {...props}
+      />
+    </ClearableCtx.Provider>
+  );
 }
 
 function SelectGroup({ ...props }: React.ComponentProps<typeof SelectPrimitive.Group>) {
@@ -26,12 +57,15 @@ function SelectTrigger({
 }: React.ComponentProps<typeof SelectPrimitive.Trigger> & {
   size?: "sm" | "default";
 }) {
+  const { noneSelected } = React.useContext(ClearableCtx);
+
   return (
     <SelectPrimitive.Trigger
       data-slot="select-trigger"
       data-size={size}
       className={cn(
-        "border-input data-[placeholder]:text-muted-foreground [&_svg:not([class*='text-'])]:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 dark:hover:bg-input/50 flex w-fit items-center justify-between gap-2 rounded-md border bg-transparent px-3 py-2 text-sm whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 data-[size=default]:h-9 data-[size=sm]:h-8 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        "min-w-40 border-input data-[placeholder]:text-muted-foreground [&_svg:not([class*='text-'])]:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 dark:hover:bg-input/50 flex w-fit items-center justify-between gap-2 rounded-md border bg-transparent px-3 py-2 text-sm whitespace-nowrap transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 data-[size=default]:h-9 data-[size=sm]:h-8 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        noneSelected && "text-muted-foreground",
         className,
       )}
       {...props}
@@ -51,6 +85,8 @@ function SelectContent({
   align = "center",
   ...props
 }: React.ComponentProps<typeof SelectPrimitive.Content>) {
+  const { clearable } = React.useContext(ClearableCtx);
+
   return (
     <SelectPrimitive.Portal>
       <SelectPrimitive.Content
@@ -73,6 +109,14 @@ function SelectContent({
               "h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)] scroll-my-1",
           )}
         >
+          {clearable && (
+            <SelectPrimitive.Item
+              value={CLEAR_SENTINEL}
+              className="focus:bg-accent text-muted-foreground relative flex w-full cursor-default items-center gap-2 rounded-sm py-1.5 pr-8 pl-2 text-sm outline-hidden select-none"
+            >
+              <SelectPrimitive.ItemText>Select</SelectPrimitive.ItemText>
+            </SelectPrimitive.Item>
+          )}
           {children}
         </SelectPrimitive.Viewport>
         <SelectScrollDownButton />

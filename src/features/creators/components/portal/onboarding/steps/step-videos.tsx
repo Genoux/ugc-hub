@@ -5,15 +5,21 @@ import { useState } from "react";
 import { uploadCreatorAsset } from "@/features/creators/hooks/use-creator-asset-upload";
 import { AssetCard } from "@/shared/components/asset-card";
 import { FileDropZone } from "@/shared/components/file-drop-zone";
-import type { PortfolioVideoEntry, UploadingVideoEntry } from "../wizard-types";
-import { MAX_PORTFOLIO_VIDEOS, MIN_PORTFOLIO_VIDEOS } from "../wizard-types";
+import { Button } from "@/shared/components/ui/button";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/shared/components/ui/carousel";
+import type { PortfolioVideoEntry, UploadingVideoEntry } from "../onboarding-types";
+import { MAX_PORTFOLIO_VIDEOS, MIN_PORTFOLIO_VIDEOS } from "../onboarding-types";
 
 const ACCEPTED_TYPES = ["video/mp4", "video/quicktime", "video/x-msvideo", "video/webm"] as const;
 
 interface Props {
-  /** Completed entries — owned by wizard shell, survive step navigation. */
   doneEntries: PortfolioVideoEntry[];
-  /** In-progress entries — owned by wizard shell, survive step navigation. */
   uploadingEntries: UploadingVideoEntry[];
   onEntryAdd: (entry: PortfolioVideoEntry) => void;
   onEntryRemove: (assetId: string) => void;
@@ -22,7 +28,7 @@ interface Props {
   creatorId: string;
 }
 
-export function Step6Videos({
+export function StepVideos({
   doneEntries,
   uploadingEntries,
   onEntryAdd,
@@ -31,7 +37,6 @@ export function Step6Videos({
   onUploadEnd,
   creatorId,
 }: Props) {
-  // Errors are transient display-only feedback — fine to reset on navigation.
   const [errors, setErrors] = useState<string[]>([]);
 
   const totalEntries = doneEntries.length + uploadingEntries.length;
@@ -64,31 +69,37 @@ export function Step6Videos({
 
   return (
     <div className="space-y-4">
-      <p className="text-muted-foreground text-sm">
-        Upload {MIN_PORTFOLIO_VIDEOS}–{MAX_PORTFOLIO_VIDEOS} of your best UGC videos. MP4, MOV or
-        WebM · Max 500 MB each.
-      </p>
-
       {doneEntries.length > 0 && (
-        <div className="columns-2 gap-2">
-          {doneEntries.map((entry) => (
-            <AssetCard
-              key={entry.assetId}
-              src={entry.objectUrl}
-              filename={entry.filename}
-              isVideo
-              action={
-                <button
-                  type="button"
-                  onClick={() => onEntryRemove(entry.assetId)}
-                  className="p-1 text-white transition-opacity hover:opacity-70"
-                >
-                  <X className="size-3.5" />
-                </button>
-              }
-            />
-          ))}
-        </div>
+        <Carousel opts={{ align: "center", loop: true }} className="w-full" tweenOpacity>
+          <div className="mb-1">
+            <p className="text-xs text-muted-foreground">
+              {doneEntries.length} / {MAX_PORTFOLIO_VIDEOS}
+            </p>
+          </div>
+          <CarouselContent>
+            {doneEntries.map((entry) => (
+              <CarouselItem key={entry.assetId} className="basis-[40%] p-1">
+                <AssetCard
+                  src={entry.objectUrl}
+                  filename={entry.filename}
+                  isVideo
+                  action={
+                    <Button
+                      className="h-8 w-8 text-white! hover:bg-white/20"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => onEntryRemove(entry.assetId)}
+                    >
+                      <X className="size-3.5" />
+                    </Button>
+                  }
+                />
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+          <CarouselPrevious />
+          <CarouselNext />
+        </Carousel>
       )}
 
       {uploadingEntries.length > 0 && (
@@ -114,9 +125,8 @@ export function Step6Videos({
         />
       )}
 
-      {errors.map((err, i) => (
-        // biome-ignore lint/suspicious/noArrayIndexKey: error list is append-only
-        <p key={i} className="text-destructive text-sm">
+      {errors.map((err) => (
+        <p key={err} className="text-destructive text-sm">
           {err}
         </p>
       ))}

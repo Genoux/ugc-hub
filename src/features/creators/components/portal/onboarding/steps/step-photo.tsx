@@ -2,8 +2,8 @@
 
 import { CameraIcon, Loader2 } from "lucide-react";
 import Image from "next/image";
-import type { ProfilePhotoManager } from "@/features/creators/hooks/use-profile-photo-manager";
 import { useCreatorAssetUpload } from "@/features/creators/hooks/use-creator-asset-upload";
+import type { ProfilePhotoManager } from "@/features/creators/hooks/use-profile-photo-manager";
 import { Button } from "@/shared/components/ui/button";
 
 interface Props {
@@ -13,7 +13,7 @@ interface Props {
   creatorId: string;
 }
 
-export function Step5Photo({ photoKey, photoManager, onChange, creatorId }: Props) {
+export function StepPhoto({ photoKey, photoManager, onChange, creatorId }: Props) {
   const { upload, error } = useCreatorAssetUpload(creatorId, "profile_picture");
 
   const hasPhoto = !!photoManager.previewUrl || !!photoKey;
@@ -38,7 +38,7 @@ export function Step5Photo({ photoKey, photoManager, onChange, creatorId }: Prop
   };
 
   return (
-    <div className="flex flex-col items-center gap-5 py-2">
+    <div className="flex flex-col items-start gap-5 py-2">
       <div className="bg-muted relative flex h-52 w-52 shrink-0 items-center justify-center overflow-hidden rounded-lg border">
         {photoManager.previewUrl ? (
           <Image src={photoManager.previewUrl} alt="Creator" fill className="object-cover" />
@@ -48,7 +48,13 @@ export function Step5Photo({ photoKey, photoManager, onChange, creatorId }: Prop
       </div>
 
       <label className="cursor-pointer">
-        <Button type="button" variant="outline" size="sm" disabled={photoManager.isUploading} asChild>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          disabled={photoManager.isUploading}
+          asChild
+        >
           <span>
             {photoManager.isUploading ? (
               <>

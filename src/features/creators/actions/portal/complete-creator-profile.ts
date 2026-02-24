@@ -21,7 +21,15 @@ const schema = z.object({
       youtube_handle: z.string().optional(),
     })
     .optional(),
-  portfolioUrl: z.union([z.url(), z.literal("")]).optional(),
+  portfolioUrl: z
+    .string()
+    .optional()
+    .transform((val) => {
+      if (!val || val.trim() === "") return undefined;
+      const trimmed = val.trim();
+      return /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+    })
+    .pipe(z.url().optional()),
   // Steps 3-9
   ugcCategories: z.array(z.string()).min(1),
   contentFormats: z.array(z.string()).min(1),
@@ -46,7 +54,9 @@ export async function completeCreatorProfile(input: z.infer<typeof schema>) {
 
     const clerkUser = await (await clerkClient()).users.getUser(userId);
     const userEmail = clerkUser.primaryEmailAddress?.emailAddress?.toLowerCase().trim();
-    const isOwner = record?.clerkUserId === userId || (userEmail !== undefined && record?.email?.toLowerCase().trim() === userEmail);
+    const isOwner =
+      record?.clerkUserId === userId ||
+      (userEmail !== undefined && record?.email?.toLowerCase().trim() === userEmail);
     if (!isOwner) throw new Error("Forbidden — you don't own this profile");
 
     await db

@@ -2,7 +2,7 @@
 
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
-import type { WizardData } from "../wizard-types";
+import type { WizardData } from "../onboarding-types";
 
 interface Props {
   data: WizardData;
@@ -39,7 +39,7 @@ function HandleInput({
   );
 }
 
-export function Step2Socials({ data, onChange }: Props) {
+export function StepSocials({ data, onChange }: Props) {
   return (
     <div className="space-y-5">
       <HandleInput
@@ -60,7 +60,7 @@ export function Step2Socials({ data, onChange }: Props) {
         value={data.youtubeHandle}
         onChange={(v) => onChange({ youtubeHandle: v })}
       />
-
+      {/* TODO: Validate that the handles is valid */}
       <div className="space-y-1.5">
         <Label htmlFor="portfolio">
           Portfolio URL <span className="text-muted-foreground">(optional)</span>

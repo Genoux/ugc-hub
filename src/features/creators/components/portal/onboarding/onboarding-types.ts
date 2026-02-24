@@ -19,7 +19,7 @@ export interface UploadingVideoEntry {
 export const MIN_PORTFOLIO_VIDEOS = 2;
 export const MAX_PORTFOLIO_VIDEOS = 5;
 
-export interface WizardData {
+export interface OnboardingData {
   // Step 1
   fullName: string;
   country: string;
@@ -43,7 +43,7 @@ export interface WizardData {
   ethnicity: string;
 }
 
-export const INITIAL_WIZARD_DATA: WizardData = {
+export const INITIAL_ONBOARDING_DATA: OnboardingData = {
   fullName: "",
   country: "",
   languages: ["English"],
@@ -60,23 +60,21 @@ export const INITIAL_WIZARD_DATA: WizardData = {
   ethnicity: "",
 };
 
-export interface CreatorForWizard {
+export interface CreatorForOnboarding {
   id: string;
 }
 
-export interface ProfileWizardProps {
-  creator: CreatorForWizard;
-  initialData?: Partial<WizardData>;
+export interface OnboardingProps {
+  creator: CreatorForOnboarding;
+  initialData?: Partial<OnboardingData>;
   onComplete: () => void;
   onClose: () => void;
 }
 
-export function canProceed(step: number, data: WizardData, portfolioVideoCount = 0): boolean {
+export function canProceed(step: number, data: OnboardingData, portfolioVideoCount = 0): boolean {
   switch (step) {
     case 1:
-      return (
-        data.fullName.trim().length > 0 && data.country.length > 0 && data.languages.length > 0
-      );
+      return data.fullName.trim().length > 0;
     case 2:
       return (
         data.instagramHandle.trim().length > 0 ||
@@ -88,13 +86,13 @@ export function canProceed(step: number, data: WizardData, portfolioVideoCount =
     case 4:
       return data.contentFormats.length > 0;
     case 5:
-      return true; // optional
+      return true; // photo is optional
     case 6:
       return portfolioVideoCount >= MIN_PORTFOLIO_VIDEOS;
     case 7:
       return data.rateRangeSelf !== null;
     case 8:
-      return true; // all optional
+      return data.country.length > 0 && data.languages.length > 0;
     case 9:
       return true;
     default:

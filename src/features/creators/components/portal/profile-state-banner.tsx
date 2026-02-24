@@ -6,7 +6,7 @@ import { Button } from "@/shared/components/ui/button";
 
 interface ProfileStateBannerProps {
   uiState: CreatorUIState;
-  onOpenWizard?: () => void;
+  onOpenOnboarding?: () => void;
 }
 
 const BANNER_CONFIG = {
@@ -29,15 +29,15 @@ const BANNER_CONFIG = {
   { variant?: "default" | "destructive"; message: string; cta?: string }
 >;
 
-export function ProfileStateBanner({ uiState, onOpenWizard }: ProfileStateBannerProps) {
+export function ProfileStateBanner({ uiState, onOpenOnboarding }: ProfileStateBannerProps) {
   const config = BANNER_CONFIG[uiState];
 
   return (
     <Alert variant={"variant" in config ? config.variant : "default"}>
       <AlertDescription className="flex items-center justify-between gap-4">
         {config.message}
-        {"cta" in config && config.cta && onOpenWizard && (
-          <Button size="sm" variant="outline" className="shrink-0" onClick={onOpenWizard}>
+        {"cta" in config && config.cta && onOpenOnboarding && (
+          <Button size="sm" variant="outline" className="shrink-0" onClick={onOpenOnboarding}>
             {config.cta}
           </Button>
         )}

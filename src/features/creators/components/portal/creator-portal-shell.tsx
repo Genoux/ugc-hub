@@ -1,9 +1,12 @@
 "use client";
 
+import { AnimatePresence } from "motion/react";
 import { useState } from "react";
 import type { CreatorSubmissions } from "@/features/creators/actions/portal/get-creator-submissions";
+import { resetCreatorProfile } from "@/features/creators/actions/portal/reset-creator-profile";
 import type { CreatorUIState } from "@/features/creators/lib/get-creator-ui-state";
 import type { Creator } from "@/features/creators/schemas";
+import { DevToolbar } from "@/shared/components/tools/dev-toolbar";
 import {
   Card,
   CardContent,
@@ -13,8 +16,8 @@ import {
 } from "@/shared/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
 import { CreatorContentTab } from "./creator-content-tab";
+import { OnboardingShell } from "./onboarding";
 import { ProfileStateBanner } from "./profile-state-banner";
-import { ProfileWizard } from "./wizard";
 
 interface CreatorPortalShellProps {
   creator: Creator;
@@ -23,10 +26,10 @@ interface CreatorPortalShellProps {
 }
 
 export function CreatorPortalShell({ creator, uiState, content }: CreatorPortalShellProps) {
-  const [wizardOpen, setWizardOpen] = useState(uiState === "pending_profile");
+  const [onboardingOpen, setOnboardingOpen] = useState(uiState === "pending_profile");
 
-  const handleWizardComplete = () => {
-    // Re-fetch server state after wizard completes
+  const handleOnboardingComplete = () => {
+    // Re-fetch server state after onboarding completes
     window.location.reload();
   };
 
@@ -63,7 +66,9 @@ export function CreatorPortalShell({ creator, uiState, content }: CreatorPortalS
       <div className="mx-auto w-full max-w-3xl space-y-4">
         <ProfileStateBanner
           uiState={uiState}
-          onOpenWizard={uiState === "pending_profile" ? () => setWizardOpen(true) : undefined}
+          onOpenOnboarding={
+            uiState === "pending_profile" ? () => setOnboardingOpen(true) : undefined
+          }
         />
 
         <Tabs defaultValue="profile">
@@ -159,12 +164,33 @@ export function CreatorPortalShell({ creator, uiState, content }: CreatorPortalS
         </Tabs>
       </div>
 
-      {wizardOpen && (
-        <ProfileWizard
-          creator={creator}
-          initialData={initialData}
-          onComplete={handleWizardComplete}
-          onClose={() => setWizardOpen(false)}
+      <AnimatePresence>
+        {onboardingOpen && (
+          <OnboardingShell
+            creator={creator}
+            initialData={initialData}
+            onComplete={handleOnboardingComplete}
+            onClose={() => setOnboardingOpen(false)}
+          />
+        )}
+      </AnimatePresence>
+
+      {!onboardingOpen && (
+        <DevToolbar
+          context="Creator Portal"
+          tools={[
+            {
+              label: "Reset onboarding",
+              action: async () => {
+                await resetCreatorProfile(creator.id);
+                window.location.reload();
+              },
+            },
+            {
+              label: "Open onboarding",
+              action: () => setOnboardingOpen(true),
+            },
+          ]}
         />
       )}
     </div>

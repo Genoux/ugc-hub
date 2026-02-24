@@ -1,14 +1,14 @@
 "use client";
 
-import { RATE_BANDS } from "../wizard-constants";
-import type { WizardData } from "../wizard-types";
+import { RATE_BANDS } from "../onboarding-constants";
+import type { WizardData } from "../onboarding-types";
 
 interface Props {
   data: WizardData;
   onChange: (updates: Partial<WizardData>) => void;
 }
 
-export function Step7Rates({ data, onChange }: Props) {
+export function StepRates({ data, onChange }: Props) {
   const isSelected = (band: (typeof RATE_BANDS)[number]) =>
     data.rateRangeSelf?.min === band.value.min && data.rateRangeSelf?.max === band.value.max;
 

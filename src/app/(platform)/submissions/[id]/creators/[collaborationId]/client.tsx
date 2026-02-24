@@ -60,9 +60,9 @@ function AssetPreview({ asset }: { asset: Asset }) {
         isLoading={isLoading}
         action={
           <Button
+            className="h-8 w-8 text-white! hover:bg-white/20"
             variant="ghost"
             size="icon"
-            className="h-8 w-8 text-white hover:bg-white/20"
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();

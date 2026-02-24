@@ -345,7 +345,7 @@ export function CreatorOverlay({
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-8 w-8 text-white hover:bg-white/20"
+                            className="h-8 w-8 text-white! hover:bg-white/20"
                             onClick={(e) => {
                               e.stopPropagation();
                               downloadAssets([{ id: asset.id, filename: asset.filename }], {
@@ -377,7 +377,8 @@ export function CreatorOverlay({
                 {closedCollabs.length > 0 ? (
                   <div className="space-y-3">
                     {closedCollabs.map((collab) => {
-                      const totalPaid = collab.totalPaidCents != null ? collab.totalPaidCents / 100 : null;
+                      const totalPaid =
+                        collab.totalPaidCents != null ? collab.totalPaidCents / 100 : null;
                       const perPiece =
                         totalPaid != null && collab.piecesOfContent
                           ? totalPaid / collab.piecesOfContent

@@ -1,7 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import type { PortfolioVideoEntry, UploadingVideoEntry } from "../components/portal/wizard/wizard-types";
+import type {
+  PortfolioVideoEntry,
+  UploadingVideoEntry,
+} from "../components/portal/onboarding/onboarding-types";
 
 export interface PortfolioVideoManager {
   doneEntries: PortfolioVideoEntry[];
@@ -17,7 +20,9 @@ export interface PortfolioVideoManager {
   abandonAll: () => void;
 }
 
-export function usePortfolioVideoManager(initialEntries?: PortfolioVideoEntry[]): PortfolioVideoManager {
+export function usePortfolioVideoManager(
+  initialEntries?: PortfolioVideoEntry[],
+): PortfolioVideoManager {
   const [doneEntries, setDoneEntries] = useState<PortfolioVideoEntry[]>(initialEntries ?? []);
   const [uploadingEntries, setUploadingEntries] = useState<UploadingVideoEntry[]>([]);
 
