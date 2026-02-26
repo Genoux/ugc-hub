@@ -3,8 +3,9 @@ import { eq } from "drizzle-orm";
 import { assets, collaborations, creators, submissions } from "@/db/schema";
 import { getR2SignedUrl, r2JsonResponse } from "@/features/uploads/lib/r2-serve";
 import { db } from "@/shared/lib/db";
+import { env } from "@/shared/lib/env";
 
-const ALLOWED_DOMAIN = process.env.ALLOWED_DOMAIN;
+const ALLOWED_DOMAIN = env.ALLOWED_DOMAIN;
 
 export async function GET(_request: Request, { params }: { params: Promise<{ assetId: string }> }) {
   try {

@@ -88,11 +88,6 @@ export function CreatorDatabase({ creators }: CreatorDatabaseProps) {
   const filtered = useMemo(() => {
     if (!hasActiveFilters(filters)) return searched;
     return searched.filter((c) => {
-      if (filters.status.length) {
-        const creatorLabel =
-          c.status === "blacklisted" ? "blacklisted" : c.collabCount > 0 ? "active" : "untested";
-        if (!filters.status.includes(creatorLabel)) return false;
-      }
       if (filters.overallRating.length && !filters.overallRating.includes(c.overallRating))
         return false;
       if (
@@ -159,7 +154,6 @@ export function CreatorDatabase({ creators }: CreatorDatabaseProps) {
   const removeFilterLabel = (label: string) => {
     setFilters((prev) => ({
       ...prev,
-      status: prev.status.filter((s) => s !== label),
       overallRating: prev.overallRating.filter((s) => s !== label),
       ugcCategories: prev.ugcCategories.filter((s) => s !== label),
       contentFormats: prev.contentFormats.filter((s) => s !== label),

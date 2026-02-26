@@ -1,10 +1,11 @@
 "use server";
 
 import { randomBytes } from "node:crypto";
-import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import type { z } from "zod";
 import { projects } from "@/db/schema";
+import { toActionError } from "@/shared/lib/action-error";
+import { requireAdmin } from "@/shared/lib/auth";
 import { db } from "@/shared/lib/db";
 import { projectSchema } from "../schemas";
 
@@ -13,24 +14,27 @@ function generateToken(): string {
 }
 
 export async function createProject(input: z.infer<typeof projectSchema>) {
-  const { isAuthenticated, userId } = await auth();
-  if (!isAuthenticated) throw new Error("User not found");
+  try {
+    const { userId } = await requireAdmin();
 
-  const data = projectSchema.parse(input);
+    const data = projectSchema.parse(input);
 
-  const code = data.name.substring(0, 4).toUpperCase().replace(/\s/g, "");
-  const uploadToken = generateToken();
+    const code = data.name.substring(0, 4).toUpperCase().replace(/\s/g, "");
+    const uploadToken = generateToken();
 
-  const [project] = await db
-    .insert(projects)
-    .values({
-      ...data,
-      userId,
-      code,
-      uploadToken,
-    })
-    .returning();
+    const [project] = await db
+      .insert(projects)
+      .values({
+        ...data,
+        userId,
+        code,
+        uploadToken,
+      })
+      .returning();
 
-  revalidatePath("/projects");
-  return project;
+    revalidatePath("/projects");
+    return project;
+  } catch (err) {
+    throw toActionError(err);
+  }
 }

@@ -6,6 +6,7 @@ import { creators } from "@/db/schema";
 import { CreatorPortalLayout } from "@/features/creators/components/portal/creator-portal-layout";
 import { getSessionCreator } from "@/features/creators/lib/get-session-creator";
 import { db } from "@/shared/lib/db";
+import { env } from "@/shared/lib/env";
 import { ROUTES } from "@/shared/lib/routes";
 
 export default async function CreatorLayout({ children }: { children: React.ReactNode }) {
@@ -15,7 +16,7 @@ export default async function CreatorLayout({ children }: { children: React.Reac
   const { creator, email } = await getSessionCreator(userId);
 
   if (!creator) {
-    const isAdmin = email.endsWith(`@${process.env.ALLOWED_DOMAIN}`);
+    const isAdmin = email.endsWith(`@${env.ALLOWED_DOMAIN}`);
     redirect(isAdmin ? ROUTES.adminHome : ROUTES.signOut);
   }
 

@@ -1,6 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { getSessionCreator } from "@/features/creators/lib/get-session-creator";
+import { env } from "@/shared/lib/env";
 import { ROUTES } from "@/shared/lib/routes";
 
 export default async function Page() {
@@ -11,7 +12,7 @@ export default async function Page() {
 
   if (creator) redirect(ROUTES.creatorHome);
 
-  if (email.endsWith(`@${process.env.ALLOWED_DOMAIN}`)) redirect(ROUTES.adminHome);
+  if (email.endsWith(`@${env.ALLOWED_DOMAIN}`)) redirect(ROUTES.adminHome);
 
   redirect(ROUTES.signOut);
 }
