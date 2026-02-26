@@ -21,7 +21,7 @@ type Asset = {
 type Submission = {
   id: string;
   label: string;
-  batchNumber: number;
+  submissionNumber: number;
   deliveredAt: Date;
   assets: Asset[];
 };
@@ -60,7 +60,7 @@ function SubmissionSection({
     }
     await downloadAssets(submissionAssets, {
       onError: (filename) => toast.error(`Failed to download ${filename}`),
-      zipName: `${projectName} - Submission ${submission.batchNumber} - ${creatorFullName}`,
+      zipName: `${projectName} - Submission ${submission.submissionNumber} - ${creatorFullName}`,
     });
   }
 

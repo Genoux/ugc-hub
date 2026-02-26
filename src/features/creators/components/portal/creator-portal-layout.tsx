@@ -4,6 +4,7 @@ import { AnimatePresence } from "motion/react";
 import { useEffect, useState } from "react";
 import { LoadingScreen } from "@/shared/components/loading-screen";
 import { Separator } from "@/shared/components/ui/separator";
+import { TooltipProvider } from "@/shared/components/ui/tooltip";
 import { CreatorPortalHeader } from "./creator-portal-header";
 
 export function CreatorPortalLayout({ children }: { children: React.ReactNode }) {
@@ -14,13 +15,15 @@ export function CreatorPortalLayout({ children }: { children: React.ReactNode })
   }, []);
 
   return (
-    <div className="flex h-screen flex-col bg-background">
-      <AnimatePresence mode="wait">
-        {!isAppReady && <LoadingScreen key="loading" />}
-      </AnimatePresence>
-      <CreatorPortalHeader />
-      <Separator />
-      <main className="flex-1 overflow-hidden">{children}</main>
-    </div>
+    <TooltipProvider>
+      <div className="flex h-screen flex-col bg-background min-h-0">
+        <AnimatePresence mode="wait">
+          {!isAppReady && <LoadingScreen key="loading" />}
+        </AnimatePresence>
+        <CreatorPortalHeader />
+        <Separator />
+        <main className="flex-1 min-h-0 overflow-hidden">{children}</main>
+      </div>
+    </TooltipProvider>
   );
 }

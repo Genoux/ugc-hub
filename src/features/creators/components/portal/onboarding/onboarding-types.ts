@@ -69,9 +69,9 @@ export const INITIAL_ONBOARDING_DATA: OnboardingData = {
   ethnicity: "",
 };
 
-import type { Creator } from "@/features/creators/schemas";
+import type { CreatorProfile } from "@/features/creators/actions/portal/get-creator-profile";
 
-export function buildOnboardingData(creator: Creator): OnboardingData {
+export function buildOnboardingData(creator: CreatorProfile): OnboardingData {
   return {
     fullName: creator.fullName ?? "",
     country: creator.country ?? "",
@@ -90,15 +90,13 @@ export function buildOnboardingData(creator: Creator): OnboardingData {
   };
 }
 
-import type { CreatorProfile } from "@/features/creators/actions/portal/get-creator-profile";
-
 export interface OnboardingProps {
   creator: CreatorProfile;
   onComplete: () => void;
   onClose: () => void;
 }
 
-export function canProceed(step: number, data: OnboardingData, portfolioVideoCount = 0): boolean {
+export function canProceed(step: number, data: OnboardingData, videoCount = 0): boolean {
   switch (step) {
     case 1:
       return data.fullName.trim().length > 0;
@@ -113,9 +111,9 @@ export function canProceed(step: number, data: OnboardingData, portfolioVideoCou
     case 4:
       return data.contentFormats.length > 0;
     case 5:
-      return true; // photo is optional
+      return data.profilePhoto.trim().length > 0;
     case 6:
-      return portfolioVideoCount >= MIN_PORTFOLIO_VIDEOS;
+      return videoCount >= MIN_PORTFOLIO_VIDEOS;
     case 7:
       return data.rateRangeSelf !== null;
     case 8:

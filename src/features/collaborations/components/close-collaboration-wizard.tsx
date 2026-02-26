@@ -290,13 +290,8 @@ export function CloseCollaborationWizard({
               Cancel
             </Button>
             {step < 4 ? (
-              <Button
-                size="sm"
-                onClick={handleNext}
-                disabled={!canContinue || isUploading}
-                className="gap-1.5"
-              >
-                {isUploading ? "Uploading…" : "Continue"}
+              <Button size="sm" onClick={handleNext} disabled={!canContinue || isUploading}>
+                {isUploading ? "Uploading…" : "Next"}
                 {!isUploading && <ChevronRight className="h-4 w-4" />}
               </Button>
             ) : (

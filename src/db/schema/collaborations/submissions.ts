@@ -9,9 +9,9 @@ export const submissions = pgTable("submissions", {
     .notNull()
     .references(() => collaborations.id, { onDelete: "cascade" }),
 
-  // Batch metadata
+  // Submission metadata
   label: text("label").notNull(), // "Submission 1", "Submission 2", etc.
-  batchNumber: integer("batch_number").notNull(), // Auto-increment per folder
+  submissionNumber: integer("submission_number").notNull(), // Auto-increment per collaboration
 
   // Timestamps
   deliveredAt: timestamp("delivered_at").notNull().defaultNow(),

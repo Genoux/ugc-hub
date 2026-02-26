@@ -48,20 +48,21 @@ export function CarouselPrevious({
   size = "icon-sm",
   ...props
 }: React.ComponentProps<typeof Button>) {
-  const { orientation, scrollPrev, canScrollPrev } = useCarousel();
+  const { orientation, buttonPlacement, scrollPrev, canScrollPrev } = useCarousel();
+
+  const positionClasses =
+    buttonPlacement === "bottom-right"
+      ? ""
+      : orientation === "horizontal"
+        ? "absolute top-1/2 -left-12 -translate-y-1/2"
+        : "absolute -top-12 left-1/2 -translate-x-1/2 rotate-90";
 
   return (
     <Button
       data-slot="carousel-previous"
       variant={variant}
       size={size}
-      className={cn(
-        "absolute rounded-full touch-manipulation",
-        orientation === "horizontal"
-          ? "top-1/2 -left-12 -translate-y-1/2"
-          : "-top-12 left-1/2 -translate-x-1/2 rotate-90",
-        className,
-      )}
+      className={cn("rounded-full touch-manipulation", positionClasses, className)}
       disabled={!canScrollPrev}
       onClick={scrollPrev}
       {...props}
@@ -78,20 +79,21 @@ export function CarouselNext({
   size = "icon-sm",
   ...props
 }: React.ComponentProps<typeof Button>) {
-  const { orientation, scrollNext, canScrollNext } = useCarousel();
+  const { orientation, buttonPlacement, scrollNext, canScrollNext } = useCarousel();
+
+  const positionClasses =
+    buttonPlacement === "bottom-right"
+      ? ""
+      : orientation === "horizontal"
+        ? "absolute top-1/2 -right-12 -translate-y-1/2"
+        : "absolute -bottom-12 left-1/2 -translate-x-1/2 rotate-90";
 
   return (
     <Button
       data-slot="carousel-next"
       variant={variant}
       size={size}
-      className={cn(
-        "absolute rounded-full touch-manipulation",
-        orientation === "horizontal"
-          ? "top-1/2 -right-12 -translate-y-1/2"
-          : "-bottom-12 left-1/2 -translate-x-1/2 rotate-90",
-        className,
-      )}
+      className={cn("rounded-full touch-manipulation", positionClasses, className)}
       disabled={!canScrollNext}
       onClick={scrollNext}
       {...props}

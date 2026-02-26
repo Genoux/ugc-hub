@@ -6,9 +6,9 @@ import {
   type CreatorProfile,
   getCreatorProfile,
 } from "@/features/creators/actions/admin/get-creator-profile";
+import type { CreatorListItem } from "@/features/creators/actions/admin/get-creators";
 import type { OverallRatingTier } from "@/features/creators/constants";
 import { OVERALL_RATING_TIERS } from "@/features/creators/constants";
-import type { CreatorListItem } from "@/features/creators/actions/admin/get-creators";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import {
@@ -266,7 +266,7 @@ export function CreatorDatabase({ creators }: CreatorDatabaseProps) {
               No creators
             </div>
           ) : (
-            <div className="grid grid-cols-2 gap-x-7 gap-y-8 p-8 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4">
+            <div className="grid grid-cols-2 gap-4 p-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4">
               {sorted.map((creator) => (
                 <CreatorCard
                   key={creator.id}

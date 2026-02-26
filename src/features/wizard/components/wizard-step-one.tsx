@@ -39,7 +39,7 @@ export function WizardStepOne({ creatorName, creatorEmail, creatorImageUrl }: Wi
       </div>
 
       <Button type="button" className="w-full" onClick={() => setStep(2)}>
-        Continue
+        Next
       </Button>
     </div>
   );

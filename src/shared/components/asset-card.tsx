@@ -1,7 +1,6 @@
 "use client";
 
-import { AnimatePresence, motion } from "motion/react";
-import Image from "next/image";
+import { motion } from "motion/react";
 import { useState } from "react";
 import { EASING_FUNCTION } from "@/shared/lib/constant";
 import { cn } from "@/shared/lib/utils";
@@ -9,43 +8,37 @@ import { cn } from "@/shared/lib/utils";
 type AssetCardProps = {
   src: string | null;
   filename: string;
-  isVideo: boolean;
+  /** Kept for API compatibility; asset card is video-only for now. */
+  isVideo?: boolean;
   isLoading?: boolean;
   action?: React.ReactNode;
   className?: string;
 };
 
-export function AssetCard({
-  src,
-  filename,
-  isVideo,
-  isLoading,
-  action,
-  className,
-}: AssetCardProps) {
+export function AssetCard({ src, filename, isLoading, action, className }: AssetCardProps) {
   const [ready, setReady] = useState(false);
-  const [aspectRatio, setAspectRatio] = useState("9/16");
+  const [showControls, setShowControls] = useState(false);
 
-  function handleVideoMetadata(e: React.SyntheticEvent<HTMLVideoElement>) {
-    const { videoWidth, videoHeight } = e.currentTarget;
-    if (videoWidth && videoHeight) setAspectRatio(`${videoWidth}/${videoHeight}`);
+  function handleVideoMetadata(_e: React.SyntheticEvent<HTMLVideoElement>) {
     setReady(true);
   }
 
   return (
-    <div
+    <fieldset
       className={cn(
-        "break-inside-avoid border relative group rounded-lg overflow-hidden bg-muted cursor-pointer",
+        "break-inside-avoid relative group rounded overflow-hidden bg-muted cursor-pointer border-none p-0 m-0 w-full aspect-9/16",
         className,
       )}
+      onMouseEnter={() => setShowControls(true)}
+      onMouseLeave={() => setShowControls(false)}
     >
-      <div className="relative w-full bg-muted" style={{ aspectRatio }}>
+      <div className="relative w-full h-full bg-muted">
         {(isLoading || !ready) && <div className="absolute inset-0 animate-pulse bg-muted" />}
 
         {!isLoading && src && (
           <motion.video
             src={src}
-            controls
+            controls={showControls}
             preload="metadata"
             className="absolute inset-0 w-full h-full object-cover"
             initial={{ opacity: 0 }}
@@ -61,6 +54,6 @@ export function AssetCard({
         <p className="truncate px-2 py-1 text-sm text-white">{filename}</p>
         {action}
       </div>
-    </div>
+    </fieldset>
   );
 }

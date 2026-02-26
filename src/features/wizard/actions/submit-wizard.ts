@@ -37,7 +37,7 @@ export async function submitWizard(data: { token: string; creatorId: string }) {
   // Reuse existing collaboration for this creator+project; create one on first submission
   let collab = await db.query.collaborations.findFirst({
     where: and(eq(collaborations.projectId, project.id), eq(collaborations.creatorId, creator.id)),
-    with: { submissions: { columns: { batchNumber: true } } },
+    with: { submissions: { columns: { submissionNumber: true } } },
   });
 
   if (!collab) {
@@ -48,16 +48,16 @@ export async function submitWizard(data: { token: string; creatorId: string }) {
     collab = { ...inserted, submissions: [] };
   }
 
-  const nextBatchNumber = collab.submissions.length + 1;
+  const nextSubmissionNumber = collab.submissions.length + 1;
 
-  const [batch] = await db
+  const [submission] = await db
     .insert(submissions)
     .values({
       collaborationId: collab.id,
-      label: `Submission ${nextBatchNumber}`,
-      batchNumber: nextBatchNumber,
+      label: `Submission ${nextSubmissionNumber}`,
+      submissionNumber: nextSubmissionNumber,
     })
     .returning();
 
-  return { project, folder: collab, batch };
+  return { project, folder: collab, submission };
 }

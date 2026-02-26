@@ -7,11 +7,14 @@ type UseCarouselParameters = Parameters<typeof useEmblaCarousel>;
 export type CarouselOptions = UseCarouselParameters[0];
 export type CarouselPlugin = UseCarouselParameters[1];
 
+export type CarouselButtonPlacement = "aside" | "bottom-right";
+
 export type CarouselContextProps = {
   carouselRef: ReturnType<typeof useEmblaCarousel>[0];
   api: CarouselApi;
   opts?: CarouselOptions;
   orientation: "horizontal" | "vertical";
+  buttonPlacement: CarouselButtonPlacement;
   scrollPrev: () => void;
   scrollNext: () => void;
   canScrollPrev: boolean;

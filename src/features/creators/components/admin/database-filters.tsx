@@ -1,7 +1,6 @@
 "use client";
 
-import type { LucideIcon } from "lucide-react";
-import { Calendar, ChevronDown, Film, Globe, Grid3X3, Shield, Star, Tv, Users } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/shared/components/ui/button";
 import { Checkbox } from "@/shared/components/ui/checkbox";
@@ -100,12 +99,10 @@ export function getActiveFilterLabels(f: Filters): string[] {
 
 function FilterSection({
   title,
-  icon: Icon,
   defaultOpen = false,
   children,
 }: {
   title: string;
-  icon: LucideIcon;
   defaultOpen?: boolean;
   children: React.ReactNode;
 }) {
@@ -119,10 +116,7 @@ function FilterSection({
         size="sm"
         onClick={() => setOpen(!open)}
       >
-        <span className="flex items-center gap-2">
-          <Icon className="h-3.5 w-3.5 text-muted-foreground" />
-          {title}
-        </span>
+        <span className="flex items-center gap-2">{title}</span>
         <ChevronDown
           className={`h-3.5 w-3.5 text-muted-foreground transition-transform ${open ? "rotate-180" : ""}`}
         />
@@ -190,7 +184,7 @@ interface DatabaseFiltersProps {
 export function DatabaseFilters({ filters, onChange }: DatabaseFiltersProps) {
   return (
     <div className="w-full flex flex-col gap-2">
-      <FilterSection title="Rating" icon={Star} defaultOpen>
+      <FilterSection title="Rating" defaultOpen>
         <MultiSelect
           prefix="rating"
           options={OVERALL_RATING_TIERS}
@@ -199,7 +193,7 @@ export function DatabaseFilters({ filters, onChange }: DatabaseFiltersProps) {
         />
       </FilterSection>
 
-      <FilterSection title="Status" icon={Shield} defaultOpen>
+      <FilterSection title="Status" defaultOpen>
         <MultiSelect
           prefix="status"
           options={CREATOR_STATUSES}
@@ -208,7 +202,7 @@ export function DatabaseFilters({ filters, onChange }: DatabaseFiltersProps) {
         />
       </FilterSection>
 
-      <FilterSection title="Channels" icon={Tv}>
+      <FilterSection title="Channels">
         <CheckOption
           id="channel-instagram"
           label="Instagram"
@@ -229,7 +223,7 @@ export function DatabaseFilters({ filters, onChange }: DatabaseFiltersProps) {
         />
       </FilterSection>
 
-      <FilterSection title="UGC Categories" icon={Grid3X3}>
+      <FilterSection title="UGC Categories">
         <MultiSelect
           prefix="ugc"
           options={UGC_CATEGORIES}
@@ -238,7 +232,7 @@ export function DatabaseFilters({ filters, onChange }: DatabaseFiltersProps) {
         />
       </FilterSection>
 
-      <FilterSection title="Content Formats" icon={Film}>
+      <FilterSection title="Content Formats">
         <MultiSelect
           prefix="format"
           options={CONTENT_FORMATS}
@@ -247,7 +241,7 @@ export function DatabaseFilters({ filters, onChange }: DatabaseFiltersProps) {
         />
       </FilterSection>
 
-      <FilterSection title="Gender" icon={Users}>
+      <FilterSection title="Gender">
         <MultiSelect
           prefix="gender"
           options={GENDER_IDENTITIES}
@@ -256,7 +250,7 @@ export function DatabaseFilters({ filters, onChange }: DatabaseFiltersProps) {
         />
       </FilterSection>
 
-      <FilterSection title="Age" icon={Calendar}>
+      <FilterSection title="Age">
         <MultiSelect
           prefix="age"
           options={AGE_DEMOGRAPHICS}
@@ -265,7 +259,7 @@ export function DatabaseFilters({ filters, onChange }: DatabaseFiltersProps) {
         />
       </FilterSection>
 
-      <FilterSection title="Ethnicity" icon={Globe}>
+      <FilterSection title="Ethnicity">
         <MultiSelect
           prefix="ethnicity"
           options={ETHNICITIES}

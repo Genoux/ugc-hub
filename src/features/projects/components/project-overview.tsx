@@ -9,14 +9,14 @@ import {
 type ProjectOverviewProps = {
   totalProjects: number;
   activeProjects: number;
-  totalBatches: number;
+  totalSubmissions: number;
   pendingReview: number;
 };
 
 export function ProjectOverview({
   totalProjects,
   activeProjects,
-  totalBatches,
+  totalSubmissions,
   pendingReview,
 }: ProjectOverviewProps) {
   return (
@@ -41,19 +41,19 @@ export function ProjectOverview({
           </CardTitle>
         </CardHeader>
         <CardFooter className="flex-col items-start gap-1.5 text-sm">
-          <div className="text-muted-foreground">Projects with batches</div>
+          <div className="text-muted-foreground">Projects with submissions</div>
         </CardFooter>
       </Card>
 
       <Card className="@container/card">
         <CardHeader>
-          <CardDescription>Total Batches</CardDescription>
+          <CardDescription>Total Submissions</CardDescription>
           <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            {totalBatches}
+            {totalSubmissions}
           </CardTitle>
         </CardHeader>
         <CardFooter className="flex-col items-start gap-1.5 text-sm">
-          <div className="text-muted-foreground">All batches received</div>
+          <div className="text-muted-foreground">All submissions received</div>
         </CardFooter>
       </Card>
 
@@ -65,7 +65,7 @@ export function ProjectOverview({
           </CardTitle>
         </CardHeader>
         <CardFooter className="flex-col items-start gap-1.5 text-sm">
-          <div className="text-muted-foreground">Batches need review</div>
+          <div className="text-muted-foreground">Submissions need review</div>
         </CardFooter>
       </Card>
     </div>

@@ -23,8 +23,8 @@ export default async function CreatorFolderPage({
       project: { columns: { id: true, name: true } },
       creator: { columns: { id: true, fullName: true, email: true, profilePhoto: true } },
       submissions: {
-        columns: { id: true, label: true, batchNumber: true, deliveredAt: true },
-        orderBy: (s, { asc }) => [asc(s.batchNumber)],
+        columns: { id: true, label: true, submissionNumber: true, deliveredAt: true },
+        orderBy: (s, { asc }) => [asc(s.submissionNumber)],
         with: {
           assets: {
             columns: { id: true, filename: true, mimeType: true, sizeBytes: true, r2Key: true },

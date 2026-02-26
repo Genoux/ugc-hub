@@ -13,7 +13,7 @@ import { projects } from "../core/projects";
 
 export const statusEnum = pgEnum("collaboration_status", ["active", "closed"]);
 
-// One collaboration per (creator, project). Has many submissions (upload batches).
+// One collaboration per (creator, project). Has many submissions (content deliveries).
 export const collaborations = pgTable(
   "collaborations",
   {

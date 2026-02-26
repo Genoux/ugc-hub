@@ -14,9 +14,9 @@ export function useMultipartUpload() {
 
   async function uploadFile(
     file: File,
-    submissionId: string,
+    projectId: string,
     creatorCollaborationId: string,
-    batchId: string,
+    submissionId: string,
   ) {
     const fileId = `${file.name}-${Date.now()}`;
 
@@ -33,9 +33,9 @@ export function useMultipartUpload() {
           filename: file.name,
           contentType: file.type,
           fileSize: file.size,
-          submissionId,
+          projectId,
           creatorCollaborationId,
-          batchId,
+          submissionId,
         }),
       });
 
@@ -51,9 +51,9 @@ export function useMultipartUpload() {
       }));
 
       if (isMultipart) {
-        await uploadMultipart(file, key, uploadId, partUrls, batchId);
+        await uploadMultipart(file, key, uploadId, partUrls, submissionId);
       } else {
-        await uploadSingle(file, uploadUrl, key, batchId);
+        await uploadSingle(file, uploadUrl, key, submissionId);
       }
 
       setUploads((prev) => ({
@@ -61,7 +61,7 @@ export function useMultipartUpload() {
         [fileId]: { ...prev[fileId], status: "completed" },
       }));
     } catch (error) {
-      console.error("Upload failed:", error);
+      if (process.env.NODE_ENV === "development") console.error("Upload failed:", error);
       setUploads((prev) => ({
         ...prev,
         [fileId]: { ...prev[fileId], status: "failed" },
@@ -70,7 +70,7 @@ export function useMultipartUpload() {
     }
   }
 
-  async function uploadSingle(file: File, uploadUrl: string, key: string, batchId: string) {
+  async function uploadSingle(file: File, uploadUrl: string, key: string, submissionId: string) {
     await putToR2(file, uploadUrl);
 
     await fetch("/api/uploads/submission/complete", {
@@ -78,7 +78,7 @@ export function useMultipartUpload() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         key,
-        submissionId: batchId,
+        submissionId,
         filename: file.name,
         mimeType: file.type,
         sizeBytes: file.size,
@@ -91,7 +91,7 @@ export function useMultipartUpload() {
     key: string,
     uploadId: string,
     partUrls: string[],
-    batchId: string,
+    submissionId: string,
   ) {
     const chunkSize = UPLOAD_CONFIG.chunkSize;
 
@@ -115,7 +115,7 @@ export function useMultipartUpload() {
         uploadId,
         key,
         parts,
-        submissionId: batchId,
+        submissionId,
         filename: file.name,
         mimeType: file.type,
         sizeBytes: file.size,

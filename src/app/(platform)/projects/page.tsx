@@ -11,7 +11,7 @@ export default async function ProjectsPage() {
       description: projects.description,
       createdAt: projects.createdAt,
       totalCreators: count(collaborations.id),
-      totalBatches: sql<number>`COUNT(DISTINCT ${submissions.id})`,
+      totalSubmissions: sql<number>`COUNT(DISTINCT ${submissions.id})`,
     })
     .from(projects)
     .leftJoin(collaborations, eq(collaborations.projectId, projects.id))
@@ -22,7 +22,7 @@ export default async function ProjectsPage() {
   const data = rows.map((row) => ({
     ...row,
     totalCreators: Number(row.totalCreators),
-    totalBatches: Number(row.totalBatches),
+    totalSubmissions: Number(row.totalSubmissions),
   }));
 
   return (

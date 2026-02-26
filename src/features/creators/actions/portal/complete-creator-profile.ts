@@ -34,7 +34,7 @@ const schema = z.object({
   // Steps 3-9
   ugcCategories: z.array(z.string()).min(1),
   contentFormats: z.array(z.string()).min(1),
-  profilePhoto: z.string().optional(),
+  profilePhoto: z.string().min(1),
   rateRangeSelf: z.object({ min: z.number(), max: z.number() }).optional(),
   genderIdentity: z.enum(GENDER_IDENTITIES).optional(),
   ageDemographic: z.enum(AGE_DEMOGRAPHICS).optional(),
@@ -72,7 +72,7 @@ export async function completeCreatorProfile(input: z.infer<typeof schema>) {
         portfolioUrl: validated.portfolioUrl || null,
         ugcCategories: validated.ugcCategories,
         contentFormats: validated.contentFormats,
-        profilePhoto: validated.profilePhoto ?? null,
+        profilePhoto: validated.profilePhoto,
         rateRangeSelf: validated.rateRangeSelf ?? null,
         genderIdentity: validated.genderIdentity ?? null,
         ageDemographic: validated.ageDemographic ?? null,

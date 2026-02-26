@@ -3,8 +3,17 @@
 import useEmblaCarousel from "embla-carousel-react";
 import * as React from "react";
 import { cn } from "@/shared/lib/utils";
-import { usePrevNextButtons } from "./carousel-arrow-buttons";
-import type { CarouselApi, CarouselOptions, CarouselPlugin } from "./carousel-context";
+import {
+  CarouselNext,
+  CarouselPrevious,
+  usePrevNextButtons,
+} from "./carousel-arrow-buttons";
+import type {
+  CarouselApi,
+  CarouselButtonPlacement,
+  CarouselOptions,
+  CarouselPlugin,
+} from "./carousel-context";
 import { CarouselContext, useCarousel } from "./carousel-context";
 import { CarouselDots } from "./carousel-dot-buttons";
 import { useOpacityTween } from "./carousel-opacity-tween";
@@ -18,6 +27,10 @@ type CarouselProps = {
   setApi?: (api: CarouselApi) => void;
   tweenOpacity?: boolean;
   showDots?: boolean;
+  /** "aside" = prev/next left and right of carousel (default). "bottom-right" = both buttons bottom-right. */
+  buttonPlacement?: CarouselButtonPlacement;
+  /** Scroll duration (Embla uses physics, not easing). Higher = slower/smoother. Recommended 20–60. Default 25. */
+  scrollDuration?: number;
 };
 
 function Carousel({
@@ -29,10 +42,16 @@ function Carousel({
   children,
   tweenOpacity = false,
   showDots = false,
+  buttonPlacement = "aside",
+  scrollDuration,
   ...props
 }: React.ComponentProps<"div"> & CarouselProps) {
   const [carouselRef, api] = useEmblaCarousel(
-    { ...opts, axis: orientation === "horizontal" ? "x" : "y" },
+    {
+      ...opts,
+      axis: orientation === "horizontal" ? "x" : "y",
+      ...(scrollDuration !== undefined && { duration: scrollDuration }),
+    },
     plugins,
   );
 
@@ -59,6 +78,32 @@ function Carousel({
     setApi(api);
   }, [api, setApi]);
 
+  const useBottomRow = buttonPlacement === "bottom-right";
+  const { content, arrowButtons, rest } = React.useMemo(() => {
+    let content: React.ReactNode = null;
+    const arrowButtons: React.ReactNode[] = [];
+    const rest: React.ReactNode[] = [];
+    React.Children.forEach(children, (child) => {
+      if (!React.isValidElement(child)) return;
+      if (child.type === CarouselContent) content = child;
+      else if (child.type === CarouselPrevious || child.type === CarouselNext)
+        arrowButtons.push(child);
+      else rest.push(child);
+    });
+    return { content, arrowButtons, rest };
+  }, [children]);
+
+  const resolved =
+    useBottomRow && arrowButtons.length > 0 && content != null
+      ? [
+          content,
+          ...rest,
+          <div key="carousel-buttons" className="flex justify-end gap-2 mt-2">
+            {arrowButtons}
+          </div>,
+        ]
+      : children;
+
   return (
     <CarouselContext.Provider
       value={{
@@ -66,6 +111,7 @@ function Carousel({
         api,
         opts,
         orientation: orientation || (opts?.axis === "y" ? "vertical" : "horizontal"),
+        buttonPlacement,
         scrollPrev: onPrevButtonClick,
         scrollNext: onNextButtonClick,
         canScrollPrev: !prevBtnDisabled,
@@ -80,24 +126,31 @@ function Carousel({
         data-tween-opacity={tweenOpacity ? "true" : undefined}
         {...props}
       >
-        {children}
+        {resolved}
         {showDots && <CarouselDots />}
       </section>
     </CarouselContext.Provider>
   );
 }
 
-function CarouselContent({ className, ...props }: React.ComponentProps<"div">) {
+type CarouselContentProps = React.ComponentProps<"div"> & {
+  /** Sets a fixed height on the viewport so items can use h-full (e.g. for fixed-ratio slides). */
+  viewportClassName?: string;
+};
+
+function CarouselContent({ className, viewportClassName, ...props }: CarouselContentProps) {
   const { carouselRef, orientation } = useCarousel();
 
   return (
-    <div ref={carouselRef} className="overflow-hidden" data-slot="carousel-content">
+    <div
+      ref={carouselRef}
+      className={cn("overflow-hidden", viewportClassName)}
+      data-slot="carousel-content"
+    >
       <div
         className={cn(
-          "flex backface-hidden",
-          // touch-action mirrors the official Embla demo — browser handles vertical
-          // scroll natively while Embla owns the horizontal axis
-          orientation === "horizontal" ? "-ml-4 touch-pan-y" : "-mt-4 flex-col",
+          "flex h-full backface-hidden touch-pan-y",
+          orientation === "horizontal" ? "gap-2" : "flex-col gap-2",
           className,
         )}
         {...props}
@@ -106,16 +159,15 @@ function CarouselContent({ className, ...props }: React.ComponentProps<"div">) {
   );
 }
 
+/** Default basis-full = one slide visible. Override with e.g. basis-1/4 for 4 visible; Embla needs fixed widths to compute scroll/snaps. */
 function CarouselItem({ className, ...props }: React.ComponentProps<"div">) {
-  const { orientation } = useCarousel();
+  useCarousel();
 
   return (
     <div
       data-slot="carousel-item"
       className={cn(
-        "min-w-0 shrink-0 grow-0 basis-full",
-        orientation === "horizontal" ? "pl-4" : "pt-4",
-        "[&_video]:touch-pan-y",
+        "min-w-0 shrink-0 grow-0 basis-full [&_video]:touch-pan-y",
         className,
       )}
       {...props}
@@ -123,7 +175,7 @@ function CarouselItem({ className, ...props }: React.ComponentProps<"div">) {
   );
 }
 
-export type { CarouselApi };
+export type { CarouselApi, CarouselButtonPlacement };
 export { Carousel, CarouselContent, CarouselItem, useCarousel };
 export { CarouselNext, CarouselPrevious } from "./carousel-arrow-buttons";
 export { CarouselDots, useDotButton } from "./carousel-dot-buttons";

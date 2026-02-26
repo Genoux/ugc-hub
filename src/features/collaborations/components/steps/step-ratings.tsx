@@ -71,7 +71,7 @@ export function StepRatings({ ratings, notes, onChange, onNotesChange }: StepRat
         <Textarea
           value={notes}
           onChange={(e) => onNotesChange(e.target.value)}
-          placeholder="Anything specific about their performance on this batch..."
+          placeholder="Anything specific about their performance on this submission..."
           className="h-20 resize-none"
         />
       </div>

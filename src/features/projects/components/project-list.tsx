@@ -53,7 +53,7 @@ type Project = {
   description: string | null;
   createdAt: Date;
   totalCreators: number;
-  totalBatches: number;
+  totalSubmissions: number;
 };
 
 const columns: ColumnDef<Project>[] = [
@@ -69,9 +69,9 @@ const columns: ColumnDef<Project>[] = [
     cell: ({ row }) => <span className="text-muted-foreground">{row.original.totalCreators}</span>,
   },
   {
-    accessorKey: "totalBatches",
+    accessorKey: "totalSubmissions",
     header: "Uploads",
-    cell: ({ row }) => <span className="text-muted-foreground">{row.original.totalBatches}</span>,
+    cell: ({ row }) => <span className="text-muted-foreground">{row.original.totalSubmissions}</span>,
   },
   {
     accessorKey: "createdAt",

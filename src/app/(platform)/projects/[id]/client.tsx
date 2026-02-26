@@ -123,8 +123,8 @@ export function ProjectDetailClient({ project, collaborations }: ProjectDetailCl
                   </div>
                   <div className="flex items-center gap-3 shrink-0">
                     <span className="text-xs text-muted-foreground">
-                      {collaboration.submissions.length} batch
-                      {collaboration.submissions.length !== 1 ? "es" : ""} · {totalFiles} file
+                      {collaboration.submissions.length} submission
+                      {collaboration.submissions.length !== 1 ? "s" : ""} · {totalFiles} file
                       {totalFiles !== 1 ? "s" : ""}
                     </span>
                     <ChevronRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />

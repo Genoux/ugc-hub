@@ -17,5 +17,5 @@ export const getSessionCreator = cache(async (userId: string) => {
     where: or(eq(creators.clerkUserId, userId), ilike(creators.email, email)),
   });
 
-  return { creator: creator ?? null, email };
+  return { creator: creator ?? null, email, fullName: clerkUser.fullName };
 });

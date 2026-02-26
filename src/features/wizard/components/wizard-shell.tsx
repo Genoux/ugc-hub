@@ -37,16 +37,16 @@ export function WizardShell({
 
   async function handleSubmit() {
     setIsSubmitting(true);
-    let batchId: string | null = null;
+    let submissionId: string | null = null;
 
     try {
       const result = await submitWizard({ token, creatorId });
-      batchId = result.batch.id;
+      submissionId = result.submission.id;
 
       if (stepTwoFiles.length > 0) {
         await Promise.all(
           stepTwoFiles.map((file) =>
-            uploadFile(file, result.project.id, result.folder.id, result.batch.id),
+            uploadFile(file, result.project.id, result.folder.id, result.submission.id),
           ),
         );
       }
@@ -54,17 +54,17 @@ export function WizardShell({
       reset();
       setIsSuccess(true);
     } catch (error) {
-      console.error("Submission failed:", error);
+      if (process.env.NODE_ENV === "development") console.error("Submission failed:", error);
 
-      if (batchId) {
+      if (submissionId) {
         try {
           await fetch("/api/projects/rollback", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ submissionId: batchId }),
+            body: JSON.stringify({ submissionId }),
           });
         } catch (rollbackError) {
-          console.error("Rollback failed:", rollbackError);
+          if (process.env.NODE_ENV === "development") console.error("Rollback failed:", rollbackError);
         }
       }
 

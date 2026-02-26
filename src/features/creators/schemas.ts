@@ -12,7 +12,7 @@ export const socialChannelsSchema = z.object({
   instagram_handle: z.string().optional(),
   tiktok_handle: z.string().optional(),
   youtube_handle: z.string().optional(),
-  other_links: z.array(z.string()).optional(),
+  portfolio_url: z.string().optional(),
 });
 
 export const rateRangeSchema = z.object({

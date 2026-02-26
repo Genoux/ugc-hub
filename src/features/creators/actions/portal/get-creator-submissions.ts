@@ -18,7 +18,7 @@ export async function getCreatorSubmissions(creatorId: string) {
             columns: { id: true, filename: true, mimeType: true, sizeBytes: true, r2Key: true },
           },
         },
-        orderBy: (cs, { asc }) => [asc(cs.batchNumber)],
+        orderBy: (cs, { asc }) => [asc(cs.submissionNumber)],
       },
     },
   });
@@ -28,14 +28,14 @@ export async function getCreatorSubmissions(creatorId: string) {
       projectId: collab.project.id,
       projectName: collab.project.name,
       status: collab.status,
-      batches: await Promise.all(
-        collab.submissions.map(async (batch) => ({
-          id: batch.id,
-          label: batch.label,
-          batchNumber: batch.batchNumber,
-          deliveredAt: batch.deliveredAt,
+      submissions: await Promise.all(
+        collab.submissions.map(async (submission) => ({
+          id: submission.id,
+          label: submission.label,
+          submissionNumber: submission.submissionNumber,
+          deliveredAt: submission.deliveredAt,
           assets: await Promise.all(
-            batch.assets.map(async (asset) => ({
+            submission.assets.map(async (asset) => ({
               id: asset.id,
               filename: asset.filename,
               mimeType: asset.mimeType,
