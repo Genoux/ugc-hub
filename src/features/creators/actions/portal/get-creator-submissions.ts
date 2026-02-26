@@ -28,6 +28,7 @@ export async function getCreatorSubmissions(creatorId: string) {
       projectId: collab.project.id,
       projectName: collab.project.name,
       status: collab.status,
+      createdAt: collab.createdAt,
       submissions: await Promise.all(
         collab.submissions.map(async (submission) => ({
           id: submission.id,

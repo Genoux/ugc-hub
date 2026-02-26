@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertCircle, CheckCircle2, Clock } from "lucide-react";
+import { AlertCircle, CheckCircle2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { WizardShell } from "@/features/wizard/components/wizard-shell";
 import { Button } from "@/shared/components/ui/button";

@@ -8,7 +8,6 @@ import { Label } from "@/shared/components/ui/label";
 import type {
   AgeDemographic,
   ContentFormat,
-  CreatorDatabaseStatus,
   Ethnicity,
   GenderIdentity,
   OverallRatingTier,
@@ -17,7 +16,6 @@ import type {
 import {
   AGE_DEMOGRAPHICS,
   CONTENT_FORMATS,
-  CREATOR_STATUSES,
   ETHNICITIES,
   GENDER_IDENTITIES,
   OVERALL_RATING_TIERS,
@@ -25,7 +23,6 @@ import {
 } from "../../constants";
 
 export interface Filters {
-  status: CreatorDatabaseStatus[];
   overallRating: OverallRatingTier[];
   ugcCategories: UgcCategory[];
   contentFormats: ContentFormat[];
@@ -38,7 +35,6 @@ export interface Filters {
 }
 
 export const emptyFilters: Filters = {
-  status: [],
   overallRating: [],
   ugcCategories: [],
   contentFormats: [],
@@ -52,7 +48,6 @@ export const emptyFilters: Filters = {
 
 export function hasActiveFilters(f: Filters): boolean {
   return (
-    f.status.length > 0 ||
     f.overallRating.length > 0 ||
     f.ugcCategories.length > 0 ||
     f.contentFormats.length > 0 ||
@@ -68,7 +63,6 @@ export function hasActiveFilters(f: Filters): boolean {
 export function countActiveFilters(f: Filters): number {
   return (
     [
-      f.status,
       f.overallRating,
       f.ugcCategories,
       f.contentFormats,
@@ -84,7 +78,6 @@ export function countActiveFilters(f: Filters): number {
 
 export function getActiveFilterLabels(f: Filters): string[] {
   return [
-    ...f.status,
     ...f.overallRating,
     ...f.ugcCategories,
     ...f.contentFormats,
@@ -190,15 +183,6 @@ export function DatabaseFilters({ filters, onChange }: DatabaseFiltersProps) {
           options={OVERALL_RATING_TIERS}
           selected={filters.overallRating}
           onChange={(v) => onChange({ ...filters, overallRating: v })}
-        />
-      </FilterSection>
-
-      <FilterSection title="Status" defaultOpen>
-        <MultiSelect
-          prefix="status"
-          options={CREATOR_STATUSES}
-          selected={filters.status}
-          onChange={(v) => onChange({ ...filters, status: v })}
         />
       </FilterSection>
 

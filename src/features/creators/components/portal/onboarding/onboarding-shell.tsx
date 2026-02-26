@@ -13,7 +13,6 @@ import {
   type ProfilePhotoManager,
   useProfilePhotoManager,
 } from "@/features/creators/hooks/use-profile-photo-manager";
-import { DevToolbar } from "@/shared/components/tools/dev-toolbar";
 import {
   AlertDialog,
   AlertDialogAction,

@@ -13,7 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/components/ui
 import { EASING_FUNCTION } from "@/shared/lib/constant";
 import { OnboardingShell } from "./onboarding";
 import { ProfileStateBanner } from "./profile-state-banner";
-import { CreatorContentTab } from "./tabs/content/creator-content-tab";
+import { ContentCollaborations } from "./tabs/content/content-collaborations";
 import { CreatorProfileTab } from "./tabs/profile/creator-profile-tab";
 
 const UI_STATES: CreatorUIState[] = ["pending_approval", "pending_profile", "live", "declined"];
@@ -38,7 +38,7 @@ export function CreatorPortalShell({ creator, uiState, content }: CreatorPortalS
   };
 
   return (
-    <div className="flex h-full flex-col overflow-y-auto pt-12 pb-40">
+    <div className="flex h-full flex-col overflow-y-auto pt-6 pb-40">
       <div className="mx-auto w-full max-w-5xl flex flex-col flex-1 min-h-0">
         {/* <ProfileStateBanner
           uiState={effectiveUiState}
@@ -60,7 +60,7 @@ export function CreatorPortalShell({ creator, uiState, content }: CreatorPortalS
                   My Profile
                 </TabsTrigger>
                 <TabsTrigger onClick={() => setActiveTab("content")} value="content">
-                  Submitted Content
+                  Collaborations
                 </TabsTrigger>
               </TabsList>
             )}
@@ -85,7 +85,7 @@ export function CreatorPortalShell({ creator, uiState, content }: CreatorPortalS
           <TabsContent
             value="profile"
             forceMount
-            className="data-[state=inactive]:hidden flex-1 flex flex-col min-h-0"
+            className="data-[state=inactive]:hidden flex-1 flex flex-col min-h-0 mt-12"
           >
             <CreatorProfileTab
               creator={creator}
@@ -94,8 +94,12 @@ export function CreatorPortalShell({ creator, uiState, content }: CreatorPortalS
             />
           </TabsContent>
 
-          <TabsContent value="content" forceMount className="data-[state=inactive]:hidden">
-            <CreatorContentTab content={content} />
+          <TabsContent
+            value="content"
+            forceMount
+            className="data-[state=inactive]:hidden flex-1 flex flex-col min-h-0"
+          >
+            <ContentCollaborations content={content} />
           </TabsContent>
         </Tabs>
       </div>

@@ -1,6 +1,7 @@
 "use client";
 
-import { ChevronRight, Files } from "lucide-react";
+import { ChevronRight } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
 import type { CreatorSubmissions } from "@/features/creators/actions/portal/get-creator-submissions";
 import { AssetCard } from "@/shared/components/asset-card";
@@ -13,24 +14,19 @@ interface SubmissionRowProps {
 }
 
 export function SubmissionRow({ submission }: SubmissionRowProps) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(true);
 
   return (
     <div className="rounded-lg border border-border overflow-hidden">
       <Button
         variant="ghost"
-        size="sm"
         onClick={() => setOpen((o) => !o)}
-        className="w-full flex items-center justify-between px-4 py-3 hover:bg-accent/40 transition-colors text-left"
+        className="w-full flex items-center  rounded-lg justify-between p-6 hover:bg-accent/40 transition-colors text-left"
       >
         <div className="flex items-center gap-2.5">
-          <Files className="h-4 w-4 text-muted-foreground shrink-0" />
           <p className="text-sm font-medium text-foreground">{submission.label}</p>
         </div>
         <div className="flex items-center gap-3">
-          <p className="text-xs text-muted-foreground">
-            {submission.assets.length} file{submission.assets.length !== 1 ? "s" : ""}
-          </p>
           <p className="text-xs text-muted-foreground">
             {new Date(submission.deliveredAt).toLocaleDateString()}
           </p>
@@ -40,22 +36,30 @@ export function SubmissionRow({ submission }: SubmissionRowProps) {
         </div>
       </Button>
 
-      <div className={`border-t border-border p-4 ${open ? "" : "hidden"}`}>
-        {submission.assets.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No files in this submission.</p>
-        ) : (
-          <div className="grid grid-cols-5 gap-2">
-            {submission.assets.map((asset) => (
-              <AssetCard
-                key={asset.id}
-                src={asset.url || null}
-                filename={asset.filename}
-                isVideo={asset.mimeType.startsWith("video/")}
-              />
-            ))}
-          </div>
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2, ease: [0.32, 0.72, 0, 1] }}
+            className="border-t border-border overflow-hidden"
+          >
+            <div className="p-4">
+              <div className="grid grid-cols-4 gap-2">
+                {submission.assets.map((asset) => (
+                  <AssetCard
+                    key={asset.id}
+                    src={asset.url || null}
+                    filename={asset.filename}
+                    isVideo={asset.mimeType.startsWith("video/")}
+                  />
+                ))}
+              </div>
+            </div>
+          </motion.div>
         )}
-      </div>
+      </AnimatePresence>
     </div>
   );
 }

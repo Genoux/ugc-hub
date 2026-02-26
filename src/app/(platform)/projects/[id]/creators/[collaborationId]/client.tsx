@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckCircle2, ChevronLeft, Download } from "lucide-react";
+import { CheckCircle2, Download } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -8,6 +8,14 @@ import { CloseCollaborationWizard } from "@/features/collaborations/components/c
 import { downloadAssets } from "@/features/projects/lib/download-assets";
 import { AssetCard } from "@/shared/components/asset-card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/ui/avatar";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/shared/components/ui/breadcrumb";
 import { Button } from "@/shared/components/ui/button";
 
 type Asset = {
@@ -153,17 +161,44 @@ export function CreatorCollaborationClient({
 
   return (
     <div className="flex flex-1 flex-col gap-6 p-8">
-      {/* Header */}
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex flex-col gap-2">
-          <Button variant="outline" size="sm" asChild className="w-fit">
-            <Link href={`/projects/${project.id}`}>
-              <ChevronLeft className="size-4" />
-              {project.name}
-            </Link>
-          </Button>
+      {/* Header — sticky so it stays visible while scrolling */}
+      <div className="flex flex-col gap-4">
+        <div className="flex items-center w-full justify-between">
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link href="/projects">Projects</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link href={`/projects/${project.id}`}>{project.name}</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>{creator.fullName}</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+          <div className="flex items-center gap-2 shrink-0">
+            <Button variant="outline" size="sm" onClick={handleDownloadAll} className="gap-2">
+              Download all
+              <Download className="h-4 w-4" />
+            </Button>
+            {!isClosed && (
+              <Button size="sm" onClick={() => setShowCloseWizard(true)}>
+                Close Collaboration
+              </Button>
+            )}
+          </div>
+        </div>
+
+        <div className="flex items-end gap-3 justify-between w-full">
           <div className="flex items-center gap-3">
-            <Avatar className="h-9 w-9">
+            <Avatar className="h-16 w-16">
               {creator.profilePhotoUrl && (
                 <AvatarImage src={creator.profilePhotoUrl} alt={creator.fullName} />
               )}
@@ -173,34 +208,23 @@ export function CreatorCollaborationClient({
               <h1 className="text-2xl font-semibold tracking-tight">{creator.fullName}</h1>
               <div className="flex items-center gap-2">
                 <p className="text-sm text-muted-foreground">{creator.email}</p>
-                {isClosed && (
-                  <div className="flex items-center gap-1 text-xs font-medium text-emerald-600">
-                    <CheckCircle2 className="h-3.5 w-3.5" />
-                    Collaboration closed
-                  </div>
-                )}
               </div>
             </div>
           </div>
-        </div>
 
-        <div className="flex items-center gap-2 mt-8 shrink-0">
-          <Button variant="outline" size="sm" onClick={handleDownloadAll} className="gap-2">
-            Download all
-            <Download className="h-4 w-4" />
-          </Button>
-          {!isClosed && (
-            <Button size="sm" onClick={() => setShowCloseWizard(true)}>
-              Close Collaboration
-            </Button>
+          {isClosed && (
+            <div className="flex items-center gap-1 text-xs font-medium text-emerald-600">
+              <CheckCircle2 className="h-3.5 w-3.5" />
+              Collaboration closed
+            </div>
           )}
         </div>
       </div>
 
-      {highlights.length > 0 && (
+      {/* {highlights.length > 0 && (
         <div className="space-y-3">
           <h2 className="text-sm font-semibold text-foreground">Project Highlights</h2>
-          <div className="columns-2 gap-2 sm:columns-3 lg:columns-4">
+          <div className="grid grid-cols-6 gap-2">
             {highlights.map((asset) => (
               <AssetCard
                 key={asset.id}
@@ -211,7 +235,7 @@ export function CreatorCollaborationClient({
             ))}
           </div>
         </div>
-      )}
+      )} */}
 
       {submissions.length === 0 ? (
         <div className="rounded-xl border border-dashed py-16 text-center">

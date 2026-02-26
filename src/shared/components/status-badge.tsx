@@ -24,8 +24,7 @@ const statusConfig = {
   },
   closed: {
     label: "closed",
-    className:
-      "text-red-600 dark:text-red-400 border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-950/30",
+    className: "text-muted-foreground border-border",
   },
   active: {
     label: "active",
@@ -45,7 +44,7 @@ export function StatusBadge({ status, children }: StatusBadgeProps) {
   return (
     <div>
       <Badge variant="outline" className={config ? config.className : "text-muted-foreground"}>
-        {config ? config.label : children}
+        <p className="uppercase">{config ? config.label : children}</p>
       </Badge>
     </div>
   );

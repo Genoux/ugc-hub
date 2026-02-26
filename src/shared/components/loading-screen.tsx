@@ -5,7 +5,7 @@ export function LoadingScreen() {
     <motion.div
       initial={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      transition={{ duration: 0.3, delay: 2, ease: "easeOut" }}
+      transition={{ duration: 0.3, delay: 0.5, ease: "easeOut" }}
       className="fixed inset-0 z-50 flex items-center justify-center bg-background text-foreground"
     >
       <svg
