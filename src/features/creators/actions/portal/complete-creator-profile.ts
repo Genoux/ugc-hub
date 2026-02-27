@@ -5,6 +5,7 @@ import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { creators } from "@/db/schema";
+import { AGE_DEMOGRAPHICS, ETHNICITIES, GENDER_IDENTITIES } from "@/features/creators/constants";
 import { toActionError } from "@/shared/lib/action-error";
 import { db } from "@/shared/lib/db";
 
@@ -21,15 +22,23 @@ const schema = z.object({
       youtube_handle: z.string().optional(),
     })
     .optional(),
-  portfolioUrl: z.union([z.url(), z.literal("")]).optional(),
+  portfolioUrl: z
+    .string()
+    .optional()
+    .transform((val) => {
+      if (!val || val.trim() === "") return undefined;
+      const trimmed = val.trim();
+      return /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+    })
+    .pipe(z.url().optional()),
   // Steps 3-9
   ugcCategories: z.array(z.string()).min(1),
   contentFormats: z.array(z.string()).min(1),
-  profilePhoto: z.url().optional(),
+  profilePhoto: z.string().min(1),
   rateRangeSelf: z.object({ min: z.number(), max: z.number() }).optional(),
-  genderIdentity: z.string().optional(),
-  ageDemographic: z.string().optional(),
-  ethnicity: z.string().optional(),
+  genderIdentity: z.enum(GENDER_IDENTITIES).optional(),
+  ageDemographic: z.enum(AGE_DEMOGRAPHICS).optional(),
+  ethnicity: z.enum(ETHNICITIES).optional(),
 });
 
 export async function completeCreatorProfile(input: z.infer<typeof schema>) {
@@ -44,9 +53,13 @@ export async function completeCreatorProfile(input: z.infer<typeof schema>) {
       columns: { clerkUserId: true, email: true },
     });
 
+    if (!record) throw new Error("Creator profile not found");
+
     const clerkUser = await (await clerkClient()).users.getUser(userId);
-    const userEmail = clerkUser.primaryEmailAddress?.emailAddress;
-    const isOwner = record?.clerkUserId === userId || record?.email === userEmail;
+    const userEmail = clerkUser.primaryEmailAddress?.emailAddress?.toLowerCase().trim();
+    const isOwner =
+      record?.clerkUserId === userId ||
+      (userEmail !== undefined && record?.email?.toLowerCase().trim() === userEmail);
     if (!isOwner) throw new Error("Forbidden — you don't own this profile");
 
     await db
@@ -54,13 +67,12 @@ export async function completeCreatorProfile(input: z.infer<typeof schema>) {
       .set({
         fullName: validated.fullName,
         country: validated.country,
-        // DB stores languages as { language, accent? } objects; wizard sends string[]
-        languages: validated.languages.map((l) => ({ language: l })),
+        languages: validated.languages,
         socialChannels: validated.socialChannels,
         portfolioUrl: validated.portfolioUrl || null,
         ugcCategories: validated.ugcCategories,
         contentFormats: validated.contentFormats,
-        profilePhoto: validated.profilePhoto ?? null,
+        profilePhoto: validated.profilePhoto,
         rateRangeSelf: validated.rateRangeSelf ?? null,
         genderIdentity: validated.genderIdentity ?? null,
         ageDemographic: validated.ageDemographic ?? null,

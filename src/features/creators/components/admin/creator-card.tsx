@@ -1,11 +1,11 @@
 import { Instagram, Music, Youtube } from "lucide-react";
 import Image from "next/image";
+import type { CreatorListItem } from "@/features/creators/actions/admin/get-creators";
 import { Badge } from "@/shared/components/ui/badge";
 import { RATING_CONFIG } from "../../constants";
-import type { Creator } from "../../schemas";
 
 interface CreatorCardProps {
-  creator: Creator;
+  creator: CreatorListItem;
   onClick: () => void;
 }
 
@@ -31,14 +31,13 @@ export function CreatorCard({ creator, onClick }: CreatorCardProps) {
       onClick={onClick}
       className="group relative flex flex-col rounded-xl border border-border bg-card p-4 text-left transition-colors hover:bg-accent/50 hover:border-border"
     >
-      <div className="relative mb-3 aspect-square w-full overflow-hidden rounded-lg bg-muted">
-        {creator.profilePhoto ? (
-          <Image src={creator.profilePhoto} alt={creator.fullName} fill className="object-cover" />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center text-4xl font-light text-muted-foreground">
-            {creator.fullName[0]}
-          </div>
-        )}
+      <div className="relative mb-3 aspect-square w-full overflow-hidden rounded-lg bg-muted flex items-center justify-center text-4xl font-light text-muted-foreground">
+        <Image
+          src={creator.profilePhotoUrl ?? ""}
+          alt={creator.fullName}
+          fill
+          className="object-cover"
+        />
       </div>
 
       <h3 className="font-medium text-foreground text-sm mb-2 truncate">{creator.fullName}</h3>

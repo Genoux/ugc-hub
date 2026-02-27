@@ -1,25 +1,18 @@
 import { z } from "zod";
 import {
-  AGE_DEMOGRAPHICS,
   CONTENT_FORMATS,
   DB_CREATOR_STATUSES,
-  ETHNICITIES,
-  GENDER_IDENTITIES,
+  LANGUAGES,
   OVERALL_RATING_TIERS,
   PRIMARY_CHANNELS,
   UGC_CATEGORIES,
 } from "./constants";
 
-export const languageTagSchema = z.object({
-  language: z.string(),
-  accent: z.string().optional(),
-});
-
 export const socialChannelsSchema = z.object({
   instagram_handle: z.string().optional(),
   tiktok_handle: z.string().optional(),
   youtube_handle: z.string().optional(),
-  other_links: z.array(z.string()).optional(),
+  portfolio_url: z.string().optional(),
 });
 
 export const rateRangeSchema = z.object({
@@ -28,18 +21,22 @@ export const rateRangeSchema = z.object({
 });
 
 export const creatorSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   fullName: z.string(),
   email: z.string().email(),
   profilePhoto: z.string().nullable(),
   country: z.string().nullable(),
-  genderIdentity: z.enum(GENDER_IDENTITIES).nullable(),
-  ageDemographic: z.enum(AGE_DEMOGRAPHICS).nullable(),
-  ethnicity: z.enum(ETHNICITIES).nullable(),
-  languages: z.array(languageTagSchema).nullable(),
+  // z.string() intentionally — enum validation belongs at the input layer (server action),
+  // not when reading back from the DB where old values may exist.
+  genderIdentity: z.string().nullable(),
+  ageDemographic: z.string().nullable(),
+  ethnicity: z.string().nullable(),
+  languages: z.array(z.enum(LANGUAGES)).nullable(),
   portfolioUrl: z.string().nullable(),
   primaryChannel: z.enum(PRIMARY_CHANNELS).nullable(),
   socialChannels: socialChannelsSchema.nullable(),
+  // z.string() intentionally — enum validation belongs at the input layer (server action),
+  // not when reading back from the DB where old values may exist.
   ugcCategories: z.array(z.enum(UGC_CATEGORIES)).nullable(),
   contentFormats: z.array(z.enum(CONTENT_FORMATS)).nullable(),
   rateRangeSelf: rateRangeSchema.nullable(),
@@ -48,7 +45,7 @@ export const creatorSchema = z.object({
   status: z.enum(DB_CREATOR_STATUSES),
   profileCompleted: z.boolean(),
   profileCompletedAt: z.date().nullable().optional(),
-  collabCount: z.number(),
+  collabCount: z.number().default(0),
   blacklistReason: z.string().nullable(),
   blacklistedAt: z.date().nullable(),
   blacklistedBy: z.string().nullable(),
@@ -58,4 +55,3 @@ export const creatorSchema = z.object({
 export type Creator = z.infer<typeof creatorSchema>;
 export type SocialChannels = z.infer<typeof socialChannelsSchema>;
 export type RateRange = z.infer<typeof rateRangeSchema>;
-export type LanguageTag = z.infer<typeof languageTagSchema>;

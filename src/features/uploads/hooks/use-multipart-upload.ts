@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { putToR2 } from "../lib/r2-upload";
 import { UPLOAD_CONFIG } from "../lib/upload-config";
 
 type UploadStatus = {
@@ -8,14 +9,19 @@ type UploadStatus = {
   status: "pending" | "uploading" | "completed" | "failed";
 };
 
+export type UploadFileOptions = {
+  onProgress?: (percent: number) => void;
+};
+
 export function useMultipartUpload() {
   const [uploads, setUploads] = useState<Record<string, UploadStatus>>({});
 
   async function uploadFile(
     file: File,
-    submissionId: string,
+    projectId: string,
     creatorCollaborationId: string,
-    batchId: string,
+    submissionId: string,
+    options?: UploadFileOptions,
   ) {
     const fileId = `${file.name}-${Date.now()}`;
 
@@ -32,9 +38,9 @@ export function useMultipartUpload() {
           filename: file.name,
           contentType: file.type,
           fileSize: file.size,
-          submissionId,
+          projectId,
           creatorCollaborationId,
-          batchId,
+          submissionId,
         }),
       });
 
@@ -50,9 +56,9 @@ export function useMultipartUpload() {
       }));
 
       if (isMultipart) {
-        await uploadMultipart(file, key, uploadId, partUrls, batchId);
+        await uploadMultipart(file, key, uploadId, partUrls, submissionId, options?.onProgress);
       } else {
-        await uploadSingle(file, uploadUrl, key, batchId);
+        await uploadSingle(file, uploadUrl, key, submissionId, options?.onProgress);
       }
 
       setUploads((prev) => ({
@@ -60,7 +66,7 @@ export function useMultipartUpload() {
         [fileId]: { ...prev[fileId], status: "completed" },
       }));
     } catch (error) {
-      console.error("Upload failed:", error);
+      if (process.env.NODE_ENV === "development") console.error("Upload failed:", error);
       setUploads((prev) => ({
         ...prev,
         [fileId]: { ...prev[fileId], status: "failed" },
@@ -69,19 +75,25 @@ export function useMultipartUpload() {
     }
   }
 
-  async function uploadSingle(file: File, uploadUrl: string, key: string, batchId: string) {
-    await fetch(uploadUrl, {
-      method: "PUT",
-      body: file,
-      headers: { "Content-Type": file.type },
-    });
+  async function uploadSingle(
+    file: File,
+    uploadUrl: string,
+    key: string,
+    submissionId: string,
+    onProgress?: (percent: number) => void,
+  ) {
+    await putToR2(
+      file,
+      uploadUrl,
+      onProgress ? (loaded, total) => onProgress(total ? (loaded / total) * 100 : 0) : undefined,
+    );
 
     await fetch("/api/uploads/submission/complete", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         key,
-        submissionId: batchId,
+        submissionId,
         filename: file.name,
         mimeType: file.type,
         sizeBytes: file.size,
@@ -94,20 +106,30 @@ export function useMultipartUpload() {
     key: string,
     uploadId: string,
     partUrls: string[],
-    batchId: string,
+    submissionId: string,
+    onProgress?: (percent: number) => void,
   ) {
     const chunkSize = UPLOAD_CONFIG.chunkSize;
+    const totalSize = file.size;
+    const partLoaded = new Array<number>(partUrls.length).fill(0);
 
-    // Upload all parts directly to R2 in parallel using presigned URLs
+    function reportProgress() {
+      if (!onProgress) return;
+      const totalLoaded = partLoaded.reduce((a, b) => a + b, 0);
+      onProgress(totalSize ? (totalLoaded / totalSize) * 100 : 0);
+    }
+
     const parts = await Promise.all(
       partUrls.map(async (partUrl, i) => {
         const start = i * chunkSize;
         const end = Math.min(start + chunkSize, file.size);
         const chunk = file.slice(start, end);
 
-        const response = await fetch(partUrl, { method: "PUT", body: chunk });
-        const etag = response.headers.get("ETag") ?? "";
-        return { PartNumber: i + 1, ETag: etag.replace(/"/g, "") };
+        const etag = await putToR2(chunk, partUrl, (loaded) => {
+          partLoaded[i] = loaded;
+          reportProgress();
+        });
+        return { PartNumber: i + 1, ETag: etag ?? "" };
       }),
     );
 
@@ -118,7 +140,7 @@ export function useMultipartUpload() {
         uploadId,
         key,
         parts,
-        submissionId: batchId,
+        submissionId,
         filename: file.name,
         mimeType: file.type,
         sizeBytes: file.size,

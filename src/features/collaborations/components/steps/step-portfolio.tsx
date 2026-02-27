@@ -1,7 +1,7 @@
 "use client";
 
 import { FileVideo, Info, Trash2 } from "lucide-react";
-import { FileDropZone } from "@/shared/components/file-drop-zone";
+import { FileDropZone } from "@/shared/components/blocks/file-drop-zone";
 
 export type PortfolioFile = {
   file: File;

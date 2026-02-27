@@ -1,15 +1,17 @@
-import { createHmac, timingSafeEqual } from "crypto";
+import { createHmac, timingSafeEqual } from "node:crypto";
 import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { creators } from "@/db/schema";
+import { LANGUAGES } from "@/features/creators/constants";
 import { db } from "@/shared/lib/db";
+import { env } from "@/shared/lib/env";
 
 const bodySchema = z.object({
   fullName: z.string().min(1),
-  email: z.string().email(),
+  email: z.email(),
   country: z.string().optional(),
-  languages: z.array(z.string()).optional(),
+  languages: z.array(z.enum(LANGUAGES)).optional(),
   socialChannels: z
     .object({
       instagram_handle: z.string().optional(),
@@ -32,10 +34,7 @@ function verifySignature(payload: string, signature: string, secret: string): bo
 }
 
 export async function POST(req: Request) {
-  const secret = process.env.APPLY_WEBHOOK_SECRET;
-  if (!secret) {
-    return NextResponse.json({ error: "Webhook secret not configured" }, { status: 500 });
-  }
+  const secret = env.APPLY_WEBHOOK_SECRET;
 
   const signature = req.headers.get("x-webhook-signature") ?? "";
   const rawBody = await req.text();
@@ -66,7 +65,7 @@ export async function POST(req: Request) {
     email: parsed.email,
     country: parsed.country,
     // DB stores languages as { language, accent? } objects
-    languages: parsed.languages?.map((l) => ({ language: l })),
+    languages: parsed.languages,
     socialChannels: parsed.socialChannels,
     portfolioUrl: parsed.portfolioUrl,
     source: "applicant",

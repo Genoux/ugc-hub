@@ -62,7 +62,6 @@ export function StepRates({
           </div>
         )}
       </div>
-
     </div>
   );
 }

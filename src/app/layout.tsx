@@ -1,8 +1,9 @@
 import { ClerkProvider } from "@clerk/nextjs";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { PlatformDisclaimer } from "@/shared/components/blocks/platform-disclaimer";
+import { LayoutDebugClient } from "@/shared/components/tools/layout-debug-client";
 import { Toaster } from "@/shared/components/ui/sonner";
-import { QueryProvider } from "@/shared/providers/query-provider";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -22,6 +23,11 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "inBeat - UGC Hub",
   description: "inBeat UGC Hub",
+  manifest: "/manifest.webmanifest",
+};
+
+export const viewport: Viewport = {
+  themeColor: "#000000",
 };
 
 export default function RootLayout({
@@ -32,11 +38,15 @@ export default function RootLayout({
   return (
     <ClerkProvider afterSignOutUrl="/sign-in">
       <html lang="en" suppressHydrationWarning>
-        <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-          <QueryProvider>
+        <body
+          className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-[775px] min-w-[368px] flex flex-col`}
+        >
+          <div className="min-h-0 flex-1 overflow-y-auto">
             <Toaster position="top-center" />
             {children}
-          </QueryProvider>
+            <PlatformDisclaimer />
+          </div>
+          <LayoutDebugClient />
         </body>
       </html>
     </ClerkProvider>

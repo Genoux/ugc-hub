@@ -4,12 +4,12 @@ import { AnimatePresence } from "motion/react";
 import { useRouter } from "next/navigation";
 import { ThemeProvider } from "next-themes";
 import { useEffect, useState } from "react";
-import { AppSidebar } from "@/shared/components/app-sidebar";
-import { LoadingScreen } from "@/shared/components/loading-screen";
-import { SiteHeader } from "@/shared/components/site-header";
+import { AppSidebar } from "@/shared/components/layout/app-sidebar";
+import { LoadingScreen } from "@/shared/components/layout/loading-screen";
+import { SiteHeader } from "@/shared/components/layout/site-header";
 import { SidebarInset, SidebarProvider } from "@/shared/components/ui/sidebar";
 
-const PLATFORM_ROUTES = ["/applicants", "/database", "/submissions"] as const;
+const PLATFORM_ROUTES = ["/applicants", "/database", "/projects"] as const;
 
 export default function PlatformLayout({ children }: { children: React.ReactNode }) {
   const [isAppReady, setIsAppReady] = useState(false);
@@ -26,7 +26,7 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
   }, [router]);
 
   return (
-    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+    <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
       <SidebarProvider
         className="h-svh overflow-hidden"
         style={
@@ -42,9 +42,7 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
         <AppSidebar variant="inset" />
         <SidebarInset className="min-h-0 max-h-[calc(100svh-1rem)] overflow-hidden">
           <SiteHeader />
-          <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-            {children}
-          </div>
+          <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">{children}</div>
         </SidebarInset>
       </SidebarProvider>
     </ThemeProvider>
