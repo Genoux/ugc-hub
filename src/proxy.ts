@@ -1,7 +1,7 @@
 import { clerkClient, clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { type NextRequest, NextResponse } from "next/server";
-import { rateLimit } from "@/shared/lib/rate-limit";
 import { env } from "@/shared/lib/env";
+import { rateLimit } from "@/shared/lib/rate-limit";
 import { ROUTES } from "@/shared/lib/routes";
 
 const ALLOWED_DOMAIN = env.ALLOWED_DOMAIN;

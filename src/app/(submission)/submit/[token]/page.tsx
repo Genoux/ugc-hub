@@ -55,7 +55,7 @@ export default async function SubmitPage({ params }: { params: Promise<{ token: 
     creatorId: creator.id,
     creatorName: creator.fullName,
     creatorEmail: creator.email,
-    creatorImageUrl: profilePhotoUrl,
+    creatorImageUrl: profilePhotoUrl ?? "",
   };
 
   return <SubmitPageClient view={view} />;

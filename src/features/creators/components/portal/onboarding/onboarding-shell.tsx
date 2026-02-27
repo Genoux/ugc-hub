@@ -68,7 +68,7 @@ function ProgressDots({
 
   return (
     <div
-      className="flex items-center gap-3"
+      className="flex items-center gap-1 flex-wrap justify-center"
       role="progressbar"
       aria-valuenow={current}
       aria-valuemin={1}
@@ -350,70 +350,72 @@ export function OnboardingShell({ creator, onComplete, onClose }: OnboardingProp
             )}
           </WizardHeader>
 
-          <WizardStep stepKey={step} direction={directionRef.current}>
-            {!isResultStep && (
-              <div className="flex flex-col gap-2">
-                <WizardTitle>{STEPS[step].header}</WizardTitle>
-                <WizardDescription>{STEPS[step].body}</WizardDescription>
-              </div>
-            )}
-            <StepContent
-              step={step}
-              data={data}
-              onChange={update}
-              creatorId={creator.id}
-              photoManager={photoManager}
-              videoManager={videoManager}
-              submitError={submitError}
-              onExitResult={handleExitResult}
-              onRetryResult={() => handleStepChange(8)}
-            />
-            {!isResultStep && (
-              <WizardFooter>
-                {step > 1 ? (
+          <div className="flex flex-1 flex-col justify-center gap-4">
+            <WizardStep stepKey={step} direction={directionRef.current}>
+              {!isResultStep && (
+                <div className="flex flex-col gap-2">
+                  <WizardTitle>{STEPS[step].header}</WizardTitle>
+                  <WizardDescription>{STEPS[step].body}</WizardDescription>
+                </div>
+              )}
+              <StepContent
+                step={step}
+                data={data}
+                onChange={update}
+                creatorId={creator.id}
+                photoManager={photoManager}
+                videoManager={videoManager}
+                submitError={submitError}
+                onExitResult={handleExitResult}
+                onRetryResult={() => handleStepChange(8)}
+              />
+              {!isResultStep && (
+                <WizardFooter>
+                  {step > 1 ? (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => handleStepChange(step - 1)}
+                      disabled={isPending}
+                    >
+                      Back
+                    </Button>
+                  ) : (
+                    <span />
+                  )}
                   <Button
                     type="button"
-                    variant="outline"
-                    onClick={() => handleStepChange(step - 1)}
-                    disabled={isPending}
+                    onClick={handleNext}
+                    disabled={
+                      !stepCanProceed ||
+                      isPending ||
+                      (step === 5 && photoManager.isUploading) ||
+                      (step === 6 && videoManager.isUploading)
+                    }
                   >
-                    Back
+                    {isPending
+                      ? "Saving…"
+                      : isLastFormStep
+                        ? creator.profileCompleted
+                          ? "Save"
+                          : "Complete"
+                        : "Next"}
                   </Button>
-                ) : (
-                  <span />
-                )}
-                <Button
-                  type="button"
-                  onClick={handleNext}
-                  disabled={
-                    !stepCanProceed ||
-                    isPending ||
-                    (step === 5 && photoManager.isUploading) ||
-                    (step === 6 && videoManager.isUploading)
-                  }
-                >
-                  {isPending
-                    ? "Saving…"
-                    : isLastFormStep
-                      ? creator.profileCompleted
-                        ? "Save"
-                        : "Complete"
-                      : "Next"}
-                </Button>
-              </WizardFooter>
-            )}
-          </WizardStep>
+                </WizardFooter>
+              )}
+            </WizardStep>
 
-          {!isResultStep && creator.profileCompleted && (
-            <div className="w-full flex justify-center pb-24">
-              <ProgressDots
-                filledSteps={filledSteps}
-                current={step}
-                steps={STEPS}
-                onStepClick={handleStepChange}
-              />
-            </div>
-          )}
+            {!isResultStep && creator.profileCompleted && (
+              <div className="w-full flex justify-center pb-21">
+                <ProgressDots
+                  filledSteps={filledSteps}
+                  current={step}
+                  steps={STEPS}
+                  onStepClick={handleStepChange}
+                />
+              </div>
+            )}
+          </div>
         </WizardPanel>
 
         <WizardAside stepKey={step} direction={directionRef.current} visible={!isResultStep}>

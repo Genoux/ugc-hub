@@ -1,9 +1,7 @@
-import { BadgeCheck } from "lucide-react";
 import Image from "next/image";
 import type { CreatorProfile } from "@/features/creators/actions/portal/get-creator-profile";
 import type { CreatorUIState } from "@/features/creators/lib/get-creator-ui-state";
 import { Button } from "@/shared/components/ui/button";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/shared/components/ui/tooltip";
 import { ProfileEmptyState } from "./profile-empty-state";
 import { Field, Tags } from "./profile-fields";
 import { ProfilePortfolio } from "./profile-portfolio";

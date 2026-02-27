@@ -22,7 +22,7 @@ export function Wizard({ variant, children, className }: WizardProps) {
     return (
       <motion.div
         className={cn(
-          "fixed inset-0 flex min-h-[max(775px,100vh)] flex-col overflow-auto z-50",
+          "fixed inset-0 flex min-h-[max(775px,100vh)] flex-col overflow-auto z-50 min-w-[368px]",
           className,
         )}
         initial={{ opacity: 0, y: 250 }}
@@ -115,7 +115,7 @@ export function WizardStep({ stepKey, direction, children, className }: WizardSt
           transition={{ duration: 0.4, ease: EASING_FUNCTION.quartic }}
           className={cn("mx-auto flex min-h-full w-full max-w-3xl flex-col", className)}
         >
-          <div className="flex flex-1 flex-col justify-center gap-6">{children}</div>
+          <div className="flex flex-1 flex-col justify-center gap-4">{children}</div>
         </motion.div>
       </AnimatePresence>
     </div>

@@ -1,4 +1,5 @@
 import type { CreatorProfile } from "@/features/creators/actions/portal/get-creator-profile";
+import type { OnboardingData } from "@/features/creators/components/portal/onboarding/onboarding-types";
 import type {
   AgeDemographic,
   ContentFormat,
@@ -7,7 +8,6 @@ import type {
   Language,
   UgcCategory,
 } from "@/features/creators/constants";
-import type { OnboardingData } from "@/features/creators/components/portal/onboarding/onboarding-types";
 
 export const MIN_PORTFOLIO_VIDEOS = 2;
 export const MAX_PORTFOLIO_VIDEOS = 5;

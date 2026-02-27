@@ -26,7 +26,7 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
   }, [router]);
 
   return (
-    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+    <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
       <SidebarProvider
         className="h-svh overflow-hidden"
         style={

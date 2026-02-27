@@ -6,7 +6,7 @@ import { EASING_FUNCTION } from "@/shared/lib/constant";
 import { cn } from "@/shared/lib/utils";
 
 const SIZE = {
-  sm: "w-40",
+  sm: "w-42",
   md: "w-52",
   lg: "w-64",
 } as const;

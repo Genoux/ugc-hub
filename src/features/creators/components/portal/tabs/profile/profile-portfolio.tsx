@@ -31,8 +31,8 @@ export function ProfilePortfolio({ creator }: ProfilePortfolioProps) {
           <h3 className="text-sm font-semibold text-foreground items-center flex">Portfolio</h3>
           <CarouselContent>
             {creator.portfolioVideos.map((video) => (
-              <CarouselItem key={video.id} className="basis-[30%]">
-                <AssetCard src={video.url} filename={video.filename} className="w-full" />
+              <CarouselItem key={video.id} className="basis-auto p-0">
+                <AssetCard src={video.url} filename={video.filename} size="sm" />
               </CarouselItem>
             ))}
           </CarouselContent>
@@ -42,7 +42,7 @@ export function ProfilePortfolio({ creator }: ProfilePortfolioProps) {
           <CarouselNext />
         </div>
       </Carousel>
-      <hr />
+
       {hasHighlights && (
         <div className="flex flex-col gap-3">
           <div className="flex gap-1 items-center">

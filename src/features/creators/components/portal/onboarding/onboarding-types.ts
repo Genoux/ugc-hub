@@ -64,7 +64,7 @@ export const INITIAL_ONBOARDING_DATA: OnboardingData = {
   genderIdentity: "",
   ageDemographic: "",
   ethnicity: "",
-}
+};
 
 import type { CreatorProfile } from "@/features/creators/actions/portal/get-creator-profile";
 

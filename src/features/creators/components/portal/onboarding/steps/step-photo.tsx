@@ -2,6 +2,7 @@
 
 import { CameraIcon, Loader2 } from "lucide-react";
 import Image from "next/image";
+import { useRef } from "react";
 import { useCreatorAssetUpload } from "@/features/creators/hooks/use-creator-asset-upload";
 import type { ProfilePhotoManager } from "@/features/creators/hooks/use-profile-photo-manager";
 import { Button } from "@/shared/components/ui/button";
@@ -14,6 +15,7 @@ interface Props {
 }
 
 export function StepPhoto({ photoKey, photoManager, onChange, creatorId }: Props) {
+  const inputRef = useRef<HTMLInputElement>(null);
   const { upload, error } = useCreatorAssetUpload(creatorId, "profile_picture");
 
   const hasPhoto = !!photoManager.previewUrl || !!photoKey;
@@ -39,43 +41,47 @@ export function StepPhoto({ photoKey, photoManager, onChange, creatorId }: Props
 
   return (
     <div className="flex flex-col items-start gap-5 py-2">
-      <div className="bg-muted relative flex h-52 w-52 shrink-0 items-center justify-center overflow-hidden rounded-lg border">
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/jpeg,image/png,image/webp"
+        className="sr-only"
+        onChange={handleFileChange}
+        disabled={photoManager.isUploading}
+        aria-label="Profile photo"
+      />
+      <button
+        type="button"
+        onClick={() => inputRef.current?.click()}
+        disabled={photoManager.isUploading}
+        className="bg-muted hover:bg-muted/80 relative flex h-52 w-52 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-lg border transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+        aria-label={hasPhoto ? "Replace photo" : "Upload photo"}
+      >
         {photoManager.previewUrl ? (
           <Image src={photoManager.previewUrl} alt="Creator" fill className="object-cover" />
         ) : (
           <CameraIcon className="size-5 text-muted-foreground" />
         )}
-      </div>
+      </button>
 
-      <label className="cursor-pointer">
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          disabled={photoManager.isUploading}
-          asChild
-        >
-          <span>
-            {photoManager.isUploading ? (
-              <>
-                <Loader2 className="size-3.5 animate-spin" />
-                Uploading…
-              </>
-            ) : hasPhoto ? (
-              "Replace photo"
-            ) : (
-              "Upload photo"
-            )}
-          </span>
-        </Button>
-        <input
-          type="file"
-          accept="image/jpeg,image/png,image/webp"
-          className="sr-only"
-          onChange={handleFileChange}
-          disabled={photoManager.isUploading}
-        />
-      </label>
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        disabled={photoManager.isUploading}
+        onClick={() => inputRef.current?.click()}
+      >
+        {photoManager.isUploading ? (
+          <>
+            <Loader2 className="size-3.5 animate-spin" />
+            Uploading…
+          </>
+        ) : hasPhoto ? (
+          "Replace photo"
+        ) : (
+          "Upload photo"
+        )}
+      </Button>
 
       {error && <p className="text-destructive text-sm">{error}</p>}
       <p className="text-muted-foreground text-xs">JPG, PNG or WebP · Max 5 MB</p>

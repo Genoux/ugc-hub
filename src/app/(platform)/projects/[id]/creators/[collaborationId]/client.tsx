@@ -141,7 +141,7 @@ export function CreatorCollaborationClient({
 }: {
   collaboration: CollaborationDetail;
 }) {
-  const { id, status, project, creator, submissions, highlights } = collaboration;
+  const { id, status, project, creator, submissions } = collaboration;
   const [isClosed, setIsClosed] = useState(status === "closed");
   const [showCloseWizard, setShowCloseWizard] = useState(false);
 

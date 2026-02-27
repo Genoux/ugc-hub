@@ -26,7 +26,7 @@ export default async function CreatorLayout({ children }: { children: React.Reac
   }
 
   return (
-    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+    <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
       <CreatorPortalLayout>{children}</CreatorPortalLayout>
     </ThemeProvider>
   );

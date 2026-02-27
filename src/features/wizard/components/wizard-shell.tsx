@@ -19,7 +19,6 @@ import { WizardStepLoading } from "./steps/step-loading";
 import { StepSubmittingAs } from "./steps/step-submitting-as";
 import { StepUploadAssets } from "./steps/step-upload-assets";
 import { WIZARD_STEPS } from "./wizard-constants";
-import { WizardStepDevTool } from "./wizard-step-dev-tool";
 
 const TOTAL_STEPS = 4;
 
@@ -44,7 +43,6 @@ export function WizardShell({
   const [uploadFiles, setUploadFiles] = useState<File[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const [simulateSubmitError, setSimulateSubmitError] = useState(false);
   const { uploadFile } = useMultipartUpload();
 
   const isLoadingStep = step === 3;
@@ -115,59 +113,56 @@ export function WizardShell({
   }
 
   return (
-    <>
-      <WizardStepDevTool currentStep={step} onGoToStep={goToStep} />
-      <Wizard variant="page">
-        <WizardPanel>
-          <WizardStep stepKey={step} direction={directionRef.current}>
-            {!isResultStep && !isLoadingStep && (
-              <div className="flex flex-col gap-2">
-                <WizardTitle>{WIZARD_STEPS[step].header}</WizardTitle>
-                <WizardDescription>{WIZARD_STEPS[step].body}</WizardDescription>
-              </div>
-            )}
-            {step === 1 && <StepSubmittingAs {...creatorProps} />}
-            {step === 2 && (
-              <StepUploadAssets
-                {...creatorProps}
-                files={uploadFiles}
-                onFilesChange={setUploadFiles}
-              />
-            )}
-            {step === 3 && <WizardStepLoading progress={uploadProgress} />}
-            {step === 4 && <WizardStepComplete />}
-            {!isResultStep && !isLoadingStep && (
-              <WizardFooter>
-                {step > 1 ? (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={handleBack}
-                    disabled={isSubmitting}
-                  >
-                    Back
-                  </Button>
-                ) : (
-                  <span />
-                )}
-                {step < 2 ? (
-                  <Button type="button" onClick={handleNext} disabled={isSubmitting}>
-                    Next
-                  </Button>
-                ) : (
-                  <Button
-                    type="button"
-                    onClick={handleSubmit}
-                    disabled={uploadFiles.length === 0 || isSubmitting}
-                  >
-                    {isSubmitting ? "Submitting…" : "Submit"}
-                  </Button>
-                )}
-              </WizardFooter>
-            )}
-          </WizardStep>
-        </WizardPanel>
-      </Wizard>
-    </>
+    <Wizard variant="page">
+      <WizardPanel>
+        <WizardStep stepKey={step} direction={directionRef.current}>
+          {!isResultStep && !isLoadingStep && (
+            <div className="flex flex-col gap-2">
+              <WizardTitle>{WIZARD_STEPS[step].header}</WizardTitle>
+              <WizardDescription>{WIZARD_STEPS[step].body}</WizardDescription>
+            </div>
+          )}
+          {step === 1 && <StepSubmittingAs {...creatorProps} />}
+          {step === 2 && (
+            <StepUploadAssets
+              {...creatorProps}
+              files={uploadFiles}
+              onFilesChange={setUploadFiles}
+            />
+          )}
+          {step === 3 && <WizardStepLoading progress={uploadProgress} />}
+          {step === 4 && <WizardStepComplete />}
+          {!isResultStep && !isLoadingStep && (
+            <WizardFooter>
+              {step > 1 ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleBack}
+                  disabled={isSubmitting}
+                >
+                  Back
+                </Button>
+              ) : (
+                <span />
+              )}
+              {step < 2 ? (
+                <Button type="button" onClick={handleNext} disabled={isSubmitting}>
+                  Next
+                </Button>
+              ) : (
+                <Button
+                  type="button"
+                  onClick={handleSubmit}
+                  disabled={uploadFiles.length === 0 || isSubmitting}
+                >
+                  {isSubmitting ? "Submitting…" : "Submit"}
+                </Button>
+              )}
+            </WizardFooter>
+          )}
+        </WizardStep>
+      </WizardPanel>
+    </Wizard>
   );
 }

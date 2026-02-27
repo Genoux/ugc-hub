@@ -73,19 +73,19 @@ export function StepVideos({
   return (
     <div className="space-y-4">
       {doneEntries.length > 0 && (
-        <Carousel opts={{ align: "center", loop: true }} className="w-full" tweenOpacity>
-          <div className="mb-1">
-            <p className="text-xs text-muted-foreground">
-              {doneEntries.length} / {MAX_PORTFOLIO_VIDEOS}
-            </p>
-          </div>
+        <Carousel
+          opts={{ align: "start", loop: false }}
+          className="w-full flex flex-col gap-3"
+          buttonPlacement="bottom-right"
+          scrollDuration={20}
+        >
           <CarouselContent>
             {doneEntries.map((entry) => (
-              <CarouselItem key={entry.assetId} className="basis-[35%] p-1">
+              <CarouselItem key={entry.assetId} className="basis-auto p-0">
                 <AssetCard
                   src={entry.objectUrl}
                   filename={entry.filename}
-                  isVideo
+                  size="sm"
                   action={
                     <Button
                       className="h-8 w-8 text-white! hover:bg-white/20"
@@ -100,8 +100,17 @@ export function StepVideos({
               </CarouselItem>
             ))}
           </CarouselContent>
-          <CarouselPrevious />
-          <CarouselNext />
+          <div className="flex items-center gap-2 justify-between">
+            <div className="mb-1">
+              <p className="text-xs text-muted-foreground">
+                {doneEntries.length} / {MAX_PORTFOLIO_VIDEOS}
+              </p>
+            </div>
+            <div className="flex items-center gap-1">
+              <CarouselPrevious />
+              <CarouselNext />
+            </div>
+          </div>
         </Carousel>
       )}
 

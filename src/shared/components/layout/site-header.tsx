@@ -1,4 +1,3 @@
-import { ThemeSwitcher } from "@/shared/components/theme-switcher";
 import { Separator } from "@/shared/components/ui/separator";
 import { SidebarTrigger } from "@/shared/components/ui/sidebar";
 
@@ -9,9 +8,6 @@ export function SiteHeader() {
         <SidebarTrigger className="-ml-1" />
         <Separator orientation="vertical" className="mx-2 data-[orientation=vertical]:h-4" />
         <h1 className="text-base font-medium">UGC Hub</h1>
-        <div className="ml-auto">
-          <ThemeSwitcher />
-        </div>
       </div>
     </header>
   );

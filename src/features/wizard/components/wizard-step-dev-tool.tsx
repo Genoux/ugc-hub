@@ -10,16 +10,9 @@ const STEP_LABELS: Record<number, string> = {
 interface WizardStepDevToolProps {
   currentStep: number;
   onGoToStep: (step: number) => void;
-  simulateSubmitError?: boolean;
-  onSimulateSubmitErrorToggle?: () => void;
 }
 
-export function WizardStepDevTool({
-  currentStep,
-  onGoToStep,
-  simulateSubmitError,
-  onSimulateSubmitErrorToggle,
-}: WizardStepDevToolProps) {
+export function WizardStepDevTool({ currentStep, onGoToStep }: WizardStepDevToolProps) {
   if (process.env.NODE_ENV !== "development") return null;
 
   return (
@@ -46,18 +39,6 @@ export function WizardStepDevTool({
           </button>
         ))}
       </div>
-      {onSimulateSubmitErrorToggle && (
-        <button
-          type="button"
-          onClick={onSimulateSubmitErrorToggle}
-          className={`mt-1 rounded px-2 py-1 text-left text-xs font-medium transition-colors ${
-            simulateSubmitError ? "bg-destructive/20 text-destructive" : "bg-muted hover:bg-muted/80"
-          }`}
-          title="Next Submit will throw an error"
-        >
-          {simulateSubmitError ? "✓ Simulate error" : "Simulate error"}
-        </button>
-      )}
     </div>
   );
 }
