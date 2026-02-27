@@ -8,9 +8,9 @@ export function ProfileSocials({ links }: { links: SocialLink[] }) {
   return (
     <div>
       <p className="text-xs text-muted-foreground mb-2">Socials</p>
-      <div className="flex justify-between gap-3">
+      <div className="flex justify-between  sm:justify-start lg:justify-between gap-3">
         {links.map(({ label, handle }) => (
-          <span key={label} className="text-sm font-medium flex flex-col">
+          <span key={label} className="text-sm font-medium flex flex-col gap-1">
             <span className="text-muted-foreground">{label} </span>
             {handle}
           </span>

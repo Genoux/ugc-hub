@@ -1,22 +1,16 @@
 "use client";
 
-import { Bug } from "lucide-react";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence } from "motion/react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { CreatorProfile } from "@/features/creators/actions/portal/get-creator-profile";
 import type { CreatorSubmissions } from "@/features/creators/actions/portal/get-creator-submissions";
-import { resetCreatorProfile } from "@/features/creators/actions/portal/reset-creator-profile";
 import type { CreatorUIState } from "@/features/creators/lib/get-creator-ui-state";
-import { Button } from "@/shared/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
-import { EASING_FUNCTION } from "@/shared/lib/constant";
+import { useCreatorPortal } from "./creator-portal-context";
 import { OnboardingShell } from "./onboarding";
-import { ProfileStateBanner } from "./profile-state-banner";
-import { ContentCollaborations } from "./tabs/content/content-collaborations";
-import { CreatorProfileTab } from "./tabs/profile/creator-profile-tab";
-
-const UI_STATES: CreatorUIState[] = ["pending_approval", "pending_profile", "live", "declined"];
+import { CollaborationTab } from "./tabs/collaborations/collaboration-tab";
+import { CreatorProfileTab } from "./tabs/profile/profile-tab";
+import { ResetProfileButton } from "./tools/reset-profile-button";
 
 interface CreatorPortalShellProps {
   creator: CreatorProfile;
@@ -27,10 +21,12 @@ interface CreatorPortalShellProps {
 export function CreatorPortalShell({ creator, uiState, content }: CreatorPortalShellProps) {
   const router = useRouter();
   const [onboardingOpen, setOnboardingOpen] = useState(uiState === "pending_profile");
-  const [activeTab, setActiveTab] = useState<"profile" | "content">("profile");
-  const [debugUiState, setDebugUiState] = useState<CreatorUIState | null>(null);
+  const { activeTab, setShowNav } = useCreatorPortal();
 
-  const effectiveUiState = debugUiState ?? uiState;
+  useEffect(() => {
+    setShowNav(creator.profileCompleted);
+    return () => setShowNav(false);
+  }, [creator.profileCompleted, setShowNav]);
 
   const handleOnboardingClose = () => {
     setOnboardingOpen(false);
@@ -38,70 +34,16 @@ export function CreatorPortalShell({ creator, uiState, content }: CreatorPortalS
   };
 
   return (
-    <div className="flex h-full flex-col overflow-y-auto pt-6 pb-40">
-      <div className="mx-auto w-full max-w-5xl flex flex-col flex-1 min-h-0">
-        {/* <ProfileStateBanner
-          uiState={effectiveUiState}
-          onOpenOnboarding={() => setOnboardingOpen(true)}
-        /> */}
-        <Button
-          className="absolute top-0 right-0"
-          variant="outline"
-          size="sm"
-          onClick={() => resetCreatorProfile(creator.id)}
-        >
-          reset
-        </Button>
-        <Tabs defaultValue="profile" className="flex flex-col gap-6 flex-1 min-h-0">
-          <div className="flex items-center justify-between w-full">
-            {creator.profileCompleted && (
-              <TabsList variant="line">
-                <TabsTrigger onClick={() => setActiveTab("profile")} value="profile">
-                  My Profile
-                </TabsTrigger>
-                <TabsTrigger onClick={() => setActiveTab("content")} value="content">
-                  Collaborations
-                </TabsTrigger>
-              </TabsList>
-            )}
-            {creator.profileCompleted && (
-              <AnimatePresence mode="wait">
-                {activeTab === "profile" ? (
-                  <motion.div
-                    key="profile"
-                    initial={{ opacity: 0, x: 10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: 10 }}
-                    transition={{ duration: 0.1, ease: EASING_FUNCTION.exponential }}
-                  >
-                    <Button variant="outline" size="sm" onClick={() => setOnboardingOpen(true)}>
-                      Edit profile
-                    </Button>
-                  </motion.div>
-                ) : null}
-              </AnimatePresence>
-            )}
-          </div>
-          <TabsContent
-            value="profile"
-            forceMount
-            className="data-[state=inactive]:hidden flex-1 flex flex-col min-h-0 mt-12"
-          >
-            <CreatorProfileTab
-              creator={creator}
-              uiState={effectiveUiState}
-              onOpenOnboarding={() => setOnboardingOpen(true)}
-            />
-          </TabsContent>
-
-          <TabsContent
-            value="content"
-            forceMount
-            className="data-[state=inactive]:hidden flex-1 flex flex-col min-h-0"
-          >
-            <ContentCollaborations content={content} />
-          </TabsContent>
-        </Tabs>
+    <div className="flex min-h-full flex-col pb-40 pt-6 px-6">
+      <div className="mx-auto w-full max-w-6xl flex flex-col min-h-full">
+        {activeTab === "profile" && (
+          <CreatorProfileTab
+            creator={creator}
+            uiState={uiState}
+            onOpenOnboarding={() => setOnboardingOpen(true)}
+          />
+        )}
+        {activeTab === "content" && <CollaborationTab content={content} />}
       </div>
 
       <AnimatePresence>
@@ -113,31 +55,11 @@ export function CreatorPortalShell({ creator, uiState, content }: CreatorPortalS
           />
         )}
       </AnimatePresence>
+      <ResetProfileButton creatorId={creator.id} />
       <div
-        className="z-0 pointer-events-none absolute inset-x-0 bottom-0 h-24 backdrop-blur-sm [mask-image:linear-gradient(to_top,black,transparent)]"
+        className="z-0 pointer-events-none absolute inset-x-0 bottom-0 h-16 backdrop-blur-lg mask-[linear-gradient(to_top,black,transparent)]"
         aria-hidden
       />
-
-      {process.env.NODE_ENV === "development" && (
-        <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-1 rounded-lg border border-border bg-background/95 p-2 shadow-lg backdrop-blur">
-          <span className="flex items-center gap-1.5 px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
-            <Bug className="size-2.5" />
-            State
-          </span>
-          {UI_STATES.map((state) => (
-            <Button
-              key={state}
-              type="button"
-              variant={effectiveUiState === state ? "secondary" : "ghost"}
-              size="sm"
-              className="h-7 justify-start text-xs font-normal"
-              onClick={() => setDebugUiState(state)}
-            >
-              {state.replace("_", " ")}
-            </Button>
-          ))}
-        </div>
-      )}
     </div>
   );
 }

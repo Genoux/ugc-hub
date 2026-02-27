@@ -184,7 +184,7 @@ export function OnboardingShell({ creator, onComplete, onClose }: OnboardingProp
   const isLastFormStep = step === 8;
   const isResultStep = step === TOTAL_STEPS;
   const directionRef = useRef<1 | -1>(1);
-  const pendingCloseActionRef = useRef<(() => void) | null>(null);
+  const pendingCloseActionRef = useRef<(() => void | Promise<void>) | null>(null);
 
   const ALERT_CLOSE_MS = 250;
 
@@ -223,22 +223,22 @@ export function OnboardingShell({ creator, onComplete, onClose }: OnboardingProp
     setConfirmingClose(true);
   };
 
-  const runAfterAlertClosed = (action: () => void) => {
+  const runAfterAlertClosed = (action: () => void | Promise<void>) => {
     pendingCloseActionRef.current = action;
     setConfirmingClose(false);
   };
 
   const handleConfirmedClose = () => {
-    runAfterAlertClosed(() => {
-      videoManager.abandonAll();
+    runAfterAlertClosed(async () => {
+      await videoManager.abandonAll();
       onClose();
     });
   };
 
   const handleRevertAndQuit = () => {
-    runAfterAlertClosed(() => {
+    runAfterAlertClosed(async () => {
       setData(initialData.current);
-      videoManager.abandonAll();
+      await videoManager.abandonAll();
       onClose();
     });
   };
@@ -346,7 +346,7 @@ export function OnboardingShell({ creator, onComplete, onClose }: OnboardingProp
                 >
                   <X className="size-5" />
                 </Button>
-                {creator.profileCompleted && (
+                {creator.profileCompleted && !isResultStep && (
                   <Button
                     type="button"
                     variant="ghost"
@@ -491,8 +491,8 @@ export function OnboardingShell({ creator, onComplete, onClose }: OnboardingProp
           if (!open) {
             const action = pendingCloseActionRef.current;
             pendingCloseActionRef.current = null;
-            setTimeout(() => {
-              action?.();
+            setTimeout(async () => {
+              await action?.();
               setCloseReason(null);
             }, ALERT_CLOSE_MS);
           }

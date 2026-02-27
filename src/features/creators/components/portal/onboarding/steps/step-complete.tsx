@@ -36,9 +36,7 @@ export function StepComplete({ error, onExit, onRetry }: Props) {
         <h1 id="wizard-title" className="text-4xl font-medium">
           You're all set!
         </h1>
-        <p className="text-muted-foreground text-sm">
-          Your profile is complete. Brands will now be able to discover you.
-        </p>
+        <p className="text-muted-foreground text-sm">Your profile is complete and discoverable.</p>
       </div>
       <Button type="button" onClick={onExit}>
         Go to dashboard

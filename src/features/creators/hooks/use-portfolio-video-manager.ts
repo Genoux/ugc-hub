@@ -16,8 +16,8 @@ export interface PortfolioVideoManager {
   remove: (assetId: string) => void;
   uploadStart: (entry: UploadingVideoEntry) => void;
   uploadEnd: (tempId: string) => void;
-  /** Deletes all completed entries from R2 + DB. Call on wizard abandon. */
-  abandonAll: () => void;
+  /** Deletes all newly-uploaded entries from R2 + DB. Awaitable — resolves when all deletes finish. */
+  abandonAll: () => Promise<void>;
 }
 
 export function usePortfolioVideoManager(
@@ -52,14 +52,17 @@ export function usePortfolioVideoManager(
     setUploadingEntries((prev) => prev.filter((e) => e.tempId !== tempId));
   };
 
-  const abandonAll = () => {
-    for (const entry of doneEntries) {
-      if (preExistingIds.current.has(entry.assetId)) continue;
-      URL.revokeObjectURL(entry.objectUrl);
-      fetch(`/api/uploads/creator-profile/${entry.assetId}`, { method: "DELETE" }).catch((err) =>
-        console.error("[wizard abandon cleanup]", err),
-      );
-    }
+  const abandonAll = async () => {
+    await Promise.allSettled(
+      doneEntries
+        .filter((entry) => !preExistingIds.current.has(entry.assetId))
+        .map((entry) => {
+          URL.revokeObjectURL(entry.objectUrl);
+          return fetch(`/api/uploads/creator-profile/${entry.assetId}`, {
+            method: "DELETE",
+          }).catch((err) => console.error("[wizard abandon cleanup]", err));
+        }),
+    );
   };
 
   return {

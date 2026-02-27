@@ -22,7 +22,7 @@ export const STEPS: Record<number, { name: string; header: string; body: string 
   5: {
     name: "Profile Image",
     header: "Your look",
-    body: "Use a clear, well-lit headshot or creator photo. This is what brands see first when browsing the database.",
+    body: "Use a clear, well-lit headshot or creator photo.",
   },
   6: {
     name: "Portfolio Videos",

@@ -21,7 +21,7 @@ export function SubmissionRow({ submission }: SubmissionRowProps) {
       <Button
         variant="ghost"
         onClick={() => setOpen((o) => !o)}
-        className="w-full flex items-center  rounded-lg justify-between p-6 hover:bg-accent/40 transition-colors text-left"
+        className="w-full flex items-center rounded-none!  justify-between p-6 hover:bg-accent/40 transition-colors text-left"
       >
         <div className="flex items-center gap-2.5">
           <p className="text-sm font-medium text-foreground">{submission.label}</p>
@@ -46,7 +46,7 @@ export function SubmissionRow({ submission }: SubmissionRowProps) {
             className="border-t border-border overflow-hidden"
           >
             <div className="p-4">
-              <div className="grid grid-cols-4 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-2">
                 {submission.assets.map((asset) => (
                   <AssetCard
                     key={asset.id}

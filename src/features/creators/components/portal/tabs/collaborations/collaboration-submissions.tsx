@@ -14,14 +14,16 @@ import { SubmissionRow } from "./submission-row";
 
 type Collaboration = CreatorSubmissions[number];
 
-interface ContentSubmissionsProps {
+interface CollaborationSubmissionsProps {
   collaboration: Collaboration;
   onBack: () => void;
 }
 
-export function ContentSubmissions({ collaboration, onBack }: ContentSubmissionsProps) {
+export function CollaborationSubmissions({ collaboration, onBack }: CollaborationSubmissionsProps) {
+  const submissions = collaboration.submissions;
+
   return (
-    <div className="space-y-4 pt-2">
+    <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Breadcrumb>
           <BreadcrumbList>
@@ -40,7 +42,7 @@ export function ContentSubmissions({ collaboration, onBack }: ContentSubmissions
       </div>
 
       <div className="space-y-2">
-        {collaboration.submissions.map((submission) => (
+        {submissions.map((submission) => (
           <SubmissionRow key={submission.id} submission={submission} />
         ))}
       </div>

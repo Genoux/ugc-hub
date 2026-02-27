@@ -2,6 +2,7 @@ import { BadgeCheck } from "lucide-react";
 import Image from "next/image";
 import type { CreatorProfile } from "@/features/creators/actions/portal/get-creator-profile";
 import type { CreatorUIState } from "@/features/creators/lib/get-creator-ui-state";
+import { Button } from "@/shared/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/shared/components/ui/tooltip";
 import { ProfileEmptyState } from "./profile-empty-state";
 import { Field, Tags } from "./profile-fields";
@@ -44,24 +45,22 @@ export function CreatorProfileTab({ creator, uiState, onOpenOnboarding }: Creato
   const profilePhotoUrl = creator.profilePhotoUrl ?? "";
 
   return (
-    <div className=" pb-40 grid grid-cols-12 gap-16">
-      <div className="col-span-4 w-full sticky top-0 self-start ">
-        <div className="relative w-full h-80 rounded-lg shadow-hub bg-muted flex items-center justify-center overflow-hidden">
-          <div
-            className="hidden pointer-events-none absolute inset-0 z-10 rounded-lg bg-linear-to-bl from-[#190407]/80 via-transparent"
-            aria-hidden
-          />
+    <div className="grid grid-cols-1 lg:grid-cols-12 lg:pt-10 gap-6 lg:gap-10 max-w-xl lg:max-w-none mx-auto">
+      <div className="flex flex-col lg:col-span-4 w-full lg:sticky top-6 self-start gap-6 lg:gap-2">
+        <div className="relative w-full h-56 lg:h-auto aspect-square lg:max-w-none lg:mx-0 rounded-4xl lg:rounded-sm shadow-hub bg-muted overflow-hidden">
           <Image src={profilePhotoUrl} alt={creator.fullName} fill className="object-cover" />
-          <Tooltip>
-            <TooltipTrigger asChild className="pointer-events-auto hidden">
-              <div className="flex justify-center items-center absolute top-2 right-2 z-50 h-8 w-8">
-                <BadgeCheck className="size-6 text-white " />
-              </div>
-            </TooltipTrigger>
-            <TooltipContent>Profile is verified and live</TooltipContent>
-          </Tooltip>
         </div>
-        <div className="w-full pt-4 flex flex-col gap-4">
+        <div className="w-full lg:pt-4 flex flex-col gap-4">
+          <div className="lg:hidden flex justify-between items-center pb-2 gap-6">
+            <h1 className="text-2xl lg:text-5xl font-bold">{creator.fullName}</h1>
+            {creator.profileCompleted && (
+              <div className="flex justify-end">
+                <Button variant="outline" size="sm" onClick={onOpenOnboarding}>
+                  Edit profile
+                </Button>
+              </div>
+            )}
+          </div>
           <Field label="Country" value={creator.country} />
           <Field label="Gender" value={creator.genderIdentity} />
           <Field label="Languages" value={creator.languages?.join(", ")} />
@@ -79,8 +78,17 @@ export function CreatorProfileTab({ creator, uiState, onOpenOnboarding }: Creato
         </div>
       </div>
 
-      <div className="col-span-8 flex flex-col gap-6">
-        <h1 className="text-5xl font-bold">{creator.fullName}</h1>
+      <div className="lg:col-span-8 flex flex-col gap-6 lg:ml-10">
+        <div className="hidden lg:flex justify-between items-center">
+          <h1 className="text-5xl font-bold">{creator.fullName}</h1>
+          {creator.profileCompleted && (
+            <div className="flex justify-end">
+              <Button variant="outline" size="sm" onClick={onOpenOnboarding}>
+                Edit profile
+              </Button>
+            </div>
+          )}
+        </div>
         <div className="space-y-4">
           <div>
             <p className="text-xs text-muted-foreground mb-2">UGC Categories</p>

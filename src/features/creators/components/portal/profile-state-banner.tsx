@@ -27,7 +27,7 @@ const BANNER_CONFIG = {
   live: {
     className: "border-emerald-200/70 bg-emerald-50/50 text-emerald-800",
     title: "You're live",
-    message: "Your profile is visible and discoverable by brands.",
+    message: "Your profile is visible and discoverable.",
     dismissable: true,
   },
   declined: {
@@ -71,14 +71,13 @@ export function ProfileStateBanner({ uiState, onOpenOnboarding }: ProfileStateBa
 
   return (
     <Alert
-      className={cn(
-        "flex items-center justify-between gap-3 py-2.5 px-3.5",
-        config.className,
-      )}
+      className={cn("flex items-center justify-between gap-3 py-2.5 px-3.5", config.className)}
     >
       <div className="min-w-0">
         <AlertTitle className="text-[13px] font-medium leading-snug">{config.title}</AlertTitle>
-        <AlertDescription className="text-[12px] mt-0.5 text-current/65">{config.message}</AlertDescription>
+        <AlertDescription className="text-[12px] mt-0.5 text-current/65">
+          {config.message}
+        </AlertDescription>
       </div>
 
       {hasCta && (

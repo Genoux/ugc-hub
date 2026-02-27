@@ -42,7 +42,7 @@ const CONFIG = {
 
 function ProfileSkeleton() {
   return (
-    <div className="p-6 grid grid-cols-12 gap-16 w-full">
+    <div className="p-6 grid grid-cols-12 gap-16 w-full max-w-5xl mx-auto">
       <div className="col-span-4 flex flex-col gap-4">
         <Skeleton className="w-full h-80 rounded-lg" />
         <Skeleton className="h-3.5 w-3/4" />
@@ -64,7 +64,6 @@ function ProfileSkeleton() {
           <Skeleton className="h-6 w-18 rounded-full" />
           <Skeleton className="h-6 w-10 rounded-full" />
         </div>
-        <Skeleton className="h-px w-full" />
         <div className="grid grid-cols-3 gap-3">
           <Skeleton className="aspect-video rounded-lg" />
           <Skeleton className="aspect-video rounded-lg" />
@@ -85,10 +84,10 @@ export function ProfileEmptyState({
   const cta = "cta" in config ? config.cta : undefined;
 
   return (
-    <div className="relative flex-1 min-h-0">
+    <div className="relative w-screen ml-[calc(50%-50vw)] p-6">
       {uiState !== "declined" ? <ProfileSkeleton /> : null}
 
-      <div className="absolute inset-0 flex items-center justify-center rounded-lg backdrop-blur-sm bg-black/2 border border-dashed">
+      <div className="fixed top-[calc(3.5rem+1px)] inset-x-0 bottom-0 flex items-center justify-center backdrop-blur-sm bg-black/2 m-4 rounded-lg">
         <Empty>
           <EmptyHeader>
             <EmptyMedia variant="icon">
