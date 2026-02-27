@@ -2,7 +2,7 @@
 
 import { X } from "lucide-react";
 import { useEffect, useState } from "react";
-import { AssetCard } from "@/shared/components/asset-card";
+import { AssetCard } from "@/shared/components/blocks/asset-card";
 import { Button } from "@/shared/components/ui/button";
 import {
   Tooltip,
@@ -23,7 +23,15 @@ function useObjectUrl(file: File) {
   return objectUrl;
 }
 
-function FileItem({ file, onRemove }: { file: File; onRemove?: () => void }) {
+function FileItem({
+  file,
+  onRemove,
+  size,
+}: {
+  file: File;
+  onRemove?: () => void;
+  size?: "sm" | "md" | "lg";
+}) {
   const objectUrl = useObjectUrl(file);
 
   return (
@@ -31,6 +39,7 @@ function FileItem({ file, onRemove }: { file: File; onRemove?: () => void }) {
       src={objectUrl}
       filename={file.name}
       isVideo={file.type.startsWith("video/")}
+      size={size}
       action={
         onRemove && (
           <TooltipProvider>
@@ -60,21 +69,17 @@ function FileItem({ file, onRemove }: { file: File; onRemove?: () => void }) {
 type FileListProps = {
   files: File[];
   onRemove?: (index: number) => void;
+  size?: "sm" | "md" | "lg";
 };
 
-export function FileList({ files, onRemove }: FileListProps) {
+export function FileList({ files, onRemove, size = "md" }: FileListProps) {
   return (
-    <div className="space-y-2">
-      <p className="text-sm font-medium">Selected Files ({files.length})</p>
-      <div className="columns-2 gap-2">
-        {files.map((file, idx) => (
-          <FileItem
-            key={`${file.name}-${idx}`}
-            file={file}
-            onRemove={onRemove ? () => onRemove(idx) : undefined}
-          />
-        ))}
-      </div>
+    <div className="flex w-full min-w-0 gap-1 overflow-x-auto pb-3">
+      {files.map((file, idx) => (
+        <div key={`${file.name}-${idx}`} className="shrink-0">
+          <FileItem file={file} onRemove={onRemove ? () => onRemove(idx) : undefined} size={size} />
+        </div>
+      ))}
     </div>
   );
 }

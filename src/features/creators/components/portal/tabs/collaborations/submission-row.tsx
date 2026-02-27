@@ -4,7 +4,7 @@ import { ChevronRight } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
 import type { CreatorSubmissions } from "@/features/creators/actions/portal/get-creator-submissions";
-import { AssetCard } from "@/shared/components/asset-card";
+import { AssetCard } from "@/shared/components/blocks/asset-card";
 import { Button } from "@/shared/components/ui/button";
 
 type Submission = CreatorSubmissions[number]["submissions"][number];

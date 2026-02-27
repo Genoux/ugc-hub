@@ -10,7 +10,7 @@ import { LayoutDebug } from "layout-debug-tool";
 export function LayoutDebugClient() {
   if (process.env.NODE_ENV !== "development") return null;
   return (
-    <div style={{ position: "fixed", zIndex: 9999, opacity: 0 }}>
+    <div style={{ position: "fixed", zIndex: 9999 }}>
       <LayoutDebug />
     </div>
   );

@@ -4,9 +4,9 @@ import { AnimatePresence } from "motion/react";
 import { useRouter } from "next/navigation";
 import { ThemeProvider } from "next-themes";
 import { useEffect, useState } from "react";
-import { AppSidebar } from "@/shared/components/app-sidebar";
-import { LoadingScreen } from "@/shared/components/loading-screen";
-import { SiteHeader } from "@/shared/components/site-header";
+import { AppSidebar } from "@/shared/components/layout/app-sidebar";
+import { LoadingScreen } from "@/shared/components/layout/loading-screen";
+import { SiteHeader } from "@/shared/components/layout/site-header";
 import { SidebarInset, SidebarProvider } from "@/shared/components/ui/sidebar";
 
 const PLATFORM_ROUTES = ["/applicants", "/database", "/projects"] as const;

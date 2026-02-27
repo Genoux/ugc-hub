@@ -19,7 +19,9 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 function sanitizeFilename(input: unknown): string {
-  const s = String(input ?? "").replace(/^.*[/\\]/, "").trim();
+  const s = String(input ?? "")
+    .replace(/^.*[/\\]/, "")
+    .trim();
   const safe = s.replace(/[^a-zA-Z0-9._-]/g, "_");
   return safe.length > 0 ? safe : "file";
 }
@@ -51,7 +53,11 @@ export async function POST(request: NextRequest) {
       where: eq(collaborations.id, creatorCollaborationId),
       columns: { id: true, creatorId: true, projectId: true },
     });
-    if (!collaboration || collaboration.creatorId !== creator.id || collaboration.projectId !== projectId) {
+    if (
+      !collaboration ||
+      collaboration.creatorId !== creator.id ||
+      collaboration.projectId !== projectId
+    ) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 

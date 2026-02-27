@@ -6,7 +6,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { CloseCollaborationWizard } from "@/features/collaborations/components/close-collaboration-wizard";
 import { downloadAssets } from "@/features/projects/lib/download-assets";
-import { AssetCard } from "@/shared/components/asset-card";
+import { AssetCard } from "@/shared/components/blocks/asset-card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/ui/avatar";
 import {
   Breadcrumb,

@@ -43,10 +43,7 @@ export async function approveApplicant(creatorId: string) {
 
     let result: Awaited<ReturnType<typeof sendInvitation>>;
     try {
-      result = await sendInvitation(
-        creator.email,
-        `${env.NEXT_PUBLIC_APP_URL}${ROUTES.signUp}`,
-      );
+      result = await sendInvitation(creator.email, `${env.NEXT_PUBLIC_APP_URL}${ROUTES.signUp}`);
     } catch (err) {
       await revert();
       throw err;

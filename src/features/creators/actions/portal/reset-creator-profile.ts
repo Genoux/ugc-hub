@@ -49,7 +49,9 @@ export async function resetCreatorProfile(creatorId: string) {
 
     if (record.profilePhoto) {
       r2Deletes.push(
-        r2Client.send(new DeleteObjectCommand({ Bucket: R2_BUCKET_NAME, Key: record.profilePhoto })),
+        r2Client.send(
+          new DeleteObjectCommand({ Bucket: R2_BUCKET_NAME, Key: record.profilePhoto }),
+        ),
       );
     }
 

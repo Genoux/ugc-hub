@@ -44,11 +44,10 @@ export async function directInvite(input: { email: string }) {
 
     let result: Awaited<ReturnType<typeof sendInvitation>>;
     try {
-      result = await sendInvitation(
-        validated.email,
-        `${env.NEXT_PUBLIC_APP_URL}${ROUTES.signUp}`,
-        { role: "creator", creatorId: newCreator.id },
-      );
+      result = await sendInvitation(validated.email, `${env.NEXT_PUBLIC_APP_URL}${ROUTES.signUp}`, {
+        role: "creator",
+        creatorId: newCreator.id,
+      });
     } catch (err) {
       await rollback();
       throw err;

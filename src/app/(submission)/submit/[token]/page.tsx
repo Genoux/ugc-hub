@@ -17,18 +17,18 @@ export const metadata: Metadata = {
 export default async function SubmitPage({ params }: { params: Promise<{ token: string }> }) {
   const { token } = await params;
 
-  const submission = await db.query.projects.findFirst({
+  const project = await db.query.projects.findFirst({
     where: eq(projects.uploadToken, token),
   });
 
-  if (!submission) notFound();
+  if (!project) notFound();
 
-  if (submission.status === "closed") {
+  if (project.status === "closed") {
     return <SubmitPageClient view={{ view: "closed" }} />;
   }
 
-  if (submission.status !== "active") {
-    return <SubmitPageClient view={{ view: "unavailable", status: submission.status }} />;
+  if (project.status !== "active") {
+    return <SubmitPageClient view={{ view: "unavailable", status: project.status }} />;
   }
 
   const { userId } = await auth.protect();
@@ -51,7 +51,7 @@ export default async function SubmitPage({ params }: { params: Promise<{ token: 
   const view: SubmitPageView = {
     view: "wizard",
     token,
-    submissionName: submission.name,
+    projectName: project.name,
     creatorId: creator.id,
     creatorName: creator.fullName,
     creatorEmail: creator.email,

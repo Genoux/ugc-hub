@@ -38,7 +38,10 @@ export async function submitWizard(data: { token: string; creatorId: string }) {
 
     // Reuse existing collaboration for this creator+project; create one on first submission
     let collab = await db.query.collaborations.findFirst({
-      where: and(eq(collaborations.projectId, project.id), eq(collaborations.creatorId, creator.id)),
+      where: and(
+        eq(collaborations.projectId, project.id),
+        eq(collaborations.creatorId, creator.id),
+      ),
       with: { submissions: { columns: { submissionNumber: true } } },
     });
 

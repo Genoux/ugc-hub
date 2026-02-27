@@ -9,6 +9,10 @@ type UploadStatus = {
   status: "pending" | "uploading" | "completed" | "failed";
 };
 
+export type UploadFileOptions = {
+  onProgress?: (percent: number) => void;
+};
+
 export function useMultipartUpload() {
   const [uploads, setUploads] = useState<Record<string, UploadStatus>>({});
 
@@ -17,6 +21,7 @@ export function useMultipartUpload() {
     projectId: string,
     creatorCollaborationId: string,
     submissionId: string,
+    options?: UploadFileOptions,
   ) {
     const fileId = `${file.name}-${Date.now()}`;
 
@@ -51,9 +56,9 @@ export function useMultipartUpload() {
       }));
 
       if (isMultipart) {
-        await uploadMultipart(file, key, uploadId, partUrls, submissionId);
+        await uploadMultipart(file, key, uploadId, partUrls, submissionId, options?.onProgress);
       } else {
-        await uploadSingle(file, uploadUrl, key, submissionId);
+        await uploadSingle(file, uploadUrl, key, submissionId, options?.onProgress);
       }
 
       setUploads((prev) => ({
@@ -70,8 +75,18 @@ export function useMultipartUpload() {
     }
   }
 
-  async function uploadSingle(file: File, uploadUrl: string, key: string, submissionId: string) {
-    await putToR2(file, uploadUrl);
+  async function uploadSingle(
+    file: File,
+    uploadUrl: string,
+    key: string,
+    submissionId: string,
+    onProgress?: (percent: number) => void,
+  ) {
+    await putToR2(
+      file,
+      uploadUrl,
+      onProgress ? (loaded, total) => onProgress(total ? (loaded / total) * 100 : 0) : undefined,
+    );
 
     await fetch("/api/uploads/submission/complete", {
       method: "POST",
@@ -92,19 +107,29 @@ export function useMultipartUpload() {
     uploadId: string,
     partUrls: string[],
     submissionId: string,
+    onProgress?: (percent: number) => void,
   ) {
     const chunkSize = UPLOAD_CONFIG.chunkSize;
+    const totalSize = file.size;
+    const partLoaded = new Array<number>(partUrls.length).fill(0);
 
-    // Upload all parts directly to R2 in parallel using presigned URLs
+    function reportProgress() {
+      if (!onProgress) return;
+      const totalLoaded = partLoaded.reduce((a, b) => a + b, 0);
+      onProgress(totalSize ? (totalLoaded / totalSize) * 100 : 0);
+    }
+
     const parts = await Promise.all(
       partUrls.map(async (partUrl, i) => {
         const start = i * chunkSize;
         const end = Math.min(start + chunkSize, file.size);
         const chunk = file.slice(start, end);
 
-        const response = await fetch(partUrl, { method: "PUT", body: chunk });
-        const etag = response.headers.get("ETag") ?? "";
-        return { PartNumber: i + 1, ETag: etag.replace(/"/g, "") };
+        const etag = await putToR2(chunk, partUrl, (loaded) => {
+          partLoaded[i] = loaded;
+          reportProgress();
+        });
+        return { PartNumber: i + 1, ETag: etag ?? "" };
       }),
     );
 

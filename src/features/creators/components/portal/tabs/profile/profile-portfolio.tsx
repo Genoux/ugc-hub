@@ -1,6 +1,6 @@
 import Image from "next/image";
 import type { CreatorProfile } from "@/features/creators/actions/portal/get-creator-profile";
-import { AssetCard } from "@/shared/components/asset-card";
+import { AssetCard } from "@/shared/components/blocks/asset-card";
 import {
   Carousel,
   CarouselContent,
@@ -31,8 +31,8 @@ export function ProfilePortfolio({ creator }: ProfilePortfolioProps) {
           <h3 className="text-sm font-semibold text-foreground items-center flex">Portfolio</h3>
           <CarouselContent>
             {creator.portfolioVideos.map((video) => (
-              <CarouselItem key={video.id} className="basis-auto">
-                <AssetCard src={video.url} filename={video.filename} className="w-full h-94" />
+              <CarouselItem key={video.id} className="basis-[30%]">
+                <AssetCard src={video.url} filename={video.filename} className="w-full" />
               </CarouselItem>
             ))}
           </CarouselContent>

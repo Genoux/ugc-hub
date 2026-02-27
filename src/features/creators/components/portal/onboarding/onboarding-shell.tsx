@@ -1,7 +1,6 @@
 "use client";
 
 import { CheckIcon, CircleAlert, X } from "lucide-react";
-import { AnimatePresence, motion } from "motion/react";
 import Image from "next/image";
 import { useRef, useState, useTransition } from "react";
 import { completeCreatorProfile } from "@/features/creators/actions/portal/complete-creator-profile";
@@ -13,6 +12,7 @@ import {
   type ProfilePhotoManager,
   useProfilePhotoManager,
 } from "@/features/creators/hooks/use-profile-photo-manager";
+import { buildOnboardingData, canProceed } from "@/features/creators/lib/onboarding-utils";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -24,15 +24,20 @@ import {
   AlertDialogTitle,
 } from "@/shared/components/ui/alert-dialog";
 import { Button } from "@/shared/components/ui/button";
-import { EASING_FUNCTION } from "@/shared/lib/constant";
+import {
+  Wizard,
+  WizardAside,
+  WizardDescription,
+  WizardFooter,
+  WizardHeader,
+  WizardPanel,
+  WizardStep,
+  WizardTitle,
+} from "@/shared/components/wizard/wizard";
+import { useSteppedFlow } from "@/shared/hooks/use-stepped-flow";
 import { cn } from "@/shared/lib/utils";
 import { STEPS } from "./onboarding-constants";
-import {
-  buildOnboardingData,
-  canProceed,
-  type OnboardingData,
-  type OnboardingProps,
-} from "./onboarding-types";
+import type { OnboardingData, OnboardingProps } from "./onboarding-types";
 import { StepAboutYou } from "./steps/step-about-you";
 import { StepComplete } from "./steps/step-complete";
 import { StepName } from "./steps/step-name";
@@ -162,7 +167,7 @@ function StepContent({
 }
 
 export function OnboardingShell({ creator, onComplete, onClose }: OnboardingProps) {
-  const [step, setStep] = useState(1);
+  const { step, goToStep, directionRef } = useSteppedFlow(TOTAL_STEPS);
   const [data, setData] = useState<OnboardingData>(() => buildOnboardingData(creator));
   const [isPending, startTransition] = useTransition();
   const [confirmingClose, setConfirmingClose] = useState(false);
@@ -183,15 +188,13 @@ export function OnboardingShell({ creator, onComplete, onClose }: OnboardingProp
   const update = (updates: Partial<OnboardingData>) => setData((prev) => ({ ...prev, ...updates }));
   const isLastFormStep = step === 8;
   const isResultStep = step === TOTAL_STEPS;
-  const directionRef = useRef<1 | -1>(1);
   const pendingCloseActionRef = useRef<(() => void | Promise<void>) | null>(null);
 
   const ALERT_CLOSE_MS = 250;
 
   const handleStepChange = (next: number) => {
-    directionRef.current = next > step ? 1 : -1;
     setSubmitError(null);
-    setStep(next);
+    goToStep(next);
   };
 
   const hasChanges = () => {
@@ -283,11 +286,11 @@ export function OnboardingShell({ creator, onComplete, onClose }: OnboardingProp
         if (creator.profileCompleted) {
           onClose();
         } else {
-          setStep(9);
+          goToStep(9);
         }
       } catch (err) {
         setSubmitError(err instanceof Error ? err.message : "Something went wrong");
-        setStep(9);
+        goToStep(9);
       }
     });
   };
@@ -312,177 +315,117 @@ export function OnboardingShell({ creator, onComplete, onClose }: OnboardingProp
 
   return (
     <>
-      <motion.div
-        initial={{ opacity: 0, y: 250 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: 250 }}
-        transition={{
-          ease: EASING_FUNCTION.exponential,
-          opacity: {
-            duration: 0.2,
-            ease: EASING_FUNCTION.quartic,
-          },
-          y: {
-            duration: 0.5,
-            ease: EASING_FUNCTION.exponential,
-          },
-        }}
-        className="fixed inset-0 flex min-h-[max(775px,100vh)] flex-col overflow-auto z-50"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="wizard-title"
-      >
-        <div className="flex min-h-0 flex-1 overflow-hidden bg-cream p-4">
-          <div className="flex min-h-0 flex-1 items-center justify-center overflow-hidden rounded-4xl bg-white shadow-hub">
-            <div className="relative flex h-full w-full flex-col">
-              <div className="flex shrink-0 items-center justify-between w-full p-4">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  onClick={handleRequestClose}
-                  className="text-muted-foreground hover:text-foreground"
-                  aria-label="Close"
-                >
-                  <X className="size-5" />
-                </Button>
-                {creator.profileCompleted && !isResultStep && (
+      <Wizard variant="modal">
+        <WizardPanel isPending={isPending}>
+          <WizardHeader>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={handleRequestClose}
+              className="text-muted-foreground hover:text-foreground"
+              aria-label="Close"
+            >
+              <X className="size-5" />
+            </Button>
+            {creator.profileCompleted && !isResultStep ? (
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={handleSaveAndClose}
+                disabled={
+                  !allStepsComplete ||
+                  isPending ||
+                  (step === 5 && photoManager.isUploading) ||
+                  (step === 6 && videoManager.isUploading)
+                }
+                className="text-muted-foreground hover:text-foreground"
+                aria-label="Save and close"
+              >
+                <CheckIcon className="size-5" />
+              </Button>
+            ) : (
+              <span />
+            )}
+          </WizardHeader>
+
+          <WizardStep stepKey={step} direction={directionRef.current}>
+            {!isResultStep && (
+              <div className="flex flex-col gap-2">
+                <WizardTitle>{STEPS[step].header}</WizardTitle>
+                <WizardDescription>{STEPS[step].body}</WizardDescription>
+              </div>
+            )}
+            <StepContent
+              step={step}
+              data={data}
+              onChange={update}
+              creatorId={creator.id}
+              photoManager={photoManager}
+              videoManager={videoManager}
+              submitError={submitError}
+              onExitResult={handleExitResult}
+              onRetryResult={() => handleStepChange(8)}
+            />
+            {!isResultStep && (
+              <WizardFooter>
+                {step > 1 ? (
                   <Button
                     type="button"
-                    variant="ghost"
-                    size="icon"
-                    onClick={handleSaveAndClose}
-                    disabled={
-                      !allStepsComplete ||
-                      isPending ||
-                      (step === 5 && photoManager.isUploading) ||
-                      (step === 6 && videoManager.isUploading)
-                    }
-                    className="text-muted-foreground hover:text-foreground"
-                    aria-label="Save and close"
+                    variant="outline"
+                    onClick={() => handleStepChange(step - 1)}
+                    disabled={isPending}
                   >
-                    <CheckIcon className="size-5" />
+                    Back
                   </Button>
+                ) : (
+                  <span />
                 )}
-              </div>
-              <div className="flex min-h-0 flex-1 overflow-y-auto px-12">
-                <AnimatePresence mode="wait" initial={false}>
-                  <motion.div
-                    key={step}
-                    initial={{ opacity: 0, x: directionRef.current * 12 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: directionRef.current * -12 }}
-                    transition={{ duration: 0.4, ease: EASING_FUNCTION.quartic }}
-                    className="mx-auto flex min-h-full w-full max-w-2xl flex-col"
-                  >
-                    <div className="flex flex-1 flex-col justify-center gap-6">
-                      {!isResultStep && (
-                        <div className="flex flex-col gap-2">
-                          <h1 id="wizard-title" className="text-4xl font-medium">
-                            {STEPS[step].header}
-                          </h1>
-                          <p className="text-sm text-muted-foreground">{STEPS[step].body}</p>
-                        </div>
-                      )}
-                      <div
-                        className={cn(
-                          "transition-opacity duration-200",
-                          isPending && "opacity-40 pointer-events-none select-none",
-                        )}
-                      >
-                        <StepContent
-                          step={step}
-                          data={data}
-                          onChange={update}
-                          creatorId={creator.id}
-                          photoManager={photoManager}
-                          videoManager={videoManager}
-                          submitError={submitError}
-                          onExitResult={handleExitResult}
-                          onRetryResult={() => handleStepChange(8)}
-                        />
-                      </div>
-                      {!isResultStep && (
-                        <div className="flex w-full shrink-0 items-center justify-between gap-4 py-6">
-                          {step > 1 ? (
-                            <Button
-                              type="button"
-                              variant="outline"
-                              onClick={() => handleStepChange(step - 1)}
-                              disabled={isPending}
-                            >
-                              Back
-                            </Button>
-                          ) : (
-                            <span />
-                          )}
-                          <Button
-                            type="button"
-                            onClick={handleNext}
-                            disabled={
-                              !stepCanProceed ||
-                              isPending ||
-                              (step === 5 && photoManager.isUploading) ||
-                              (step === 6 && videoManager.isUploading)
-                            }
-                          >
-                            {isPending
-                              ? "Saving…"
-                              : isLastFormStep
-                                ? creator.profileCompleted
-                                  ? "Save"
-                                  : "Complete"
-                                : "Next"}
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-                    {!isResultStep && creator.profileCompleted && (
-                      <div className="flex justify-start mb-32">
-                        <ProgressDots
-                          filledSteps={filledSteps}
-                          current={step}
-                          steps={STEPS}
-                          onStepClick={handleStepChange}
-                        />
-                      </div>
-                    )}
-                  </motion.div>
-                </AnimatePresence>
-              </div>
-            </div>
-          </div>
+                <Button
+                  type="button"
+                  onClick={handleNext}
+                  disabled={
+                    !stepCanProceed ||
+                    isPending ||
+                    (step === 5 && photoManager.isUploading) ||
+                    (step === 6 && videoManager.isUploading)
+                  }
+                >
+                  {isPending
+                    ? "Saving…"
+                    : isLastFormStep
+                      ? creator.profileCompleted
+                        ? "Save"
+                        : "Complete"
+                      : "Next"}
+                </Button>
+              </WizardFooter>
+            )}
+          </WizardStep>
 
-          <motion.aside
-            animate={
-              isResultStep
-                ? { width: 0, minWidth: 0, opacity: 0, x: 12, paddingLeft: 0 }
-                : { opacity: 1 }
-            }
-            transition={{ duration: 0.6, ease: EASING_FUNCTION.exponential }}
-            className="hidden xl:flex shrink-0 overflow-hidden w-[min(536px,40vw)] min-w-[280px] pl-4"
-          >
-            <AnimatePresence mode="wait" initial={false}>
-              <motion.div
-                key={step}
-                initial={{ opacity: 0, x: directionRef.current * 10 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: directionRef.current * -10 }}
-                transition={{ duration: 0.6, ease: EASING_FUNCTION.exponential }}
-                className="relative h-full w-full overflow-hidden rounded-4xl shadow-hub"
-              >
-                <Image
-                  src={`/creator/onboarding/step${step}.jpg`}
-                  alt=""
-                  fill
-                  className="object-cover"
-                  unoptimized
-                />
-              </motion.div>
-            </AnimatePresence>
-          </motion.aside>
-        </div>
-      </motion.div>
+          {!isResultStep && creator.profileCompleted && (
+            <div className="w-full flex justify-center pb-24">
+              <ProgressDots
+                filledSteps={filledSteps}
+                current={step}
+                steps={STEPS}
+                onStepClick={handleStepChange}
+              />
+            </div>
+          )}
+        </WizardPanel>
+
+        <WizardAside stepKey={step} direction={directionRef.current} visible={!isResultStep}>
+          <Image
+            src={`/creator/onboarding/step${step}.jpg`}
+            alt=""
+            fill
+            className="object-cover"
+            unoptimized
+          />
+        </WizardAside>
+      </Wizard>
 
       <AlertDialog
         open={confirmingClose}

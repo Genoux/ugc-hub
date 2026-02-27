@@ -57,10 +57,7 @@ export async function directInviteBulk(input: {
 
     let result: Awaited<ReturnType<typeof sendInvitationBulk>>;
     try {
-      result = await sendInvitationBulk(
-        toInvite,
-        `${env.NEXT_PUBLIC_APP_URL}${ROUTES.signUp}`,
-      );
+      result = await sendInvitationBulk(toInvite, `${env.NEXT_PUBLIC_APP_URL}${ROUTES.signUp}`);
     } catch (err) {
       // No invite was sent — roll back to avoid ghost records
       await db.delete(creators).where(inArray(creators.id, insertedIds));

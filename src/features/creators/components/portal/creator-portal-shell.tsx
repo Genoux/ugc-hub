@@ -35,7 +35,7 @@ export function CreatorPortalShell({ creator, uiState, content }: CreatorPortalS
 
   return (
     <div className="flex min-h-full flex-col pb-40 pt-6 px-6">
-      <div className="mx-auto w-full max-w-6xl flex flex-col min-h-full">
+      <div className="mx-auto w-full max-w-5xl flex flex-col min-h-full">
         {activeTab === "profile" && (
           <CreatorProfileTab
             creator={creator}

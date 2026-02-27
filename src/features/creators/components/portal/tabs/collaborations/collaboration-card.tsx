@@ -2,7 +2,7 @@
 
 import { ChevronRight } from "lucide-react";
 import type { CreatorSubmissions } from "@/features/creators/actions/portal/get-creator-submissions";
-import { StatusBadge } from "@/shared/components/status-badge";
+import { StatusBadge } from "@/shared/components/blocks/status-badge";
 import { cn } from "@/shared/lib/utils";
 
 type Collaboration = CreatorSubmissions[number];

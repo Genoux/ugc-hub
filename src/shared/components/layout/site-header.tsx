@@ -1,6 +1,6 @@
+import { ThemeSwitcher } from "@/shared/components/theme-switcher";
 import { Separator } from "@/shared/components/ui/separator";
 import { SidebarTrigger } from "@/shared/components/ui/sidebar";
-import { ThemeSwitcher } from "./theme-switcher";
 
 export function SiteHeader() {
   return (

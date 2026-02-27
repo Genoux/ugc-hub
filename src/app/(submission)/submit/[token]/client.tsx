@@ -13,11 +13,11 @@ export type SubmitPageView =
   | {
       view: "wizard";
       token: string;
-      submissionName: string;
+      projectName: string;
       creatorId: string;
       creatorName: string;
       creatorEmail: string;
-      creatorImageUrl: string | null;
+      creatorImageUrl: string;
     };
 
 export function SubmitPageClient({ view }: { view: SubmitPageView }) {
@@ -79,7 +79,7 @@ export function SubmitPageClient({ view }: { view: SubmitPageView }) {
   return (
     <WizardShell
       token={view.token}
-      submissionName={view.submissionName}
+      projectName={view.projectName}
       creatorId={view.creatorId}
       creatorName={view.creatorName}
       creatorEmail={view.creatorEmail}

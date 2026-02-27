@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import type { CreatorProfile } from "@/features/creators/actions/admin/get-creator-profile";
 import { RATING_CONFIG, RATING_LABELS } from "@/features/creators/constants";
 import { calculateRatingsFromCollaborations } from "@/features/creators/lib/calculated-ratings";
-import { AssetCard } from "@/shared/components/asset-card";
+import { AssetCard } from "@/shared/components/blocks/asset-card";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import { Sheet, SheetContent, SheetHeader } from "@/shared/components/ui/sheet";

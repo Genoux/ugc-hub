@@ -21,8 +21,6 @@ import { CreatorOverlay } from "./creator-overlay";
 import { DatabaseFilters } from "./database-filters";
 import { SORT_OPTIONS, useCreatorFilters } from "./use-creator-filters";
 
-
-
 // Module-level cache — persists across component remounts so signed URLs
 // remain stable and the browser can serve them from its HTTP cache.
 const assetsCache = new Map<string, CreatorProfile>();

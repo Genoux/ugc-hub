@@ -1,7 +1,7 @@
 import { ClerkProvider } from "@clerk/nextjs";
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { PlatformDisclaimer } from "@/shared/components/platform-disclaimer";
+import { PlatformDisclaimer } from "@/shared/components/blocks/platform-disclaimer";
 import { LayoutDebugClient } from "@/shared/components/tools/layout-debug-client";
 import { Toaster } from "@/shared/components/ui/sonner";
 import "./globals.css";

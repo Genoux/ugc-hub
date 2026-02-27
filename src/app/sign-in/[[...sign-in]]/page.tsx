@@ -1,5 +1,5 @@
 import { AlertCircle } from "lucide-react";
-import { ThemedSignIn } from "@/shared/components/themed-sign-in";
+import { ThemedSignIn } from "@/shared/components/auth/themed-sign-in";
 
 const REASON_MESSAGES: Record<string, string> = {
   no_account:

@@ -207,7 +207,7 @@ export function ApplicantDetail({ creator, activeTab }: Props) {
           <div className="mt-6 pt-4 border-t border-border flex gap-3">
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button onClick={handleApprove} disabled={isPending} className="flex-1 h-12">
+                <Button onClick={handleApprove} disabled={isPending}>
                   Invite to Pool
                 </Button>
               </TooltipTrigger>
@@ -215,12 +215,7 @@ export function ApplicantDetail({ creator, activeTab }: Props) {
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button
-                  onClick={handleReject}
-                  disabled={isPending}
-                  variant="outline"
-                  className="flex-1 h-12 hover:bg-destructive hover:text-destructive-foreground hover:border-destructive"
-                >
+                <Button onClick={handleReject} disabled={isPending} variant="outline">
                   Reject
                 </Button>
               </TooltipTrigger>

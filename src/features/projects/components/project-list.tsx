@@ -19,7 +19,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
-import { EmptyState } from "@/shared/components/empty-state";
+import { EmptyState } from "@/shared/components/blocks/empty-state";
 import { Button } from "@/shared/components/ui/button";
 import {
   Dialog,
@@ -71,7 +71,9 @@ const columns: ColumnDef<Project>[] = [
   {
     accessorKey: "totalSubmissions",
     header: "Uploads",
-    cell: ({ row }) => <span className="text-muted-foreground">{row.original.totalSubmissions}</span>,
+    cell: ({ row }) => (
+      <span className="text-muted-foreground">{row.original.totalSubmissions}</span>
+    ),
   },
   {
     accessorKey: "createdAt",

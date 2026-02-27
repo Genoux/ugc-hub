@@ -3,8 +3,12 @@
 import { Loader2, X } from "lucide-react";
 import { useState } from "react";
 import { uploadCreatorAsset } from "@/features/creators/hooks/use-creator-asset-upload";
-import { AssetCard } from "@/shared/components/asset-card";
-import { FileDropZone } from "@/shared/components/file-drop-zone";
+import {
+  MAX_PORTFOLIO_VIDEOS,
+  MIN_PORTFOLIO_VIDEOS,
+} from "@/features/creators/lib/onboarding-utils";
+import { AssetCard } from "@/shared/components/blocks/asset-card";
+import { FileDropZone } from "@/shared/components/blocks/file-drop-zone";
 import { Button } from "@/shared/components/ui/button";
 import {
   Carousel,
@@ -14,7 +18,6 @@ import {
   CarouselPrevious,
 } from "@/shared/components/ui/carousel";
 import type { PortfolioVideoEntry, UploadingVideoEntry } from "../onboarding-types";
-import { MAX_PORTFOLIO_VIDEOS, MIN_PORTFOLIO_VIDEOS } from "../onboarding-types";
 
 const ACCEPTED_TYPES = ["video/mp4", "video/quicktime", "video/x-msvideo", "video/webm"] as const;
 
@@ -78,7 +81,7 @@ export function StepVideos({
           </div>
           <CarouselContent>
             {doneEntries.map((entry) => (
-              <CarouselItem key={entry.assetId} className="basis-[40%] p-1">
+              <CarouselItem key={entry.assetId} className="basis-[35%] p-1">
                 <AssetCard
                   src={entry.objectUrl}
                   filename={entry.filename}

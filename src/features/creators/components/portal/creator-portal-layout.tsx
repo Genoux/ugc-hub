@@ -2,7 +2,7 @@
 
 import { AnimatePresence } from "motion/react";
 import { useEffect, useState } from "react";
-import { LoadingScreen } from "@/shared/components/loading-screen";
+import { LoadingScreen } from "@/shared/components/layout/loading-screen";
 import { Separator } from "@/shared/components/ui/separator";
 import { TooltipProvider } from "@/shared/components/ui/tooltip";
 import { CreatorPortalProvider } from "./creator-portal-context";

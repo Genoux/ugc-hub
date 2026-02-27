@@ -1,6 +1,5 @@
 "use client";
 
-import { XIcon } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/shared/components/ui/alert";
@@ -21,7 +20,7 @@ export function PlatformDisclaimer() {
             exit={{ opacity: 0, y: 10 }}
             transition={{ duration: 0.3, delay: 2 }}
           >
-            <Alert className="shadow-hub flex items-center justify-between p-4 gap-2 rounded-4xl">
+            <Alert className="shadow-hub flex items-center justify-between p-4 gap-2 rounded-4xl sm:rounded-xl">
               <div className="flex items-center gap-4">
                 <div>
                   <AlertTitle>Welcome to UGC Hub pre-alpha</AlertTitle>

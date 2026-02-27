@@ -1,7 +1,7 @@
 "use client";
 
 import type { CreatorSubmissions } from "@/features/creators/actions/portal/get-creator-submissions";
-import { StatusBadge } from "@/shared/components/status-badge";
+import { StatusBadge } from "@/shared/components/blocks/status-badge";
 import {
   Breadcrumb,
   BreadcrumbItem,
