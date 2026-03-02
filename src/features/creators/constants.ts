@@ -87,6 +87,14 @@ export type Language = (typeof LANGUAGES)[number];
 
 export const PRIMARY_CHANNELS = ["Instagram", "TikTok", "YouTube"] as const;
 
+export const SOCIAL_PLATFORMS = [
+  { value: "Instagram", label: "Instagram", handleKey: "instagram_handle" },
+  { value: "TikTok", label: "TikTok", handleKey: "tiktok_handle" },
+  { value: "YouTube", label: "YouTube", handleKey: "youtube_handle" },
+] as const;
+
+export type SocialPlatform = (typeof SOCIAL_PLATFORMS)[number]["value"];
+
 export const COUNTRIES = [
   "United States",
   "United Kingdom",

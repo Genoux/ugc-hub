@@ -3,8 +3,8 @@
 import { CameraIcon, Loader2 } from "lucide-react";
 import Image from "next/image";
 import { useRef } from "react";
-import { useCreatorAssetUpload } from "@/features/creators/hooks/use-creator-asset-upload";
-import type { ProfilePhotoManager } from "@/features/creators/hooks/use-profile-photo-manager";
+import { useCreatorAssetUpload } from "@/features/creators/hooks/portal/use-creator-asset-upload";
+import type { ProfilePhotoManager } from "@/features/creators/hooks/portal/use-profile-photo-manager";
 import { Button } from "@/shared/components/ui/button";
 
 interface Props {
@@ -14,7 +14,9 @@ interface Props {
   creatorId: string;
 }
 
-export function StepPhoto({ photoKey, photoManager, onChange, creatorId }: Props) {
+export function StepPhoto(
+  { photoKey, photoManager, onChange, creatorId }: Props,
+) {
   const inputRef = useRef<HTMLInputElement>(null);
   const { upload, error } = useCreatorAssetUpload(creatorId, "profile_picture");
 
@@ -57,11 +59,16 @@ export function StepPhoto({ photoKey, photoManager, onChange, creatorId }: Props
         className="bg-muted hover:bg-muted/80 relative flex h-52 w-52 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-lg border transition-colors disabled:cursor-not-allowed disabled:opacity-50"
         aria-label={hasPhoto ? "Replace photo" : "Upload photo"}
       >
-        {photoManager.previewUrl ? (
-          <Image src={photoManager.previewUrl} alt="Creator" fill className="object-cover" />
-        ) : (
-          <CameraIcon className="size-5 text-muted-foreground" />
-        )}
+        {photoManager.previewUrl
+          ? (
+            <Image
+              src={photoManager.previewUrl}
+              alt="Creator"
+              fill
+              className="object-cover"
+            />
+          )
+          : <CameraIcon className="size-5 text-muted-foreground" />}
       </button>
 
       <Button
@@ -71,20 +78,26 @@ export function StepPhoto({ photoKey, photoManager, onChange, creatorId }: Props
         disabled={photoManager.isUploading}
         onClick={() => inputRef.current?.click()}
       >
-        {photoManager.isUploading ? (
-          <>
-            <Loader2 className="size-3.5 animate-spin" />
-            Uploading…
-          </>
-        ) : hasPhoto ? (
-          "Replace photo"
-        ) : (
-          "Upload photo"
-        )}
+        {photoManager.isUploading
+          ? (
+            <>
+              <Loader2 className="size-3.5 animate-spin" />
+              Uploading…
+            </>
+          )
+          : hasPhoto
+          ? (
+            "Replace photo"
+          )
+          : (
+            "Upload photo"
+          )}
       </Button>
 
       {error && <p className="text-destructive text-sm">{error}</p>}
-      <p className="text-muted-foreground text-xs">JPG, PNG or WebP · Max 5 MB</p>
+      <p className="text-muted-foreground text-xs">
+        JPG, PNG or WebP · Max 5 MB
+      </p>
     </div>
   );
 }

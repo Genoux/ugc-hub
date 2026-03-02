@@ -2,7 +2,7 @@
 
 import { Loader2, X } from "lucide-react";
 import { useState } from "react";
-import { uploadCreatorAsset } from "@/features/creators/hooks/use-creator-asset-upload";
+import { uploadCreatorAsset } from "@/features/creators/hooks/portal/use-creator-asset-upload";
 import {
   MAX_PORTFOLIO_VIDEOS,
   MIN_PORTFOLIO_VIDEOS,
@@ -17,9 +17,17 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/shared/components/ui/carousel";
-import type { PortfolioVideoEntry, UploadingVideoEntry } from "../onboarding-types";
+import type {
+  PortfolioVideoEntry,
+  UploadingVideoEntry,
+} from "../onboarding-types";
 
-const ACCEPTED_TYPES = ["video/mp4", "video/quicktime", "video/x-msvideo", "video/webm"] as const;
+const ACCEPTED_TYPES = [
+  "video/mp4",
+  "video/quicktime",
+  "video/x-msvideo",
+  "video/webm",
+] as const;
 
 interface Props {
   doneEntries: PortfolioVideoEntry[];
@@ -57,11 +65,18 @@ export function StepVideos({
         .then((result) => {
           const { assetId } = result;
           if (!assetId) throw new Error("Upload did not return an asset ID");
-          onEntryAdd({ assetId, key: result.key, filename: result.filename, objectUrl });
+          onEntryAdd({
+            assetId,
+            key: result.key,
+            filename: result.filename,
+            objectUrl,
+          });
         })
         .catch((err) => {
           URL.revokeObjectURL(objectUrl);
-          const message = err instanceof Error ? err.message : "Upload failed. Please try again.";
+          const message = err instanceof Error
+            ? err.message
+            : "Upload failed. Please try again.";
           setErrors((prev) => [...prev, message]);
         })
         .finally(() => onUploadEnd(tempId));

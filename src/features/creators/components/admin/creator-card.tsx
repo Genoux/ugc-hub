@@ -9,18 +9,8 @@ interface CreatorCardProps {
   onClick: () => void;
 }
 
-const CHANNEL_ICON_MAP = {
-  Instagram: Instagram,
-  TikTok: Music,
-  YouTube: Youtube,
-};
-
 export function CreatorCard({ creator, onClick }: CreatorCardProps) {
   const ratingConfig = RATING_CONFIG[creator.overallRating] || RATING_CONFIG.untested;
-  const ChannelIcon = creator.primaryChannel
-    ? CHANNEL_ICON_MAP[creator.primaryChannel as keyof typeof CHANNEL_ICON_MAP]
-    : null;
-
   const topCategories = creator.ugcCategories?.slice(0, 2) || [];
   const rateRange = creator.rateRangeInternal || creator.rateRangeSelf;
   const rateDisplay = rateRange ? `$${rateRange.min}-$${rateRange.max}` : "Rate TBD";
@@ -33,10 +23,10 @@ export function CreatorCard({ creator, onClick }: CreatorCardProps) {
     >
       <div className="relative mb-3 aspect-square w-full overflow-hidden rounded-lg bg-muted flex items-center justify-center text-4xl font-light text-muted-foreground">
         <Image
-          src={creator.profilePhotoUrl ?? ""}
+          src={creator.profilePhotoUrl}
           alt={creator.fullName}
           fill
-          className="object-cover"
+          className="object-cover flex items-center justify-center text-sm"
         />
       </div>
 
@@ -46,11 +36,6 @@ export function CreatorCard({ creator, onClick }: CreatorCardProps) {
         <Badge variant="outline" className={ratingConfig.className}>
           {creator.overallRating}
         </Badge>
-        {ChannelIcon && (
-          <div className="flex items-center justify-center h-5 w-5 rounded-full bg-muted">
-            <ChannelIcon className="h-3 w-3 text-muted-foreground" />
-          </div>
-        )}
       </div>
 
       {topCategories.length > 0 && (
