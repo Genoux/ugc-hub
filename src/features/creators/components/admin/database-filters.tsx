@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Button } from "@/shared/components/ui/button";
 import { Checkbox } from "@/shared/components/ui/checkbox";
 import { Label } from "@/shared/components/ui/label";
+import { NumberDot } from "@/shared/components/ui/number-dot";
 import type {
   AgeDemographic,
   ContentFormat,
@@ -103,11 +104,7 @@ function FilterSection({
       >
         <div className="flex items-center gap-2">
           <span className="flex items-center gap-2">{title}</span>
-          {activeCount > 0 && (
-            <span className="ml-0.5 text-[10px] bg-muted-foreground/10 font-bold rounded-full h-4 w-4 flex items-center justify-center text-muted-foreground">
-              {activeCount}
-            </span>
-          )}
+          <NumberDot count={activeCount} />
         </div>
         <ChevronDown
           className={`h-3.5 w-3.5 text-muted-foreground transition-transform ${

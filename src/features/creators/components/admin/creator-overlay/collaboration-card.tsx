@@ -39,7 +39,9 @@ function CollaborationCardContent({
           variant="ghost"
           className="w-full flex items-center justify-between rounded-none p-6 hover:bg-accent/40 transition-colors text-left"
         >
-          <p className="text-sm font-medium text-foreground leading-none">{collab.projectName}</p>
+          <p className="text-sm font-medium text-foreground leading-none truncate">
+            {collab.projectName}
+          </p>
           <ChevronRight
             className={`h-4 w-4 text-muted-foreground transition-transform shrink-0 ${open ? "rotate-90" : ""}`}
           />
@@ -100,33 +102,33 @@ function CollaborationCardContent({
           {(collab.ratingVisualQuality ||
             collab.ratingActingDelivery ||
             collab.ratingReliabilitySpeed) && (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-1">
-              {collab.ratingVisualQuality && (
-                <BentoCard>
-                  <LabeledField
-                    label="Visual"
-                    value={<RatingBadge rating={collab.ratingVisualQuality} />}
-                  />
-                </BentoCard>
-              )}
-              {collab.ratingActingDelivery && (
-                <BentoCard>
-                  <LabeledField
-                    label="Acting"
-                    value={<RatingBadge rating={collab.ratingActingDelivery} />}
-                  />
-                </BentoCard>
-              )}
-              {collab.ratingReliabilitySpeed && (
-                <BentoCard>
-                  <LabeledField
-                    label="Reliability"
-                    value={<RatingBadge rating={collab.ratingReliabilitySpeed} />}
-                  />
-                </BentoCard>
-              )}
-            </div>
-          )}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-1">
+                {collab.ratingVisualQuality && (
+                  <BentoCard>
+                    <LabeledField
+                      label="Visual"
+                      value={<RatingBadge rating={collab.ratingVisualQuality} />}
+                    />
+                  </BentoCard>
+                )}
+                {collab.ratingActingDelivery && (
+                  <BentoCard>
+                    <LabeledField
+                      label="Acting"
+                      value={<RatingBadge rating={collab.ratingActingDelivery} />}
+                    />
+                  </BentoCard>
+                )}
+                {collab.ratingReliabilitySpeed && (
+                  <BentoCard>
+                    <LabeledField
+                      label="Reliability"
+                      value={<RatingBadge rating={collab.ratingReliabilitySpeed} />}
+                    />
+                  </BentoCard>
+                )}
+              </div>
+            )}
           {collab.submissions.map((submission) => (
             <SubmissionSection key={submission.id} submission={submission} />
           ))}
