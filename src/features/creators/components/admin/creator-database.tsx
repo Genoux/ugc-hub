@@ -17,7 +17,7 @@ import {
 } from "@/shared/components/ui/dropdown-menu";
 import { Input } from "@/shared/components/ui/input";
 import { CreatorCard } from "./creator-card";
-import { CreatorOverlay } from "./creator-overlay";
+import { CreatorOverlay } from "./creator-overlay/creator-overlay";
 import { DatabaseFilters } from "./database-filters";
 import {
   SORT_OPTIONS,

@@ -14,7 +14,6 @@ const SIZE = {
 type AssetCardProps = {
   src: string | null;
   filename: string;
-  isVideo?: boolean;
   isLoading?: boolean;
   action?: React.ReactNode;
   size?: keyof typeof SIZE;
@@ -27,7 +26,7 @@ export function AssetCard({ src, filename, isLoading, action, size, className }:
   return (
     <fieldset
       className={cn(
-        "break-inside-avoid relative group rounded overflow-hidden bg-muted shrink-0 border-none p-0 m-0",
+        "break-inside-avoid relative group rounded-lg overflow-hidden bg-muted shrink-0 border-none p-0 m-0",
         size ? SIZE[size] : "w-full",
         className,
       )}

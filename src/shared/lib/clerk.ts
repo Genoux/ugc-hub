@@ -43,7 +43,30 @@ export async function sendInvitation(
   }
 }
 
-// ignoreExisting skips already-invited emails rather than failing the whole batch
+export type ClerkUserProfile = {
+  id: string;
+  name: string | null;
+  imageUrl: string | null;
+  email: string | null;
+};
+
+export async function getClerkUserProfile(userId: string): Promise<ClerkUserProfile | null> {
+  const client = await clerkClient();
+  try {
+    const user = await client.users.getUser(userId);
+    const name = [user.firstName, user.lastName].filter(Boolean).join(" ") || null;
+    return {
+      id: userId,
+      name,
+      imageUrl: user.imageUrl || null,
+      email: user.emailAddresses[0]?.emailAddress ?? null,
+    };
+  } catch {
+    return null;
+  }
+}
+
+
 export async function sendInvitationBulk(
   emails: string[],
   redirectUrl: string,
