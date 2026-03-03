@@ -185,7 +185,7 @@ export interface PortfolioVideoEntry {
 }
 
 /** Resolved for display/download — signed URL attached. */
-export interface PortfolioVideoWithUrl {
+export interface PortfolioVideo {
   id: string;
   filename: string;
   mimeType: string;

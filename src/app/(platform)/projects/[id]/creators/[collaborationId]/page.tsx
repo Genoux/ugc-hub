@@ -2,7 +2,7 @@ import { eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { collaborations } from "@/db/schema";
 import type { CollaborationHighlight } from "@/features/creators/constants";
-import { getR2SignedUrl } from "@/features/uploads/lib/r2-serve";
+import { toMediaUrl } from "@/features/uploads/lib/r2-media-url";
 import { db } from "@/shared/lib/db";
 import { CreatorCollaborationClient } from "./client";
 
@@ -36,28 +36,22 @@ export default async function CreatorFolderPage({
 
   if (!raw || raw.project.id !== id) redirect(`/projects/${id}`);
 
-  const [profilePhotoUrl, submissions, highlights] = await Promise.all([
-    getR2SignedUrl(raw.creator.profilePhoto),
-    Promise.all(
-      raw.submissions.map(async (submission) => ({
-        ...submission,
-        assets: await Promise.all(
-          submission.assets.map(async ({ r2Key, ...asset }) => ({
-            ...asset,
-            url: (await getR2SignedUrl(r2Key)) ?? "",
-          })),
-        ),
-      })),
-    ),
-    Promise.all(
-      ((raw.highlights ?? []) as CollaborationHighlight[]).map(async (h) => ({
-        id: h.id,
-        filename: h.filename,
-        mimeType: h.mimeType,
-        url: (await getR2SignedUrl(h.r2Key)) ?? "",
-      })),
-    ),
-  ]);
+  const profilePhotoUrl = toMediaUrl(raw.creator.profilePhoto);
+
+  const submissions = raw.submissions.map((submission) => ({
+    ...submission,
+    assets: submission.assets.map(({ r2Key, ...asset }) => ({
+      ...asset,
+      url: toMediaUrl(r2Key) ?? "",
+    })),
+  }));
+
+  const highlights = ((raw.highlights ?? []) as CollaborationHighlight[]).map((h) => ({
+    id: h.id,
+    filename: h.filename,
+    mimeType: h.mimeType,
+    url: toMediaUrl(h.r2Key) ?? "",
+  }));
 
   return (
     <CreatorCollaborationClient

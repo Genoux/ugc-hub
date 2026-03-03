@@ -271,7 +271,6 @@ export function OnboardingShell(
   };
 
   const buildProfilePayload = () => ({
-    creatorId: creator.id,
     fullName: data.fullName,
     country: data.country,
     languages: data.languages,

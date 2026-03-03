@@ -55,7 +55,7 @@ export function CreatorPortalShell({ creator, uiState, content }: CreatorPortalS
           />
         )}
       </AnimatePresence>
-      <ResetProfileButton creatorId={creator.id} />
+      <ResetProfileButton />
       <div
         className="z-0 pointer-events-none absolute inset-x-0 bottom-0 h-16 backdrop-blur-lg mask-[linear-gradient(to_top,black,transparent)]"
         aria-hidden

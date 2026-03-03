@@ -1,4 +1,3 @@
-import { Instagram, Music, Youtube } from "lucide-react";
 import Image from "next/image";
 import type { CreatorListItem } from "@/features/creators/actions/admin/get-creators";
 import { RatingBadge } from "@/features/creators/components/rating-badge";
@@ -25,6 +24,7 @@ export function CreatorCard({ creator, onClick }: CreatorCardProps) {
           src={creator.profilePhotoUrl || ""}
           alt={creator.fullName}
           fill
+          unoptimized
           className="object-cover flex items-center justify-center text-sm"
         />
       </div>

@@ -47,7 +47,7 @@ export function CreatorProfileTab({ creator, uiState, onOpenOnboarding }: Creato
     <div className="grid grid-cols-1 lg:grid-cols-12 lg:pt-10 gap-6 lg:gap-10 max-w-xl lg:max-w-none w-full mx-auto">
       <div className="flex flex-col lg:col-span-4 w-full lg:sticky top-6 self-start gap-6 lg:gap-2">
         <div className="relative w-full h-56 lg:h-auto aspect-square lg:max-w-none lg:mx-0 rounded-4xl lg:rounded-sm shadow-hub bg-muted overflow-hidden">
-          <Image src={profilePhotoUrl} alt={creator.fullName} fill className="object-cover" />
+          <Image src={profilePhotoUrl} alt={creator.fullName} fill unoptimized className="object-cover" />
         </div>
         <div className="w-full lg:pt-4 flex flex-col gap-4">
           <div className="lg:hidden flex justify-between items-center pb-2 gap-6">

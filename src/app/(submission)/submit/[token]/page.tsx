@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { creators, projects } from "@/db/schema";
 import { getSessionCreator } from "@/features/creators/lib/get-session-creator";
-import { getR2SignedUrl } from "@/features/uploads/lib/r2-serve";
+import { toMediaUrl } from "@/features/uploads/lib/r2-media-url";
 import { db } from "@/shared/lib/db";
 import { ROUTES } from "@/shared/lib/routes";
 import type { SubmitPageView } from "./client";
@@ -46,7 +46,7 @@ export default async function SubmitPage({ params }: { params: Promise<{ token: 
     await db.update(creators).set({ clerkUserId: userId }).where(eq(creators.id, creator.id));
   }
 
-  const profilePhotoUrl = await getR2SignedUrl(creator.profilePhoto);
+  const profilePhotoUrl = toMediaUrl(creator.profilePhoto);
 
   const view: SubmitPageView = {
     view: "wizard",

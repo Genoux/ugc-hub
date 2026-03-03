@@ -65,6 +65,7 @@ export function StepPhoto(
               src={photoManager.previewUrl}
               alt="Creator"
               fill
+              unoptimized
               className="object-cover"
             />
           )

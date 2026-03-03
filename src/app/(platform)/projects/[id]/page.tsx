@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { collaborations, projects } from "@/db/schema";
-import { getR2SignedUrl } from "@/features/uploads/lib/r2-serve";
+import { toMediaUrl } from "@/features/uploads/lib/r2-media-url";
 import { db } from "@/shared/lib/db";
 import { ProjectDetailClient } from "./client";
 
@@ -28,17 +28,15 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
 
   if (!project) redirect("/projects");
 
-  const signedCollaborations = await Promise.all(
-    rawCollaborations.map(async (collaboration) => ({
-      ...collaboration,
-      creator: {
-        id: collaboration.creator.id,
-        fullName: collaboration.creator.fullName,
-        email: collaboration.creator.email,
-        profilePhotoUrl: await getR2SignedUrl(collaboration.creator.profilePhoto),
-      },
-    })),
-  );
+  const signedCollaborations = rawCollaborations.map((collaboration) => ({
+    ...collaboration,
+    creator: {
+      id: collaboration.creator.id,
+      fullName: collaboration.creator.fullName,
+      email: collaboration.creator.email,
+      profilePhotoUrl: toMediaUrl(collaboration.creator.profilePhoto),
+    },
+  }));
 
   return <ProjectDetailClient project={project} collaborations={signedCollaborations} />;
 }

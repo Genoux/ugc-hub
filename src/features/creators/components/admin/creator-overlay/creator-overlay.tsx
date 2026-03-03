@@ -1,6 +1,8 @@
 "use client";
 
-import { ChevronLeft, ChevronRight, X } from "lucide-react";
+import { useState } from "react";
+import { ChevronLeft, ChevronRight, Info, X } from "lucide-react";
+import Image from "next/image";
 import { Button } from "@/shared/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/shared/components/ui/sheet";
 import type { CreatorProfile } from "@/features/creators/actions/admin/get-creator-profile";
@@ -24,47 +26,80 @@ export function CreatorOverlay({
   onPrev,
   onNext,
 }: CreatorOverlayProps) {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
   return (
     <Sheet open onOpenChange={onClose}>
-      <SheetContent side="bottom" showCloseButton={false} className="rounded-t-2xl overflow-hidden">
+      <SheetContent
+        side="bottom"
+        showCloseButton={false}
+        className="min-w-[368px] rounded-t-2xl overflow-hidden"
+      >
         <SheetTitle className="sr-only">
           {creator ? `${creator.fullName} Profile` : "Creator Profile"}
         </SheetTitle>
-        <div className="flex h-[calc(100vh-5rem)] flex-col">
-          <SheetHeader className="shrink-0 flex flex-row items-center justify-between border-b border-border px-6 py-4">
-            <div className="flex items-center gap-3">
+        <div className="flex h-[calc(100vh-1rem)] flex-col">
+          <SheetHeader className="shrink-0 flex flex-row items-center border-b border-border px-6 py-4">
+            <div className="flex items-center gap-1">
+              {hasPrev && (
+                <Button variant="ghost" size="icon" onClick={onPrev} aria-label="Previous creator">
+                  <ChevronLeft className="h-5 w-5" />
+                </Button>
+              )}
+              {hasNext && (
+                <Button variant="ghost" size="icon" onClick={onNext} aria-label="Next creator">
+                  <ChevronRight className="h-5 w-5" />
+                </Button>
+              )}
+            </div>
+
+            {creator && (
+              <div className="flex sm:hidden flex-1 items-center gap-3 min-w-0">
+                {creator.profilePhotoUrl && (
+                  <div className="relative h-10 w-10 rounded-full overflow-hidden shrink-0 bg-muted">
+                    <Image
+                      src={creator.profilePhotoUrl}
+                      alt={creator.fullName}
+                      fill
+                      unoptimized
+                      className="object-cover"
+                    />
+                  </div>
+                )}
+                <span className="text-lg font-semibold truncate">{creator.fullName}</span>
+              </div>
+            )}
+
+            <div className="flex items-center gap-1 ml-auto">
+              {creator && (
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="sm:hidden"
+                  onClick={() => setSidebarOpen(true)}
+                  aria-label="Creator details"
+                >
+                  <Info className="h-3 w-3" />
+                </Button>
+              )}
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={onPrev}
-                disabled={!hasPrev}
-                aria-label="Previous creator"
+                onClick={onClose}
+                aria-label="Close creator profile"
               >
-                <ChevronLeft className="h-5 w-5" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={onNext}
-                disabled={!hasNext}
-                aria-label="Next creator"
-              >
-                <ChevronRight className="h-5 w-5" />
+                <X className="h-5 w-5" />
               </Button>
             </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={onClose}
-              aria-label="Close creator profile"
-            >
-              <X className="h-5 w-5" />
-            </Button>
           </SheetHeader>
 
           {creator && (
             <div className="flex flex-1 min-h-0">
-              <CreatorSidebar creator={creator} />
+              <CreatorSidebar
+                creator={creator}
+                sheetOpen={sidebarOpen}
+                onSheetOpenChange={setSidebarOpen}
+              />
               <CreatorContent creator={creator} />
             </div>
           )}

@@ -3,9 +3,15 @@
 import { motion } from "motion/react";
 import { useState } from "react";
 import { Button } from "@/shared/components/ui/button";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/shared/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/shared/components/ui/tooltip";
 import { EASING_FUNCTION } from "@/shared/lib/constant";
 import { cn } from "@/shared/lib/utils";
+import Image from "next/image";
 
 const SIZE = {
   sm: "w-42",
@@ -24,13 +30,22 @@ type AssetCardProps = {
   className?: string;
 };
 
-export function AssetCard({ src, filename, isLoading, action, buttonIcon, buttonTooltip, size, className }: AssetCardProps) {
+export function AssetCard({
+  src,
+  filename,
+  isLoading,
+  action,
+  buttonIcon,
+  buttonTooltip,
+  size,
+  className,
+}: AssetCardProps) {
   const [ready, setReady] = useState(false);
 
   return (
     <fieldset
       className={cn(
-        "break-inside-avoid relative group rounded-lg overflow-hidden bg-muted shrink-0 border-none p-0 m-0",
+        "break-inside-avoid relative group rounded overflow-hidden bg-muted shrink-0 border-none p-0 m-0",
         size ? SIZE[size] : "w-full",
         className,
       )}
@@ -57,8 +72,8 @@ export function AssetCard({ src, filename, isLoading, action, buttonIcon, button
         {/* Top overlay: filename + actions */}
         <div className="flex items-start justify-between p-2 absolute top-0 left-0 w-full h-14 bg-linear-to-b from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
           <p className="truncate px-2 py-1 text-sm text-white">{filename}</p>
-          {action && (
-            buttonTooltip ? (
+          {action &&
+            (buttonTooltip ? (
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -85,8 +100,7 @@ export function AssetCard({ src, filename, isLoading, action, buttonIcon, button
               >
                 {buttonIcon}
               </Button>
-            )
-          )}
+            ))}
         </div>
       </div>
     </fieldset>

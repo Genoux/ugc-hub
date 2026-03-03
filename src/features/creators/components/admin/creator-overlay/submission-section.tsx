@@ -19,7 +19,6 @@ interface SubmissionSectionProps {
   submission: CollabSubmission;
 }
 
-
 function SubmissionSectionContent({ submission }: SubmissionSectionProps) {
   const { open } = useCollapsible();
   return (
@@ -27,7 +26,7 @@ function SubmissionSectionContent({ submission }: SubmissionSectionProps) {
       <CollapsibleTrigger asChild>
         <Button
           variant="ghost"
-          className="w-full flex items-center rounded-none! justify-between px-4 py-3 hover:bg-accent/40 text-left"
+          className="w-full border-none flex items-center rounded-none! justify-between px-4 py-3 hover:bg-accent/40 text-left"
         >
           <p className="text-sm font-medium text-foreground">{submission.label}</p>
           <div className="flex items-center gap-3">
@@ -44,8 +43,7 @@ function SubmissionSectionContent({ submission }: SubmissionSectionProps) {
         <div className="p-4">
           {submission.assets.length > 0 ? (
             <div className="flex overflow-x-auto gap-2">
-             <pre>{JSON.stringify(submission.assets, null, 2)}</pre>
-             {submission.assets.map((asset) => (
+              {submission.assets.map((asset) => (
                 <AssetCard
                   className="w-40"
                   key={asset.id}
