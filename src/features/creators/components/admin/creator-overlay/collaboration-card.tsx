@@ -1,14 +1,19 @@
 "use client";
 
 import { ChevronRight } from "lucide-react";
-import { AnimatePresence, motion } from "motion/react";
 import Image from "next/image";
-import { useState } from "react";
 import type { CreatorProfile } from "@/features/creators/actions/admin/get-creator-profile";
-import { RATING_CONFIG } from "@/features/creators/constants";
-import { Badge } from "@/shared/components/ui/badge";
+import { RatingBadge } from "@/features/creators/components/rating-badge";
+import {
+  CollapsibleSection,
+  CollapsibleTrigger,
+  CollapsibleContent,
+  useCollapsible,
+} from "@/shared/components/blocks/collapsible-section";
+import { Button } from "@/shared/components/ui/button";
 import { BentoCard } from "./_components/bento-card";
 import { SubmissionSection } from "./submission-section";
+import { LabeledField } from "../../labeled-field";
 
 type ClosedCollab = CreatorProfile["closedCollaborations"][number];
 
@@ -16,138 +21,107 @@ interface CollaborationCardProps {
   collab: ClosedCollab;
 }
 
+function CollaborationCardContent({ collab, totalPaid, perPiece }: {
+  collab: ClosedCollab;
+  totalPaid: number | null;
+  perPiece: number | null;
+}) {
+  const { open } = useCollapsible();
+
+  return (
+    <>
+      <CollapsibleTrigger asChild>
+        <Button
+          variant="ghost"
+          className="w-full flex items-center justify-between p-6 hover:bg-accent/40 transition-colors text-left"
+        >
+          <p className="text-sm font-medium text-foreground leading-none">{collab.projectName}</p>
+          <ChevronRight
+            className={`h-4 w-4 text-muted-foreground transition-transform shrink-0 ${open ? "rotate-90" : ""}`}
+          />
+        </Button>
+      </CollapsibleTrigger>
+      <CollapsibleContent>
+        <div className="p-4 space-y-2">
+          <div className="grid grid-cols-5 gap-1">
+            {totalPaid && (
+              <BentoCard>
+                <LabeledField label="Total Paid" value={<p className="text-2xl font-bold text-foreground">${totalPaid.toLocaleString()}</p>} />
+                {perPiece != null && (
+                  <p className="text-xs text-muted-foreground">${perPiece.toFixed(0)} / piece</p>
+                )}
+              </BentoCard>
+            )}
+            <BentoCard>
+              <LabeledField label="Closed" value={collab.closedAt.toLocaleDateString(undefined, { dateStyle: "long" })}
+              />
+            </BentoCard>
+            {collab.piecesOfContent != null && (
+              <BentoCard>
+                <LabeledField label="Pieces of Content" value={collab.piecesOfContent} />
+              </BentoCard>
+            )}
+            {collab.reviewNotes && (
+              <BentoCard className="justify-between col-span-2">
+                <p className="text-xs text-muted-foreground font-medium">Review Notes</p>
+                <p className="text-xs text-foreground">{collab.reviewNotes}</p>
+                {collab.closedBy && (
+                  <div className="flex items-center gap-1.5">
+                    {collab.closedBy.imageUrl && (
+                      <Image
+                        src={collab.closedBy.imageUrl}
+                        alt={collab.closedBy.name ?? ""}
+                        width={16}
+                        height={16}
+                        className="rounded-full"
+                      />
+                    )}
+                    <p className="text-xs text-muted-foreground">
+                      {collab.closedBy.name ?? collab.closedBy.email}
+                    </p>
+                  </div>
+                )}
+              </BentoCard>
+            )}
+          </div>
+          {(collab.ratingVisualQuality ||
+            collab.ratingActingDelivery ||
+            collab.ratingReliabilitySpeed) && (
+              <div className="grid grid-cols-3 gap-1">
+                {collab.ratingVisualQuality && (
+                  <BentoCard>
+                    <LabeledField label="Visual" value={<RatingBadge rating={collab.ratingVisualQuality} />} />
+                  </BentoCard>
+                )}
+                {collab.ratingActingDelivery && (
+                  <BentoCard>
+                    <LabeledField label="Acting" value={<RatingBadge rating={collab.ratingActingDelivery} />} />
+                  </BentoCard>
+                )}
+                {collab.ratingReliabilitySpeed && (
+                  <BentoCard>
+                    <LabeledField label="Reliability" value={<RatingBadge rating={collab.ratingReliabilitySpeed} />} />
+                  </BentoCard>
+                )}
+              </div>
+            )}
+          {collab.submissions.map((submission) => (
+            <SubmissionSection key={submission.id} submission={submission} />
+          ))}
+        </div>
+      </CollapsibleContent >
+    </>
+  );
+}
+
 export function CollaborationCard({ collab }: CollaborationCardProps) {
-  const [open, setOpen] = useState(false);
   const totalPaid = collab.totalPaidCents != null ? collab.totalPaidCents / 100 : null;
   const perPiece =
     totalPaid != null && collab.piecesOfContent ? totalPaid / collab.piecesOfContent : null;
 
   return (
-    <div className="border rounded-lg overflow-hidden">
-      <button
-        type="button"
-        onClick={() => setOpen((o) => !o)}
-        className="w-full flex items-center justify-between px-4 py-3 hover:bg-accent/40 transition-colors text-left"
-      >
-        <div>
-          <p className="text-sm font-medium text-foreground leading-none">{collab.projectName}</p>
-          {collab.piecesOfContent != null && (
-            <p className="text-xs text-muted-foreground mt-0.5">
-              {collab.piecesOfContent} piece{collab.piecesOfContent === 1 ? "" : "s"}
-            </p>
-          )}
-        </div>
-        <ChevronRight
-          className={`h-4 w-4 text-muted-foreground transition-transform shrink-0 ${open ? "rotate-90" : ""}`}
-        />
-      </button>
-      <AnimatePresence initial={false}>
-        {open && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2, ease: [0.32, 0.72, 0, 1] }}
-            className="overflow-hidden border-t"
-          >
-            <div className="p-4 space-y-2">
-              <div className="grid grid-cols-4 gap-1">
-                {totalPaid && (
-                  <BentoCard>
-                    <p className="text-sm font-medium text-foreground">Total Paid</p>
-                    <div className="flex flex-col gap-2">
-                      <p className="text-2xl font-bold text-foreground">
-                        ${totalPaid.toLocaleString()}
-                      </p>
-                      {perPiece != null && (
-                        <p className="text-xs text-muted-foreground">
-                          ${perPiece.toFixed(0)} / piece
-                        </p>
-                      )}
-                    </div>
-                  </BentoCard>
-                )}
-                <BentoCard>
-                  <p className="text-sm font-medium text-foreground">Closed</p>
-                  <p className="text-sm font-semibold text-foreground">
-                    {collab.closedAt.toLocaleDateString(undefined, { dateStyle: "long" })}
-                  </p>
-                </BentoCard>
-                {collab.piecesOfContent != null && (
-                  <BentoCard>
-                    <p className="text-md font-medium text-foreground">Pieces of Content</p>
-                    <p className="text-2xl font-bold text-foreground">{collab.piecesOfContent}</p>
-                  </BentoCard>
-                )}
-                {collab.reviewNotes && (
-                  <BentoCard className="justify-between">
-                    <p className="text-xs text-muted-foreground font-medium">Review Notes</p>
-                    <p className="text-xs text-foreground">{collab.reviewNotes}</p>
-                    {collab.closedBy && (
-                      <div className="flex items-center gap-1.5">
-                        {collab.closedBy.imageUrl && (
-                          <Image
-                            src={collab.closedBy.imageUrl}
-                            alt={collab.closedBy.name ?? ""}
-                            width={16}
-                            height={16}
-                            className="rounded-full"
-                          />
-                        )}
-                        <p className="text-xs text-muted-foreground">
-                          {collab.closedBy.name ?? collab.closedBy.email}
-                        </p>
-                      </div>
-                    )}
-                  </BentoCard>
-                )}
-              </div>
-              {(collab.ratingVisualQuality ||
-                collab.ratingActingDelivery ||
-                collab.ratingReliabilitySpeed) && (
-                <div className="grid grid-cols-3 gap-1">
-                  {collab.ratingVisualQuality && (
-                    <BentoCard>
-                      <span className="text-xs text-muted-foreground">Visual</span>
-                      <Badge
-                        variant="outline"
-                        className={`text-xs w-fit ${RATING_CONFIG[collab.ratingVisualQuality].className}`}
-                      >
-                        {collab.ratingVisualQuality}
-                      </Badge>
-                    </BentoCard>
-                  )}
-                  {collab.ratingActingDelivery && (
-                    <BentoCard>
-                      <span className="text-xs text-muted-foreground">Acting</span>
-                      <Badge
-                        variant="outline"
-                        className={`text-xs w-fit ${RATING_CONFIG[collab.ratingActingDelivery].className}`}
-                      >
-                        {collab.ratingActingDelivery}
-                      </Badge>
-                    </BentoCard>
-                  )}
-                  {collab.ratingReliabilitySpeed && (
-                    <BentoCard>
-                      <span className="text-xs text-muted-foreground">Reliability</span>
-                      <Badge
-                        variant="outline"
-                        className={`text-xs w-fit ${RATING_CONFIG[collab.ratingReliabilitySpeed].className}`}
-                      >
-                        {collab.ratingReliabilitySpeed}
-                      </Badge>
-                    </BentoCard>
-                  )}
-                </div>
-              )}
-              {collab.submissions.map((submission) => (
-                <SubmissionSection key={submission.id} submission={submission} />
-              ))}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
+    <CollapsibleSection>
+      <CollaborationCardContent collab={collab} totalPaid={totalPaid} perPiece={perPiece} />
+    </CollapsibleSection>
   );
 }

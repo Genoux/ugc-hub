@@ -1,8 +1,8 @@
 import { Instagram, Music, Youtube } from "lucide-react";
 import Image from "next/image";
 import type { CreatorListItem } from "@/features/creators/actions/admin/get-creators";
+import { RatingBadge } from "@/features/creators/components/rating-badge";
 import { Badge } from "@/shared/components/ui/badge";
-import { RATING_CONFIG } from "../../constants";
 
 interface CreatorCardProps {
   creator: CreatorListItem;
@@ -10,7 +10,6 @@ interface CreatorCardProps {
 }
 
 export function CreatorCard({ creator, onClick }: CreatorCardProps) {
-  const ratingConfig = RATING_CONFIG[creator.overallRating] || RATING_CONFIG.untested;
   const topCategories = creator.ugcCategories?.slice(0, 2) || [];
   const rateRange = creator.rateRangeInternal || creator.rateRangeSelf;
   const rateDisplay = rateRange ? `$${rateRange.min}-$${rateRange.max}` : "Rate TBD";
@@ -23,7 +22,7 @@ export function CreatorCard({ creator, onClick }: CreatorCardProps) {
     >
       <div className="relative mb-3 aspect-square w-full overflow-hidden rounded-lg bg-muted flex items-center justify-center text-4xl font-light text-muted-foreground">
         <Image
-          src={creator.profilePhotoUrl}
+          src={creator.profilePhotoUrl || ""}
           alt={creator.fullName}
           fill
           className="object-cover flex items-center justify-center text-sm"
@@ -33,9 +32,7 @@ export function CreatorCard({ creator, onClick }: CreatorCardProps) {
       <h3 className="font-medium text-foreground text-sm mb-2 truncate">{creator.fullName}</h3>
 
       <div className="flex items-center gap-2 mb-2">
-        <Badge variant="outline" className={ratingConfig.className}>
-          {creator.overallRating}
-        </Badge>
+        <RatingBadge rating={creator.overallRating} />
       </div>
 
       {topCategories.length > 0 && (

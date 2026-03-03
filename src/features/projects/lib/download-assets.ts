@@ -13,6 +13,11 @@ async function fetchBlobFromDownloadRoute(assetId: string): Promise<Blob> {
   return r2Res.blob();
 }
 
+async function fetchBlob(asset: { id: string; url?: string }): Promise<Blob> {
+  if (asset.url) return fetch(asset.url).then((r) => (r.ok ? r.blob() : Promise.reject(new Error(r.statusText))));
+  return fetchBlobFromDownloadRoute(asset.id);
+}
+
 function triggerBlobDownload(blob: Blob, filename: string): void {
   const blobUrl = URL.createObjectURL(blob);
   const a = document.createElement("a");
@@ -22,21 +27,23 @@ function triggerBlobDownload(blob: Blob, filename: string): void {
   URL.revokeObjectURL(blobUrl);
 }
 
+/** Asset for download: id + filename required; url optional. When url is present, fetches directly and skips the /download API. */
+export type DownloadableAsset = { id: string; filename: string; url?: string };
+
 /**
- * Single asset: fetches signed URL from /download, then fetches blob from R2 directly.
- * Using fetch→blob→blobUrl (same-origin) ensures a.download is honoured for cross-origin R2 URLs.
- * Multiple: same fetch-from-R2 pattern per file, then zips into one download.
+ * Single asset: uses url when provided, else fetches signed URL from /download, then fetches blob from R2.
+ * Multiple: same per file, then zips. Using fetch→blob→blobUrl ensures a.download is honoured for cross-origin R2.
  * Use from client only.
  */
 export async function downloadAssets(
-  assets: { id: string; filename: string }[],
+  assets: DownloadableAsset[],
   options?: { onError?: (filename: string) => void; zipName?: string },
 ): Promise<void> {
   if (assets.length === 0) return;
 
   if (assets.length === 1) {
     try {
-      const blob = await fetchBlobFromDownloadRoute(assets[0].id);
+      const blob = await fetchBlob(assets[0]);
       triggerBlobDownload(blob, assets[0].filename);
     } catch {
       options?.onError?.(assets[0].filename);
@@ -48,7 +55,7 @@ export async function downloadAssets(
 
   for (const asset of assets) {
     try {
-      const blob = await fetchBlobFromDownloadRoute(asset.id);
+      const blob = await fetchBlob(asset);
       blobs.push({ blob, filename: asset.filename });
     } catch {
       options?.onError?.(asset.filename);

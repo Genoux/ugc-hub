@@ -1,42 +1,58 @@
 "use server";
 
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { assets, collaborations, submissions } from "@/db/schema";
+import { getR2SignedUrl } from "@/features/uploads/lib/r2-serve";
 import { toActionError } from "@/shared/lib/action-error";
 import { requireAdmin } from "@/shared/lib/auth";
 import { db } from "@/shared/lib/db";
 
+export type AssetWithUrl = { id: string; filename: string; url: string };
+
 type Scope = { projectId: string } | { collaborationId: string } | { submissionId: string };
 
-export async function getAssets(scope: Scope) {
+const completed = eq(assets.uploadStatus, "completed");
+
+export async function getAssets(scope: Scope): Promise<{ data: AssetWithUrl[] }> {
   try {
     await requireAdmin();
 
-    if ("submissionId" in scope) {
-      const rows = await db
-        .select({ id: assets.id, filename: assets.filename })
-        .from(assets)
-        .where(eq(assets.submissionId, scope.submissionId));
-      return { data: rows };
-    }
+    let rows: { id: string; filename: string; r2Key: string }[];
 
-    if ("collaborationId" in scope) {
-      const rows = await db
-        .select({ id: assets.id, filename: assets.filename })
+    if ("submissionId" in scope) {
+      rows = await db
+        .select({ id: assets.id, filename: assets.filename, r2Key: assets.r2Key })
+        .from(assets)
+        .where(and(eq(assets.submissionId, scope.submissionId), completed));
+    } else if ("collaborationId" in scope) {
+      rows = await db
+        .select({ id: assets.id, filename: assets.filename, r2Key: assets.r2Key })
         .from(assets)
         .innerJoin(submissions, eq(assets.submissionId, submissions.id))
-        .where(eq(submissions.collaborationId, scope.collaborationId));
-      return { data: rows };
+        .where(
+          and(eq(submissions.collaborationId, scope.collaborationId), completed),
+        );
+    } else {
+      rows = await db
+        .select({ id: assets.id, filename: assets.filename, r2Key: assets.r2Key })
+        .from(assets)
+        .innerJoin(submissions, eq(assets.submissionId, submissions.id))
+        .innerJoin(collaborations, eq(submissions.collaborationId, collaborations.id))
+        .where(
+          and(eq(collaborations.projectId, scope.projectId), completed),
+        );
     }
 
-    const rows = await db
-      .select({ id: assets.id, filename: assets.filename })
-      .from(assets)
-      .innerJoin(submissions, eq(assets.submissionId, submissions.id))
-      .innerJoin(collaborations, eq(submissions.collaborationId, collaborations.id))
-      .where(eq(collaborations.projectId, scope.projectId));
+    const data = (
+      await Promise.all(
+        rows.map(async (row) => {
+          const url = await getR2SignedUrl(row.r2Key);
+          return url ? { id: row.id, filename: row.filename, url } : null;
+        }),
+      )
+    ).filter((a): a is AssetWithUrl => a !== null);
 
-    return { data: rows };
+    return { data };
   } catch (err) {
     throw toActionError(err);
   }

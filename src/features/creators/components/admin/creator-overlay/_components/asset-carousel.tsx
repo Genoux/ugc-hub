@@ -1,4 +1,7 @@
+import { Download } from "lucide-react";
+import { toast } from "sonner";
 import { AssetCard } from "@/shared/components/blocks/asset-card";
+import { downloadAssets } from "@/features/projects/lib/download-assets";
 import {
   Carousel,
   CarouselContent,
@@ -6,7 +9,6 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/shared/components/ui/carousel";
-import { DownloadButton } from "./download-button";
 
 interface Asset {
   id: string;
@@ -18,13 +20,11 @@ interface Asset {
 interface AssetCarouselProps {
   assets: Asset[];
   emptyLabel: string;
-  downloadButtonClassName?: string;
 }
 
 export function AssetCarousel({
   assets,
   emptyLabel,
-  downloadButtonClassName,
 }: AssetCarouselProps) {
   if (assets.length === 0) {
     return <p className="text-sm text-muted-foreground">{emptyLabel}</p>;
@@ -43,15 +43,16 @@ export function AssetCarousel({
             <AssetCard
               src={asset.url}
               filename={asset.filename}
-              isVideo={asset.mimeType.startsWith("video/")}
               size="sm"
-              action={
-                <DownloadButton
-                  url={asset.url}
-                  filename={asset.filename}
-                  className={downloadButtonClassName}
-                />
-              }
+              action={async (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                await downloadAssets(
+                  [{ id: asset.id, filename: asset.filename, url: asset.url }],
+                  { onError: () => toast.error("Download failed") },
+                );
+              }}
+              buttonIcon={<Download className="h-4 w-4" />}
             />
           </CarouselItem>
         ))}

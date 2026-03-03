@@ -19,8 +19,13 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
-import { EmptyState } from "@/shared/components/blocks/empty-state";
 import { Button } from "@/shared/components/ui/button";
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyTitle,
+} from "@/shared/components/ui/empty";
 import {
   Dialog,
   DialogContent,
@@ -242,15 +247,16 @@ export function ProjectList({ projects }: { projects: Project[] }) {
           </Table>
         </div>
       ) : (
-        <EmptyState
-          title="Projects"
-          description="Create a project folder to collect creator content"
-          action={{
-            label: "New Project",
-            onClick: () => setIsDialogOpen(true),
-            icon: <Plus className="size-4" />,
-          }}
-        />
+        <Empty>
+          <EmptyHeader>
+            <EmptyTitle>Projects</EmptyTitle>
+            <EmptyDescription>Create a project folder to collect creator content</EmptyDescription>
+          </EmptyHeader>
+          <Button onClick={() => setIsDialogOpen(true)} size="sm" variant="outline">
+            <Plus className="size-4" />
+            New Project
+          </Button>
+        </Empty>
       )}
       <div className="text-muted-foreground hidden text-sm lg:flex">
         {table.getFilteredRowModel().rows.length} project(s)

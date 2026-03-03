@@ -2,20 +2,18 @@
 
 import { eq } from "drizzle-orm";
 import { creators } from "@/db/schema";
-import type { CollaborationHighlight, PortfolioVideoEntry } from "@/features/creators/constants";
+import type {
+  CollaborationHighlight,
+  PortfolioVideoEntry,
+  PortfolioVideoWithUrl,
+} from "@/features/creators/constants";
 import { creatorSchema } from "@/features/creators/schemas";
 import { getR2SignedUrl } from "@/features/uploads/lib/r2-serve";
 import { db } from "@/shared/lib/db";
 
 export type CreatorProfile = ReturnType<typeof creatorSchema.parse> & {
   profilePhotoUrl: string | null;
-  portfolioVideos: {
-    id: string;
-    filename: string;
-    mimeType: string;
-    sizeBytes: number;
-    url: string;
-  }[];
+  portfolioVideos: PortfolioVideoWithUrl[];
   closedCollaborations: {
     id: string;
     highlights: { id: string; filename: string; mimeType: string; url: string }[];

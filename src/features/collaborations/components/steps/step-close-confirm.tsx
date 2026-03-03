@@ -1,6 +1,6 @@
 "use client";
 
-import { RATING_CONFIG } from "@/features/creators/constants";
+import { RatingBadge } from "@/features/creators/components/rating-badge";
 import { calculateOverallRating } from "../../lib/calculate-overall-rating";
 import type { CollaborationRatingsInput } from "../../schemas";
 import type { PortfolioFile } from "./step-portfolio";
@@ -19,7 +19,6 @@ export function StepCloseConfirm({
   portfolioFiles,
 }: StepCloseConfirmProps) {
   const overallRating = calculateOverallRating(ratings);
-  const config = RATING_CONFIG[overallRating] ?? RATING_CONFIG.untested;
 
   return (
     <div className="space-y-6">
@@ -40,11 +39,7 @@ export function StepCloseConfirm({
         <p className="text-xs text-muted-foreground mb-2">
           After this collaboration this creator&apos;s rating will be:
         </p>
-        <span
-          className={`inline-flex px-3 py-1.5 text-xs font-medium rounded-full border capitalize ${config.className}`}
-        >
-          {overallRating}
-        </span>
+        <RatingBadge rating={overallRating} className="px-3 py-1.5 capitalize" />
       </div>
 
       <div className="rounded-xl bg-muted/60 px-4 py-3 text-sm space-y-1">

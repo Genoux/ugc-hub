@@ -101,16 +101,8 @@ export function StepVideos({
                   src={entry.objectUrl}
                   filename={entry.filename}
                   size="sm"
-                  action={
-                    <Button
-                      className="h-8 w-8 text-white! hover:bg-white/20"
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => onEntryRemove(entry.assetId)}
-                    >
-                      <X className="size-3.5" />
-                    </Button>
-                  }
+                  action={() => onEntryRemove(entry.assetId)}
+                  buttonIcon={<X className="h-4 w-4" />}
                 />
               </CarouselItem>
             ))}

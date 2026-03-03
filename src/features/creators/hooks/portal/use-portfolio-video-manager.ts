@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 import type {
   PortfolioVideoEntry,
   UploadingVideoEntry,
-} from "../components/portal/onboarding/onboarding-types";
+} from "../../components/portal/onboarding/onboarding-types";
 
 export interface PortfolioVideoManager {
   doneEntries: PortfolioVideoEntry[];

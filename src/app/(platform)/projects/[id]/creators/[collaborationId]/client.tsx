@@ -59,13 +59,13 @@ function SubmissionSection({
   projectName: string;
   creatorFullName: string;
 }) {
-  const submissionAssets = submission.assets.map((a) => ({ id: a.id, filename: a.filename }));
+  const submissionAssets = submission.assets.map((a) => ({
+    id: a.id,
+    filename: a.filename,
+    url: a.url,
+  }));
 
   async function handleDownloadSubmission() {
-    if (submissionAssets.length === 0) {
-      toast.info("No assets to download");
-      return;
-    }
     await downloadAssets(submissionAssets, {
       onError: (filename) => toast.error(`Failed to download ${filename}`),
       zipName: `${projectName} - Submission ${submission.submissionNumber} - ${creatorFullName}`,
@@ -109,24 +109,14 @@ function SubmissionSection({
                 key={asset.id}
                 src={asset.url}
                 filename={asset.filename}
-                isVideo={asset.mimeType.startsWith("video/")}
-                action={
-                  <Button
-                    className="h-8 w-8 text-white! hover:bg-white/20"
-                    variant="ghost"
-                    size="icon"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      downloadAssets([{ id: asset.id, filename: asset.filename }], {
-                        onError: () => toast.error("Download failed"),
-                      });
-                    }}
-                  >
-                    <Download className="h-4 w-4" />
-                    <span className="sr-only">Download</span>
-                  </Button>
-                }
+                action={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  downloadAssets([{ id: asset.id, filename: asset.filename, url: asset.url }], {
+                    onError: () => toast.error("Download failed"),
+                  });
+                }}
+                buttonIcon={<Download className="h-4 w-4" />}
               />
             ))}
           </div>
@@ -147,7 +137,7 @@ export function CreatorCollaborationClient({
 
   async function handleDownloadAll() {
     const allAssets = submissions.flatMap((s) =>
-      s.assets.map((a) => ({ id: a.id, filename: a.filename })),
+      s.assets.map((a) => ({ id: a.id, filename: a.filename, url: a.url })),
     );
     if (allAssets.length === 0) {
       toast.info("No assets to download");
@@ -230,7 +220,6 @@ export function CreatorCollaborationClient({
                 key={asset.id}
                 src={asset.url}
                 filename={asset.filename}
-                isVideo={asset.mimeType.startsWith("video/")}
               />
             ))}
           </div>

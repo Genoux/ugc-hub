@@ -2,7 +2,11 @@
 
 import { eq } from "drizzle-orm";
 import { creators } from "@/db/schema";
-import type { CollaborationHighlight, PortfolioVideoEntry } from "@/features/creators/constants";
+import type {
+  CollaborationHighlight,
+  PortfolioVideoEntry,
+  PortfolioVideoWithUrl,
+} from "@/features/creators/constants";
 import { creatorSchema } from "@/features/creators/schemas";
 import { getR2SignedUrl } from "@/features/uploads/lib/r2-serve";
 import type { ClerkUserProfile } from "@/shared/lib/clerk";
@@ -21,13 +25,7 @@ type CollabSubmission = {
 
 export type CreatorProfile = ReturnType<typeof creatorSchema.parse> & {
   profilePhotoUrl: string | null;
-  portfolioVideos: {
-    id: string;
-    filename: string;
-    mimeType: string;
-    sizeBytes: number;
-    url: string;
-  }[];
+  portfolioVideos: PortfolioVideoWithUrl[];
   closedCollaborations: {
     id: string;
     projectName: string;
@@ -98,43 +96,43 @@ export async function getCreatorProfile(creatorId: string): Promise<CreatorProfi
       })),
     ),
     Promise.all(
-    row.collaborations.map(async (collab) => ({
-      id: collab.id,
-      projectName: collab.project.name,
-      closedAt: collab.closedAt as Date,
-      closedBy: collab.closedBy ? await getClerkUserProfile(collab.closedBy) : null,
-      piecesOfContent: collab.piecesOfContent,
-      totalPaidCents: collab.totalPaid,
-      ratingVisualQuality: collab.ratingVisualQuality,
-      ratingActingDelivery: collab.ratingActingDelivery,
-      ratingReliabilitySpeed: collab.ratingReliabilitySpeed,
-      reviewNotes: collab.reviewNotes,
-      highlights: await Promise.all(
-        ((collab.highlights ?? []) as CollaborationHighlight[]).map(async (h) => ({
-          id: h.id,
-          filename: h.filename,
-          mimeType: h.mimeType,
-          url: (await getR2SignedUrl(h.r2Key)) ?? "",
-        })),
-      ),
-      submissions: await Promise.all(
-        collab.submissions.map(async (s) => ({
-          id: s.id,
-          label: s.label,
-          submissionNumber: s.submissionNumber,
-          deliveredAt: s.deliveredAt,
-          assets: await Promise.all(
-            s.assets.map(async (a) => ({
-              id: a.id,
-              filename: a.filename,
-              mimeType: a.mimeType,
-              url: (await getR2SignedUrl(a.r2Key)) ?? "",
-            })),
-          ),
-        })),
-      ),
-    })),
-  ),
+      row.collaborations.map(async (collab) => ({
+        id: collab.id,
+        projectName: collab.project.name,
+        closedAt: collab.closedAt as Date,
+        closedBy: collab.closedBy ? await getClerkUserProfile(collab.closedBy) : null,
+        piecesOfContent: collab.piecesOfContent,
+        totalPaidCents: collab.totalPaid,
+        ratingVisualQuality: collab.ratingVisualQuality,
+        ratingActingDelivery: collab.ratingActingDelivery,
+        ratingReliabilitySpeed: collab.ratingReliabilitySpeed,
+        reviewNotes: collab.reviewNotes,
+        highlights: await Promise.all(
+          ((collab.highlights ?? []) as CollaborationHighlight[]).map(async (h) => ({
+            id: h.id,
+            filename: h.filename,
+            mimeType: h.mimeType,
+            url: (await getR2SignedUrl(h.r2Key)) ?? "",
+          })),
+        ),
+        submissions: await Promise.all(
+          collab.submissions.map(async (s) => ({
+            id: s.id,
+            label: s.label,
+            submissionNumber: s.submissionNumber,
+            deliveredAt: s.deliveredAt,
+            assets: await Promise.all(
+              s.assets.map(async (a) => ({
+                id: a.id,
+                filename: a.filename,
+                mimeType: a.mimeType,
+                url: (await getR2SignedUrl(a.r2Key)) ?? "",
+              })),
+            ),
+          })),
+        ),
+      })),
+    ),
   ]);
 
   return { ...creator, profilePhotoUrl, portfolioVideos, closedCollaborations };

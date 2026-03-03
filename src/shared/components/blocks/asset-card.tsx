@@ -2,6 +2,8 @@
 
 import { motion } from "motion/react";
 import { useState } from "react";
+import { Button } from "@/shared/components/ui/button";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/shared/components/ui/tooltip";
 import { EASING_FUNCTION } from "@/shared/lib/constant";
 import { cn } from "@/shared/lib/utils";
 
@@ -15,12 +17,14 @@ type AssetCardProps = {
   src: string | null;
   filename: string;
   isLoading?: boolean;
-  action?: React.ReactNode;
+  action?: (e: React.MouseEvent<HTMLButtonElement>) => void;
+  buttonIcon?: React.ReactNode;
+  buttonTooltip?: string;
   size?: keyof typeof SIZE;
   className?: string;
 };
 
-export function AssetCard({ src, filename, isLoading, action, size, className }: AssetCardProps) {
+export function AssetCard({ src, filename, isLoading, action, buttonIcon, buttonTooltip, size, className }: AssetCardProps) {
   const [ready, setReady] = useState(false);
 
   return (
@@ -53,7 +57,36 @@ export function AssetCard({ src, filename, isLoading, action, size, className }:
         {/* Top overlay: filename + actions */}
         <div className="flex items-start justify-between p-2 absolute top-0 left-0 w-full h-14 bg-linear-to-b from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
           <p className="truncate px-2 py-1 text-sm text-white">{filename}</p>
-          <div className="pointer-events-auto">{action}</div>
+          {action && (
+            buttonTooltip ? (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={action}
+                      className="pointer-events-auto h-8 w-8 text-white! hover:bg-white/20"
+                    >
+                      {buttonIcon}
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{buttonTooltip}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            ) : (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={action}
+                className="pointer-events-auto h-8 w-8 text-white! hover:bg-white/20"
+              >
+                {buttonIcon}
+              </Button>
+            )
+          )}
         </div>
       </div>
     </fieldset>

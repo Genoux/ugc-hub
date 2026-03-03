@@ -2,6 +2,10 @@ import type { CreatorProfile } from "@/features/creators/actions/admin/get-creat
 import { AssetCarousel } from "./_components/asset-carousel";
 import { SectionHeader } from "./_components/section-header";
 import { CollaborationCard } from "./collaboration-card";
+import { Download } from "lucide-react";
+import { AssetCard } from "@/shared/components/blocks/asset-card";
+import { toast } from "sonner";
+import { downloadAssets } from "@/features/projects/lib/download-assets";
 
 interface CreatorContentProps {
   creator: CreatorProfile;
@@ -15,11 +19,25 @@ export function CreatorContent({ creator }: CreatorContentProps) {
     <div className="flex-1 min-w-0 p-6 overflow-y-auto pb-8 space-y-8">
       <div className="space-y-3">
         <SectionHeader title="Portfolio" count={creator.portfolioVideos.length} />
-        <AssetCarousel
-          assets={creator.portfolioVideos}
-          emptyLabel="No past work uploaded yet."
-          downloadButtonClassName="h-8 w-8 text-white! hover:bg-white/20"
-        />
+        <div className="flex overflow-x-auto gap-2">
+          {creator.portfolioVideos.map((asset) => (
+            <AssetCard
+              size="md"
+              key={asset.id}
+              src={asset.url}
+              filename={asset.filename}
+              action={async (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                await downloadAssets(
+                  [{ id: asset.id, filename: asset.filename, url: asset.url }],
+                  { onError: () => toast.error("Download failed") },
+                );
+              }}
+              buttonIcon={<Download className="h-4 w-4" />}
+            />
+          ))}
+        </div>
       </div>
 
       <div className="space-y-3">
@@ -27,7 +45,6 @@ export function CreatorContent({ creator }: CreatorContentProps) {
         <AssetCarousel
           assets={allHighlights}
           emptyLabel="No highlights yet."
-          downloadButtonClassName="h-8 w-8 text-white! hover:bg-white/20"
         />
       </div>
 
