@@ -1,15 +1,18 @@
 "use client";
 
-import { Copy } from "lucide-react";
+import { Copy, ExternalLink } from "lucide-react";
 import Image from "next/image";
 import { toast } from "sonner";
 import type { CreatorProfile } from "@/features/creators/actions/admin/get-creator-profile";
-import { calculateRatingsFromCollaborations } from "@/features/creators/lib/calculated-ratings";
-import { RatingBadge } from "@/features/creators/components/rating-badge";
 import { LabeledField } from "@/features/creators/components/labeled-field";
-import { RATING_LABELS } from "@/features/creators/constants";
+import { RatingBadge } from "@/features/creators/components/rating-badge";
+import type { SocialPlatform } from "@/features/creators/constants";
+import { calculateRatingsFromCollaborations } from "@/features/creators/lib/calculated-ratings";
+import { SocialIcon } from "@/shared/components/icons/socials/social-icon";
+import { VerifiedBadge } from "@/shared/components/icons/verified-badge";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/shared/components/ui/tooltip";
 
 interface CreatorProfileInfoProps {
   creator: CreatorProfile;
@@ -41,17 +44,33 @@ export function CreatorProfileInfo({ creator, layout = "sidebar" }: CreatorProfi
     },
   ].filter(Boolean) as { label: string; handle: string }[];
 
-  const photo = (
-    <div className="relative aspect-[4/5] w-full rounded-2xl overflow-hidden bg-muted">
-      {creator.profilePhotoUrl && (
-        <Image
-          src={creator.profilePhotoUrl}
-          alt={creator.fullName}
-          fill
-          unoptimized
-          className="object-cover"
-        />
-      )}
+  const profileHero = (
+    <div className="relative aspect-4/5 w-full rounded-2xl overflow-hidden bg-muted">
+      <Image
+        src={creator.profilePhotoUrl || ""}
+        alt={creator.fullName}
+        fill
+        unoptimized
+        className="object-cover group-hover:scale-105 transition-transform duration-300"
+      />
+      <div
+        className="absolute bottom-0 left-0 right-0 h-full bg-black/20 backdrop-blur-xs pointer-events-none"
+        style={{
+          maskImage: "linear-gradient(to top, black 0%, black 10%, transparent 100%)",
+          WebkitMaskImage: "linear-gradient(to top, black 0%, black 10%, transparent 100%)",
+        }}
+      />
+      <div className="absolute inset-0 flex flex-col bg-linear-to-b from-transparent to-black/60 p-4">
+        <div className="mt-auto flex flex-col gap-1">
+          <div className="flex flex-col gap-2">
+            <RatingBadge rating={creator.overallRating} className="w-fit" />
+            <div className="flex items-center gap-2">
+              <h3 className="font-semibold text-white text-xl truncate">{creator.fullName}</h3>
+              {creator.overallRating === "top creator" && <VerifiedBadge className="size-5" />}
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 
@@ -74,60 +93,25 @@ export function CreatorProfileInfo({ creator, layout = "sidebar" }: CreatorProfi
     </Button>
   );
 
-  const nameAndRating = (
-    <div className="flex items-center gap-2 justify-between">
-      <h1 className="text-lg font-bold text-foreground leading-tight">{creator.fullName}</h1>
-      <div className="flex items-center gap-2 mt-1.5">
-        <RatingBadge rating={overallRating} />
-      </div>
-    </div>
-  );
-
   const details = (
     <>
-      {calculatedRatings && (
-        <>
-          <hr />
-          <div className="space-y-4">
-            <p className="text-xs uppercase tracking-wider text-muted-foreground font-medium">
-              Ratings
-            </p>
-            {[
-              { label: "Overall", rating: calculatedRatings.overall },
-              { label: RATING_LABELS.visual_quality, rating: calculatedRatings.visual_quality },
-              {
-                label: RATING_LABELS.acting_line_delivery,
-                rating: calculatedRatings.acting_line_delivery,
-              },
-              {
-                label: RATING_LABELS.reliability_speed,
-                rating: calculatedRatings.reliability_speed,
-              },
-            ].map(({ label, rating }) => (
-              <LabeledField
-                className="flex-row"
-                key={label}
-                label={label}
-                value={<RatingBadge rating={rating} />}
-              />
-            ))}
-          </div>
-        </>
-      )}
-
       <hr />
-
       <div className="space-y-3">
         <div className="flex items-center gap-6 justify-start">
           <LabeledField label="Country" value={creator.country} />
           <LabeledField label="Languages" value={creator.languages?.join(", ")} />
         </div>
-        <LabeledField label="Age range" value={creator.ageDemographic} />
-        <LabeledField label="Gender" value={creator.genderIdentity} />
-        <LabeledField label="Ethnicity" value={creator.ethnicity} />
       </div>
 
-      {(creator.ugcCategories?.length || creator.contentFormats?.length) ? (
+      {(creator.ageDemographic || creator.genderIdentity || creator.ethnicity) && (
+        <div className="space-y-3 border-t border-border pt-3">
+          <LabeledField label="Age range" value={creator.ageDemographic} />
+          <LabeledField label="Gender" value={creator.genderIdentity} />
+          <LabeledField label="Ethnicity" value={creator.ethnicity} />
+        </div>
+      )}
+
+      {creator.ugcCategories?.length || creator.contentFormats?.length ? (
         <>
           <hr />
           <div className="space-y-3">
@@ -161,11 +145,26 @@ export function CreatorProfileInfo({ creator, layout = "sidebar" }: CreatorProfi
 
       <hr />
 
-      {socialLinks.length > 0 &&
-        socialLinks.map(({ label, handle }) => (
-          <LabeledField key={label} label={label} value={handle} />
+      <div className="flex items-center gap-2">
+        {socialLinks.map(({ label, handle }) => (
+          <SocialIcon key={label} name={label as SocialPlatform} handle={handle} />
         ))}
-
+        {creator.portfolioUrl && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                onClick={() => window.open(creator.portfolioUrl ?? "", "_blank")}
+              >
+                <ExternalLink className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>{creator.portfolioUrl}</TooltipContent>
+          </Tooltip>
+        )}
+      </div>
       <hr />
       {rateRange && <LabeledField label="Rate" value={`$${rateRange.min}–${rateRange.max}`} />}
     </>
@@ -174,13 +173,9 @@ export function CreatorProfileInfo({ creator, layout = "sidebar" }: CreatorProfi
   if (layout === "mobile") {
     return (
       <div className="px-4 pb-6 space-y-4">
-        {/* On wider phones: photo left, name + email right. On small phones: stacked. */}
         <div className="flex flex-col min-[400px]:flex-row gap-4">
-          <div className="w-full min-[400px]:w-[45%] shrink-0">{photo}</div>
-          <div className="flex flex-col gap-3 justify-end min-w-0">
-            {nameAndRating}
-            {copyEmailButton}
-          </div>
+          <div className="w-full min-[400px]:w-[45%] shrink-0">{profileHero}</div>
+          <div className="flex flex-col gap-3 justify-end min-w-0">{copyEmailButton}</div>
         </div>
         {details}
       </div>
@@ -188,10 +183,9 @@ export function CreatorProfileInfo({ creator, layout = "sidebar" }: CreatorProfi
   }
 
   return (
-    <div className="p-6 space-y-4">
-      {photo}
+    <div className="p-4 sm:p-6 space-y-4">
+      {profileHero}
       {copyEmailButton}
-      {nameAndRating}
       {details}
     </div>
   );

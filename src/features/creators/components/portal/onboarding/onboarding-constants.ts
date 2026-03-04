@@ -26,8 +26,8 @@ export const STEPS: Record<number, { name: string; header: string; body: string 
   },
   6: {
     name: "Portfolio Videos",
-    header: "Your work",
-    body: "Upload 2–5 vertical videos that showcase your on-camera presence and editing style.",
+    header: "Best Work",
+    body: "Upload 2–5 vertical videos that showcase your best work.",
   },
   7: {
     name: "Rate",

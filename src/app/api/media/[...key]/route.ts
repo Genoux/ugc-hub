@@ -8,6 +8,27 @@ export async function GET(request: Request, { params }: { params: Promise<{ key:
   const { key } = await params;
   const r2Key = key.join("/");
 
+  if (process.env.NODE_ENV === "development" && key[0]?.startsWith("http")) {
+    const externalUrl = (key[0] + "//" + key.slice(1).join("/")) as string;
+    if (externalUrl.startsWith("http://") || externalUrl.startsWith("https://")) {
+      const res = await fetch(externalUrl, {
+        headers: request.headers.get("range") ? { Range: request.headers.get("range")! } : {},
+      });
+      if (!res.ok) return new Response("Not found", { status: 404 });
+      const headers: Record<string, string> = {
+        "cache-control": "private, no-store",
+        "accept-ranges": "bytes",
+      };
+      const ct = res.headers.get("content-type");
+      if (ct) headers["content-type"] = ct;
+      const cl = res.headers.get("content-length");
+      if (cl) headers["content-length"] = cl;
+      const cr = res.headers.get("content-range");
+      if (cr) headers["content-range"] = cr;
+      return new Response(res.body, { status: res.status, headers });
+    }
+  }
+
   const signedUrl = await getR2SignedUrl(r2Key);
   if (!signedUrl) return new Response("Not found", { status: 404 });
 

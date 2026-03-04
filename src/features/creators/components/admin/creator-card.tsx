@@ -1,7 +1,9 @@
 import Image from "next/image";
 import type { CreatorListItem } from "@/features/creators/actions/admin/get-creators";
 import { RatingBadge } from "@/features/creators/components/rating-badge";
-import { Badge } from "@/shared/components/ui/badge";
+import { VerifiedBadge } from "@/shared/components/icons/verified-badge";
+import { Squircle } from "@squircle-js/react";
+import { Button } from "@/shared/components/ui/button";
 
 interface CreatorCardProps {
   creator: CreatorListItem;
@@ -9,7 +11,6 @@ interface CreatorCardProps {
 }
 
 export function CreatorCard({ creator, onClick }: CreatorCardProps) {
-  const topCategories = creator.ugcCategories?.slice(0, 2) || [];
   const rateRange = creator.rateRangeInternal || creator.rateRangeSelf;
   const rateDisplay = rateRange ? `$${rateRange.min}-$${rateRange.max}` : "Rate TBD";
 
@@ -17,35 +18,47 @@ export function CreatorCard({ creator, onClick }: CreatorCardProps) {
     <button
       type="button"
       onClick={onClick}
-      className="group relative flex flex-col rounded-xl border border-border bg-card p-4 text-left transition-colors hover:bg-accent/50 hover:border-border"
+      className="rounded-3xl cursor-pointer group relative h-[400px] aspect-square w-full overflow-hidden"
     >
-      <div className="relative mb-3 aspect-square w-full overflow-hidden rounded-lg bg-muted flex items-center justify-center text-4xl font-light text-muted-foreground">
+      <div className="absolute inset-0 overflow-hidden">
         <Image
           src={creator.profilePhotoUrl || ""}
           alt={creator.fullName}
           fill
           unoptimized
-          className="object-cover flex items-center justify-center text-sm"
+          className="object-cover group-hover:scale-105 transition-transform duration-300"
         />
-      </div>
-
-      <h3 className="font-medium text-foreground text-sm mb-2 truncate">{creator.fullName}</h3>
-
-      <div className="flex items-center gap-2 mb-2">
-        <RatingBadge rating={creator.overallRating} />
-      </div>
-
-      {topCategories.length > 0 && (
-        <div className="flex flex-wrap gap-1 mb-2">
-          {topCategories.map((cat) => (
-            <Badge key={cat} variant="secondary" className="text-xs font-normal">
-              {cat}
-            </Badge>
-          ))}
+        <div
+          className="absolute bottom-0 left-0 right-0 h-[55%] bg-black/20 backdrop-blur-md pointer-events-none"
+          style={{
+            maskImage: "linear-gradient(to top, black 0%, black 50%, transparent 100%)",
+            WebkitMaskImage: "linear-gradient(to top, black 0%, black 50%, transparent 100%)",
+          }}
+        />
+        <div className="absolute inset-0 flex flex-col bg-linear-to-b from-transparent to-black/60 p-4">
+          <div className="flex justify-start">
+            <RatingBadge rating={creator.overallRating} />
+          </div>
+          <div className="mt-auto flex flex-col gap-1">
+            <div className="flex flex-col gap-0.5">
+              <div className="flex items-center gap-2">
+                <h3 className="font-semibold text-white text-xl truncate">{creator.fullName}</h3>
+                {creator.overallRating === "top creator" && (
+                  <VerifiedBadge className="size-5" />
+                )}
+              </div>
+              <div className="text-sm text-left font-semibold text-white/80">{rateDisplay}</div>
+            </div>
+            <div className="flex flex-wrap gap-0.5 pt-1">
+              <Button size="lg" className="w-full backdrop-blur-sm bg-white/10 hover:bg-white/20">
+                View Profile
+              </Button>
+            </div>
+          </div>
         </div>
-      )}
-
-      <div className="mt-auto pt-1.5 text-xs font-medium text-muted-foreground">{rateDisplay}</div>
+      </div>
     </button>
+
+
   );
 }

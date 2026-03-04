@@ -1,5 +1,4 @@
-import { RATING_CONFIG } from "@/features/creators/constants";
-import { Badge } from "@/shared/components/ui/badge";
+import { RATING_CONFIG, type OverallRatingTier } from "@/features/creators/constants";
 import { cn } from "@/shared/lib/utils";
 
 interface RatingBadgeProps {
@@ -8,10 +7,21 @@ interface RatingBadgeProps {
 }
 
 export function RatingBadge({ rating, className }: RatingBadgeProps) {
-  const config = RATING_CONFIG[rating] ?? RATING_CONFIG.untested;
+  const config = RATING_CONFIG[rating as OverallRatingTier] ?? RATING_CONFIG.untested;
+
   return (
-    <Badge variant="outline" className={cn("text-xs", config.className, className)}>
-      {rating}
-    </Badge>
+    <span
+      className={cn(
+        "inline-flex items-center gap-1.5 px-2.5 py-1.5 w-fit rounded-full text-xs font-medium tracking-wide",
+        "bg-black/40 backdrop-blur-sm text-white",
+        className,
+      )}
+    >
+      <span
+        className={cn("size-1.5 rounded-full shrink-0", config.dot)}
+        aria-hidden
+      />
+      <span className="capitalize">{rating}</span>
+    </span>
   );
 }

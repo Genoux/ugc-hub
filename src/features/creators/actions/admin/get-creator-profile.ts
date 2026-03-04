@@ -5,7 +5,7 @@ import { creators } from "@/db/schema";
 import type {
   CollaborationHighlight,
   PortfolioVideoEntry,
-  PortfolioVideoWithUrl,
+  PortfolioVideo,
 } from "@/features/creators/constants";
 import { creatorSchema } from "@/features/creators/schemas";
 import { toMediaUrl } from "@/features/uploads/lib/r2-media-url";
@@ -25,7 +25,7 @@ type CollabSubmission = {
 
 export type CreatorProfile = ReturnType<typeof creatorSchema.parse> & {
   profilePhotoUrl: string | null;
-  portfolioVideos: PortfolioVideoWithUrl[];
+  portfolioVideos: PortfolioVideo[];
   closedCollaborations: {
     id: string;
     projectName: string;

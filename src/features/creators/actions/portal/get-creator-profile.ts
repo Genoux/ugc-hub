@@ -5,7 +5,7 @@ import { creators } from "@/db/schema";
 import type {
   CollaborationHighlight,
   PortfolioVideoEntry,
-  PortfolioVideoWithUrl,
+  PortfolioVideo,
 } from "@/features/creators/constants";
 import { requireCreator } from "@/features/creators/lib/require-creator";
 import { creatorSchema } from "@/features/creators/schemas";
@@ -14,7 +14,7 @@ import { db } from "@/shared/lib/db";
 
 export type CreatorProfile = ReturnType<typeof creatorSchema.parse> & {
   profilePhotoUrl: string | null;
-  portfolioVideos: PortfolioVideoWithUrl[];
+  portfolioVideos: PortfolioVideo[];
   closedCollaborations: {
     id: string;
     highlights: { id: string; filename: string; mimeType: string; url: string }[];

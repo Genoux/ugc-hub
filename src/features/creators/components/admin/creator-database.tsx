@@ -1,13 +1,17 @@
 "use client";
 
-import { ArrowUpDown, Search, SlidersHorizontal, X } from "lucide-react";
+import { motion } from "framer-motion";
+import { ArrowUpDown, Search, SlidersHorizontal, Users } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
   type CreatorProfile,
   getCreatorProfile,
 } from "@/features/creators/actions/admin/get-creator-profile";
 import type { CreatorListItem } from "@/features/creators/actions/admin/get-creators";
-import { Badge } from "@/shared/components/ui/badge";
+import {
+  SORT_OPTIONS,
+  useCreatorFilters,
+} from "@/features/creators/hooks/admin/use-creator-filters";
 import { Button } from "@/shared/components/ui/button";
 import {
   DropdownMenu,
@@ -15,29 +19,27 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/shared/components/ui/dropdown-menu";
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/shared/components/ui/empty";
 import { Input } from "@/shared/components/ui/input";
+import { EASING_FUNCTION } from "@/shared/lib/constant";
 import { CreatorCard } from "./creator-card";
 import { CreatorOverlay } from "./creator-overlay/creator-overlay";
 import { DatabaseFilters } from "./database-filters";
-import {
-  SORT_OPTIONS,
-  useCreatorFilters,
-} from "@/features/creators/hooks/admin/use-creator-filters";
-import { motion } from "framer-motion";
-import { EASING_FUNCTION } from "@/shared/lib/constant";
-// Module-level cache — persists across component remounts so signed URLs
-// remain stable and the browser can serve them from its HTTP cache.
-const assetsCache = new Map<string, CreatorProfile>();
+
 
 interface CreatorDatabaseProps {
   creators: CreatorListItem[];
 }
 
 export function CreatorDatabase({ creators }: CreatorDatabaseProps) {
-  const [selectedCreatorId, setSelectedCreatorId] = useState<string | null>(
-    null,
-  );
-  const [filtersOpen, setFiltersOpen] = useState(true);
+  const [selectedCreatorId, setSelectedCreatorId] = useState<string | null>(null);
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const [creator, setCreatorAssets] = useState<CreatorProfile | null>(null);
   const {
     search,
@@ -47,31 +49,13 @@ export function CreatorDatabase({ creators }: CreatorDatabaseProps) {
     filters,
     setFilters,
     sortedCreators,
-    activeLabels,
-    activeCount,
     currentSortLabel,
-    removeFilterLabel,
-    clearFilters,
   } = useCreatorFilters(creators);
 
   useEffect(() => {
     if (!selectedCreatorId) return;
-    const cached = assetsCache.get(selectedCreatorId);
-    if (cached) {
-      setCreatorAssets(cached);
-      return;
-    }
     setCreatorAssets(null);
-    let cancelled = false;
-    getCreatorProfile(selectedCreatorId).then((data) => {
-      if (!cancelled) {
-        assetsCache.set(selectedCreatorId, data);
-        setCreatorAssets(data);
-      }
-    });
-    return () => {
-      cancelled = true;
-    };
+    getCreatorProfile(selectedCreatorId).then(setCreatorAssets);
   }, [selectedCreatorId]);
 
   const selectedCreatorIdx = selectedCreatorId
@@ -112,12 +96,7 @@ export function CreatorDatabase({ creators }: CreatorDatabaseProps) {
         <div className="ml-auto">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="gap-1.5"
-              >
+              <Button type="button" variant="outline" size="sm" className="gap-1.5">
                 <ArrowUpDown className="h-3.5 w-3.5 text-muted-foreground" />
                 {currentSortLabel}
               </Button>
@@ -137,31 +116,38 @@ export function CreatorDatabase({ creators }: CreatorDatabaseProps) {
         </div>
       </div>
 
-      {/* Body: filter sidebar + grid */}
-      <div className="flex flex-1 min-h-0 overflow-hidden">
-        <motion.div
-          className="flex shrink-0 flex-col min-h-0 overflow-hidden"
-          animate={{ width: filtersOpen ? "14rem" : 0 }}
-          transition={{ duration: 0.15, ease: EASING_FUNCTION.exponential }}
+      {/* Body: filter overlays content; content always full width */}
+      <div className="relative flex flex-1 min-h-0 overflow-hidden">
+        {/* Filter: overlay from left, shadow only */}
+        <motion.aside
+          className="absolute inset-y-0 left-0 z-10 w-56 flex flex-col overflow-y-auto bg-background p-4 shadow-xl"
+          initial={{ x: "-100%" }}
+          animate={{ x: filtersOpen ? 0 : "-100%" }}
+          transition={{ duration: 0.2, ease: EASING_FUNCTION.exponential }}
         >
-          <motion.aside
-            className="flex h-full w-56 flex-col overflow-y-auto border-r border-border bg-background p-4"
-            animate={{ x: filtersOpen ? 0 : "-100%" }}
-            transition={{ duration: 0.15, ease: EASING_FUNCTION.exponential }}
-          >
-            <DatabaseFilters filters={filters} onChange={setFilters} />
-          </motion.aside>
-        </motion.div>
+          <DatabaseFilters filters={filters} onChange={setFilters} />
+        </motion.aside>
 
-        <div className="flex min-h-0 flex-1 min-w-0 flex-col overflow-y-auto">
-          {sortedCreators.length === 0
-            ? (
-              <div className="flex flex-1 items-center justify-center text-sm text-muted-foreground">
-                No creators
-              </div>
-            )
-            : (
-              <div className="grid grid-cols-2 gap-4 p-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4">
+        <button
+          type="button"
+          className={`flex min-h-0 flex-1 min-w-0 flex-col overflow-y-auto transition-[filter] duration-200 ${filtersOpen ? "blur-sm overflow-hidden" : ""}`}
+          onClick={() => filtersOpen && setFiltersOpen(false)}
+        >
+          <div
+            className={`flex flex-1 flex-col min-h-0 ${filtersOpen ? "pointer-events-none" : ""}`}
+          >
+            {sortedCreators.length === 0 ? (
+              <Empty>
+                <EmptyHeader>
+                  <EmptyMedia variant="icon">
+                    <Users size={16} />
+                  </EmptyMedia>
+                  <EmptyTitle>No creators found</EmptyTitle>
+                  <EmptyDescription>Try adjusting your filters or search query.</EmptyDescription>
+                </EmptyHeader>
+              </Empty>
+            ) : (
+              <div className="grid grid-cols-1 gap-2 p-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4">
                 {sortedCreators.map((creator) => (
                   <CreatorCard
                     key={creator.id}
@@ -171,7 +157,8 @@ export function CreatorDatabase({ creators }: CreatorDatabaseProps) {
                 ))}
               </div>
             )}
-        </div>
+          </div>
+        </button>
       </div>
 
       {selectedCreatorId && (

@@ -44,16 +44,16 @@ export function StepRatings({ ratings, notes, onChange, onNotesChange }: StepRat
               {RATING_TIERS.map((tier) => {
                 const isSelected = ratings[key] === tier;
                 const config = RATING_CONFIG[tier];
+                /* TODO: USE TOGGLE BUTTON */
                 return (
                   <button
                     key={tier}
                     type="button"
                     onClick={() => onChange({ ...ratings, [key]: tier })}
-                    className={`px-3 py-1.5 text-xs font-medium rounded-full border capitalize transition-all ${config.className} ${
-                      isSelected
-                        ? "ring-2 ring-offset-1 ring-current scale-[1.03] opacity-100"
-                        : "opacity-55 hover:opacity-80"
-                    }`}
+                    className={`px-3 py-1.5 text-xs font-medium rounded-full border capitalize transition-all ${isSelected
+                      ? "ring-2 ring-offset-1 ring-current scale-[1.03] opacity-100"
+                      : "opacity-55 hover:opacity-80"
+                      }`}
                   >
                     {tier}
                   </button>
