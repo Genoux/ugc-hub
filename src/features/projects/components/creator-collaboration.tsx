@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
 import { CloseCollaborationWizard } from "@/features/collaborations/components/close-collaboration-wizard";
+import { CreatorProfileInfo } from "@/features/creators/components/admin/creator-overlay/_components/creator-profile-info";
 import type { CollaborationDetail } from "@/features/projects/actions/get-collaboration-detail";
 import { DownloadButton } from "@/features/projects/components/download-button";
 import { SubmissionSection } from "@/features/projects/components/submission-section";
