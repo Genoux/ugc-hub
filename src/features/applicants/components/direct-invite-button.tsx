@@ -93,15 +93,15 @@ export function DirectInviteButton() {
 
   return (
     <Dialog open={open} onOpenChange={(v) => (v ? setOpen(true) : handleClose())}>
-      <DialogTrigger asChild disabled>
+      <DialogTrigger asChild>
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="outline" size="sm" className="gap-1.5 opacity-50">
+            <Button onClick={() => setOpen(true)} variant="outline" size="sm" className="gap-1.5">
               <UserPlus className="h-3.5 w-3.5" />
               Direct Invite
             </Button>
           </TooltipTrigger>
-          <TooltipContent>Not production ready</TooltipContent>
+          <TooltipContent>Invite a creator directly to the platform</TooltipContent>
         </Tooltip>
       </DialogTrigger>
       <DialogContent className="sm:max-w-lg">

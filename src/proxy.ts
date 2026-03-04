@@ -12,6 +12,7 @@ const isPublicRoute = createRouteMatcher([
   "/",
   "/sign-out(.*)",
   "/api/auth/sign-out(.*)",
+  "/api/webhooks/(.*)",
 ]);
 
 const isPlatformRoute = createRouteMatcher([

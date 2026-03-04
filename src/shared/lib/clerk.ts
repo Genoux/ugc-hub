@@ -67,6 +67,22 @@ export async function getClerkUserProfile(userId: string): Promise<ClerkUserProf
 }
 
 
+export async function revokeInvitation(email: string): Promise<void> {
+  const client = await clerkClient();
+
+  const { data: invitations } = await client.invitations.getInvitationList({
+    status: "pending",
+    query: email,
+  });
+
+  const invitation = invitations.find((inv) => inv.emailAddress === email);
+
+  if (invitation) {
+    await client.invitations.revokeInvitation(invitation.id);
+  }
+  // Silently succeed if no pending invitation found — may have expired or been used
+}
+
 export async function sendInvitationBulk(
   emails: string[],
   redirectUrl: string,
