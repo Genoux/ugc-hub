@@ -1,17 +1,16 @@
 "use client";
 
-import { ChevronRight, Download } from "lucide-react";
-import { toast } from "sonner";
+import { ChevronRight } from "lucide-react";
 import type { CreatorProfile } from "@/features/creators/actions/admin/get-creator-profile";
+import { DownloadButton } from "@/features/projects/components/download-button";
 import { AssetCard } from "@/shared/components/blocks/asset-card";
 import {
+  CollapsibleContent,
   CollapsibleSection,
   CollapsibleTrigger,
-  CollapsibleContent,
   useCollapsible,
 } from "@/shared/components/blocks/collapsible-section";
 import { Button } from "@/shared/components/ui/button";
-import { downloadAssets } from "@/features/projects/lib/download-assets";
 
 type CollabSubmission = CreatorProfile["closedCollaborations"][number]["submissions"][number];
 
@@ -49,14 +48,15 @@ function SubmissionSectionContent({ submission }: SubmissionSectionProps) {
                   key={asset.id}
                   src={asset.url}
                   filename={asset.filename}
-                  action={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    downloadAssets([{ id: asset.id, filename: asset.filename, url: asset.url }], {
-                      onError: () => toast.error("Download failed"),
-                    });
-                  }}
-                  buttonIcon={<Download className="h-4 w-4" />}
+                  actionSlot={
+                    <DownloadButton
+                      assets={[{ id: asset.id, filename: asset.filename, url: asset.url }]}
+                      size="icon"
+                      variant="ghost"
+                      className="h-8 w-8 text-white! hover:bg-white/20"
+                      stopPropagation
+                    />
+                  }
                 />
               ))}
             </div>

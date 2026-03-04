@@ -1,13 +1,13 @@
 "use client";
 
-import { CheckCircle2, Download } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
 import { CloseCollaborationWizard } from "@/features/collaborations/components/close-collaboration-wizard";
 import type { CollaborationDetail } from "@/features/projects/actions/get-collaboration-detail";
+import { DownloadButton } from "@/features/projects/components/download-button";
 import { SubmissionSection } from "@/features/projects/components/submission-section";
-import { downloadAssets } from "@/features/projects/lib/download-assets";
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/ui/avatar";
 import {
   Breadcrumb,
@@ -28,19 +28,9 @@ export function CreatorCollaboration({ collaboration }: CreatorCollaborationProp
   const [isClosed, setIsClosed] = useState(status === "closed");
   const [showCloseWizard, setShowCloseWizard] = useState(false);
 
-  async function handleDownloadAll() {
-    const allAssets = submissions.flatMap((s) =>
-      s.assets.map((a) => ({ id: a.id, filename: a.filename, url: a.url })),
-    );
-    if (allAssets.length === 0) {
-      toast.info("No assets to download");
-      return;
-    }
-    await downloadAssets(allAssets, {
-      onError: (filename) => toast.error(`Failed to download ${filename}`),
-      zipName: `${project.name} - ${creator.fullName}`,
-    });
-  }
+  const allAssets = submissions.flatMap((s) =>
+    s.assets.map((a) => ({ id: a.id, filename: a.filename, url: a.url })),
+  );
 
   return (
     <div className="flex flex-1 flex-col gap-6 p-8">
@@ -66,10 +56,16 @@ export function CreatorCollaboration({ collaboration }: CreatorCollaborationProp
             </BreadcrumbList>
           </Breadcrumb>
           <div className="flex items-center gap-2 shrink-0">
-            <Button variant="outline" size="sm" onClick={handleDownloadAll} className="gap-2">
+            <DownloadButton
+              assets={allAssets}
+              zipName={`${project.name} - ${creator.fullName}`}
+              onEmpty={() => toast.info("No assets to download")}
+              variant="outline"
+              size="sm"
+              className="gap-2"
+            >
               Download all
-              <Download className="h-4 w-4" />
-            </Button>
+            </DownloadButton>
             {!isClosed && (
               <Button size="sm" onClick={() => setShowCloseWizard(true)}>
                 Close Collaboration

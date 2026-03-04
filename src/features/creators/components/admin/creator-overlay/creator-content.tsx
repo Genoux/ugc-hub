@@ -1,8 +1,6 @@
-import { Download, FolderIcon } from "lucide-react";
-import { toast } from "sonner";
+import { FolderIcon } from "lucide-react";
 import type { CreatorProfile } from "@/features/creators/actions/admin/get-creator-profile";
-import type { PortfolioVideo } from "@/features/creators/constants";
-import { downloadAssets } from "@/features/projects/lib/download-assets";
+import { DownloadButton } from "@/features/projects/components/download-button";
 import { AssetCard } from "@/shared/components/blocks/asset-card";
 import {
   Empty,
@@ -19,21 +17,12 @@ interface CreatorContentProps {
   contentInert?: boolean;
 }
 
-async function handleDownloadAsset(e: React.MouseEvent<HTMLButtonElement>, asset: PortfolioVideo) {
-  e.preventDefault();
-  e.stopPropagation();
-  await downloadAssets([{ id: asset.id, filename: asset.filename, url: asset.url }], {
-    onError: () => toast.error("Download failed"),
-  });
-}
-
 export function CreatorContent({ creator, contentInert = false }: CreatorContentProps) {
   const allAssets = [
     ...creator.portfolioVideos.map((asset) => ({
       id: asset.id,
       url: asset.url,
       filename: asset.filename,
-      onDownload: (e: React.MouseEvent<HTMLButtonElement>) => handleDownloadAsset(e, asset),
     })),
     ...creator.closedCollaborations
       .flatMap((collab) => collab.highlights)
@@ -41,13 +30,6 @@ export function CreatorContent({ creator, contentInert = false }: CreatorContent
         id: highlight.id,
         url: highlight.url,
         filename: highlight.filename,
-        onDownload: (e: React.MouseEvent<HTMLButtonElement>) =>
-          handleDownloadAsset(e, {
-            id: highlight.id,
-            filename: highlight.filename,
-            url: highlight.url,
-            sizeBytes: 0,
-          } as PortfolioVideo),
       })),
   ];
 
@@ -67,8 +49,15 @@ export function CreatorContent({ creator, contentInert = false }: CreatorContent
                 size="sm"
                 src={asset.url}
                 filename={asset.filename}
-                action={asset.onDownload}
-                buttonIcon={<Download className="h-4 w-4" />}
+                actionSlot={
+                  <DownloadButton
+                    assets={[{ id: asset.id, filename: asset.filename, url: asset.url }]}
+                    size="icon"
+                    variant="ghost"
+                    className="h-8 w-8 text-white! hover:bg-white/20"
+                    stopPropagation
+                  />
+                }
               />
             ))}
           </div>

@@ -1,9 +1,8 @@
 "use client";
 
-import { ChevronRight, Download } from "lucide-react";
-import { toast } from "sonner";
+import { ChevronRight } from "lucide-react";
 import type { CollaborationDetail } from "@/features/projects/actions/get-collaboration-detail";
-import { downloadAssets } from "@/features/projects/lib/download-assets";
+import { DownloadButton } from "@/features/projects/components/download-button";
 import { AssetCard } from "@/shared/components/blocks/asset-card";
 import {
   CollapsibleContent,
@@ -26,17 +25,6 @@ function SubmissionSectionContent({
 }) {
   const { open } = useCollapsible();
 
-  async function handleDownloadSubmission(e: React.MouseEvent) {
-    e.stopPropagation();
-    await downloadAssets(
-      submission.assets.map((a) => ({ id: a.id, filename: a.filename, url: a.url })),
-      {
-        onError: (filename) => toast.error(`Failed to download ${filename}`),
-        zipName: `${projectName} - Submission ${submission.submissionNumber} - ${creatorFullName}`,
-      },
-    );
-  }
-
   return (
     <>
       <CollapsibleTrigger asChild>
@@ -52,15 +40,16 @@ function SubmissionSectionContent({
           </div>
           <div className="flex items-center gap-2">
             {submission.assets.length > 0 && (
-              <Button
+              <DownloadButton
+                assets={submission.assets.map((a) => ({ id: a.id, filename: a.filename, url: a.url }))}
+                zipName={`${projectName} - Submission ${submission.submissionNumber} - ${creatorFullName}`}
                 variant="ghost"
                 size="sm"
-                onClick={handleDownloadSubmission}
                 className="gap-1.5"
+                stopPropagation
               >
-                <Download className="h-3.5 w-3.5" />
                 Download all
-              </Button>
+              </DownloadButton>
             )}
             <span className="text-xs text-muted-foreground">
               {new Date(submission.deliveredAt).toLocaleDateString()}
@@ -83,14 +72,15 @@ function SubmissionSectionContent({
                   src={asset.url}
                   size="sm"
                   filename={asset.filename}
-                  action={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    downloadAssets([{ id: asset.id, filename: asset.filename, url: asset.url }], {
-                      onError: () => toast.error("Download failed"),
-                    });
-                  }}
-                  buttonIcon={<Download className="h-4 w-4" />}
+                  actionSlot={
+                    <DownloadButton
+                      assets={[{ id: asset.id, filename: asset.filename, url: asset.url }]}
+                      size="icon"
+                      variant="ghost"
+                      className="h-8 w-8 text-white! hover:bg-white/20"
+                      stopPropagation
+                    />
+                  }
                 />
               ))}
             </div>
