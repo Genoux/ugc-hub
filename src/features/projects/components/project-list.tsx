@@ -15,17 +15,10 @@ import {
   type VisibilityState,
 } from "@tanstack/react-table";
 import { Download, MoreVertical, Plus } from "lucide-react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/shared/components/ui/button";
-import {
-  Empty,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyTitle,
-} from "@/shared/components/ui/empty";
 import {
   Dialog,
   DialogContent,
@@ -39,6 +32,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/shared/components/ui/dropdown-menu";
+import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@/shared/components/ui/empty";
 import {
   Table,
   TableBody,
@@ -108,9 +102,6 @@ const columns: ColumnDef<Project>[] = [
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-40">
-              <DropdownMenuItem asChild>
-                <Link href={`/projects/${row.original.id}`}>View</Link>
-              </DropdownMenuItem>
               <DropdownMenuItem
                 className="cursor-pointer gap-2"
                 onSelect={(e) => {

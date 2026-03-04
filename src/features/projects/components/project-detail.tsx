@@ -3,37 +3,16 @@
 import { Check, ChevronLeft, ChevronRight, Copy, Folder } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import type { ProjectDetail as ProjectDetailType } from "@/features/projects/actions/get-project-detail";
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/ui/avatar";
 import { Button } from "@/shared/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/shared/components/ui/tooltip";
 
-type Project = {
-  id: string;
-  name: string;
-  description: string | null;
-  uploadToken: string;
-};
-
-type Collaboration = {
-  id: string;
-  creator: {
-    id: string;
-    fullName: string;
-    email: string;
-    profilePhotoUrl: string | null;
-  };
-  submissions: Array<{
-    id: string;
-    assets: Array<{ id: string; filename: string }>;
-  }>;
-};
-
-interface ProjectDetailClientProps {
-  project: Project;
-  collaborations: Collaboration[];
+interface ProjectDetailProps {
+  project: ProjectDetailType;
 }
 
-export function ProjectDetailClient({ project, collaborations }: ProjectDetailClientProps) {
+export function ProjectDetail({ project }: ProjectDetailProps) {
   const [copiedToken, setCopiedToken] = useState(false);
 
   async function handleCopyToken() {
@@ -45,7 +24,6 @@ export function ProjectDetailClient({ project, collaborations }: ProjectDetailCl
 
   return (
     <div className="flex flex-1 flex-col gap-6 p-8">
-      {/* Header */}
       <div className="flex flex-col gap-6">
         <Button variant="outline" size="sm" asChild className="w-fit">
           <Link href="/projects">
@@ -75,13 +53,12 @@ export function ProjectDetailClient({ project, collaborations }: ProjectDetailCl
         </div>
       </div>
 
-      {/* Creator list */}
       <div className="flex flex-col gap-3">
         <p className="text-sm text-muted-foreground">
-          {collaborations.length} creator{collaborations.length !== 1 ? "s" : ""}
+          {project.collaborations.length} creator{project.collaborations.length !== 1 ? "s" : ""}
         </p>
 
-        {collaborations.length === 0 ? (
+        {project.collaborations.length === 0 ? (
           <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed py-16 text-center">
             <Folder className="h-8 w-8 text-muted-foreground/50" />
             <div>
@@ -93,7 +70,7 @@ export function ProjectDetailClient({ project, collaborations }: ProjectDetailCl
           </div>
         ) : (
           <div className="space-y-2">
-            {collaborations.map((collaboration) => {
+            {project.collaborations.map((collaboration) => {
               const totalFiles = collaboration.submissions.reduce((s, b) => s + b.assets.length, 0);
 
               return (
