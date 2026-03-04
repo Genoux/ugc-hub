@@ -1,8 +1,11 @@
 "use client";
 
-import { RATING_CONFIG, RATING_TIERS } from "@/features/creators/constants";
+import { RATING_TIERS } from "@/features/creators/constants";
+import { Button } from "@/shared/components/ui/button";
+import { Field, FieldDescription, FieldLabel } from "@/shared/components/ui/field";
 import { Label } from "@/shared/components/ui/label";
 import { Textarea } from "@/shared/components/ui/textarea";
+import { cn } from "@/shared/lib/utils";
 import type { CollaborationRatingsInput } from "../../schemas";
 
 const DIMENSIONS: { key: keyof CollaborationRatingsInput; label: string; description: string }[] = [
@@ -33,39 +36,37 @@ interface StepRatingsProps {
 export function StepRatings({ ratings, notes, onChange, onNotesChange }: StepRatingsProps) {
   return (
     <div className="space-y-6">
-      <div className="rounded-xl bg-muted/60 p-5 space-y-5">
-        {DIMENSIONS.map(({ key, label, description }) => (
-          <div key={key}>
-            <div className="mb-2">
-              <span className="text-sm font-medium text-foreground">{label}</span>
-              <p className="text-xs text-muted-foreground">{description}</p>
-            </div>
-            <div className="flex flex-wrap gap-1.5">
-              {RATING_TIERS.map((tier) => {
-                const isSelected = ratings[key] === tier;
-                const config = RATING_CONFIG[tier];
-                /* TODO: USE TOGGLE BUTTON */
-                return (
-                  <button
-                    key={tier}
-                    type="button"
-                    onClick={() => onChange({ ...ratings, [key]: tier })}
-                    className={`px-3 py-1.5 text-xs font-medium rounded-full border capitalize transition-all ${isSelected
-                      ? "ring-2 ring-offset-1 ring-current scale-[1.03] opacity-100"
-                      : "opacity-55 hover:opacity-80"
-                      }`}
-                  >
-                    {tier}
-                  </button>
-                );
-              })}
-            </div>
+      {DIMENSIONS.map(({ key, label, description }) => (
+        <div key={key} className="space-y-2">
+          <div>
+            <p className="text-sm font-medium">{label}</p>
+            <p className="text-xs text-muted-foreground">{description}</p>
           </div>
-        ))}
-      </div>
-
+          <div className="flex flex-wrap gap-1.5">
+            {RATING_TIERS.map((tier) => {
+              const isSelected = ratings[key] === tier;
+              return (
+                <Button
+                  key={tier}
+                  onClick={() => onChange({ ...ratings, [key]: tier })}
+                  variant={isSelected ? "default" : "outline"}
+                  className={cn(
+                    "text-sm capitalize border border-transparent",
+                    isSelected
+                      ? "border-foreground bg-foreground text-background"
+                      : "border-border text-muted-foreground",
+                  )}
+                >
+                  {tier}
+                </Button>
+              );
+            })}
+          </div>
+        </div>
+      ))}
+      <hr />
       <div>
-        <Label className="text-sm font-medium text-foreground mb-1.5 block">
+        <Label className="text-sm font-medium mb-1.5 block">
           Notes <span className="text-muted-foreground font-normal">(optional)</span>
         </Label>
         <Textarea

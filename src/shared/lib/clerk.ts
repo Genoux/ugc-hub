@@ -66,7 +66,6 @@ export async function getClerkUserProfile(userId: string): Promise<ClerkUserProf
   }
 }
 
-
 export async function revokeInvitation(email: string): Promise<void> {
   const client = await clerkClient();
 

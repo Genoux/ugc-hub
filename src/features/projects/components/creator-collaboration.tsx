@@ -1,6 +1,7 @@
 "use client";
 
 import { CheckCircle2 } from "lucide-react";
+import { AnimatePresence } from "motion/react";
 import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -9,6 +10,7 @@ import { CreatorProfileInfo } from "@/features/creators/components/admin/creator
 import type { CollaborationDetail } from "@/features/projects/actions/get-collaboration-detail";
 import { DownloadButton } from "@/features/projects/components/download-button";
 import { SubmissionSection } from "@/features/projects/components/submission-section";
+import { AssetCard } from "@/shared/components/blocks/asset-card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/ui/avatar";
 import {
   Breadcrumb,
@@ -97,6 +99,22 @@ export function CreatorCollaboration({ collaboration }: CreatorCollaborationProp
           )}
         </div>
       </div>
+      <hr />
+      {collaboration.highlights.length > 0 && (
+        <div className="flex flex-col gap-2">
+          <h3 className="text-sm font-semibold text-foreground">Collaboration highlights</h3>
+          <div className="flex items-center gap-2">
+            {collaboration.highlights.map((highlight) => (
+              <AssetCard
+                key={highlight.id}
+                size="md"
+                src={highlight.url}
+                filename={highlight.filename}
+              />
+            ))}
+          </div>
+        </div>
+      )}
 
       {submissions.length === 0 ? (
         <div className="rounded-xl border border-dashed py-16 text-center">
@@ -115,15 +133,20 @@ export function CreatorCollaboration({ collaboration }: CreatorCollaborationProp
         </div>
       )}
 
-      <CloseCollaborationWizard
-        open={showCloseWizard}
-        onClose={() => setShowCloseWizard(false)}
-        onSuccess={() => setIsClosed(true)}
-        collaborationId={id}
-        creatorId={creator.id}
-        creatorName={creator.fullName}
-        submissionName={project.name}
-      />
+      <AnimatePresence>
+        {showCloseWizard && (
+          <CloseCollaborationWizard
+            onClose={() => setShowCloseWizard(false)}
+            onSuccess={() => setIsClosed(true)}
+            collaborationId={id}
+            creatorId={creator.id}
+            creatorName={creator.fullName}
+            profilePhotoUrl={creator.profilePhotoUrl ?? ""}
+            submissionName={project.name}
+            closedCollabRatings={creator.closedCollabRatings}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

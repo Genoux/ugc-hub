@@ -17,17 +17,9 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/shared/components/ui/carousel";
-import type {
-  PortfolioVideoEntry,
-  UploadingVideoEntry,
-} from "../onboarding-types";
+import type { PortfolioVideoEntry, UploadingVideoEntry } from "../onboarding-types";
 
-const ACCEPTED_TYPES = [
-  "video/mp4",
-  "video/quicktime",
-  "video/x-msvideo",
-  "video/webm",
-] as const;
+const ACCEPTED_TYPES = ["video/mp4", "video/quicktime", "video/x-msvideo", "video/webm"] as const;
 
 interface Props {
   doneEntries: PortfolioVideoEntry[];
@@ -74,9 +66,7 @@ export function StepVideos({
         })
         .catch((err) => {
           URL.revokeObjectURL(objectUrl);
-          const message = err instanceof Error
-            ? err.message
-            : "Upload failed. Please try again.";
+          const message = err instanceof Error ? err.message : "Upload failed. Please try again.";
           setErrors((prev) => [...prev, message]);
         })
         .finally(() => onUploadEnd(tempId));

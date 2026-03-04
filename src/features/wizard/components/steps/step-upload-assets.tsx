@@ -1,8 +1,8 @@
 "use client";
 
 import { toast } from "sonner";
+import { AssetFileList } from "@/shared/components/blocks/asset-file-list";
 import { FileDropZone } from "@/shared/components/blocks/file-drop-zone";
-import { FileList } from "../wizard-file-list";
 
 interface StepUploadAssetsProps {
   files: File[];
@@ -24,7 +24,7 @@ export function StepUploadAssets({ projectName, files, onFilesChange }: StepUplo
     <div className="space-y-2">
       <p className="text-sm text-muted-foreground">Project: {projectName}</p>
 
-      {files.length > 0 && <FileList files={files} onRemove={handleRemoveFile} />}
+      {files.length > 0 && <AssetFileList files={files} onRemove={handleRemoveFile} />}
 
       <FileDropZone
         onFilesAdd={(added) => onFilesChange([...files, ...added])}

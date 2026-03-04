@@ -1,8 +1,9 @@
 "use server";
 
-import { eq } from "drizzle-orm";
+import { and, eq, ne } from "drizzle-orm";
 import { collaborations } from "@/db/schema";
 import type { CollaborationHighlight } from "@/features/creators/constants";
+import type { CollabRatingRow } from "@/features/collaborations/lib/calculate-ratings";
 import { toMediaUrl } from "@/features/uploads/lib/r2-media-url";
 import { requireAdmin } from "@/shared/lib/auth";
 import { db } from "@/shared/lib/db";
@@ -11,13 +12,25 @@ export type CollaborationDetail = {
   id: string;
   status: "active" | "closed";
   project: { id: string; name: string };
-  creator: { id: string; fullName: string; email: string; profilePhotoUrl: string | null };
+  creator: {
+    id: string;
+    fullName: string;
+    email: string;
+    profilePhotoUrl: string | null;
+    closedCollabRatings: CollabRatingRow[];
+  };
   submissions: Array<{
     id: string;
     label: string;
     submissionNumber: number;
     deliveredAt: Date;
-    assets: Array<{ id: string; filename: string; mimeType: string; sizeBytes: number; url: string }>;
+    assets: Array<{
+      id: string;
+      filename: string;
+      mimeType: string;
+      sizeBytes: number;
+      url: string;
+    }>;
   }>;
   highlights: Array<{ id: string; filename: string; mimeType: string; url: string }>;
 };
@@ -47,6 +60,21 @@ export async function getCollaborationDetail(
 
   if (!raw || raw.project.id !== projectId) return null;
 
+  const closedCollabRatings = await db
+    .select({
+      ratingVisualQuality: collaborations.ratingVisualQuality,
+      ratingActingDelivery: collaborations.ratingActingDelivery,
+      ratingReliabilitySpeed: collaborations.ratingReliabilitySpeed,
+    })
+    .from(collaborations)
+    .where(
+      and(
+        eq(collaborations.creatorId, raw.creator.id),
+        eq(collaborations.status, "closed"),
+        ne(collaborations.id, collaborationId),
+      ),
+    );
+
   return {
     id: raw.id,
     status: raw.status,
@@ -56,6 +84,7 @@ export async function getCollaborationDetail(
       fullName: raw.creator.fullName,
       email: raw.creator.email,
       profilePhotoUrl: toMediaUrl(raw.creator.profilePhoto),
+      closedCollabRatings,
     },
     submissions: raw.submissions.map((submission) => ({
       id: submission.id,

@@ -14,7 +14,10 @@ async function fetchBlobFromDownloadRoute(assetId: string): Promise<Blob> {
 }
 
 async function fetchBlob(asset: { id: string; url?: string }): Promise<Blob> {
-  if (asset.url) return fetch(asset.url).then((r) => (r.ok ? r.blob() : Promise.reject(new Error(r.statusText))));
+  if (asset.url)
+    return fetch(asset.url).then((r) =>
+      r.ok ? r.blob() : Promise.reject(new Error(r.statusText)),
+    );
   return fetchBlobFromDownloadRoute(asset.id);
 }
 

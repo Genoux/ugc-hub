@@ -3,7 +3,7 @@
 import { ChevronRight } from "lucide-react";
 import Image from "next/image";
 import type { CreatorProfile } from "@/features/creators/actions/admin/get-creator-profile";
-import { RatingBadge } from "@/features/creators/components/rating-badge";
+import { RatingBadge } from "@/shared/components/blocks/rating-badge";
 import {
   CollapsibleSection,
   CollapsibleTrigger,
@@ -102,33 +102,33 @@ function CollaborationCardContent({
           {(collab.ratingVisualQuality ||
             collab.ratingActingDelivery ||
             collab.ratingReliabilitySpeed) && (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-1">
-                {collab.ratingVisualQuality && (
-                  <BentoCard>
-                    <LabeledField
-                      label="Visual"
-                      value={<RatingBadge rating={collab.ratingVisualQuality} />}
-                    />
-                  </BentoCard>
-                )}
-                {collab.ratingActingDelivery && (
-                  <BentoCard>
-                    <LabeledField
-                      label="Acting"
-                      value={<RatingBadge rating={collab.ratingActingDelivery} />}
-                    />
-                  </BentoCard>
-                )}
-                {collab.ratingReliabilitySpeed && (
-                  <BentoCard>
-                    <LabeledField
-                      label="Reliability"
-                      value={<RatingBadge rating={collab.ratingReliabilitySpeed} />}
-                    />
-                  </BentoCard>
-                )}
-              </div>
-            )}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-1">
+              {collab.ratingVisualQuality && (
+                <BentoCard>
+                  <LabeledField
+                    label="Visual"
+                    value={<RatingBadge rating={collab.ratingVisualQuality} />}
+                  />
+                </BentoCard>
+              )}
+              {collab.ratingActingDelivery && (
+                <BentoCard>
+                  <LabeledField
+                    label="Acting"
+                    value={<RatingBadge rating={collab.ratingActingDelivery} />}
+                  />
+                </BentoCard>
+              )}
+              {collab.ratingReliabilitySpeed && (
+                <BentoCard>
+                  <LabeledField
+                    label="Reliability"
+                    value={<RatingBadge rating={collab.ratingReliabilitySpeed} />}
+                  />
+                </BentoCard>
+              )}
+            </div>
+          )}
           {collab.submissions.map((submission) => (
             <SubmissionSection key={submission.id} submission={submission} />
           ))}

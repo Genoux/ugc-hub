@@ -160,8 +160,7 @@ function MultiSelect<T extends string>({
           id={`${prefix}-${o}`}
           label={o}
           checked={selected.includes(o)}
-          onChange={(on) =>
-            onChange(on ? [...selected, o] : selected.filter((s) => s !== o))}
+          onChange={(on) => onChange(on ? [...selected, o] : selected.filter((s) => s !== o))}
         />
       ))}
     </>
@@ -176,11 +175,7 @@ interface DatabaseFiltersProps {
 export function DatabaseFilters({ filters, onChange }: DatabaseFiltersProps) {
   return (
     <div className="w-full flex flex-col gap-2">
-      <FilterSection
-        title="Rating"
-        defaultOpen
-        activeCount={filters.overallRating.length}
-      >
+      <FilterSection title="Rating" defaultOpen activeCount={filters.overallRating.length}>
         <MultiSelect
           prefix="rating"
           options={OVERALL_RATING_TIERS}
@@ -189,10 +184,7 @@ export function DatabaseFilters({ filters, onChange }: DatabaseFiltersProps) {
         />
       </FilterSection>
 
-      <FilterSection
-        title="Channels"
-        activeCount={filters.socialPlatforms.length}
-      >
+      <FilterSection title="Channels" activeCount={filters.socialPlatforms.length}>
         <MultiSelect
           prefix="channel"
           options={SOCIAL_PLATFORMS.map((p) => p.value)}
@@ -201,10 +193,7 @@ export function DatabaseFilters({ filters, onChange }: DatabaseFiltersProps) {
         />
       </FilterSection>
 
-      <FilterSection
-        title="UGC Categories"
-        activeCount={filters.ugcCategories.length}
-      >
+      <FilterSection title="UGC Categories" activeCount={filters.ugcCategories.length}>
         <MultiSelect
           prefix="ugc"
           options={UGC_CATEGORIES}
@@ -213,10 +202,7 @@ export function DatabaseFilters({ filters, onChange }: DatabaseFiltersProps) {
         />
       </FilterSection>
 
-      <FilterSection
-        title="Content Formats"
-        activeCount={filters.contentFormats.length}
-      >
+      <FilterSection title="Content Formats" activeCount={filters.contentFormats.length}>
         <MultiSelect
           prefix="format"
           options={CONTENT_FORMATS}

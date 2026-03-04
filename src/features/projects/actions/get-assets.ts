@@ -29,18 +29,14 @@ export async function getAssets(scope: Scope): Promise<{ data: AssetWithUrl[] }>
         .select({ id: assets.id, filename: assets.filename, r2Key: assets.r2Key })
         .from(assets)
         .innerJoin(submissions, eq(assets.submissionId, submissions.id))
-        .where(
-          and(eq(submissions.collaborationId, scope.collaborationId), completed),
-        );
+        .where(and(eq(submissions.collaborationId, scope.collaborationId), completed));
     } else {
       rows = await db
         .select({ id: assets.id, filename: assets.filename, r2Key: assets.r2Key })
         .from(assets)
         .innerJoin(submissions, eq(assets.submissionId, submissions.id))
         .innerJoin(collaborations, eq(submissions.collaborationId, collaborations.id))
-        .where(
-          and(eq(collaborations.projectId, scope.projectId), completed),
-        );
+        .where(and(eq(collaborations.projectId, scope.projectId), completed));
     }
 
     const data = rows

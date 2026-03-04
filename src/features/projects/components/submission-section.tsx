@@ -41,7 +41,11 @@ function SubmissionSectionContent({
           <div className="flex items-center gap-2">
             {submission.assets.length > 0 && (
               <DownloadButton
-                assets={submission.assets.map((a) => ({ id: a.id, filename: a.filename, url: a.url }))}
+                assets={submission.assets.map((a) => ({
+                  id: a.id,
+                  filename: a.filename,
+                  url: a.url,
+                }))}
                 zipName={`${projectName} - Submission ${submission.submissionNumber} - ${creatorFullName}`}
                 variant="ghost"
                 size="sm"

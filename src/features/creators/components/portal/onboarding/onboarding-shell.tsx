@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckIcon, CircleAlert, X } from "lucide-react";
+import { CheckIcon, X } from "lucide-react";
 import Image from "next/image";
 import { useRef, useState, useTransition } from "react";
 import { completeCreatorProfile } from "@/features/creators/actions/portal/complete-creator-profile";
@@ -12,10 +12,7 @@ import {
   type ProfilePhotoManager,
   useProfilePhotoManager,
 } from "@/features/creators/hooks/portal/use-profile-photo-manager";
-import {
-  buildOnboardingData,
-  canProceed,
-} from "@/features/creators/lib/onboarding-utils";
+import { buildOnboardingData, canProceed } from "@/features/creators/lib/onboarding-utils";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -37,6 +34,7 @@ import {
   WizardStep,
   WizardTitle,
 } from "@/shared/components/wizard/wizard";
+import { ProgressDots } from "@/shared/components/wizard/progress-dots";
 import { useSteppedFlow } from "@/shared/hooks/use-stepped-flow";
 import { cn } from "@/shared/lib/utils";
 import { STEPS } from "./onboarding-constants";
@@ -52,60 +50,6 @@ import { StepStyle } from "./steps/step-style";
 import { StepVideos } from "./steps/step-videos";
 
 const TOTAL_STEPS = 9;
-
-function ProgressDots({
-  current,
-  steps,
-  onStepClick,
-  filledSteps,
-}: {
-  current: number;
-  steps: Record<number, { name: string }>;
-  filledSteps: Set<number>;
-  onStepClick: (step: number) => void;
-}) {
-  const stepEntries = Object.entries(steps).map(([key, val]) => ({
-    step: Number(key),
-    name: val.name,
-  }));
-
-  return (
-    <div
-      className="flex items-center gap-1 flex-wrap justify-center"
-      role="progressbar"
-      aria-valuenow={current}
-      aria-valuemin={1}
-      aria-valuemax={stepEntries.length}
-      aria-label={steps[current]?.name}
-    >
-      {stepEntries.map(({ step, name }) => {
-        const isCompleted = step < current;
-        const isCurrent = step === current;
-        return (
-          <Button
-            key={step}
-            variant="outline"
-            size="sm"
-            onClick={() => onStepClick(step)}
-            className={cn(
-              `text-xs transition-colors disabled:cursor-default relative`,
-              isCompleted && "text-foreground",
-              isCurrent && "text-foreground font-medium opacity-100",
-            )}
-            aria-label={isCompleted ? `Go back to ${name}` : name}
-          >
-            {!filledSteps.has(step)
-              ? (
-                <CircleAlert className="size-3.5 rounded-full animate-pulse text-red-500 bg-white absolute -top-1 -right-1" />
-              )
-              : null}
-            <span className={cn(!isCurrent && "opacity-50")}>{name}</span>
-          </Button>
-        );
-      })}
-    </div>
-  );
-}
 
 interface StepContentProps {
   step: number;
@@ -165,31 +109,19 @@ function StepContent({
     case 8:
       return <StepAboutYou data={data} onChange={onChange} />;
     case 9:
-      return (
-        <StepComplete
-          error={submitError}
-          onExit={onExitResult}
-          onRetry={onRetryResult}
-        />
-      );
+      return <StepComplete error={submitError} onExit={onExitResult} onRetry={onRetryResult} />;
     default:
       return null;
   }
 }
 
-export function OnboardingShell(
-  { creator, onComplete, onClose }: OnboardingProps,
-) {
+export function OnboardingShell({ creator, onComplete, onClose }: OnboardingProps) {
   const { step, goToStep, directionRef } = useSteppedFlow(TOTAL_STEPS);
-  const [data, setData] = useState<OnboardingData>(() =>
-    buildOnboardingData(creator)
-  );
+  const [data, setData] = useState<OnboardingData>(() => buildOnboardingData(creator));
   const [isPending, startTransition] = useTransition();
   const [confirmingClose, setConfirmingClose] = useState(false);
   const initialData = useRef(buildOnboardingData(creator));
-  const initialVideoIds = useRef(
-    new Set(creator.portfolioVideos.map((v) => v.id)),
-  );
+  const initialVideoIds = useRef(new Set(creator.portfolioVideos.map((v) => v.id)));
   const photoManager = useProfilePhotoManager(creator.profilePhotoUrl);
   const videoManager = usePortfolioVideoManager(
     creator.portfolioVideos.map((v) => ({
@@ -201,16 +133,11 @@ export function OnboardingShell(
   );
 
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const [closeReason, setCloseReason] = useState<
-    "incomplete" | "leave_save" | "quit" | null
-  >(null);
-  const update = (updates: Partial<OnboardingData>) =>
-    setData((prev) => ({ ...prev, ...updates }));
+  const [closeReason, setCloseReason] = useState<"incomplete" | "leave_save" | "quit" | null>(null);
+  const update = (updates: Partial<OnboardingData>) => setData((prev) => ({ ...prev, ...updates }));
   const isLastFormStep = step === 8;
   const isResultStep = step === TOTAL_STEPS;
-  const pendingCloseActionRef = useRef<(() => void | Promise<void>) | null>(
-    null,
-  );
+  const pendingCloseActionRef = useRef<(() => void | Promise<void>) | null>(null);
 
   const ALERT_CLOSE_MS = 250;
 
@@ -238,7 +165,7 @@ export function OnboardingShell(
       return;
     }
     const allComplete = [1, 2, 3, 4, 5, 6, 7, 8].every((s) =>
-      canProceed(s, data, videoManager.completedCount)
+      canProceed(s, data, videoManager.completedCount),
     );
     if (hasChanges() && !allComplete) {
       setCloseReason("incomplete");
@@ -295,9 +222,7 @@ export function OnboardingShell(
         await completeCreatorProfile(buildProfilePayload());
         onClose();
       } catch (err) {
-        setSubmitError(
-          err instanceof Error ? err.message : "Something went wrong",
-        );
+        setSubmitError(err instanceof Error ? err.message : "Something went wrong");
         setConfirmingClose(false);
       }
     });
@@ -314,9 +239,7 @@ export function OnboardingShell(
           goToStep(9);
         }
       } catch (err) {
-        setSubmitError(
-          err instanceof Error ? err.message : "Something went wrong",
-        );
+        setSubmitError(err instanceof Error ? err.message : "Something went wrong");
         goToStep(9);
       }
     });
@@ -333,9 +256,7 @@ export function OnboardingShell(
 
   const videoCount = videoManager.completedCount;
   const stepCanProceed = canProceed(step, data, videoCount);
-  const allStepsComplete = [1, 2, 3, 4, 5, 6, 7, 8].every((s) =>
-    canProceed(s, data, videoCount)
-  );
+  const allStepsComplete = [1, 2, 3, 4, 5, 6, 7, 8].every((s) => canProceed(s, data, videoCount));
   const filledSteps = new Set(
     Object.keys(STEPS)
       .map(Number)
@@ -357,24 +278,26 @@ export function OnboardingShell(
             >
               <X className="size-5" />
             </Button>
-            {creator.profileCompleted && !isResultStep
-              ? (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  onClick={handleSaveAndClose}
-                  disabled={!allStepsComplete ||
-                    isPending ||
-                    (step === 5 && photoManager.isUploading) ||
-                    (step === 6 && videoManager.isUploading)}
-                  className="text-muted-foreground hover:text-foreground"
-                  aria-label="Save and close"
-                >
-                  <CheckIcon className="size-5" />
-                </Button>
-              )
-              : <span />}
+            {creator.profileCompleted && !isResultStep ? (
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={handleSaveAndClose}
+                disabled={
+                  !allStepsComplete ||
+                  isPending ||
+                  (step === 5 && photoManager.isUploading) ||
+                  (step === 6 && videoManager.isUploading)
+                }
+                className="text-muted-foreground hover:text-foreground"
+                aria-label="Save and close"
+              >
+                <CheckIcon className="size-5" />
+              </Button>
+            ) : (
+              <span />
+            )}
           </WizardHeader>
 
           <div className="flex flex-1 flex-col justify-center gap-4">
@@ -398,31 +321,35 @@ export function OnboardingShell(
               />
               {!isResultStep && (
                 <WizardFooter>
-                  {step > 1
-                    ? (
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => handleStepChange(step - 1)}
-                        disabled={isPending}
-                      >
-                        Back
-                      </Button>
-                    )
-                    : <span />}
+                  {step > 1 ? (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => handleStepChange(step - 1)}
+                      disabled={isPending}
+                    >
+                      Back
+                    </Button>
+                  ) : (
+                    <span />
+                  )}
                   <Button
                     type="button"
                     onClick={handleNext}
-                    disabled={!stepCanProceed ||
+                    disabled={
+                      !stepCanProceed ||
                       isPending ||
                       (step === 5 && photoManager.isUploading) ||
-                      (step === 6 && videoManager.isUploading)}
+                      (step === 6 && videoManager.isUploading)
+                    }
                   >
                     {isPending
                       ? "Saving…"
                       : isLastFormStep
-                      ? creator.profileCompleted ? "Save" : "Complete"
-                      : "Next"}
+                        ? creator.profileCompleted
+                          ? "Save"
+                          : "Complete"
+                        : "Next"}
                   </Button>
                 </WizardFooter>
               )}
@@ -441,11 +368,7 @@ export function OnboardingShell(
           </div>
         </WizardPanel>
 
-        <WizardAside
-          stepKey={step}
-          direction={directionRef.current}
-          visible={!isResultStep}
-        >
+        <WizardAside stepKey={step} direction={directionRef.current} visible={!isResultStep}>
           <Image
             src={`/creator/onboarding/step${step}.jpg`}
             alt=""
@@ -485,52 +408,40 @@ export function OnboardingShell(
               {closeReason === "incomplete"
                 ? "Profile incomplete"
                 : creator.profileCompleted
-                ? "Leave profile setup?"
-                : "Quit profile setup?"}
+                  ? "Leave profile setup?"
+                  : "Quit profile setup?"}
             </AlertDialogTitle>
             <AlertDialogDescription>
               {closeReason === "incomplete"
                 ? "Please make sure to fill out all the steps before leaving, or discard your changes."
                 : creator.profileCompleted
-                ? "Do you want to save your changes before leaving?"
-                : "Your progress won't be saved. You can come back and complete your profile anytime."}
+                  ? "Do you want to save your changes before leaving?"
+                  : "Your progress won't be saved. You can come back and complete your profile anytime."}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            {closeReason === "incomplete"
-              ? (
-                <>
-                  <AlertDialogCancel onClick={() => setConfirmingClose(false)}>
-                    Stay
-                  </AlertDialogCancel>
-                  <AlertDialogAction onClick={handleRevertAndQuit}>
-                    Revert and quit
-                  </AlertDialogAction>
-                </>
-              )
-              : creator.profileCompleted
-              ? (
-                <>
-                  <AlertDialogCancel onClick={handleConfirmedClose}>
-                    No, quit
-                  </AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={() => runAfterAlertClosed(handleSaveAndClose)}
-                  >
-                    Save and quit
-                  </AlertDialogAction>
-                </>
-              )
-              : (
-                <>
-                  <AlertDialogCancel onClick={() => setConfirmingClose(false)}>
-                    Keep going
-                  </AlertDialogCancel>
-                  <AlertDialogAction onClick={handleConfirmedClose}>
-                    Quit
-                  </AlertDialogAction>
-                </>
-              )}
+            {closeReason === "incomplete" ? (
+              <>
+                <AlertDialogCancel onClick={() => setConfirmingClose(false)}>
+                  Stay
+                </AlertDialogCancel>
+                <AlertDialogAction onClick={handleRevertAndQuit}>Revert and quit</AlertDialogAction>
+              </>
+            ) : creator.profileCompleted ? (
+              <>
+                <AlertDialogCancel onClick={handleConfirmedClose}>No, quit</AlertDialogCancel>
+                <AlertDialogAction onClick={() => runAfterAlertClosed(handleSaveAndClose)}>
+                  Save and quit
+                </AlertDialogAction>
+              </>
+            ) : (
+              <>
+                <AlertDialogCancel onClick={() => setConfirmingClose(false)}>
+                  Keep going
+                </AlertDialogCancel>
+                <AlertDialogAction onClick={handleConfirmedClose}>Quit</AlertDialogAction>
+              </>
+            )}
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

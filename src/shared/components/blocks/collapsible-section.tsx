@@ -53,7 +53,7 @@ export function CollapsibleTrigger({ children, asChild }: CollapsibleTriggerProp
   const Comp = asChild ? Slot : "button";
 
   return (
-    <Comp  type={asChild ? undefined : "button"} onClick={toggle}>
+    <Comp type={asChild ? undefined : "button"} onClick={toggle}>
       {children}
     </Comp>
   );

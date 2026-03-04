@@ -50,13 +50,13 @@ function FileItem({
   );
 }
 
-type FileListProps = {
+export type AssetFileListProps = {
   files: File[];
   onRemove?: (index: number) => void;
   size?: "sm" | "md" | "lg";
 };
 
-export function FileList({ files, onRemove, size = "md" }: FileListProps) {
+export function AssetFileList({ files, onRemove, size = "md" }: AssetFileListProps) {
   return (
     <div className="flex w-full min-w-0 gap-1 overflow-x-auto pb-3">
       {files.map((file, idx) => (
@@ -66,4 +66,9 @@ export function FileList({ files, onRemove, size = "md" }: FileListProps) {
       ))}
     </div>
   );
+}
+
+/** @deprecated Use AssetFileList */
+export function FileList(props: AssetFileListProps) {
+  return <AssetFileList {...props} />;
 }

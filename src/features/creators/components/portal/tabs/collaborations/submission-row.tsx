@@ -43,11 +43,7 @@ function SubmissionRowContent({ submission }: SubmissionRowProps) {
         <div className="p-4">
           <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-2">
             {submission.assets.map((asset) => (
-              <AssetCard
-                key={asset.id}
-                src={asset.url || null}
-                filename={asset.filename}
-              />
+              <AssetCard key={asset.id} src={asset.url || null} filename={asset.filename} />
             ))}
           </div>
         </div>

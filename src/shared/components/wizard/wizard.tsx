@@ -112,7 +112,7 @@ export function WizardStep({ stepKey, direction, children, className }: WizardSt
           initial={{ opacity: 0, x: direction * SLIDE_OFFSET }}
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: direction * -SLIDE_OFFSET }}
-          transition={{ duration: 0.4, ease: EASING_FUNCTION.quartic }}
+          transition={{ duration: 0.3, ease: EASING_FUNCTION.exponential }}
           className={cn("mx-auto flex min-h-full w-full max-w-3xl flex-col", className)}
         >
           <div className="flex flex-1 flex-col justify-center gap-4">{children}</div>
@@ -185,7 +185,7 @@ export function WizardAside({
           ? { opacity: 1 }
           : { width: 0, minWidth: 0, opacity: 0, x: SLIDE_OFFSET, paddingLeft: 0 }
       }
-      transition={{ duration: 0.6, ease: EASING_FUNCTION.exponential }}
+      transition={{ duration: 0.2, ease: EASING_FUNCTION.exponential }}
       className={cn(
         "hidden xl:flex shrink-0 overflow-hidden w-[min(536px,40vw)] min-w-[280px] pl-4",
         className,
@@ -197,7 +197,7 @@ export function WizardAside({
           initial={{ opacity: 0, x: direction * 10 }}
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: direction * -10 }}
-          transition={{ duration: 0.6, ease: EASING_FUNCTION.exponential }}
+          transition={{ duration: 0.2, ease: EASING_FUNCTION.exponential }}
           className="relative h-full w-full overflow-hidden rounded-4xl shadow-hub"
         >
           {children}

@@ -11,9 +11,7 @@ import { SidebarInset, SidebarProvider } from "@/shared/components/ui/sidebar";
 
 const PLATFORM_ROUTES = ["/applicants", "/database", "/projects"] as const;
 
-export default function PlatformLayout(
-  { children }: { children: React.ReactNode },
-) {
+export default function PlatformLayout({ children }: { children: React.ReactNode }) {
   const [isAppReady, setIsAppReady] = useState(false);
   const router = useRouter();
 
@@ -31,10 +29,12 @@ export default function PlatformLayout(
     <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
       <SidebarProvider
         className="h-svh overflow-hidden"
-        style={{
-          "--sidebar-width": "220px",
-          "--header-height": "calc(var(--spacing) * 12)",
-        } as React.CSSProperties}
+        style={
+          {
+            "--sidebar-width": "220px",
+            "--header-height": "calc(var(--spacing) * 12)",
+          } as React.CSSProperties
+        }
       >
         <AnimatePresence mode="wait">
           {!isAppReady && <LoadingScreen key="loading" />}
@@ -42,9 +42,7 @@ export default function PlatformLayout(
         <AppSidebar variant="inset" />
         <SidebarInset className="min-h-0 max-h-[calc(100svh-1rem)] overflow-hidden">
           <SiteHeader />
-          <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
-            {children}
-          </div>
+          <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">{children}</div>
         </SidebarInset>
       </SidebarProvider>
     </ThemeProvider>

@@ -1,6 +1,6 @@
 import Image from "next/image";
 import type { CreatorListItem } from "@/features/creators/actions/admin/get-creators";
-import { RatingBadge } from "@/features/creators/components/rating-badge";
+import { RatingBadge } from "@/shared/components/blocks/rating-badge";
 import { VerifiedBadge } from "@/shared/components/icons/verified-badge";
 import { Squircle } from "@squircle-js/react";
 import { Button } from "@/shared/components/ui/button";
@@ -43,9 +43,7 @@ export function CreatorCard({ creator, onClick }: CreatorCardProps) {
             <div className="flex flex-col gap-0.5">
               <div className="flex items-center gap-2">
                 <h3 className="font-semibold text-white text-xl truncate">{creator.fullName}</h3>
-                {creator.overallRating === "top creator" && (
-                  <VerifiedBadge className="size-5" />
-                )}
+                {creator.overallRating === "top creator" && <VerifiedBadge className="size-5" />}
               </div>
               <div className="text-sm text-left font-semibold text-white/80">{rateDisplay}</div>
             </div>
@@ -58,7 +56,5 @@ export function CreatorCard({ creator, onClick }: CreatorCardProps) {
         </div>
       </div>
     </button>
-
-
   );
 }

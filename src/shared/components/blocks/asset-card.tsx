@@ -20,7 +20,14 @@ type AssetCardProps = {
   className?: string;
 };
 
-export function AssetCard({ src, filename, isLoading, actionSlot, size, className }: AssetCardProps) {
+export function AssetCard({
+  src,
+  filename,
+  isLoading,
+  actionSlot,
+  size,
+  className,
+}: AssetCardProps) {
   const [ready, setReady] = useState(false);
 
   return (

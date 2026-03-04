@@ -4,10 +4,9 @@ import { Copy, ExternalLink } from "lucide-react";
 import Image from "next/image";
 import { toast } from "sonner";
 import type { CreatorProfile } from "@/features/creators/actions/admin/get-creator-profile";
-import { LabeledField } from "@/features/creators/components/labeled-field";
-import { RatingBadge } from "@/features/creators/components/rating-badge";
 import type { SocialPlatform } from "@/features/creators/constants";
-import { calculateRatingsFromCollaborations } from "@/features/creators/lib/calculated-ratings";
+import { LabeledField } from "@/features/creators/components/labeled-field";
+import { RatingBadge } from "@/shared/components/blocks/rating-badge";
 import { SocialIcon } from "@/shared/components/icons/socials/social-icon";
 import { VerifiedBadge } from "@/shared/components/icons/verified-badge";
 import { Badge } from "@/shared/components/ui/badge";
@@ -24,9 +23,6 @@ interface CreatorProfileInfoProps {
 }
 
 export function CreatorProfileInfo({ creator, layout = "sidebar" }: CreatorProfileInfoProps) {
-  const closedCollabs = creator.closedCollaborations ?? [];
-  const calculatedRatings = calculateRatingsFromCollaborations(closedCollabs);
-  const overallRating = calculatedRatings?.overall ?? creator.overallRating ?? "untested";
   const rateRange = creator.rateRangeInternal || creator.rateRangeSelf;
 
   const socialLinks = [

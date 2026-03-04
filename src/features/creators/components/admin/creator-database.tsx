@@ -32,7 +32,6 @@ import { CreatorCard } from "./creator-card";
 import { CreatorOverlay } from "./creator-overlay/creator-overlay";
 import { DatabaseFilters } from "./database-filters";
 
-
 interface CreatorDatabaseProps {
   creators: CreatorListItem[];
 }
