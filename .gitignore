@@ -51,3 +51,4 @@ next-env.d.ts
 .vscode
 
 */db/migrations
+/scripts

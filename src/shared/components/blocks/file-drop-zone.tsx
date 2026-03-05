@@ -2,10 +2,8 @@
 
 import { Upload } from "lucide-react";
 import { useRef } from "react";
-import { UPLOAD_CONFIG } from "@/features/uploads/lib/upload-config";
+import { ALLOWED_UPLOAD_MIME_TYPES, DEFAULT_UPLOAD_MAX_FILE_SIZE } from "@/shared/lib/constant";
 import { cn } from "@/shared/lib/utils";
-
-type AllowedMime = (typeof UPLOAD_CONFIG.allowedMimeTypes)[number];
 
 interface FileDropZoneProps {
   onFilesAdd: (files: File[]) => void;
@@ -18,13 +16,10 @@ interface FileDropZoneProps {
   children?: React.ReactNode;
 }
 
-const defaultAccept = UPLOAD_CONFIG.allowedMimeTypes as unknown as AllowedMime[];
-const defaultMaxSize = UPLOAD_CONFIG.maxFileSize;
-
 export function FileDropZone({
   onFilesAdd,
-  accept = defaultAccept,
-  maxFileSize = defaultMaxSize,
+  accept = ALLOWED_UPLOAD_MIME_TYPES,
+  maxFileSize = DEFAULT_UPLOAD_MAX_FILE_SIZE,
   multiple = true,
   onInvalidFiles,
   className,

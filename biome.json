@@ -5,7 +5,7 @@
     "includes": [
       "**",
       "!**/node_modules",
-      "!!**/.next",
+      "!**/.next",
       "!!**/dist",
       "!!**/build",
       "!!**/.cache",

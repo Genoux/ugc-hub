@@ -1,37 +1,29 @@
 "use server";
 
 import { DeleteObjectCommand, DeleteObjectsCommand } from "@aws-sdk/client-s3";
-import { auth, clerkClient } from "@clerk/nextjs/server";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { creators } from "@/db/schema";
 import type { PortfolioVideoEntry } from "@/features/creators/constants";
+import { requireCreator } from "@/features/creators/lib/require-creator";
 import { R2_BUCKET_NAME, r2Client } from "@/features/uploads/lib/r2-client";
 import { toActionError } from "@/shared/lib/action-error";
 import { db } from "@/shared/lib/db";
 
-export async function resetCreatorProfile(creatorId: string) {
+export async function resetCreatorProfile() {
   if (process.env.NODE_ENV !== "development") {
     throw new Error("Dev only");
   }
 
   try {
-    const { userId } = await auth();
-    if (!userId) throw new Error("Unauthorized");
+    const creator = await requireCreator();
 
     const record = await db.query.creators.findFirst({
-      where: eq(creators.id, creatorId),
-      columns: { clerkUserId: true, email: true, portfolioVideos: true, profilePhoto: true },
+      where: eq(creators.id, creator.id),
+      columns: { portfolioVideos: true, profilePhoto: true },
     });
 
     if (!record) throw new Error("Creator profile not found");
-
-    const clerkUser = await (await clerkClient()).users.getUser(userId);
-    const userEmail = clerkUser.primaryEmailAddress?.emailAddress?.toLowerCase().trim();
-    const isOwner =
-      record.clerkUserId === userId ||
-      (userEmail !== undefined && record.email?.toLowerCase().trim() === userEmail);
-    if (!isOwner) throw new Error("Forbidden");
 
     const videos = (record.portfolioVideos ?? []) as PortfolioVideoEntry[];
     const r2Deletes: Promise<unknown>[] = [];
@@ -78,7 +70,7 @@ export async function resetCreatorProfile(creatorId: string) {
         ageDemographic: null,
         ethnicity: null,
       })
-      .where(eq(creators.id, creatorId));
+      .where(eq(creators.id, creator.id));
 
     revalidatePath("/creator");
   } catch (err) {

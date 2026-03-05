@@ -22,7 +22,7 @@ export default async function SignInPage({
           {message}
         </div>
       )}
-      <ThemedSignIn fallbackRedirectUrl={redirect_url ?? "/"} />
+      <ThemedSignIn forceRedirectUrl={redirect_url} fallbackRedirectUrl={redirect_url ?? "/"} />
     </div>
   );
 }

@@ -7,19 +7,19 @@ import { resetCreatorProfile } from "@/features/creators/actions/portal/reset-cr
 import { Button } from "@/shared/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/shared/components/ui/tooltip";
 
-export function ResetProfileButton({ creatorId }: { creatorId: string }) {
+export function ResetProfileButton() {
   if (process.env.NODE_ENV !== "development") return null;
 
-  return <ResetButton creatorId={creatorId} />;
+  return <ResetButton />;
 }
 
-function ResetButton({ creatorId }: { creatorId: string }) {
+function ResetButton() {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
   const handleReset = () => {
     startTransition(async () => {
-      await resetCreatorProfile(creatorId);
+      await resetCreatorProfile();
       router.refresh();
     });
   };

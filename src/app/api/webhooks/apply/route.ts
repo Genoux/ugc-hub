@@ -1,10 +1,8 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
-import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { creators } from "@/db/schema";
+import { createApplicant } from "@/features/applicants/lib/create-applicant";
 import { LANGUAGES } from "@/features/creators/constants";
-import { db } from "@/shared/lib/db";
 import { env } from "@/shared/lib/env";
 
 const bodySchema = z.object({
@@ -50,28 +48,11 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }
 
-  // Reject duplicate active applications
-  const existing = await db.query.creators.findFirst({
-    where: eq(creators.email, parsed.email),
-    columns: { id: true, status: true },
-  });
+  const result = await createApplicant(parsed);
 
-  if (existing && existing.status !== "rejected") {
+  if (!result.success && result.conflict) {
     return NextResponse.json({ error: "Email already has an active record" }, { status: 409 });
   }
-
-  await db.insert(creators).values({
-    fullName: parsed.fullName,
-    email: parsed.email,
-    country: parsed.country,
-    // DB stores languages as { language, accent? } objects
-    languages: parsed.languages,
-    socialChannels: parsed.socialChannels,
-    portfolioUrl: parsed.portfolioUrl,
-    source: "applicant",
-    status: "applicant",
-    appliedAt: new Date(),
-  });
 
   return NextResponse.json({ success: true }, { status: 200 });
 }

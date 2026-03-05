@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/shared/components/ui/button";
+import { WizardComplete } from "@/shared/components/wizard/wizard-complete";
 
 interface Props {
   error: string | null;
@@ -31,16 +32,10 @@ export function StepComplete({ error, onExit, onRetry }: Props) {
   }
 
   return (
-    <div className="flex flex-col items-start gap-12">
-      <div className="flex flex-col gap-4">
-        <h1 id="wizard-title" className="text-4xl font-medium">
-          You're all set!
-        </h1>
-        <p className="text-muted-foreground text-sm">Your profile is complete and discoverable.</p>
-      </div>
+    <WizardComplete title="You're all set!" description="Your profile is complete and discoverable.">
       <Button type="button" onClick={onExit}>
         Go to dashboard
       </Button>
-    </div>
+    </WizardComplete>
   );
 }

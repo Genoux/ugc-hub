@@ -1,81 +1,162 @@
 "use client";
 
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useCallback, useState, useTransition } from "react";
+import { X } from "lucide-react";
+import Image from "next/image";
+import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/shared/components/ui/alert-dialog";
 import { Button } from "@/shared/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/shared/components/ui/dialog";
+import { ProgressDots } from "@/shared/components/wizard/progress-dots";
+import {
+  Wizard,
+  WizardAside,
+  WizardDescription,
+  WizardFooter,
+  WizardHeader,
+  WizardPanel,
+  WizardStep,
+  WizardTitle,
+} from "@/shared/components/wizard/wizard";
+import { WizardComplete } from "@/shared/components/wizard/wizard-complete";
+import { WizardLoading } from "@/shared/components/wizard/wizard-loading";
+import { useSteppedFlow } from "@/shared/hooks/use-stepped-flow";
+import type { CollabRatingRow } from "../lib/calculate-ratings";
+import { calculateProjectedOverall } from "../lib/calculate-ratings";
 import { closeCollaboration } from "../actions/close-collaboration";
-import { calculateOverallRating } from "../lib/calculate-overall-rating";
+import { CLOSE_WIZARD_STEPS } from "../lib/close-wizard-constants";
+import { canProceed } from "../lib/close-wizard-utils";
 import type { CollaborationRatingsInput } from "../schemas";
 import { StepCloseConfirm } from "./steps/step-close-confirm";
 import { type PortfolioFile, StepPortfolio } from "./steps/step-portfolio";
 import { StepRates } from "./steps/step-rates";
 import { StepRatings } from "./steps/step-ratings";
 
-type Step = 1 | 2 | 3 | 4;
-
-const STEP_LABELS: Record<Step, string> = {
-  1: "Ratings",
-  2: "Rates",
-  3: "Portfolio",
-  4: "Confirm & Close",
-};
+const CONTENT_STEPS = Object.keys(CLOSE_WIZARD_STEPS).length;
+const LOADING_STEP = CONTENT_STEPS + 1;
+const COMPLETE_STEP = CONTENT_STEPS + 2;
+const TOTAL_STEPS = COMPLETE_STEP;
 
 interface CloseCollaborationWizardProps {
-  open: boolean;
   onClose: () => void;
   onSuccess: () => void;
   collaborationId: string;
   creatorId: string;
   creatorName: string;
+  profilePhotoUrl: string;
   submissionName: string;
+  closedCollabRatings: CollabRatingRow[];
 }
 
 export function CloseCollaborationWizard({
-  open,
   onClose,
   onSuccess,
   collaborationId,
   creatorId,
   creatorName,
+  profilePhotoUrl,
   submissionName,
+  closedCollabRatings,
 }: CloseCollaborationWizardProps) {
-  const [step, setStep] = useState<Step>(1);
+  const { step, goToStep, directionRef } = useSteppedFlow(TOTAL_STEPS);
   const [ratings, setRatings] = useState<Partial<CollaborationRatingsInput>>({});
   const [piecesOfContent, setPiecesOfContent] = useState("");
   const [totalPaid, setTotalPaid] = useState("");
   const [notes, setNotes] = useState("");
   const [portfolioFiles, setPortfolioFiles] = useState<PortfolioFile[]>([]);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const [confirmingClose, setConfirmingClose] = useState(false);
+  const pendingCloseActionRef = useRef<(() => void) | null>(null);
 
-  const ratingsComplete =
-    ratings.visual_quality && ratings.acting_line_delivery && ratings.reliability_speed;
+  const isLoadingStep = step === LOADING_STEP;
+  const isCompleteStep = step === COMPLETE_STEP;
+  const isResultStep = isLoadingStep || isCompleteStep;
 
-  const canContinue =
-    step === 1
-      ? !!ratingsComplete
-      : step === 2
-        ? parseInt(piecesOfContent, 10) > 0 && parseFloat(totalPaid) >= 0
-        : true;
+  const stepCanProceed = canProceed(step, ratings, piecesOfContent, totalPaid, portfolioFiles);
 
-  function handleClose() {
-    setStep(1);
+  const filledSteps = new Set(
+    Object.keys(CLOSE_WIZARD_STEPS)
+      .map(Number)
+      .filter(
+        (s) => s >= step || canProceed(s, ratings, piecesOfContent, totalPaid, portfolioFiles),
+      ),
+  );
+
+  function resetState() {
+    goToStep(1);
     setRatings({});
     setPiecesOfContent("");
     setTotalPaid("");
     setNotes("");
     setPortfolioFiles([]);
+    setUploadProgress(0);
+    setIsUploading(false);
+  }
+
+  function handleClose() {
+    resetState();
     onClose();
   }
 
+  function handleDone() {
+    onSuccess();
+    onClose();
+  }
+
+  const hasChanges = () =>
+    Object.keys(ratings).length > 0 ||
+    piecesOfContent !== "" ||
+    totalPaid !== "" ||
+    notes !== "" ||
+    portfolioFiles.length > 0;
+
+  const handleRequestClose = () => {
+    if (isResultStep) {
+      handleClose();
+      return;
+    }
+    if (!hasChanges()) {
+      handleClose();
+      return;
+    }
+    setConfirmingClose(true);
+  };
+
+  const runAfterAlertClosed = (action: () => void) => {
+    pendingCloseActionRef.current = action;
+    setConfirmingClose(false);
+  };
+
+  // Stable ref so the effect doesn't need handleRequestClose in its deps
+  const handleRequestCloseRef = useRef(handleRequestClose);
+  handleRequestCloseRef.current = handleRequestClose;
+
+  useEffect(() => {
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape" && !isPending && !isUploading) {
+        handleRequestCloseRef.current();
+      }
+    }
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [isPending, isUploading]);
+
   const uploadPortfolioFiles = useCallback(
-    async (files: PortfolioFile[]) => {
+    async (files: PortfolioFile[], totalFiles: number) => {
       const pending = files.filter((f) => !f.uploaded);
       if (pending.length === 0) return files;
 
-      setIsUploading(true);
+      const progressPerFile = totalFiles > 0 ? 80 / totalFiles : 80;
       const updated = [...files];
 
       for (const pf of pending) {
@@ -122,191 +203,239 @@ export function CloseCollaborationWizard({
         } catch {
           toast.error(`Failed to upload ${pf.file.name}`);
         }
+
+        setUploadProgress((prev) => Math.min(prev + progressPerFile, 80));
       }
 
-      setIsUploading(false);
       return updated;
     },
     [collaborationId, creatorId],
   );
 
-  function handleNext() {
-    setStep((step + 1) as Step);
-  }
-
   async function handleSubmit() {
+    goToStep(LOADING_STEP);
+    setUploadProgress(0);
+
     startTransition(async () => {
       try {
-        const toUpload = portfolioFiles.filter((f) => !f.uploaded);
-        if (toUpload.length > 0) {
+        let currentFiles = portfolioFiles;
+        const pendingFiles = portfolioFiles.filter((f) => !f.uploaded);
+
+        if (pendingFiles.length > 0) {
           setIsUploading(true);
-          const uploaded = await uploadPortfolioFiles(portfolioFiles);
-          setPortfolioFiles(uploaded);
+          currentFiles = await uploadPortfolioFiles(portfolioFiles, pendingFiles.length);
+          setPortfolioFiles(currentFiles);
           setIsUploading(false);
-          const stillPending = uploaded.filter((f) => !f.uploaded);
+
+          const stillPending = currentFiles.filter((f) => !f.uploaded);
           if (stillPending.length > 0) {
             toast.error(
               "Some files could not be uploaded. Remove them or try again before closing.",
             );
+            goToStep(4);
             return;
           }
+        } else {
+          setUploadProgress(80);
         }
+
         await closeCollaboration({
           collaborationId,
           creatorId,
           submissionName,
-          overallRating: calculateOverallRating(ratings as CollaborationRatingsInput),
+          overallRating: calculateProjectedOverall(closedCollabRatings, ratings as CollaborationRatingsInput),
           ratings: ratings as CollaborationRatingsInput,
           piecesOfContent: parseInt(piecesOfContent, 10),
           totalPaid: parseFloat(totalPaid),
           notes: notes || undefined,
         });
-        toast.success("Collaboration closed");
-        handleClose();
-        onSuccess();
+
+        setUploadProgress(100);
+        goToStep(COMPLETE_STEP);
       } catch {
         toast.error("Failed to close collaboration. Please try again.");
+        goToStep(4);
       }
     });
   }
 
   return (
-    <Dialog
-      open={open}
-      onOpenChange={(o) => {
-        if (!o && !isPending && !isUploading) handleClose();
-      }}
-    >
-      <DialogContent className="max-w-lg">
-        <DialogHeader>
-          <p className="text-xs text-muted-foreground font-medium">
-            {creatorName} &middot; {submissionName}
-          </p>
-          <DialogTitle>Close collaboration</DialogTitle>
-        </DialogHeader>
-
-        {/* Step indicator */}
-        <div className="flex items-center gap-2 flex-wrap">
-          {([1, 2, 3, 4] as Step[]).map((s) => (
-            <div key={s} className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => {
-                  if (s < step && !isUploading) setStep(s);
-                }}
-                className={`flex items-center gap-1.5 text-xs font-medium transition-colors ${
-                  s === step
-                    ? "text-foreground"
-                    : s < step
-                      ? "text-primary cursor-pointer hover:underline"
-                      : "text-muted-foreground"
-                }`}
-              >
-                <span
-                  className={`h-5 w-5 rounded-full flex items-center justify-center text-[10px] font-bold border transition-colors ${
-                    s === step
-                      ? "bg-foreground text-background border-foreground"
-                      : s < step
-                        ? "bg-primary text-primary-foreground border-primary"
-                        : "border-border text-muted-foreground"
-                  }`}
-                >
-                  {s}
-                </span>
-                {STEP_LABELS[s]}
-              </button>
-              {s < 4 && <ChevronRight className="h-3 w-3 text-muted-foreground" />}
-            </div>
-          ))}
-        </div>
-
-        {/* Step content */}
-        <div className="py-1">
-          {step === 1 && (
-            <StepRatings
-              ratings={ratings}
-              notes={notes}
-              onChange={setRatings}
-              onNotesChange={setNotes}
-            />
-          )}
-          {step === 2 && (
-            <StepRates
-              piecesOfContent={piecesOfContent}
-              totalPaid={totalPaid}
-              onPiecesChange={setPiecesOfContent}
-              onTotalPaidChange={setTotalPaid}
-            />
-          )}
-          {step === 3 && (
-            <StepPortfolio
-              creatorName={creatorName}
-              files={portfolioFiles}
-              isUploading={isUploading}
-              onFilesAdd={(files) =>
-                setPortfolioFiles((prev) => [
-                  ...prev,
-                  ...files.map((f) => ({ file: f, key: "", uploaded: false })),
-                ])
-              }
-              onFileRemove={(index) =>
-                setPortfolioFiles((prev) => prev.filter((_, i) => i !== index))
-              }
-            />
-          )}
-          {step === 4 && (
-            <StepCloseConfirm
-              creatorName={creatorName}
-              submissionName={submissionName}
-              ratings={ratings as CollaborationRatingsInput}
-              portfolioFiles={portfolioFiles}
-            />
-          )}
-        </div>
-
-        {/* Actions */}
-        <div className="flex items-center justify-between pt-2 border-t border-border">
-          <div>
-            {step > 1 && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setStep((step - 1) as Step)}
-                disabled={isPending || isUploading}
-                className="gap-1.5 text-muted-foreground"
-              >
-                <ChevronLeft className="h-4 w-4" />
-                Back
-              </Button>
-            )}
-          </div>
-          <div className="flex items-center gap-2">
+    <>
+      <Wizard variant="modal">
+        <WizardPanel isPending={isPending && !isLoadingStep}>
+          <WizardHeader>
             <Button
-              variant="outline"
-              size="sm"
-              onClick={handleClose}
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={handleRequestClose}
               disabled={isPending || isUploading}
+              className="text-muted-foreground hover:text-foreground"
+              aria-label="Close"
             >
-              Cancel
+              <X className="size-5" />
             </Button>
-            {step < 4 ? (
-              <Button size="sm" onClick={handleNext} disabled={!canContinue || isUploading}>
-                {isUploading ? "Uploading…" : "Next"}
-                {!isUploading && <ChevronRight className="h-4 w-4" />}
-              </Button>
-            ) : (
-              <Button
-                size="sm"
-                variant="default"
-                onClick={() => void handleSubmit()}
-                disabled={isPending || isUploading}
-              >
-                {isUploading ? "Uploading…" : isPending ? "Closing…" : "Close Collaboration"}
-              </Button>
-            )}
+            <span />
+          </WizardHeader>
+
+          <div className="flex flex-1 flex-col justify-center gap-4">
+            <WizardStep stepKey={step} direction={directionRef.current}>
+              {!isResultStep && (
+                <div className="flex flex-col gap-2">
+                  <WizardTitle>{CLOSE_WIZARD_STEPS[step].header}</WizardTitle>
+                  <WizardDescription>{CLOSE_WIZARD_STEPS[step].body}</WizardDescription>
+                </div>
+              )}
+
+              {step === 1 && (
+                <StepRatings
+                  ratings={ratings}
+                  notes={notes}
+                  onChange={setRatings}
+                  onNotesChange={setNotes}
+                />
+              )}
+              {step === 2 && (
+                <StepRates
+                  piecesOfContent={piecesOfContent}
+                  totalPaid={totalPaid}
+                  onPiecesChange={setPiecesOfContent}
+                  onTotalPaidChange={setTotalPaid}
+                />
+              )}
+              {step === 3 && (
+                <StepPortfolio
+                  creatorName={creatorName}
+                  files={portfolioFiles}
+                  isUploading={isUploading}
+                  onFilesAdd={(files) =>
+                    setPortfolioFiles((prev) => [
+                      ...prev,
+                      ...files.map((f) => ({ file: f, key: "", uploaded: false })),
+                    ])
+                  }
+                  onFileRemove={(index) =>
+                    setPortfolioFiles((prev) => prev.filter((_, i) => i !== index))
+                  }
+                />
+              )}
+              {step === 4 && (
+                <StepCloseConfirm
+                  profilePhotoUrl={profilePhotoUrl}
+                  creatorName={creatorName}
+                  submissionName={submissionName}
+                  ratings={ratings as CollaborationRatingsInput}
+                  notes={notes}
+                  piecesOfContent={piecesOfContent}
+                  totalPaid={totalPaid}
+                  portfolioFiles={portfolioFiles}
+                  closedCollabRatings={closedCollabRatings}
+                />
+              )}
+              {step === LOADING_STEP && (
+                <WizardLoading
+                  title="Closing collaboration"
+                  description="Uploading portfolio files and finalizing — please don't close this page."
+                  progress={uploadProgress}
+                />
+              )}
+              {step === COMPLETE_STEP && (
+                <WizardComplete
+                  title="Collaboration closed"
+                  description="Ratings and rates have been recorded. The folder is now locked."
+                >
+                  <Button type="button" onClick={handleDone}>
+                    Done
+                  </Button>
+                </WizardComplete>
+              )}
+
+              {!isResultStep && (
+                <WizardFooter>
+                  {step > 1 ? (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => goToStep(step - 1)}
+                      disabled={isPending || isUploading}
+                    >
+                      Back
+                    </Button>
+                  ) : (
+                    <span />
+                  )}
+                  {step < 4 ? (
+                    <Button
+                      type="button"
+                      onClick={() => goToStep(step + 1)}
+                      disabled={!stepCanProceed || isUploading}
+                    >
+                      Next
+                    </Button>
+                  ) : (
+                    <Button
+                      type="button"
+                      onClick={() => void handleSubmit()}
+                      disabled={isPending || isUploading}
+                    >
+                      {isPending ? "Closing…" : "Close Collaboration"}
+                    </Button>
+                  )}
+                </WizardFooter>
+              )}
+            </WizardStep>
           </div>
-        </div>
-      </DialogContent>
-    </Dialog>
+        </WizardPanel>
+
+        {/* Static stepKey — content is the same for all form steps */}
+        <WizardAside stepKey="creator" direction={1} visible={!isResultStep}>
+          <div className="relative flex h-full flex-col items-center justify-center gap-4 overflow-hidden p-8">
+            <div className="absolute inset-0 backdrop-blur-md z-10" />
+            <Image src={profilePhotoUrl} alt="" fill unoptimized className="object-cover" />
+            <div className="relative z-10 flex flex-col items-center gap-4">
+              <Image
+                src={profilePhotoUrl}
+                alt={creatorName}
+                width={80}
+                height={80}
+                unoptimized
+                className="size-40 rounded-full object-cover shadow-hub"
+              />
+              <div className="text-center">
+                <p className="text-2xl font-semibold text-white">{creatorName}</p>
+                <p className="text-md text-white/80 mt-0.5">{submissionName}</p>
+              </div>
+            </div>
+          </div>
+        </WizardAside>
+      </Wizard>
+
+      <AlertDialog
+        open={confirmingClose}
+        onOpenChange={(open) => {
+          setConfirmingClose(open);
+          if (!open) {
+            const action = pendingCloseActionRef.current;
+            pendingCloseActionRef.current = null;
+            setTimeout(() => action?.(), 250);
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Discard and close?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Your progress won&apos;t be saved. The collaboration will remain open.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setConfirmingClose(false)}>Stay</AlertDialogCancel>
+            <AlertDialogAction onClick={() => runAfterAlertClosed(handleClose)}>
+              Discard and close
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }

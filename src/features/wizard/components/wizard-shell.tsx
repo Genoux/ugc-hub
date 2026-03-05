@@ -13,14 +13,17 @@ import {
   WizardTitle,
 } from "@/shared/components/wizard/wizard";
 import { useSteppedFlow } from "@/shared/hooks/use-stepped-flow";
+import { WizardComplete } from "@/shared/components/wizard/wizard-complete";
+import { WizardLoading } from "@/shared/components/wizard/wizard-loading";
 import { submitWizard } from "../actions/submit-wizard";
-import { WizardStepComplete } from "./steps/step-complete";
-import { WizardStepLoading } from "./steps/step-loading";
 import { StepSubmittingAs } from "./steps/step-submitting-as";
 import { StepUploadAssets } from "./steps/step-upload-assets";
 import { WIZARD_STEPS } from "./wizard-constants";
 
-const TOTAL_STEPS = 4;
+const CONTENT_STEPS = Object.keys(WIZARD_STEPS).length;
+const LOADING_STEP = CONTENT_STEPS + 1;
+const COMPLETE_STEP = CONTENT_STEPS + 2;
+const TOTAL_STEPS = COMPLETE_STEP;
 
 interface WizardShellProps {
   token: string;
@@ -45,8 +48,8 @@ export function WizardShell({
   const [uploadProgress, setUploadProgress] = useState(0);
   const { uploadFile } = useMultipartUpload();
 
-  const isLoadingStep = step === 3;
-  const isResultStep = step === TOTAL_STEPS;
+  const isLoadingStep = step === LOADING_STEP;
+  const isResultStep = step === COMPLETE_STEP;
 
   const creatorProps = { creatorName, creatorEmail, creatorImageUrl, projectName };
 
@@ -59,7 +62,7 @@ export function WizardShell({
   }
 
   async function handleSubmit() {
-    goToStep(3);
+    goToStep(LOADING_STEP);
     setIsSubmitting(true);
     setUploadProgress(0);
     let submissionId: string | null = null;
@@ -130,8 +133,20 @@ export function WizardShell({
               onFilesChange={setUploadFiles}
             />
           )}
-          {step === 3 && <WizardStepLoading progress={uploadProgress} />}
-          {step === 4 && <WizardStepComplete />}
+          {step === LOADING_STEP && (
+            <WizardLoading
+              title="Submitting"
+              description="Uploading your files, please don't close this page."
+              progress={uploadProgress}
+            />
+          )}
+          {step === 4 && (
+            <WizardComplete title="Submission complete!" description="Your files have been received.">
+              <Button type="button" asChild>
+                <a href="/creator">Go to my profile</a>
+              </Button>
+            </WizardComplete>
+          )}
           {!isResultStep && !isLoadingStep && (
             <WizardFooter>
               {step > 1 ? (

@@ -1,17 +1,17 @@
 "use client";
 
-import { CheckIcon, CircleAlert, X } from "lucide-react";
+import { CheckIcon, X } from "lucide-react";
 import Image from "next/image";
 import { useRef, useState, useTransition } from "react";
 import { completeCreatorProfile } from "@/features/creators/actions/portal/complete-creator-profile";
 import {
   type PortfolioVideoManager,
   usePortfolioVideoManager,
-} from "@/features/creators/hooks/use-portfolio-video-manager";
+} from "@/features/creators/hooks/portal/use-portfolio-video-manager";
 import {
   type ProfilePhotoManager,
   useProfilePhotoManager,
-} from "@/features/creators/hooks/use-profile-photo-manager";
+} from "@/features/creators/hooks/portal/use-profile-photo-manager";
 import { buildOnboardingData, canProceed } from "@/features/creators/lib/onboarding-utils";
 import {
   AlertDialog,
@@ -34,6 +34,7 @@ import {
   WizardStep,
   WizardTitle,
 } from "@/shared/components/wizard/wizard";
+import { ProgressDots } from "@/shared/components/wizard/progress-dots";
 import { useSteppedFlow } from "@/shared/hooks/use-stepped-flow";
 import { cn } from "@/shared/lib/utils";
 import { STEPS } from "./onboarding-constants";
@@ -49,58 +50,6 @@ import { StepStyle } from "./steps/step-style";
 import { StepVideos } from "./steps/step-videos";
 
 const TOTAL_STEPS = 9;
-
-function ProgressDots({
-  current,
-  steps,
-  onStepClick,
-  filledSteps,
-}: {
-  current: number;
-  steps: Record<number, { name: string }>;
-  filledSteps: Set<number>;
-  onStepClick: (step: number) => void;
-}) {
-  const stepEntries = Object.entries(steps).map(([key, val]) => ({
-    step: Number(key),
-    name: val.name,
-  }));
-
-  return (
-    <div
-      className="flex items-center gap-1 flex-wrap justify-center"
-      role="progressbar"
-      aria-valuenow={current}
-      aria-valuemin={1}
-      aria-valuemax={stepEntries.length}
-      aria-label={steps[current]?.name}
-    >
-      {stepEntries.map(({ step, name }) => {
-        const isCompleted = step < current;
-        const isCurrent = step === current;
-        return (
-          <Button
-            key={step}
-            variant="outline"
-            size="sm"
-            onClick={() => onStepClick(step)}
-            className={cn(
-              `text-xs transition-colors disabled:cursor-default relative`,
-              isCompleted && "text-foreground",
-              isCurrent && "text-foreground font-medium opacity-100",
-            )}
-            aria-label={isCompleted ? `Go back to ${name}` : name}
-          >
-            {!filledSteps.has(step) ? (
-              <CircleAlert className="size-3.5 rounded-full animate-pulse text-red-500 bg-white absolute -top-1 -right-1" />
-            ) : null}
-            <span className={cn(!isCurrent && "opacity-50")}>{name}</span>
-          </Button>
-        );
-      })}
-    </div>
-  );
-}
 
 interface StepContentProps {
   step: number;
@@ -198,7 +147,9 @@ export function OnboardingShell({ creator, onComplete, onClose }: OnboardingProp
   };
 
   const hasChanges = () => {
-    if (JSON.stringify(data) !== JSON.stringify(initialData.current)) return true;
+    if (JSON.stringify(data) !== JSON.stringify(initialData.current)) {
+      return true;
+    }
     const currentIds = videoManager.doneEntries.map((e) => e.assetId);
     if (currentIds.length !== initialVideoIds.current.size) return true;
     return currentIds.some((id) => !initialVideoIds.current.has(id));
@@ -247,7 +198,6 @@ export function OnboardingShell({ creator, onComplete, onClose }: OnboardingProp
   };
 
   const buildProfilePayload = () => ({
-    creatorId: creator.id,
     fullName: data.fullName,
     country: data.country,
     languages: data.languages,

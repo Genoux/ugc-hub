@@ -15,11 +15,9 @@ import {
   type VisibilityState,
 } from "@tanstack/react-table";
 import { Download, MoreVertical, Plus } from "lucide-react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
-import { EmptyState } from "@/shared/components/blocks/empty-state";
 import { Button } from "@/shared/components/ui/button";
 import {
   Dialog,
@@ -34,6 +32,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/shared/components/ui/dropdown-menu";
+import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@/shared/components/ui/empty";
 import {
   Table,
   TableBody,
@@ -103,9 +102,6 @@ const columns: ColumnDef<Project>[] = [
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-40">
-              <DropdownMenuItem asChild>
-                <Link href={`/projects/${row.original.id}`}>View</Link>
-              </DropdownMenuItem>
               <DropdownMenuItem
                 className="cursor-pointer gap-2"
                 onSelect={(e) => {
@@ -242,15 +238,16 @@ export function ProjectList({ projects }: { projects: Project[] }) {
           </Table>
         </div>
       ) : (
-        <EmptyState
-          title="Projects"
-          description="Create a project folder to collect creator content"
-          action={{
-            label: "New Project",
-            onClick: () => setIsDialogOpen(true),
-            icon: <Plus className="size-4" />,
-          }}
-        />
+        <Empty>
+          <EmptyHeader>
+            <EmptyTitle>Projects</EmptyTitle>
+            <EmptyDescription>Create a project folder to collect creator content</EmptyDescription>
+          </EmptyHeader>
+          <Button onClick={() => setIsDialogOpen(true)} size="sm" variant="outline">
+            <Plus className="size-4" />
+            New Project
+          </Button>
+        </Empty>
       )}
       <div className="text-muted-foreground hidden text-sm lg:flex">
         {table.getFilteredRowModel().rows.length} project(s)

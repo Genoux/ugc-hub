@@ -87,6 +87,14 @@ export type Language = (typeof LANGUAGES)[number];
 
 export const PRIMARY_CHANNELS = ["Instagram", "TikTok", "YouTube"] as const;
 
+export const SOCIAL_PLATFORMS = [
+  { value: "Instagram", label: "Instagram", handleKey: "instagram_handle" },
+  { value: "TikTok", label: "TikTok", handleKey: "tiktok_handle" },
+  { value: "YouTube", label: "YouTube", handleKey: "youtube_handle" },
+] as const;
+
+export type SocialPlatform = (typeof SOCIAL_PLATFORMS)[number]["value"];
+
 export const COUNTRIES = [
   "United States",
   "United Kingdom",
@@ -137,15 +145,15 @@ export const OVERALL_RATING_TIERS = [
 
 export type OverallRatingTier = (typeof OVERALL_RATING_TIERS)[number];
 
-export const RATING_CONFIG: Record<string, { className: string }> = {
-  "top creator": { className: "bg-amber-100 text-amber-700 border-amber-200" },
-  standout: { className: "bg-emerald-100 text-emerald-700 border-emerald-200" },
-  good: { className: "bg-sky-100 text-sky-700 border-sky-200" },
-  sufficient: { className: "bg-slate-100 text-slate-600 border-slate-200" },
-  problematic: { className: "bg-orange-100 text-orange-600 border-orange-200" },
-  untested: { className: "bg-gray-50 text-gray-500 border-gray-200" },
-  blacklisted: { className: "bg-rose-100 text-rose-700 border-rose-200" },
-};
+export const RATING_CONFIG = {
+  "top creator": { dot: "bg-violet-500" },
+  standout: { dot: "bg-emerald-500" },
+  good: { dot: "bg-sky-500" },
+  sufficient: { dot: "bg-zinc-400" },
+  problematic: { dot: "bg-orange-500" },
+  untested: { dot: "bg-zinc-300" },
+  blacklisted: { dot: "bg-rose-500" },
+} satisfies Record<OverallRatingTier, { dot: string }>;
 
 // Actual Postgres enum values (source of truth)
 export const DB_CREATOR_STATUSES = [
@@ -167,12 +175,22 @@ export const RATING_LABELS: Record<string, string> = {
   reliability_speed: "Reliability & Speed",
 };
 
+/** Stored shape (DB/API). */
 export interface PortfolioVideoEntry {
   id: string;
   r2Key: string;
   filename: string;
   mimeType: string;
   sizeBytes: number;
+}
+
+/** Resolved for display/download — signed URL attached. */
+export interface PortfolioVideo {
+  id: string;
+  filename: string;
+  mimeType: string;
+  sizeBytes: number;
+  url: string;
 }
 
 export interface CollaborationHighlight {

@@ -1,14 +1,14 @@
 import { useMemo, useState } from "react";
 import type { CreatorListItem } from "@/features/creators/actions/admin/get-creators";
 import type { OverallRatingTier } from "@/features/creators/constants";
-import { OVERALL_RATING_TIERS } from "@/features/creators/constants";
+import { OVERALL_RATING_TIERS, SOCIAL_PLATFORMS } from "@/features/creators/constants";
 import {
   countActiveFilters,
   emptyFilters,
   type Filters,
   getActiveFilterLabels,
   hasActiveFilters,
-} from "./database-filters";
+} from "@/features/creators/components/admin/database-filters";
 
 export type SortKey = "rating" | "newest" | "collaborations" | "rate_low" | "rate_high";
 
@@ -61,9 +61,14 @@ export function useCreatorFilters(creators: CreatorListItem[]) {
       if (filters.ethnicity.length) {
         if (!c.ethnicity || !filters.ethnicity.includes(c.ethnicity as never)) return false;
       }
-      if (filters.hasInstagram && !c.socialChannels?.instagram_handle) return false;
-      if (filters.hasTikTok && !c.socialChannels?.tiktok_handle) return false;
-      if (filters.hasYouTube && !c.socialChannels?.youtube_handle) return false;
+      if (
+        filters.socialPlatforms.length &&
+        !filters.socialPlatforms.every((p) => {
+          const key = SOCIAL_PLATFORMS.find((sp) => sp.value === p)!.handleKey;
+          return c.socialChannels?.[key as keyof typeof c.socialChannels];
+        })
+      )
+        return false;
       return true;
     });
   }, [searched, filters]);
@@ -101,9 +106,7 @@ export function useCreatorFilters(creators: CreatorListItem[]) {
       genderIdentity: prev.genderIdentity.filter((s) => s !== label),
       ageDemographic: prev.ageDemographic.filter((s) => s !== label),
       ethnicity: prev.ethnicity.filter((s) => s !== label),
-      hasInstagram: label === "Instagram" ? false : prev.hasInstagram,
-      hasTikTok: label === "TikTok" ? false : prev.hasTikTok,
-      hasYouTube: label === "YouTube" ? false : prev.hasYouTube,
+      socialPlatforms: prev.socialPlatforms.filter((s) => s !== label),
     }));
   };
 

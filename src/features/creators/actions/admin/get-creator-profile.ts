@@ -2,25 +2,35 @@
 
 import { eq } from "drizzle-orm";
 import { creators } from "@/db/schema";
-import type { CollaborationHighlight, PortfolioVideoEntry } from "@/features/creators/constants";
+import type {
+  CollaborationHighlight,
+  PortfolioVideoEntry,
+  PortfolioVideo,
+} from "@/features/creators/constants";
 import { creatorSchema } from "@/features/creators/schemas";
-import { getR2SignedUrl } from "@/features/uploads/lib/r2-serve";
+import { toMediaUrl } from "@/features/uploads/lib/r2-media-url";
+import type { ClerkUserProfile } from "@/shared/lib/clerk";
+import { getClerkUserProfile } from "@/shared/lib/clerk";
 import { requireAdmin } from "@/shared/lib/auth";
 import { db } from "@/shared/lib/db";
 
+type SubmissionAsset = { id: string; filename: string; mimeType: string; url: string };
+type CollabSubmission = {
+  id: string;
+  label: string;
+  submissionNumber: number;
+  deliveredAt: Date;
+  assets: SubmissionAsset[];
+};
+
 export type CreatorProfile = ReturnType<typeof creatorSchema.parse> & {
   profilePhotoUrl: string | null;
-  portfolioVideos: {
-    id: string;
-    filename: string;
-    mimeType: string;
-    sizeBytes: number;
-    url: string;
-  }[];
+  portfolioVideos: PortfolioVideo[];
   closedCollaborations: {
     id: string;
     projectName: string;
     closedAt: Date;
+    closedBy: ClerkUserProfile | null;
     piecesOfContent: number | null;
     totalPaidCents: number | null;
     ratingVisualQuality: string | null;
@@ -28,6 +38,7 @@ export type CreatorProfile = ReturnType<typeof creatorSchema.parse> & {
     ratingReliabilitySpeed: string | null;
     reviewNotes: string | null;
     highlights: { id: string; filename: string; mimeType: string; url: string }[];
+    submissions: CollabSubmission[];
   }[];
 };
 
@@ -42,6 +53,7 @@ export async function getCreatorProfile(creatorId: string): Promise<CreatorProfi
         columns: {
           id: true,
           closedAt: true,
+          closedBy: true,
           piecesOfContent: true,
           totalPaid: true,
           ratingVisualQuality: true,
@@ -50,7 +62,19 @@ export async function getCreatorProfile(creatorId: string): Promise<CreatorProfi
           reviewNotes: true,
           highlights: true,
         },
-        with: { project: { columns: { name: true } } },
+        with: {
+          project: { columns: { name: true } },
+          submissions: {
+            columns: { id: true, label: true, submissionNumber: true, deliveredAt: true },
+            with: {
+              assets: {
+                columns: { id: true, filename: true, mimeType: true, r2Key: true },
+                where: (a, { eq: eqFn }) => eqFn(a.uploadStatus, "completed"),
+              },
+            },
+            orderBy: (s, { asc }) => [asc(s.submissionNumber)],
+          },
+        },
         orderBy: (c, { desc }) => [desc(c.closedAt)],
       },
     },
@@ -60,39 +84,48 @@ export async function getCreatorProfile(creatorId: string): Promise<CreatorProfi
 
   const creator = creatorSchema.parse(row);
 
-  const [profilePhotoUrl, portfolioVideos, closedCollaborations] = await Promise.all([
-    getR2SignedUrl(row.profilePhoto),
-    Promise.all(
-      ((row.portfolioVideos ?? []) as PortfolioVideoEntry[]).map(async (v) => ({
-        id: v.id,
-        filename: v.filename,
-        mimeType: v.mimeType,
-        sizeBytes: v.sizeBytes,
-        url: (await getR2SignedUrl(v.r2Key)) ?? "",
+  const profilePhotoUrl = toMediaUrl(row.profilePhoto);
+
+  const portfolioVideos = ((row.portfolioVideos ?? []) as PortfolioVideoEntry[]).map((v) => ({
+    id: v.id,
+    filename: v.filename,
+    mimeType: v.mimeType,
+    sizeBytes: v.sizeBytes,
+    url: toMediaUrl(v.r2Key) ?? "",
+  }));
+
+  const closedCollaborations = await Promise.all(
+    row.collaborations.map(async (collab) => ({
+      id: collab.id,
+      projectName: collab.project.name,
+      closedAt: collab.closedAt as Date,
+      closedBy: collab.closedBy ? await getClerkUserProfile(collab.closedBy) : null,
+      piecesOfContent: collab.piecesOfContent,
+      totalPaidCents: collab.totalPaid,
+      ratingVisualQuality: collab.ratingVisualQuality,
+      ratingActingDelivery: collab.ratingActingDelivery,
+      ratingReliabilitySpeed: collab.ratingReliabilitySpeed,
+      reviewNotes: collab.reviewNotes,
+      highlights: ((collab.highlights ?? []) as CollaborationHighlight[]).map((h) => ({
+        id: h.id,
+        filename: h.filename,
+        mimeType: h.mimeType,
+        url: toMediaUrl(h.r2Key) ?? "",
       })),
-    ),
-    Promise.all(
-      row.collaborations.map(async (collab) => ({
-        id: collab.id,
-        projectName: collab.project.name,
-        closedAt: collab.closedAt as Date,
-        piecesOfContent: collab.piecesOfContent,
-        totalPaidCents: collab.totalPaid,
-        ratingVisualQuality: collab.ratingVisualQuality,
-        ratingActingDelivery: collab.ratingActingDelivery,
-        ratingReliabilitySpeed: collab.ratingReliabilitySpeed,
-        reviewNotes: collab.reviewNotes,
-        highlights: await Promise.all(
-          ((collab.highlights ?? []) as CollaborationHighlight[]).map(async (h) => ({
-            id: h.id,
-            filename: h.filename,
-            mimeType: h.mimeType,
-            url: (await getR2SignedUrl(h.r2Key)) ?? "",
-          })),
-        ),
+      submissions: collab.submissions.map((s) => ({
+        id: s.id,
+        label: s.label,
+        submissionNumber: s.submissionNumber,
+        deliveredAt: s.deliveredAt,
+        assets: s.assets.map((a) => ({
+          id: a.id,
+          filename: a.filename,
+          mimeType: a.mimeType,
+          url: toMediaUrl(a.r2Key) ?? "",
+        })),
       })),
-    ),
-  ]);
+    })),
+  );
 
   return { ...creator, profilePhotoUrl, portfolioVideos, closedCollaborations };
 }

@@ -5,6 +5,7 @@ const envSchema = z.object({
   ALLOWED_DOMAIN: z.string().min(1, "ALLOWED_DOMAIN is required"),
   NEXT_PUBLIC_APP_URL: z.url("NEXT_PUBLIC_APP_URL must be a valid URL"),
   APPLY_WEBHOOK_SECRET: z.string().min(1, "APPLY_WEBHOOK_SECRET is required"),
+  TYPEFORM_WEBHOOK_SECRET: z.string().min(1, "TYPEFORM_WEBHOOK_SECRET is required"),
   NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: z.string().min(1),
   CLERK_SECRET_KEY: z.string().min(1),
   R2_ACCOUNT_ID: z.string().min(1, "R2_ACCOUNT_ID is required"),

@@ -2,7 +2,7 @@
 
 import { Loader2, X } from "lucide-react";
 import { useState } from "react";
-import { uploadCreatorAsset } from "@/features/creators/hooks/use-creator-asset-upload";
+import { uploadCreatorAsset } from "@/features/creators/hooks/portal/use-creator-asset-upload";
 import {
   MAX_PORTFOLIO_VIDEOS,
   MIN_PORTFOLIO_VIDEOS,
@@ -57,7 +57,12 @@ export function StepVideos({
         .then((result) => {
           const { assetId } = result;
           if (!assetId) throw new Error("Upload did not return an asset ID");
-          onEntryAdd({ assetId, key: result.key, filename: result.filename, objectUrl });
+          onEntryAdd({
+            assetId,
+            key: result.key,
+            filename: result.filename,
+            objectUrl,
+          });
         })
         .catch((err) => {
           URL.revokeObjectURL(objectUrl);
@@ -86,14 +91,14 @@ export function StepVideos({
                   src={entry.objectUrl}
                   filename={entry.filename}
                   size="sm"
-                  action={
+                  actionSlot={
                     <Button
-                      className="h-8 w-8 text-white! hover:bg-white/20"
                       variant="ghost"
                       size="icon"
                       onClick={() => onEntryRemove(entry.assetId)}
+                      className="h-8 w-8 text-white! hover:bg-white/20"
                     >
-                      <X className="size-3.5" />
+                      <X className="h-4 w-4" />
                     </Button>
                   }
                 />

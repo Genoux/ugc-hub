@@ -2,29 +2,30 @@
 
 import { eq } from "drizzle-orm";
 import { creators } from "@/db/schema";
-import type { CollaborationHighlight, PortfolioVideoEntry } from "@/features/creators/constants";
+import type {
+  CollaborationHighlight,
+  PortfolioVideoEntry,
+  PortfolioVideo,
+} from "@/features/creators/constants";
+import { requireCreator } from "@/features/creators/lib/require-creator";
 import { creatorSchema } from "@/features/creators/schemas";
-import { getR2SignedUrl } from "@/features/uploads/lib/r2-serve";
+import { toMediaUrl } from "@/features/uploads/lib/r2-media-url";
 import { db } from "@/shared/lib/db";
 
 export type CreatorProfile = ReturnType<typeof creatorSchema.parse> & {
   profilePhotoUrl: string | null;
-  portfolioVideos: {
-    id: string;
-    filename: string;
-    mimeType: string;
-    sizeBytes: number;
-    url: string;
-  }[];
+  portfolioVideos: PortfolioVideo[];
   closedCollaborations: {
     id: string;
     highlights: { id: string; filename: string; mimeType: string; url: string }[];
   }[];
 };
 
-export async function getCreatorProfile(creatorId: string): Promise<CreatorProfile> {
+export async function getCreatorProfile(): Promise<CreatorProfile> {
+  const sessionCreator = await requireCreator();
+
   const row = await db.query.creators.findFirst({
-    where: eq(creators.id, creatorId),
+    where: eq(creators.id, sessionCreator.id),
     with: {
       collaborations: {
         where: (c, { eq: eqFn }) => eqFn(c.status, "closed"),
@@ -41,31 +42,25 @@ export async function getCreatorProfile(creatorId: string): Promise<CreatorProfi
 
   const creator = creatorSchema.parse(row);
 
-  const [profilePhotoUrl, portfolioVideos, closedCollaborations] = await Promise.all([
-    getR2SignedUrl(row.profilePhoto),
-    Promise.all(
-      ((row.portfolioVideos ?? []) as PortfolioVideoEntry[]).map(async (v) => ({
-        id: v.id,
-        filename: v.filename,
-        mimeType: v.mimeType,
-        sizeBytes: v.sizeBytes,
-        url: (await getR2SignedUrl(v.r2Key)) ?? "",
-      })),
-    ),
-    Promise.all(
-      row.collaborations.map(async (collab) => ({
-        id: collab.id,
-        highlights: await Promise.all(
-          ((collab.highlights ?? []) as CollaborationHighlight[]).map(async (h) => ({
-            id: h.id,
-            filename: h.filename,
-            mimeType: h.mimeType,
-            url: (await getR2SignedUrl(h.r2Key)) ?? "",
-          })),
-        ),
-      })),
-    ),
-  ]);
+  const profilePhotoUrl = toMediaUrl(row.profilePhoto);
+
+  const portfolioVideos = ((row.portfolioVideos ?? []) as PortfolioVideoEntry[]).map((v) => ({
+    id: v.id,
+    filename: v.filename,
+    mimeType: v.mimeType,
+    sizeBytes: v.sizeBytes,
+    url: toMediaUrl(v.r2Key) ?? "",
+  }));
+
+  const closedCollaborations = row.collaborations.map((collab) => ({
+    id: collab.id,
+    highlights: ((collab.highlights ?? []) as CollaborationHighlight[]).map((h) => ({
+      id: h.id,
+      filename: h.filename,
+      mimeType: h.mimeType,
+      url: toMediaUrl(h.r2Key) ?? "",
+    })),
+  }));
 
   return { ...creator, profilePhotoUrl, portfolioVideos, closedCollaborations };
 }

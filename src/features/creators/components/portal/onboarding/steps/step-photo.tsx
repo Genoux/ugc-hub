@@ -3,8 +3,8 @@
 import { CameraIcon, Loader2 } from "lucide-react";
 import Image from "next/image";
 import { useRef } from "react";
-import { useCreatorAssetUpload } from "@/features/creators/hooks/use-creator-asset-upload";
-import type { ProfilePhotoManager } from "@/features/creators/hooks/use-profile-photo-manager";
+import { useCreatorAssetUpload } from "@/features/creators/hooks/portal/use-creator-asset-upload";
+import type { ProfilePhotoManager } from "@/features/creators/hooks/portal/use-profile-photo-manager";
 import { Button } from "@/shared/components/ui/button";
 
 interface Props {
@@ -58,7 +58,13 @@ export function StepPhoto({ photoKey, photoManager, onChange, creatorId }: Props
         aria-label={hasPhoto ? "Replace photo" : "Upload photo"}
       >
         {photoManager.previewUrl ? (
-          <Image src={photoManager.previewUrl} alt="Creator" fill className="object-cover" />
+          <Image
+            src={photoManager.previewUrl}
+            alt="Creator"
+            fill
+            unoptimized
+            className="object-cover"
+          />
         ) : (
           <CameraIcon className="size-5 text-muted-foreground" />
         )}

@@ -43,7 +43,45 @@ export async function sendInvitation(
   }
 }
 
-// ignoreExisting skips already-invited emails rather than failing the whole batch
+export type ClerkUserProfile = {
+  id: string;
+  name: string | null;
+  imageUrl: string | null;
+  email: string | null;
+};
+
+export async function getClerkUserProfile(userId: string): Promise<ClerkUserProfile | null> {
+  const client = await clerkClient();
+  try {
+    const user = await client.users.getUser(userId);
+    const name = [user.firstName, user.lastName].filter(Boolean).join(" ") || null;
+    return {
+      id: userId,
+      name,
+      imageUrl: user.imageUrl || null,
+      email: user.emailAddresses[0]?.emailAddress ?? null,
+    };
+  } catch {
+    return null;
+  }
+}
+
+export async function revokeInvitation(email: string): Promise<void> {
+  const client = await clerkClient();
+
+  const { data: invitations } = await client.invitations.getInvitationList({
+    status: "pending",
+    query: email,
+  });
+
+  const invitation = invitations.find((inv) => inv.emailAddress === email);
+
+  if (invitation) {
+    await client.invitations.revokeInvitation(invitation.id);
+  }
+  // Silently succeed if no pending invitation found — may have expired or been used
+}
+
 export async function sendInvitationBulk(
   emails: string[],
   redirectUrl: string,

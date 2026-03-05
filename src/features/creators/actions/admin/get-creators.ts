@@ -3,7 +3,7 @@
 import { and, count, desc, eq, inArray } from "drizzle-orm";
 import { collaborations, creators } from "@/db/schema";
 import { type Creator, creatorSchema } from "@/features/creators/schemas";
-import { getR2SignedUrl } from "@/features/uploads/lib/r2-serve";
+import { toMediaUrl } from "@/features/uploads/lib/r2-media-url";
 import { requireAdmin } from "@/shared/lib/auth";
 import { db } from "@/shared/lib/db";
 
@@ -35,12 +35,10 @@ export async function getCreators(): Promise<GetCreatorsResult> {
       creatorSchema.parse({ ...creator, collabCount: collabCount ?? 0 }),
     );
 
-    const withPhotos = await Promise.all(
-      parsed.map(async (creator) => ({
-        ...creator,
-        profilePhotoUrl: await getR2SignedUrl(creator.profilePhoto),
-      })),
-    );
+    const withPhotos = parsed.map((creator) => ({
+      ...creator,
+      profilePhotoUrl: toMediaUrl(creator.profilePhoto),
+    }));
 
     return { success: true, creators: withPhotos };
   } catch (error) {

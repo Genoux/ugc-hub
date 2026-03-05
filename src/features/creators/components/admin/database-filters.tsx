@@ -5,12 +5,14 @@ import { useState } from "react";
 import { Button } from "@/shared/components/ui/button";
 import { Checkbox } from "@/shared/components/ui/checkbox";
 import { Label } from "@/shared/components/ui/label";
+import { NumberDot } from "@/shared/components/ui/number-dot";
 import type {
   AgeDemographic,
   ContentFormat,
   Ethnicity,
   GenderIdentity,
   OverallRatingTier,
+  SocialPlatform,
   UgcCategory,
 } from "../../constants";
 import {
@@ -19,6 +21,7 @@ import {
   ETHNICITIES,
   GENDER_IDENTITIES,
   OVERALL_RATING_TIERS,
+  SOCIAL_PLATFORMS,
   UGC_CATEGORIES,
 } from "../../constants";
 
@@ -29,9 +32,7 @@ export interface Filters {
   genderIdentity: GenderIdentity[];
   ageDemographic: AgeDemographic[];
   ethnicity: Ethnicity[];
-  hasInstagram: boolean;
-  hasTikTok: boolean;
-  hasYouTube: boolean;
+  socialPlatforms: SocialPlatform[];
 }
 
 export const emptyFilters: Filters = {
@@ -41,9 +42,7 @@ export const emptyFilters: Filters = {
   genderIdentity: [],
   ageDemographic: [],
   ethnicity: [],
-  hasInstagram: false,
-  hasTikTok: false,
-  hasYouTube: false,
+  socialPlatforms: [],
 };
 
 export function hasActiveFilters(f: Filters): boolean {
@@ -54,26 +53,20 @@ export function hasActiveFilters(f: Filters): boolean {
     f.genderIdentity.length > 0 ||
     f.ageDemographic.length > 0 ||
     f.ethnicity.length > 0 ||
-    f.hasInstagram ||
-    f.hasTikTok ||
-    f.hasYouTube
+    f.socialPlatforms.length > 0
   );
 }
 
 export function countActiveFilters(f: Filters): number {
-  return (
-    [
-      f.overallRating,
-      f.ugcCategories,
-      f.contentFormats,
-      f.genderIdentity,
-      f.ageDemographic,
-      f.ethnicity,
-    ].reduce((n, arr) => n + arr.length, 0) +
-    (f.hasInstagram ? 1 : 0) +
-    (f.hasTikTok ? 1 : 0) +
-    (f.hasYouTube ? 1 : 0)
-  );
+  return [
+    f.overallRating,
+    f.ugcCategories,
+    f.contentFormats,
+    f.genderIdentity,
+    f.ageDemographic,
+    f.ethnicity,
+    f.socialPlatforms,
+  ].reduce((n, arr) => n + arr.length, 0);
 }
 
 export function getActiveFilterLabels(f: Filters): string[] {
@@ -84,19 +77,19 @@ export function getActiveFilterLabels(f: Filters): string[] {
     ...f.genderIdentity,
     ...f.ageDemographic,
     ...f.ethnicity,
-    ...(f.hasInstagram ? ["Instagram"] : []),
-    ...(f.hasTikTok ? ["TikTok"] : []),
-    ...(f.hasYouTube ? ["YouTube"] : []),
+    ...f.socialPlatforms,
   ];
 }
 
 function FilterSection({
   title,
   defaultOpen = false,
+  activeCount,
   children,
 }: {
   title: string;
   defaultOpen?: boolean;
+  activeCount: number;
   children: React.ReactNode;
 }) {
   const [open, setOpen] = useState(defaultOpen);
@@ -109,9 +102,14 @@ function FilterSection({
         size="sm"
         onClick={() => setOpen(!open)}
       >
-        <span className="flex items-center gap-2">{title}</span>
+        <div className="flex items-center gap-2">
+          <span className="flex items-center gap-2">{title}</span>
+          <NumberDot count={activeCount} />
+        </div>
         <ChevronDown
-          className={`h-3.5 w-3.5 text-muted-foreground transition-transform ${open ? "rotate-180" : ""}`}
+          className={`h-3.5 w-3.5 text-muted-foreground transition-transform ${
+            open ? "rotate-180" : ""
+          }`}
         />
       </Button>
       {open && <div className="px-3 pb-3 space-y-2">{children}</div>}
@@ -177,7 +175,7 @@ interface DatabaseFiltersProps {
 export function DatabaseFilters({ filters, onChange }: DatabaseFiltersProps) {
   return (
     <div className="w-full flex flex-col gap-2">
-      <FilterSection title="Rating" defaultOpen>
+      <FilterSection title="Rating" defaultOpen activeCount={filters.overallRating.length}>
         <MultiSelect
           prefix="rating"
           options={OVERALL_RATING_TIERS}
@@ -186,28 +184,16 @@ export function DatabaseFilters({ filters, onChange }: DatabaseFiltersProps) {
         />
       </FilterSection>
 
-      <FilterSection title="Channels">
-        <CheckOption
-          id="channel-instagram"
-          label="Instagram"
-          checked={filters.hasInstagram}
-          onChange={(v) => onChange({ ...filters, hasInstagram: !!v })}
-        />
-        <CheckOption
-          id="channel-tiktok"
-          label="TikTok"
-          checked={filters.hasTikTok}
-          onChange={(v) => onChange({ ...filters, hasTikTok: !!v })}
-        />
-        <CheckOption
-          id="channel-youtube"
-          label="YouTube"
-          checked={filters.hasYouTube}
-          onChange={(v) => onChange({ ...filters, hasYouTube: !!v })}
+      <FilterSection title="Channels" activeCount={filters.socialPlatforms.length}>
+        <MultiSelect
+          prefix="channel"
+          options={SOCIAL_PLATFORMS.map((p) => p.value)}
+          selected={filters.socialPlatforms}
+          onChange={(v) => onChange({ ...filters, socialPlatforms: v })}
         />
       </FilterSection>
 
-      <FilterSection title="UGC Categories">
+      <FilterSection title="UGC Categories" activeCount={filters.ugcCategories.length}>
         <MultiSelect
           prefix="ugc"
           options={UGC_CATEGORIES}
@@ -216,7 +202,7 @@ export function DatabaseFilters({ filters, onChange }: DatabaseFiltersProps) {
         />
       </FilterSection>
 
-      <FilterSection title="Content Formats">
+      <FilterSection title="Content Formats" activeCount={filters.contentFormats.length}>
         <MultiSelect
           prefix="format"
           options={CONTENT_FORMATS}
@@ -225,7 +211,7 @@ export function DatabaseFilters({ filters, onChange }: DatabaseFiltersProps) {
         />
       </FilterSection>
 
-      <FilterSection title="Gender">
+      <FilterSection title="Gender" activeCount={filters.genderIdentity.length}>
         <MultiSelect
           prefix="gender"
           options={GENDER_IDENTITIES}
@@ -234,7 +220,7 @@ export function DatabaseFilters({ filters, onChange }: DatabaseFiltersProps) {
         />
       </FilterSection>
 
-      <FilterSection title="Age">
+      <FilterSection title="Age" activeCount={filters.ageDemographic.length}>
         <MultiSelect
           prefix="age"
           options={AGE_DEMOGRAPHICS}
@@ -243,7 +229,7 @@ export function DatabaseFilters({ filters, onChange }: DatabaseFiltersProps) {
         />
       </FilterSection>
 
-      <FilterSection title="Ethnicity">
+      <FilterSection title="Ethnicity" activeCount={filters.ethnicity.length}>
         <MultiSelect
           prefix="ethnicity"
           options={ETHNICITIES}

@@ -1,16 +1,15 @@
 "use server";
 
-import { auth, clerkClient } from "@clerk/nextjs/server";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { creators } from "@/db/schema";
 import { AGE_DEMOGRAPHICS, ETHNICITIES, GENDER_IDENTITIES } from "@/features/creators/constants";
+import { requireCreator } from "@/features/creators/lib/require-creator";
 import { toActionError } from "@/shared/lib/action-error";
 import { db } from "@/shared/lib/db";
 
 const schema = z.object({
-  creatorId: z.string().uuid(),
   // Steps 1-2
   fullName: z.string().min(1),
   country: z.string().min(1),
@@ -43,24 +42,8 @@ const schema = z.object({
 
 export async function completeCreatorProfile(input: z.infer<typeof schema>) {
   try {
-    const { userId } = await auth();
-    if (!userId) throw new Error("Unauthorized");
-
+    const creator = await requireCreator();
     const validated = schema.parse(input);
-
-    const record = await db.query.creators.findFirst({
-      where: eq(creators.id, validated.creatorId),
-      columns: { clerkUserId: true, email: true },
-    });
-
-    if (!record) throw new Error("Creator profile not found");
-
-    const clerkUser = await (await clerkClient()).users.getUser(userId);
-    const userEmail = clerkUser.primaryEmailAddress?.emailAddress?.toLowerCase().trim();
-    const isOwner =
-      record?.clerkUserId === userId ||
-      (userEmail !== undefined && record?.email?.toLowerCase().trim() === userEmail);
-    if (!isOwner) throw new Error("Forbidden — you don't own this profile");
 
     await db
       .update(creators)
@@ -82,7 +65,7 @@ export async function completeCreatorProfile(input: z.infer<typeof schema>) {
         status: "joined",
         joinedAt: new Date(),
       })
-      .where(eq(creators.id, validated.creatorId));
+      .where(eq(creators.id, creator.id));
 
     revalidatePath("/creator");
   } catch (err) {
