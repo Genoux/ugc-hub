@@ -5,7 +5,7 @@ import { RatingBadge } from "@/shared/components/blocks/rating-badge";
 import { Label } from "@/shared/components/ui/label";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/shared/components/ui/tooltip";
 import type { CollabRatingRow } from "../../lib/calculate-ratings";
-import { calculateOverallRating, calculateProjectedOverall } from "../../lib/calculate-ratings";
+import { calculateCreatorRating, calculateOverallRating } from "../../lib/calculate-ratings";
 import type { CollaborationRatingsInput } from "../../schemas";
 import type { PortfolioFile } from "./step-portfolio";
 
@@ -38,7 +38,14 @@ export function StepCloseConfirm({
   portfolioFiles,
   closedCollabRatings,
 }: StepCloseConfirmProps) {
-  const projectedOverall = calculateProjectedOverall(closedCollabRatings, ratings);
+  const projectedOverall = calculateCreatorRating([
+    ...closedCollabRatings,
+    {
+      ratingVisualQuality: ratings.visual_quality,
+      ratingActingDelivery: ratings.acting_line_delivery,
+      ratingReliabilitySpeed: ratings.reliability_speed,
+    },
+  ]);
   const collabOverall = calculateOverallRating(ratings);
   const pieces = parseInt(piecesOfContent, 10);
   const paid = parseFloat(totalPaid);

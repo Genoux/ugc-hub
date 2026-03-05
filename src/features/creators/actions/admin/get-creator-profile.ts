@@ -7,7 +7,7 @@ import type {
   PortfolioVideoEntry,
   PortfolioVideo,
 } from "@/features/creators/constants";
-import { creatorSchema } from "@/features/creators/schemas";
+import { creatorSchema, type Creator } from "@/features/creators/schemas";
 import { toMediaUrl } from "@/features/uploads/lib/r2-media-url";
 import type { ClerkUserProfile } from "@/shared/lib/clerk";
 import { getClerkUserProfile } from "@/shared/lib/clerk";
@@ -23,7 +23,7 @@ type CollabSubmission = {
   assets: SubmissionAsset[];
 };
 
-export type CreatorProfile = ReturnType<typeof creatorSchema.parse> & {
+type CreatorProfileBase = Omit<Creator, "status" | "blacklistReason" | "blacklistedAt" | "blacklistedBy"> & {
   profilePhotoUrl: string | null;
   portfolioVideos: PortfolioVideo[];
   closedCollaborations: {
@@ -41,6 +41,22 @@ export type CreatorProfile = ReturnType<typeof creatorSchema.parse> & {
     submissions: CollabSubmission[];
   }[];
 };
+
+export type CreatorProfile =
+  | (CreatorProfileBase & {
+      status: "blacklisted";
+      blacklistReason: string;
+      blacklistedAt: Date;
+      blacklistedBy: string;
+      blacklistedByProfile: ClerkUserProfile;
+    })
+  | (CreatorProfileBase & {
+      status: Exclude<Creator["status"], "blacklisted">;
+      blacklistReason: string | null;
+      blacklistedAt: Date | null;
+      blacklistedBy: string | null;
+      blacklistedByProfile: ClerkUserProfile | null;
+    });
 
 export async function getCreatorProfile(creatorId: string): Promise<CreatorProfile> {
   await requireAdmin();
@@ -127,5 +143,10 @@ export async function getCreatorProfile(creatorId: string): Promise<CreatorProfi
     })),
   );
 
-  return { ...creator, profilePhotoUrl, portfolioVideos, closedCollaborations };
+  const blacklistedByProfile = creator.blacklistedBy
+    ? await getClerkUserProfile(creator.blacklistedBy)
+    : null;
+
+  // Cast is safe: the DB enforces that blacklistReason/blacklistedBy are non-null when status === "blacklisted"
+  return { ...creator, profilePhotoUrl, blacklistedByProfile, portfolioVideos, closedCollaborations } as CreatorProfile;
 }

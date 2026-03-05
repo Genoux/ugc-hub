@@ -53,25 +53,14 @@ export function calculateOverallRating(ratings: RatingDimensions): OverallRating
 }
 
 /**
- * Calculates the projected creator overall rating including a pending (not-yet-saved) collab.
- * Used in the close wizard to preview what the creator's rating will become.
+ * Calculates the creator's overall rating from a list of collaborations.
+ * To project with a pending collab, spread it in: calculateCreatorRating([...existing, pendingRow])
  */
-export function calculateProjectedOverall(
-  existingCollabs: CollabRatingRow[],
-  pending: RatingDimensions,
-): OverallRatingTier {
-  const all = [
-    ...existingCollabs,
-    {
-      ratingVisualQuality: pending.visual_quality,
-      ratingActingDelivery: pending.acting_line_delivery,
-      ratingReliabilitySpeed: pending.reliability_speed,
-    },
-  ];
-
+export function calculateCreatorRating(collabs: CollabRatingRow[]): OverallRatingTier {
+  if (collabs.length === 0) return "untested";
   return calculateOverallRating({
-    visual_quality: avgDimensionScores(all.map((c) => c.ratingVisualQuality)),
-    acting_line_delivery: avgDimensionScores(all.map((c) => c.ratingActingDelivery)),
-    reliability_speed: avgDimensionScores(all.map((c) => c.ratingReliabilitySpeed)),
+    visual_quality: avgDimensionScores(collabs.map((c) => c.ratingVisualQuality)),
+    acting_line_delivery: avgDimensionScores(collabs.map((c) => c.ratingActingDelivery)),
+    reliability_speed: avgDimensionScores(collabs.map((c) => c.ratingReliabilitySpeed)),
   });
 }

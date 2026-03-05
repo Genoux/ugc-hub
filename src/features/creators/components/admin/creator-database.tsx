@@ -146,7 +146,7 @@ export function CreatorDatabase({ creators }: CreatorDatabaseProps) {
                 </EmptyHeader>
               </Empty>
             ) : (
-              <div className="grid grid-cols-1 gap-2 p-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4">
+              <div className="grid grid-cols-1 gap-2 p-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
                 {sortedCreators.map((creator) => (
                   <CreatorCard
                     key={creator.id}
@@ -161,14 +161,7 @@ export function CreatorDatabase({ creators }: CreatorDatabaseProps) {
       </div>
 
       {selectedCreatorId && (
-        <CreatorOverlay
-          creator={creator}
-          hasPrev={selectedCreatorIdx > 0}
-          hasNext={selectedCreatorIdx < sortedCreators.length - 1}
-          onClose={() => setSelectedCreatorId(null)}
-          onPrev={() => navigateCreator(-1)}
-          onNext={() => navigateCreator(1)}
-        />
+        <CreatorOverlay creator={creator} onClose={() => setSelectedCreatorId(null)} />
       )}
     </div>
   );

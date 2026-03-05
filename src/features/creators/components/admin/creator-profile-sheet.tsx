@@ -7,6 +7,7 @@ import { getCreatorProfile } from "@/features/creators/actions/admin/get-creator
 import { CreatorProfileInfo } from "@/features/creators/components/admin/creator-overlay/_components/creator-profile-info";
 import { Button } from "@/shared/components/ui/button";
 import { Sheet, SheetClose, SheetContent, SheetTitle } from "@/shared/components/ui/sheet";
+import { BlacklistedHovercard } from "./creator-overlay/_components/blacklisted-hovercard";
 
 interface CreatorProfileSheetProps {
   creatorId: string;
@@ -42,15 +43,17 @@ export function CreatorProfileSheet({
           className="overflow-y-auto p-0 gap-0 flex flex-col"
         >
           <SheetTitle className="sr-only">{creatorName} Profile</SheetTitle>
-          <div className="flex justify-end px-2 pt-2 shrink-0">
-            <SheetClose asChild>
-              <Button variant="ghost" size="icon-sm">
-                <X />
-              </Button>
-            </SheetClose>
-          </div>
           {profile ? (
-            <CreatorProfileInfo creator={profile} />
+            <>
+              <div className="flex justify-end px-2 pt-2 shrink-0">
+                <SheetClose asChild>
+                  <Button variant="ghost" size="icon-sm">
+                    <X />
+                  </Button>
+                </SheetClose>
+              </div>
+              <CreatorProfileInfo creator={profile} />
+            </>
           ) : (
             <div className="flex h-full items-center justify-center">
               <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
