@@ -35,9 +35,9 @@ export function CreatorContent({ creator, contentInert = false }: CreatorContent
 
   return (
     <div
-      className={`flex-1 min-w-0 p-4 sm:p-6 overflow-y-auto flex flex-col ${contentInert ? "pointer-events-none" : ""}`}
+      className={`flex-1 min-w-0 overflow-y-auto p-4 sm:p-6 ${contentInert ? "pointer-events-none" : ""}`}
     >
-      <div className="flex flex-1 min-h-0 flex-col gap-8">
+      <div className="min-h-full flex flex-col gap-8 pb-6 sm:pb-8">
         <div className="flex flex-col gap-3">
           <h2 className="text-base font-semibold flex items-center gap-1">
             Portfolio <NumberDot count={allAssets.length} />

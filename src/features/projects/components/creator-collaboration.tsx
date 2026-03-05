@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
 import { CloseCollaborationWizard } from "@/features/collaborations/components/close-collaboration-wizard";
-import { CreatorProfileInfo } from "@/features/creators/components/admin/creator-overlay/_components/creator-profile-info";
+import { CreatorProfileSheet } from "@/features/creators/components/admin/creator-profile-sheet";
 import type { CollaborationDetail } from "@/features/projects/actions/get-collaboration-detail";
 import { DownloadButton } from "@/features/projects/components/download-button";
 import { SubmissionSection } from "@/features/projects/components/submission-section";
@@ -86,7 +86,10 @@ export function CreatorCollaboration({ collaboration }: CreatorCollaborationProp
               <AvatarFallback className="text-base">{creator.fullName[0]}</AvatarFallback>
             </Avatar>
             <div>
-              <h1 className="text-2xl font-semibold tracking-tight">{creator.fullName}</h1>
+              <CreatorProfileSheet creatorId={creator.id} creatorName={creator.fullName}>
+                <h1 className="hover:underline text-2xl font-semibold">{creator.fullName}</h1>
+              </CreatorProfileSheet>
+
               <p className="text-sm text-muted-foreground">{creator.email}</p>
             </div>
           </div>
@@ -103,7 +106,7 @@ export function CreatorCollaboration({ collaboration }: CreatorCollaborationProp
       {collaboration.highlights.length > 0 && (
         <div className="flex flex-col gap-2">
           <h3 className="text-sm font-semibold text-foreground">Collaboration highlights</h3>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 overflow-x-auto">
             {collaboration.highlights.map((highlight) => (
               <AssetCard
                 key={highlight.id}

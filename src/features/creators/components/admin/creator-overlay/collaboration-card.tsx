@@ -3,17 +3,17 @@
 import { ChevronRight } from "lucide-react";
 import Image from "next/image";
 import type { CreatorProfile } from "@/features/creators/actions/admin/get-creator-profile";
-import { RatingBadge } from "@/shared/components/blocks/rating-badge";
 import {
+  CollapsibleContent,
   CollapsibleSection,
   CollapsibleTrigger,
-  CollapsibleContent,
   useCollapsible,
 } from "@/shared/components/blocks/collapsible-section";
+import { RatingBadge } from "@/shared/components/blocks/rating-badge";
 import { Button } from "@/shared/components/ui/button";
+import { LabeledField } from "../../labeled-field";
 import { BentoCard } from "./_components/bento-card";
 import { SubmissionSection } from "./submission-section";
-import { LabeledField } from "../../labeled-field";
 
 type ClosedCollab = CreatorProfile["closedCollaborations"][number];
 
@@ -107,7 +107,7 @@ function CollaborationCardContent({
                 <BentoCard>
                   <LabeledField
                     label="Visual"
-                    value={<RatingBadge rating={collab.ratingVisualQuality} />}
+                    value={<RatingBadge color="white" rating={collab.ratingVisualQuality} />}
                   />
                 </BentoCard>
               )}
@@ -115,7 +115,7 @@ function CollaborationCardContent({
                 <BentoCard>
                   <LabeledField
                     label="Acting"
-                    value={<RatingBadge rating={collab.ratingActingDelivery} />}
+                    value={<RatingBadge color="white" rating={collab.ratingActingDelivery} />}
                   />
                 </BentoCard>
               )}
@@ -123,7 +123,7 @@ function CollaborationCardContent({
                 <BentoCard>
                   <LabeledField
                     label="Reliability"
-                    value={<RatingBadge rating={collab.ratingReliabilitySpeed} />}
+                    value={<RatingBadge color="white" rating={collab.ratingReliabilitySpeed} />}
                   />
                 </BentoCard>
               )}

@@ -1,10 +1,11 @@
 "use client";
 
+import { PanelLeft, X } from "lucide-react";
 import { useState } from "react";
-import { ChevronLeft, ChevronRight, PanelLeft, X } from "lucide-react";
+import type { CreatorProfile } from "@/features/creators/actions/admin/get-creator-profile";
 import { Button } from "@/shared/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/shared/components/ui/sheet";
-import type { CreatorProfile } from "@/features/creators/actions/admin/get-creator-profile";
+import { cn } from "@/shared/lib/utils";
 import { CreatorContent } from "./creator-content";
 import { CreatorSidebar } from "./creator-sidebar";
 
@@ -71,9 +72,19 @@ export function CreatorOverlay({
                 onClose={() => setSidebarOpen(false)}
               />
               <div
-                className={`flex flex-1 min-w-0 min-h-0 transition-[filter] duration-200 ${sidebarOpen ? "sm:filter-none blur-sm overflow-hidden" : ""}`}
-                onClick={() => sidebarOpen && setSidebarOpen(false)}
+                className={cn(
+                  "relative flex flex-1 min-w-0 min-h-0 transition-[filter] duration-200",
+                  sidebarOpen && "blur-sm overflow-hidden sm:filter-none",
+                )}
               >
+                {sidebarOpen && (
+                  <button
+                    type="button"
+                    aria-label="Close creator info"
+                    className="absolute inset-0 z-10 sm:hidden"
+                    onClick={() => setSidebarOpen(false)}
+                  />
+                )}
                 <CreatorContent creator={creator} contentInert={sidebarOpen} />
               </div>
             </div>
