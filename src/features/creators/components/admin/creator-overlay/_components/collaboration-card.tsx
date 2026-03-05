@@ -3,6 +3,7 @@
 import { ChevronRight } from "lucide-react";
 import Image from "next/image";
 import type { CreatorProfile } from "@/features/creators/actions/admin/get-creator-profile";
+import { LabeledField } from "@/features/creators/components/labeled-field";
 import {
   CollapsibleContent,
   CollapsibleSection,
@@ -11,8 +12,7 @@ import {
 } from "@/shared/components/blocks/collapsible-section";
 import { RatingBadge } from "@/shared/components/blocks/rating-badge";
 import { Button } from "@/shared/components/ui/button";
-import { LabeledField } from "../../labeled-field";
-import { BentoCard } from "./_components/bento-card";
+import { BentoCard } from "./bento-card";
 import { SubmissionSection } from "./submission-section";
 
 type ClosedCollab = CreatorProfile["closedCollaborations"][number];

@@ -30,7 +30,7 @@ import { WizardComplete } from "@/shared/components/wizard/wizard-complete";
 import { WizardLoading } from "@/shared/components/wizard/wizard-loading";
 import { useSteppedFlow } from "@/shared/hooks/use-stepped-flow";
 import type { CollabRatingRow } from "../lib/calculate-ratings";
-import { calculateProjectedOverall } from "../lib/calculate-ratings";
+import { calculateCreatorRating } from "../lib/calculate-ratings";
 import { closeCollaboration } from "../actions/close-collaboration";
 import { CLOSE_WIZARD_STEPS } from "../lib/close-wizard-constants";
 import { canProceed } from "../lib/close-wizard-utils";
@@ -243,7 +243,14 @@ export function CloseCollaborationWizard({
           collaborationId,
           creatorId,
           submissionName,
-          overallRating: calculateProjectedOverall(closedCollabRatings, ratings as CollaborationRatingsInput),
+          overallRating: calculateCreatorRating([
+            ...closedCollabRatings,
+            {
+              ratingVisualQuality: (ratings as CollaborationRatingsInput).visual_quality,
+              ratingActingDelivery: (ratings as CollaborationRatingsInput).acting_line_delivery,
+              ratingReliabilitySpeed: (ratings as CollaborationRatingsInput).reliability_speed,
+            },
+          ]),
           ratings: ratings as CollaborationRatingsInput,
           piecesOfContent: parseInt(piecesOfContent, 10),
           totalPaid: parseFloat(totalPaid),

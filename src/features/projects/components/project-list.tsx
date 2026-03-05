@@ -83,41 +83,6 @@ const columns: ColumnDef<Project>[] = [
       </span>
     ),
   },
-  {
-    id: "actions",
-    header: () => <div className="text-right"></div>,
-    cell: ({ row, table }) => {
-      const meta = table.options.meta as { onDownloadProject?: (id: string, name: string) => void };
-      return (
-        <div className="flex justify-end">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                className="data-[state=open]:bg-muted text-muted-foreground flex size-8"
-                size="icon"
-              >
-                <MoreVertical />
-                <span className="sr-only">Open menu</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-40">
-              <DropdownMenuItem
-                className="cursor-pointer gap-2"
-                onSelect={(e) => {
-                  e.preventDefault();
-                  meta.onDownloadProject?.(row.original.id, row.original.name);
-                }}
-              >
-                <Download className="size-4" />
-                Download all
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      );
-    },
-  },
 ];
 
 export function ProjectList({ projects }: { projects: Project[] }) {
@@ -131,22 +96,9 @@ export function ProjectList({ projects }: { projects: Project[] }) {
     pageSize: 10,
   });
 
-  async function handleDownloadProject(projectId: string, projectName: string) {
-    const { data } = await getAssets({ projectId });
-    if (!data?.length) {
-      toast.info("No assets to download");
-      return;
-    }
-    await downloadAssets(data, {
-      onError: (filename) => toast.error(`Failed to download ${filename}`),
-      zipName: projectName,
-    });
-  }
-
   const table = useReactTable({
     data: projects,
     columns,
-    meta: { onDownloadProject: handleDownloadProject },
     state: {
       sorting,
       columnVisibility,
@@ -221,14 +173,7 @@ export function ProjectList({ projects }: { projects: Project[] }) {
                   onClick={() => router.push(`/projects/${row.original.id}`)}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell
-                      key={cell.id}
-                      onClick={(e) => {
-                        if (cell.column.id === "actions") {
-                          e.stopPropagation();
-                        }
-                      }}
-                    >
+                    <TableCell key={cell.id} className="cursor-pointer p-4">
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </TableCell>
                   ))}

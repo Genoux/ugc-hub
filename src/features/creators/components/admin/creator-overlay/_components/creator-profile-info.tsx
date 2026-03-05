@@ -12,6 +12,7 @@ import { VerifiedBadge } from "@/shared/components/icons/verified-badge";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/shared/components/ui/tooltip";
+import { BlacklistedHovercard } from "./blacklisted-hovercard";
 
 interface CreatorProfileInfoProps {
   creator: CreatorProfile;
@@ -63,6 +64,12 @@ export function CreatorProfileInfo({ creator, layout = "sidebar" }: CreatorProfi
             <div className="flex items-center gap-2">
               <h3 className="font-semibold text-white text-xl truncate">{creator.fullName}</h3>
               {creator.overallRating === "top creator" && <VerifiedBadge className="size-5" />}
+              {creator.status === "blacklisted" && (
+                <BlacklistedHovercard
+                  reason={creator.blacklistReason}
+                  blacklistedBy={creator.blacklistedByProfile}
+                />
+              )}
             </div>
           </div>
         </div>

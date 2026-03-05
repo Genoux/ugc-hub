@@ -1,11 +1,11 @@
 "use client";
 
-import { X } from "lucide-react";
 import { motion } from "framer-motion";
+import { X } from "lucide-react";
 import type { CreatorProfile } from "@/features/creators/actions/admin/get-creator-profile";
-import { CreatorProfileInfo } from "./_components/creator-profile-info";
 import { Button } from "@/shared/components/ui/button";
 import { EASING_FUNCTION } from "@/shared/lib/constant";
+import { CreatorProfileInfo } from "./_components/creator-profile-info";
 
 interface CreatorSidebarProps {
   creator: CreatorProfile;
