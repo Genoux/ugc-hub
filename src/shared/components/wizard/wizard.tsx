@@ -2,7 +2,7 @@
 
 import { AnimatePresence, motion } from "motion/react";
 import type { ReactNode } from "react";
-import { EASING_FUNCTION } from "@/shared/lib/constant";
+import { EASING_FUNCTION } from "@/shared/lib/constants";
 import { cn } from "@/shared/lib/utils";
 
 const SLIDE_OFFSET = 12;

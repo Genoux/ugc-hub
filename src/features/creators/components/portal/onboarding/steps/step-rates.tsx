@@ -1,6 +1,6 @@
 "use client";
 
-import { RATE_BANDS } from "@/features/creators/constants";
+import { RATE_BANDS } from "@/shared/lib/constants";
 import type { OnboardingData } from "../onboarding-types";
 
 interface Props {

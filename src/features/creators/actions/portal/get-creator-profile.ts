@@ -6,7 +6,7 @@ import type {
   CollaborationHighlight,
   PortfolioVideoEntry,
   PortfolioVideo,
-} from "@/features/creators/constants";
+} from "@/features/creators/types";
 import { requireCreator } from "@/features/creators/lib/require-creator";
 import { creatorSchema } from "@/features/creators/schemas";
 import { toMediaUrl } from "@/features/uploads/lib/r2-media-url";

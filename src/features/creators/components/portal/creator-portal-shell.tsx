@@ -7,7 +7,7 @@ import type { CreatorProfile } from "@/features/creators/actions/portal/get-crea
 import type { CreatorSubmissions } from "@/features/creators/actions/portal/get-creator-submissions";
 import type { CreatorUIState } from "@/features/creators/lib/get-creator-ui-state";
 import { useCreatorPortal } from "./creator-portal-context";
-import { OnboardingShell } from "./onboarding";
+import { OnboardingShell } from "./onboarding/onboarding-shell";
 import { CollaborationTab } from "./tabs/collaborations/collaboration-tab";
 import { CreatorProfileTab } from "./tabs/profile/profile-tab";
 import { ResetProfileButton } from "./tools/reset-profile-button";

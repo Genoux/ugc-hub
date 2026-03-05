@@ -2,7 +2,7 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { createApplicant } from "@/features/applicants/lib/create-applicant";
-import { LANGUAGES } from "@/features/creators/constants";
+import { LANGUAGES } from "@/shared/lib/constants";
 import { env } from "@/shared/lib/env";
 
 const bodySchema = z.object({

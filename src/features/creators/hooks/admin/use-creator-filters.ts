@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import type { CreatorListItem } from "@/features/creators/actions/admin/get-creators";
-import type { OverallRatingTier } from "@/features/creators/constants";
-import { OVERALL_RATING_TIERS, SOCIAL_PLATFORMS } from "@/features/creators/constants";
+import type { OverallRatingTier } from "@/shared/lib/constants";
+import { OVERALL_RATING_TIERS, SOCIAL_PLATFORMS } from "@/shared/lib/constants";
 import {
   countActiveFilters,
   emptyFilters,

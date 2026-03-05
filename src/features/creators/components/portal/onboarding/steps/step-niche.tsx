@@ -1,6 +1,6 @@
 "use client";
 
-import { UGC_CATEGORIES, type UgcCategory } from "@/features/creators/constants";
+import { UGC_CATEGORIES, type UgcCategory } from "@/shared/lib/constants";
 import { Button } from "@/shared/components/ui/button";
 import type { OnboardingData } from "../onboarding-types";
 

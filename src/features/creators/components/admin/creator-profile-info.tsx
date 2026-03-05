@@ -5,14 +5,14 @@ import Image from "next/image";
 import { toast } from "sonner";
 import type { CreatorProfile } from "@/features/creators/actions/admin/get-creator-profile";
 import { LabeledField } from "@/features/creators/components/labeled-field";
-import type { SocialPlatform } from "@/features/creators/constants";
 import { RatingBadge } from "@/shared/components/blocks/rating-badge";
 import { SocialIcon } from "@/shared/components/icons/socials/social-icon";
 import { VerifiedBadge } from "@/shared/components/icons/verified-badge";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/shared/components/ui/tooltip";
-import { BlacklistedHovercard } from "./blacklisted-hovercard";
+import type { SocialPlatform } from "@/shared/lib/constants";
+import { BlacklistedHovercard } from "./creator-overlay/_components/blacklisted-hovercard";
 
 interface CreatorProfileInfoProps {
   creator: CreatorProfile;
@@ -25,6 +25,7 @@ interface CreatorProfileInfoProps {
 
 export function CreatorProfileInfo({ creator, layout = "sidebar" }: CreatorProfileInfoProps) {
   const rateRange = creator.rateRangeInternal || creator.rateRangeSelf;
+  const blacklisted = creator.status === "blacklisted" ? creator : null;
 
   const socialLinks = [
     creator.socialChannels?.instagram_handle && {
@@ -64,10 +65,10 @@ export function CreatorProfileInfo({ creator, layout = "sidebar" }: CreatorProfi
             <div className="flex items-center gap-2">
               <h3 className="font-semibold text-white text-xl truncate">{creator.fullName}</h3>
               {creator.overallRating === "top creator" && <VerifiedBadge className="size-5" />}
-              {creator.status === "blacklisted" && (
+              {blacklisted && (
                 <BlacklistedHovercard
-                  reason={creator.blacklistReason}
-                  blacklistedBy={creator.blacklistedByProfile}
+                  reason={blacklisted.blacklistReason}
+                  blacklistedBy={blacklisted.blacklistedByProfile}
                 />
               )}
             </div>

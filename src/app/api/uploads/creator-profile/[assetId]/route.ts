@@ -4,7 +4,7 @@ import { eq, sql } from "drizzle-orm";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { creators } from "@/db/schema";
-import type { PortfolioVideoEntry } from "@/features/creators/constants";
+import type { PortfolioVideoEntry } from "@/features/creators/types";
 import { getSessionCreator } from "@/features/creators/lib/get-session-creator";
 import { R2_BUCKET_NAME, r2Client } from "@/features/uploads/lib/r2-client";
 import { db } from "@/shared/lib/db";

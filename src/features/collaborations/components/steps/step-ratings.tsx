@@ -1,6 +1,6 @@
 "use client";
 
-import { RATING_TIERS } from "@/features/creators/constants";
+import { RATING_TIERS } from "@/shared/lib/constants";
 import { Button } from "@/shared/components/ui/button";
 import { Field, FieldDescription, FieldLabel } from "@/shared/components/ui/field";
 import { Label } from "@/shared/components/ui/label";

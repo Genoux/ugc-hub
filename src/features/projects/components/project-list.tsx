@@ -43,7 +43,7 @@ import {
 } from "@/shared/components/ui/table";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/shared/components/ui/tooltip";
 import { getAssets } from "../actions/get-assets";
-import { downloadAssets } from "../lib/download-assets";
+import { downloadAssets } from "../../../shared/lib/download-assets";
 import { ProjectForm } from "./project-form";
 
 type Project = {

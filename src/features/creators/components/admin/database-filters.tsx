@@ -14,7 +14,7 @@ import type {
   OverallRatingTier,
   SocialPlatform,
   UgcCategory,
-} from "../../constants";
+} from "@/shared/lib/constants";
 import {
   AGE_DEMOGRAPHICS,
   CONTENT_FORMATS,
@@ -23,7 +23,7 @@ import {
   OVERALL_RATING_TIERS,
   SOCIAL_PLATFORMS,
   UGC_CATEGORIES,
-} from "../../constants";
+} from "@/shared/lib/constants";
 
 export interface Filters {
   overallRating: OverallRatingTier[];

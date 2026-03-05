@@ -4,8 +4,8 @@ import Image from "next/image";
 import { RatingBadge } from "@/shared/components/blocks/rating-badge";
 import { Label } from "@/shared/components/ui/label";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/shared/components/ui/tooltip";
-import type { CollabRatingRow } from "../../lib/calculate-ratings";
-import { calculateCreatorRating, calculateOverallRating } from "../../lib/calculate-ratings";
+import type { CollabRatingRow } from "../../../../shared/lib/calculate-ratings";
+import { calculateCreatorRating, calculateOverallRating } from "../../../../shared/lib/calculate-ratings";
 import type { CollaborationRatingsInput } from "../../schemas";
 import type { PortfolioFile } from "./step-portfolio";
 

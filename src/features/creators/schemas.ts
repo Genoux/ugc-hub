@@ -6,7 +6,7 @@ import {
   OVERALL_RATING_TIERS,
   PRIMARY_CHANNELS,
   UGC_CATEGORIES,
-} from "./constants";
+} from "@/shared/lib/constants";
 
 export const socialChannelsSchema = z.object({
   instagram_handle: z.string().optional(),

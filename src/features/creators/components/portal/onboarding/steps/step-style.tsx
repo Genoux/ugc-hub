@@ -1,6 +1,6 @@
 "use client";
 
-import { CONTENT_FORMATS, type ContentFormat } from "@/features/creators/constants";
+import { CONTENT_FORMATS, type ContentFormat } from "@/shared/lib/constants";
 import { Button } from "@/shared/components/ui/button";
 import type { OnboardingData } from "../onboarding-types";
 

@@ -29,8 +29,8 @@ import {
 import { WizardComplete } from "@/shared/components/wizard/wizard-complete";
 import { WizardLoading } from "@/shared/components/wizard/wizard-loading";
 import { useSteppedFlow } from "@/shared/hooks/use-stepped-flow";
-import type { CollabRatingRow } from "../lib/calculate-ratings";
-import { calculateCreatorRating } from "../lib/calculate-ratings";
+import type { CollabRatingRow } from "../../../shared/lib/calculate-ratings";
+import { calculateCreatorRating } from "../../../shared/lib/calculate-ratings";
 import { closeCollaboration } from "../actions/close-collaboration";
 import { CLOSE_WIZARD_STEPS } from "../lib/close-wizard-constants";
 import { canProceed } from "../lib/close-wizard-utils";

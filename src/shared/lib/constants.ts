@@ -1,5 +1,3 @@
-// Based on prototype ugc-hub-pool/src/data/creatorTypes.ts
-
 export const UGC_CATEGORIES = [
   "Sports & Outdoors",
   "Lifestyle",
@@ -64,8 +62,11 @@ export const ETHNICITIES = [
 
 export type Ethnicity = (typeof ETHNICITIES)[number];
 
+//TODO: Add more languages
 export const LANGUAGES = [
   "English",
+  "English (US)",
+  "English (UK)",
   "French",
   "Spanish",
   "Portuguese",
@@ -175,29 +176,11 @@ export const RATING_LABELS: Record<string, string> = {
   reliability_speed: "Reliability & Speed",
 };
 
-/** Stored shape (DB/API). */
-export interface PortfolioVideoEntry {
-  id: string;
-  r2Key: string;
-  filename: string;
-  mimeType: string;
-  sizeBytes: number;
-}
+export const EASING_FUNCTION = {
+  exponential: [0.16, 1, 0.3, 1],
+  quartic: [0.78, 0, 0.22, 1],
+} as const;
 
-/** Resolved for display/download — signed URL attached. */
-export interface PortfolioVideo {
-  id: string;
-  filename: string;
-  mimeType: string;
-  sizeBytes: number;
-  url: string;
-}
+export const ALLOWED_UPLOAD_MIME_TYPES = ["video/mp4", "video/quicktime"] as const;
 
-export interface CollaborationHighlight {
-  id: string;
-  r2Key: string;
-  filename: string;
-  mimeType: string;
-  sizeBytes: number;
-  uploadedBy: string;
-}
+export const DEFAULT_UPLOAD_MAX_FILE_SIZE = 5 * 1024 * 1024 * 1024; // 5GB

@@ -27,7 +27,7 @@ import {
   EmptyTitle,
 } from "@/shared/components/ui/empty";
 import { Input } from "@/shared/components/ui/input";
-import { EASING_FUNCTION } from "@/shared/lib/constant";
+import { EASING_FUNCTION } from "@/shared/lib/constants";
 import { CreatorCard } from "./creator-card";
 import { CreatorOverlay } from "./creator-overlay/creator-overlay";
 import { DatabaseFilters } from "./database-filters";

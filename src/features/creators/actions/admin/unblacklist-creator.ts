@@ -4,7 +4,7 @@ import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { collaborations, creators } from "@/db/schema";
-import { calculateCreatorRating } from "@/features/collaborations/lib/calculate-ratings";
+import { calculateCreatorRating } from "@/shared/lib/calculate-ratings";
 import { toActionError } from "@/shared/lib/action-error";
 import { requireAdmin } from "@/shared/lib/auth";
 import { db } from "@/shared/lib/db";

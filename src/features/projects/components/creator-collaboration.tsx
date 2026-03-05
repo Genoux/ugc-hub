@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import { CloseCollaborationWizard } from "@/features/collaborations/components/close-collaboration-wizard";
 import { CreatorProfileSheet } from "@/features/creators/components/admin/creator-profile-sheet";
 import type { CollaborationDetail } from "@/features/projects/actions/get-collaboration-detail";
-import { DownloadButton } from "@/features/projects/components/download-button";
+import { DownloadButton } from "@/shared/components/blocks/download-button";
 import { SubmissionSection } from "@/features/projects/components/submission-section";
 import { AssetCard } from "@/shared/components/blocks/asset-card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/ui/avatar";

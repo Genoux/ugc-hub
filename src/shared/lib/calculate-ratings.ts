@@ -1,4 +1,4 @@
-import type { OverallRatingTier, RatingTier } from "@/features/creators/constants";
+import type { OverallRatingTier, RatingTier } from "@/shared/lib/constants";
 
 export const SCORE: Record<string, number> = {
   standout: 4,

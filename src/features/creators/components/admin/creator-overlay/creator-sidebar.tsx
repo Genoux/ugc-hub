@@ -1,11 +1,9 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { X } from "lucide-react";
 import type { CreatorProfile } from "@/features/creators/actions/admin/get-creator-profile";
-import { Button } from "@/shared/components/ui/button";
-import { EASING_FUNCTION } from "@/shared/lib/constant";
-import { CreatorProfileInfo } from "./_components/creator-profile-info";
+import { EASING_FUNCTION } from "@/shared/lib/constants";
+import { CreatorProfileInfo } from "../creator-profile-info";
 
 interface CreatorSidebarProps {
   creator: CreatorProfile;
@@ -13,7 +11,7 @@ interface CreatorSidebarProps {
   onClose?: () => void;
 }
 
-export function CreatorSidebar({ creator, sidebarOpen = false, onClose }: CreatorSidebarProps) {
+export function CreatorSidebar({ creator, sidebarOpen = false }: CreatorSidebarProps) {
   return (
     <>
       {/* Mobile: absolute overlay panel, slides in over the content */}

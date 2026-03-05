@@ -2,7 +2,7 @@
 
 import { ChevronRight } from "lucide-react";
 import type { CreatorProfile } from "@/features/creators/actions/admin/get-creator-profile";
-import { DownloadButton } from "@/features/projects/components/download-button";
+import { DownloadButton } from "@/shared/components/blocks/download-button";
 import { AssetCard } from "@/shared/components/blocks/asset-card";
 import {
   CollapsibleContent,

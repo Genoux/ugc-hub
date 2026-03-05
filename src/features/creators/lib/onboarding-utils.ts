@@ -7,7 +7,7 @@ import type {
   GenderIdentity,
   Language,
   UgcCategory,
-} from "@/features/creators/constants";
+} from "@/shared/lib/constants";
 
 export const MIN_PORTFOLIO_VIDEOS = 2;
 export const MAX_PORTFOLIO_VIDEOS = 5;

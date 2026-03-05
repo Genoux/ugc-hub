@@ -1,6 +1,6 @@
 //TODO: What if the top creator is manually set by the team, so they get the top creator + the verified badge? If not, is the top rating 'standout'?
 
-import { type OverallRatingTier, RATING_CONFIG } from "@/features/creators/constants";
+import { type OverallRatingTier, RATING_CONFIG } from "@/shared/lib/constants";
 import { cn } from "@/shared/lib/utils";
 
 interface RatingBadgeProps {

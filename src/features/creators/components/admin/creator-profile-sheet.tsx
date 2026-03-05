@@ -4,10 +4,9 @@ import { Loader2, X } from "lucide-react";
 import { useState } from "react";
 import type { CreatorProfile } from "@/features/creators/actions/admin/get-creator-profile";
 import { getCreatorProfile } from "@/features/creators/actions/admin/get-creator-profile";
-import { CreatorProfileInfo } from "@/features/creators/components/admin/creator-overlay/_components/creator-profile-info";
+import { CreatorProfileInfo } from "@/features/creators/components/admin/creator-profile-info";
 import { Button } from "@/shared/components/ui/button";
 import { Sheet, SheetClose, SheetContent, SheetTitle } from "@/shared/components/ui/sheet";
-import { BlacklistedHovercard } from "./creator-overlay/_components/blacklisted-hovercard";
 
 interface CreatorProfileSheetProps {
   creatorId: string;

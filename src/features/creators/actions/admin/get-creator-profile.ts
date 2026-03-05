@@ -2,16 +2,17 @@
 
 import { eq } from "drizzle-orm";
 import { creators } from "@/db/schema";
+import { type Creator, creatorSchema } from "@/features/creators/schemas";
 import type {
   CollaborationHighlight,
-  PortfolioVideoEntry,
   PortfolioVideo,
-} from "@/features/creators/constants";
-import { creatorSchema, type Creator } from "@/features/creators/schemas";
+  PortfolioVideoEntry,
+} from "@/features/creators/types";
 import { toMediaUrl } from "@/features/uploads/lib/r2-media-url";
-import type { ClerkUserProfile } from "@/shared/lib/clerk";
-import { getClerkUserProfile } from "@/shared/lib/clerk";
 import { requireAdmin } from "@/shared/lib/auth";
+import type { ClerkUserProfile } from "@/shared/lib/clerk";
+import type { DbCreatorStatus } from "@/shared/lib/constants";
+import { getClerkUserProfile } from "@/shared/lib/clerk";
 import { db } from "@/shared/lib/db";
 
 type SubmissionAsset = { id: string; filename: string; mimeType: string; url: string };
@@ -23,7 +24,10 @@ type CollabSubmission = {
   assets: SubmissionAsset[];
 };
 
-type CreatorProfileBase = Omit<Creator, "status" | "blacklistReason" | "blacklistedAt" | "blacklistedBy"> & {
+type CreatorProfileBase = Omit<
+  Creator,
+  "status" | "blacklistReason" | "blacklistedAt" | "blacklistedBy"
+> & {
   profilePhotoUrl: string | null;
   portfolioVideos: PortfolioVideo[];
   closedCollaborations: {
@@ -51,7 +55,7 @@ export type CreatorProfile =
       blacklistedByProfile: ClerkUserProfile;
     })
   | (CreatorProfileBase & {
-      status: Exclude<Creator["status"], "blacklisted">;
+      status: Exclude<DbCreatorStatus, "blacklisted">;
       blacklistReason: string | null;
       blacklistedAt: Date | null;
       blacklistedBy: string | null;
@@ -148,5 +152,11 @@ export async function getCreatorProfile(creatorId: string): Promise<CreatorProfi
     : null;
 
   // Cast is safe: the DB enforces that blacklistReason/blacklistedBy are non-null when status === "blacklisted"
-  return { ...creator, profilePhotoUrl, blacklistedByProfile, portfolioVideos, closedCollaborations } as CreatorProfile;
+  return {
+    ...creator,
+    profilePhotoUrl,
+    blacklistedByProfile,
+    portfolioVideos,
+    closedCollaborations,
+  } as CreatorProfile;
 }

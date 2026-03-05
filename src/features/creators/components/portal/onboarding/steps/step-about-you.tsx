@@ -10,7 +10,7 @@ import {
   type GenderIdentity,
   LANGUAGES,
   type Language,
-} from "@/features/creators/constants";
+} from "@/shared/lib/constants";
 import { Button } from "@/shared/components/ui/button";
 import { Label } from "@/shared/components/ui/label";
 import {

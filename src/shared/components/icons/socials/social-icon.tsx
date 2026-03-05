@@ -1,4 +1,4 @@
-import type { SocialPlatform } from "@/features/creators/constants";
+import type { SocialPlatform } from "@/shared/lib/constants";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/shared/components/ui/tooltip";
 import { Button } from "../../ui/button";
 import { InstagramIcon } from "./instagram";

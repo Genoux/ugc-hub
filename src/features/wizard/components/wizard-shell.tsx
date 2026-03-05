@@ -18,7 +18,7 @@ import { WizardLoading } from "@/shared/components/wizard/wizard-loading";
 import { submitWizard } from "../actions/submit-wizard";
 import { StepSubmittingAs } from "./steps/step-submitting-as";
 import { StepUploadAssets } from "./steps/step-upload-assets";
-import { WIZARD_STEPS } from "./wizard-constants";
+import { WIZARD_STEPS } from "../lib/constants";
 
 const CONTENT_STEPS = Object.keys(WIZARD_STEPS).length;
 const LOADING_STEP = CONTENT_STEPS + 1;

@@ -23,7 +23,7 @@ import type {
   GenderIdentity,
   Language,
   UgcCategory,
-} from "@/features/creators/constants";
+} from "@/shared/lib/constants";
 
 export interface OnboardingData {
   // Step 1

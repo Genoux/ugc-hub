@@ -4,7 +4,7 @@ import { DeleteObjectCommand, DeleteObjectsCommand } from "@aws-sdk/client-s3";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { creators } from "@/db/schema";
-import type { PortfolioVideoEntry } from "@/features/creators/constants";
+import type { PortfolioVideoEntry } from "@/features/creators/types";
 import { requireCreator } from "@/features/creators/lib/require-creator";
 import { R2_BUCKET_NAME, r2Client } from "@/features/uploads/lib/r2-client";
 import { toActionError } from "@/shared/lib/action-error";

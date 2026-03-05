@@ -1,4 +1,4 @@
-import { ALLOWED_UPLOAD_MIME_TYPES, DEFAULT_UPLOAD_MAX_FILE_SIZE } from "@/shared/lib/constant";
+import { ALLOWED_UPLOAD_MIME_TYPES, DEFAULT_UPLOAD_MAX_FILE_SIZE } from "@/shared/lib/constants";
 
 export const UPLOAD_CONFIG = {
   allowedMimeTypes: ALLOWED_UPLOAD_MIME_TYPES,

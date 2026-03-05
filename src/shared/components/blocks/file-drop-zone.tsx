@@ -2,7 +2,7 @@
 
 import { Upload } from "lucide-react";
 import { useRef } from "react";
-import { ALLOWED_UPLOAD_MIME_TYPES, DEFAULT_UPLOAD_MAX_FILE_SIZE } from "@/shared/lib/constant";
+import { ALLOWED_UPLOAD_MIME_TYPES, DEFAULT_UPLOAD_MAX_FILE_SIZE } from "@/shared/lib/constants";
 import { cn } from "@/shared/lib/utils";
 
 interface FileDropZoneProps {

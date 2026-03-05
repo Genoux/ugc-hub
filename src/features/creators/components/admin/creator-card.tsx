@@ -2,7 +2,6 @@ import Image from "next/image";
 import type { CreatorListItem } from "@/features/creators/actions/admin/get-creators";
 import { RatingBadge } from "@/shared/components/blocks/rating-badge";
 import { VerifiedBadge } from "@/shared/components/icons/verified-badge";
-import { Squircle } from "@squircle-js/react";
 import { Button } from "@/shared/components/ui/button";
 
 interface CreatorCardProps {
