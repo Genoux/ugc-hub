@@ -68,7 +68,7 @@ export function WizardPanel({ isPending = false, children, className }: WizardPa
       <div className="relative flex h-full w-full flex-col">
         <div
           className={cn(
-            "flex min-h-0 flex-1 flex-col transition-opacity duration-200",
+            "flex min-h-0 flex-1 flex-col justify-center transition-opacity duration-200",
             isPending && "opacity-40 pointer-events-none select-none",
           )}
         >
@@ -105,7 +105,7 @@ type WizardStepProps = {
 
 export function WizardStep({ stepKey, direction, children, className }: WizardStepProps) {
   return (
-    <div className="flex flex-col min-h-0 flex-1 w-full max-w-xl mx-auto overflow-y-auto px-6">
+    <div className="flex flex-col w-full justify-center max-w-xl mx-auto overflow-y-auto px-6">
       <AnimatePresence mode="wait" initial={false}>
         <motion.div
           key={stepKey}

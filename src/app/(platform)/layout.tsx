@@ -4,6 +4,7 @@ import { AnimatePresence } from "motion/react";
 import { useRouter } from "next/navigation";
 import { ThemeProvider } from "next-themes";
 import { useEffect, useState } from "react";
+import { PlatformDisclaimer } from "@/shared/components/blocks/platform-disclaimer";
 import { AppSidebar } from "@/shared/components/layout/app-sidebar";
 import { LoadingScreen } from "@/shared/components/layout/loading-screen";
 import { SiteHeader } from "@/shared/components/layout/site-header";
@@ -45,6 +46,7 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
           <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">{children}</div>
         </SidebarInset>
       </SidebarProvider>
+      <PlatformDisclaimer />
     </ThemeProvider>
   );
 }

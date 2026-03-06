@@ -6,7 +6,7 @@ import { toActionError } from "@/shared/lib/action-error";
 import { requireAdmin } from "@/shared/lib/auth";
 import { sendInvitation } from "@/shared/lib/clerk";
 import { db } from "@/shared/lib/db";
-import { env } from "@/shared/lib/env";
+import { getAppUrl } from "@/shared/lib/app-url";
 import { ROUTES } from "@/shared/lib/routes";
 
 export async function reinviteCreator(creatorId: string) {
@@ -23,7 +23,7 @@ export async function reinviteCreator(creatorId: string) {
 
     const result = await sendInvitation(
       creator.email,
-      `${env.NEXT_PUBLIC_APP_URL}${ROUTES.signUp}`,
+      `${await getAppUrl()}${ROUTES.signUp}`,
     );
 
     // already_has_account = they can sign in directly, no invite needed

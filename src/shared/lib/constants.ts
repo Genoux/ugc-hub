@@ -62,11 +62,8 @@ export const ETHNICITIES = [
 
 export type Ethnicity = (typeof ETHNICITIES)[number];
 
-//TODO: Add more languages
 export const LANGUAGES = [
   "English",
-  "English (US)",
-  "English (UK)",
   "French",
   "Spanish",
   "Portuguese",

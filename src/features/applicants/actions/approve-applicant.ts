@@ -7,7 +7,7 @@ import { toActionError } from "@/shared/lib/action-error";
 import { requireAdmin } from "@/shared/lib/auth";
 import { sendInvitation } from "@/shared/lib/clerk";
 import { db } from "@/shared/lib/db";
-import { env } from "@/shared/lib/env";
+import { getAppUrl } from "@/shared/lib/app-url";
 import { ROUTES } from "@/shared/lib/routes";
 import { approveApplicantSchema } from "../schemas";
 
@@ -43,7 +43,7 @@ export async function approveApplicant(creatorId: string) {
 
     let result: Awaited<ReturnType<typeof sendInvitation>>;
     try {
-      result = await sendInvitation(creator.email, `${env.NEXT_PUBLIC_APP_URL}${ROUTES.signUp}`);
+      result = await sendInvitation(creator.email, `${await getAppUrl()}${ROUTES.signUp}`);
     } catch (err) {
       await revert();
       throw err;

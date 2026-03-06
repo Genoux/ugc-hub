@@ -36,7 +36,7 @@ export function StepComplete({ error, onExit, onRetry }: Props) {
       title="You're all set!"
       description="Your profile is complete and discoverable."
     >
-      <Button type="button" onClick={onExit}>
+      <Button className="w-fit mx-auto" type="button" onClick={onExit}>
         Go to dashboard
       </Button>
     </WizardComplete>
