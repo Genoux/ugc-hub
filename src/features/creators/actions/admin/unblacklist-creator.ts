@@ -31,7 +31,9 @@ export async function unblacklistCreator(creatorId: string) {
         ratingReliabilitySpeed: collaborations.ratingReliabilitySpeed,
       })
       .from(collaborations)
-      .where(and(eq(collaborations.creatorId, input.creatorId), eq(collaborations.status, "closed")));
+      .where(
+        and(eq(collaborations.creatorId, input.creatorId), eq(collaborations.status, "closed")),
+      );
 
     const restoredRating = calculateCreatorRating(closedCollabs);
 

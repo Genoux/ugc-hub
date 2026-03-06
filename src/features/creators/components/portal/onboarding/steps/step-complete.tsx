@@ -32,7 +32,10 @@ export function StepComplete({ error, onExit, onRetry }: Props) {
   }
 
   return (
-    <WizardComplete title="You're all set!" description="Your profile is complete and discoverable.">
+    <WizardComplete
+      title="You're all set!"
+      description="Your profile is complete and discoverable."
+    >
       <Button type="button" onClick={onExit}>
         Go to dashboard
       </Button>

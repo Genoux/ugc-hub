@@ -25,7 +25,6 @@ import type {
   UgcCategory,
 } from "@/shared/lib/constants";
 
-
 //TODO: Rename for Onboarding or OnboardingPayload
 export interface OnboardingData {
   // Step 1

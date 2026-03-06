@@ -1,5 +1,5 @@
-import { cn } from "@/shared/lib/utils";
 import { Field, FieldContent, FieldLabel } from "@/shared/components/ui/field";
+import { cn } from "@/shared/lib/utils";
 
 interface LabeledFieldProps {
   label: string;

@@ -20,10 +20,7 @@ export default async function CreatorPage() {
   const { creator: row } = await getSessionCreator(userId);
   if (!row) redirect(ROUTES.signOut);
 
-  const [creator, content] = await Promise.all([
-    getCreatorProfile(),
-    getCreatorSubmissions(),
-  ]);
+  const [creator, content] = await Promise.all([getCreatorProfile(), getCreatorSubmissions()]);
   const uiState = toCreatorUIState(row);
 
   return <CreatorPortalShell creator={creator} uiState={uiState} content={content} />;

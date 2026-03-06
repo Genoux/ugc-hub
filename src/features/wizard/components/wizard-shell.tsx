@@ -141,7 +141,10 @@ export function WizardShell({
             />
           )}
           {step === 4 && (
-            <WizardComplete title="Submission complete!" description="Your files have been received.">
+            <WizardComplete
+              title="Submission complete!"
+              description="Your files have been received."
+            >
               <Button type="button" asChild>
                 <a href="/creator">Go to my profile</a>
               </Button>
