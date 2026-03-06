@@ -15,7 +15,6 @@ import {
   AlertDialogTitle,
 } from "@/shared/components/ui/alert-dialog";
 import { Button } from "@/shared/components/ui/button";
-import { ProgressDots } from "@/shared/components/wizard/progress-dots";
 import {
   Wizard,
   WizardAside,
@@ -84,7 +83,7 @@ export function CloseCollaborationWizard({
 
   const stepCanProceed = canProceed(step, ratings, piecesOfContent, totalPaid, portfolioFiles);
 
-  const filledSteps = new Set(
+  const _filledSteps = new Set(
     Object.keys(CLOSE_WIZARD_STEPS)
       .map(Number)
       .filter(

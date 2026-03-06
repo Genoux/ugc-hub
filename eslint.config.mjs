@@ -1,6 +1,7 @@
+/** biome-ignore-all lint/suspicious/noTemplateCurlyInString: biome doesn't support template strings */
+import tsParser from "@typescript-eslint/parser";
 import boundaries from "eslint-plugin-boundaries";
 import importPlugin from "eslint-plugin-import";
-import tsParser from "@typescript-eslint/parser";
 
 export default [
   {

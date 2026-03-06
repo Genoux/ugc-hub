@@ -2,7 +2,6 @@
 
 import { ChevronRight } from "lucide-react";
 import type { CreatorProfile } from "@/features/creators/actions/admin/get-creator-profile";
-import { DownloadButton } from "@/shared/components/blocks/download-button";
 import { AssetCard } from "@/shared/components/blocks/asset-card";
 import {
   CollapsibleContent,
@@ -10,6 +9,7 @@ import {
   CollapsibleTrigger,
   useCollapsible,
 } from "@/shared/components/blocks/collapsible-section";
+import { DownloadButton } from "@/shared/components/blocks/download-button";
 import { Button } from "@/shared/components/ui/button";
 
 type CollabSubmission = CreatorProfile["closedCollaborations"][number]["submissions"][number];

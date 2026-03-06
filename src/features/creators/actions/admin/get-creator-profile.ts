@@ -2,17 +2,17 @@
 
 import { eq } from "drizzle-orm";
 import { creators } from "@/db/schema";
-import { type Creator, creatorSchema } from "@/features/creators/schemas";
 import type {
   CollaborationHighlight,
   PortfolioVideo,
   PortfolioVideoEntry,
 } from "@/entities/creator/types";
+import { type Creator, creatorSchema } from "@/features/creators/schemas";
 import { toMediaUrl } from "@/features/uploads/lib/r2-media-url";
 import { requireAdmin } from "@/shared/lib/auth";
 import type { ClerkUserProfile } from "@/shared/lib/clerk";
-import type { DbCreatorStatus } from "@/shared/lib/constants";
 import { getClerkUserProfile } from "@/shared/lib/clerk";
+import type { DbCreatorStatus } from "@/shared/lib/constants";
 import { db } from "@/shared/lib/db";
 
 type SubmissionAsset = { id: string; filename: string; mimeType: string; url: string };

@@ -1,7 +1,7 @@
 "use client";
 
-import { CONTENT_FORMATS, type ContentFormat } from "@/shared/lib/constants";
 import { Button } from "@/shared/components/ui/button";
+import { CONTENT_FORMATS, type ContentFormat } from "@/shared/lib/constants";
 import type { OnboardingData } from "../onboarding-types";
 
 interface Props {

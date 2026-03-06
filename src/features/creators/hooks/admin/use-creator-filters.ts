@@ -1,7 +1,5 @@
 import { useMemo, useState } from "react";
 import type { CreatorListItem } from "@/features/creators/actions/admin/get-creators";
-import type { OverallRatingTier } from "@/shared/lib/constants";
-import { OVERALL_RATING_TIERS, SOCIAL_PLATFORMS } from "@/shared/lib/constants";
 import {
   countActiveFilters,
   emptyFilters,
@@ -9,6 +7,8 @@ import {
   getActiveFilterLabels,
   hasActiveFilters,
 } from "@/features/creators/components/admin/database-filters";
+import type { OverallRatingTier } from "@/shared/lib/constants";
+import { OVERALL_RATING_TIERS, SOCIAL_PLATFORMS } from "@/shared/lib/constants";
 
 export type SortKey = "rating" | "newest" | "collaborations" | "rate_low" | "rate_high";
 
@@ -64,7 +64,7 @@ export function useCreatorFilters(creators: CreatorListItem[]) {
       if (
         filters.socialPlatforms.length &&
         !filters.socialPlatforms.every((p) => {
-          const key = SOCIAL_PLATFORMS.find((sp) => sp.value === p)!.handleKey;
+          const key = SOCIAL_PLATFORMS.find((sp) => sp.value === p)?.handleKey;
           return c.socialChannels?.[key as keyof typeof c.socialChannels];
         })
       )

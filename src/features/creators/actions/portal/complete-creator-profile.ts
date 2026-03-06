@@ -4,9 +4,9 @@ import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { creators } from "@/db/schema";
-import { AGE_DEMOGRAPHICS, ETHNICITIES, GENDER_IDENTITIES } from "@/shared/lib/constants";
 import { requireCreator } from "@/features/creators/lib/require-creator";
 import { toActionError } from "@/shared/lib/action-error";
+import { AGE_DEMOGRAPHICS, ETHNICITIES, GENDER_IDENTITIES } from "@/shared/lib/constants";
 import { db } from "@/shared/lib/db";
 
 const schema = z.object({

@@ -2,9 +2,8 @@
 
 import { and, eq, ne } from "drizzle-orm";
 import { collaborations } from "@/db/schema";
-import type { CollaborationHighlight } from "@/entities/creator/types";
 import type { CollaborationDetail } from "@/entities/collaboration/types";
-import type { CollabRatingRow } from "@/shared/lib/calculate-ratings";
+import type { CollaborationHighlight } from "@/entities/creator/types";
 import { toMediaUrl } from "@/features/uploads/lib/r2-media-url";
 import { requireAdmin } from "@/shared/lib/auth";
 import { db } from "@/shared/lib/db";

@@ -9,10 +9,10 @@ export async function GET(request: Request, { params }: { params: Promise<{ key:
   const r2Key = key.join("/");
 
   if (process.env.NODE_ENV === "development" && key[0]?.startsWith("http")) {
-    const externalUrl = (key[0] + "//" + key.slice(1).join("/")) as string;
+    const externalUrl = `${key[0]}//${key.slice(1).join("/")}` as string;
     if (externalUrl.startsWith("http://") || externalUrl.startsWith("https://")) {
       const res = await fetch(externalUrl, {
-        headers: request.headers.get("range") ? { Range: request.headers.get("range")! } : {},
+        headers: request.headers.get("range") ? { Range: request.headers.get("range") ?? "" } : {},
       });
       if (!res.ok) return new Response("Not found", { status: 404 });
       const headers: Record<string, string> = {

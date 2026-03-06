@@ -1,7 +1,7 @@
 "use client";
 
-import { UGC_CATEGORIES, type UgcCategory } from "@/shared/lib/constants";
 import { Button } from "@/shared/components/ui/button";
+import { UGC_CATEGORIES, type UgcCategory } from "@/shared/lib/constants";
 import type { OnboardingData } from "../onboarding-types";
 
 interface Props {

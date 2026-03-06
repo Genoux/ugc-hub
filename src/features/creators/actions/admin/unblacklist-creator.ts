@@ -4,9 +4,9 @@ import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { collaborations, creators } from "@/db/schema";
-import { calculateCreatorRating } from "@/shared/lib/calculate-ratings";
 import { toActionError } from "@/shared/lib/action-error";
 import { requireAdmin } from "@/shared/lib/auth";
+import { calculateCreatorRating } from "@/shared/lib/calculate-ratings";
 import { db } from "@/shared/lib/db";
 
 const unblacklistCreatorSchema = z.object({

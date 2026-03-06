@@ -1,10 +1,9 @@
 "use client";
 
-import { RATING_TIERS } from "@/shared/lib/constants";
 import { Button } from "@/shared/components/ui/button";
-import { Field, FieldDescription, FieldLabel } from "@/shared/components/ui/field";
 import { Label } from "@/shared/components/ui/label";
 import { Textarea } from "@/shared/components/ui/textarea";
+import { RATING_TIERS } from "@/shared/lib/constants";
 import { cn } from "@/shared/lib/utils";
 import type { CollaborationRatingsInput } from "../../schemas";
 

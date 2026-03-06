@@ -2,7 +2,6 @@
 
 import { Field, FieldDescription, FieldLabel } from "@/shared/components/ui/field";
 import { Input } from "@/shared/components/ui/input";
-import { Label } from "@/shared/components/ui/label";
 
 interface StepRatesProps {
   piecesOfContent: string;

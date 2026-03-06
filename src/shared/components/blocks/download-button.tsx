@@ -3,9 +3,9 @@
 import { Download, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { Button } from "@/shared/components/ui/button";
 import type { DownloadableAsset } from "@/shared/lib/download-assets";
 import { downloadAssets } from "@/shared/lib/download-assets";
-import { Button } from "@/shared/components/ui/button";
 
 type DownloadButtonProps = Omit<React.ComponentProps<typeof Button>, "onClick"> & {
   assets: DownloadableAsset[];

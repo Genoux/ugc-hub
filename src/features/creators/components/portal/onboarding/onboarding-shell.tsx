@@ -24,6 +24,7 @@ import {
   AlertDialogTitle,
 } from "@/shared/components/ui/alert-dialog";
 import { Button } from "@/shared/components/ui/button";
+import { ProgressDots } from "@/shared/components/wizard/progress-dots";
 import {
   Wizard,
   WizardAside,
@@ -34,9 +35,7 @@ import {
   WizardStep,
   WizardTitle,
 } from "@/shared/components/wizard/wizard";
-import { ProgressDots } from "@/shared/components/wizard/progress-dots";
 import { useSteppedFlow } from "@/shared/hooks/use-stepped-flow";
-import { cn } from "@/shared/lib/utils";
 import { STEPS } from "./onboarding-constants";
 import type { OnboardingData, OnboardingProps } from "./onboarding-types";
 import { StepAboutYou } from "./steps/step-about-you";

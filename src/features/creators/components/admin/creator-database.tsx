@@ -57,16 +57,6 @@ export function CreatorDatabase({ creators }: CreatorDatabaseProps) {
     getCreatorProfile(selectedCreatorId).then(setCreatorAssets);
   }, [selectedCreatorId]);
 
-  const selectedCreatorIdx = selectedCreatorId
-    ? sortedCreators.findIndex((c) => c.id === selectedCreatorId)
-    : -1;
-
-  const navigateCreator = (direction: 1 | -1) => {
-    if (selectedCreatorIdx < 0) return;
-    const next = sortedCreators[selectedCreatorIdx + direction];
-    if (next) setSelectedCreatorId(next.id);
-  };
-
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
       {/* Top bar: filter toggle + search + sort */}

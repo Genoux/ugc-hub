@@ -1,7 +1,7 @@
 import Image from "next/image";
 import type { CreatorProfile } from "@/features/creators/actions/portal/get-creator-profile";
-import type { CreatorUIState } from "@/features/creators/components/portal/creator-portal-shell";
 import { LabeledField } from "@/features/creators/components/labeled-field";
+import type { CreatorUIState } from "@/features/creators/components/portal/creator-portal-shell";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import { ProfileEmptyState } from "./profile-empty-state";

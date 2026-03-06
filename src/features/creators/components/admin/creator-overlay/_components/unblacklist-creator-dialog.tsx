@@ -27,7 +27,6 @@ export function UnblacklistCreatorDialog({
   onOpenChange,
   creatorId,
   creatorName,
-  blacklistReason,
 }: UnblacklistCreatorDialogProps) {
   const [isPending, startTransition] = useTransition();
 

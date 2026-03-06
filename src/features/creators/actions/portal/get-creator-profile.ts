@@ -4,8 +4,8 @@ import { eq } from "drizzle-orm";
 import { creators } from "@/db/schema";
 import type {
   CollaborationHighlight,
-  PortfolioVideoEntry,
   PortfolioVideo,
+  PortfolioVideoEntry,
 } from "@/entities/creator/types";
 import { requireCreator } from "@/features/creators/lib/require-creator";
 import { creatorSchema } from "@/features/creators/schemas";

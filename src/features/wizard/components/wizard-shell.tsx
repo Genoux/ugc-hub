@@ -12,13 +12,13 @@ import {
   WizardStep,
   WizardTitle,
 } from "@/shared/components/wizard/wizard";
-import { useSteppedFlow } from "@/shared/hooks/use-stepped-flow";
 import { WizardComplete } from "@/shared/components/wizard/wizard-complete";
 import { WizardLoading } from "@/shared/components/wizard/wizard-loading";
+import { useSteppedFlow } from "@/shared/hooks/use-stepped-flow";
 import { submitWizard } from "../actions/submit-wizard";
+import { WIZARD_STEPS } from "../lib/constants";
 import { StepSubmittingAs } from "./steps/step-submitting-as";
 import { StepUploadAssets } from "./steps/step-upload-assets";
-import { WIZARD_STEPS } from "../lib/constants";
 
 const CONTENT_STEPS = Object.keys(WIZARD_STEPS).length;
 const LOADING_STEP = CONTENT_STEPS + 1;

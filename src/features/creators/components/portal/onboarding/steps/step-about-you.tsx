@@ -1,5 +1,14 @@
 "use client";
 
+import { Button } from "@/shared/components/ui/button";
+import { Label } from "@/shared/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/components/ui/select";
 import {
   AGE_DEMOGRAPHICS,
   type AgeDemographic,
@@ -11,15 +20,6 @@ import {
   LANGUAGES,
   type Language,
 } from "@/shared/lib/constants";
-import { Button } from "@/shared/components/ui/button";
-import { Label } from "@/shared/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/shared/components/ui/select";
 import type { OnboardingData } from "../onboarding-types";
 
 interface Props {

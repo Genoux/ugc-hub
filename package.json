@@ -9,6 +9,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "biome check .",
+    "lint:fix": "biome check . --write",
     "lint:arch": "eslint src/",
     "format": "biome format --write .",
     "format:check": "biome format ."

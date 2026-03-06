@@ -4,9 +4,9 @@ import { ChevronRight } from "lucide-react";
 import type { CreatorSubmissions } from "@/features/creators/actions/portal/get-creator-submissions";
 import { AssetCard } from "@/shared/components/blocks/asset-card";
 import {
+  CollapsibleContent,
   CollapsibleSection,
   CollapsibleTrigger,
-  CollapsibleContent,
   useCollapsible,
 } from "@/shared/components/blocks/collapsible-section";
 import { Button } from "@/shared/components/ui/button";
