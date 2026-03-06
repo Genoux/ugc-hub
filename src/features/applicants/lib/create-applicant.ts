@@ -1,4 +1,5 @@
 import { eq } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
 import { creators } from "@/db/schema";
 import { db } from "@/shared/lib/db";
 
@@ -43,5 +44,6 @@ export async function createApplicant(data: ApplicantData): Promise<CreateApplic
     appliedAt: new Date(),
   });
 
+  revalidatePath("/applicants");
   return { success: true };
 }
