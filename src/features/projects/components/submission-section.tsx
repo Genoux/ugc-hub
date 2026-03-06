@@ -1,7 +1,7 @@
 "use client";
 
 import { ChevronRight } from "lucide-react";
-import type { CollaborationDetail } from "@/features/projects/actions/get-collaboration-detail";
+import type { CollaborationDetail } from "@/entities/collaboration/types";
 import { DownloadButton } from "@/shared/components/blocks/download-button";
 import { AssetCard } from "@/shared/components/blocks/asset-card";
 import {

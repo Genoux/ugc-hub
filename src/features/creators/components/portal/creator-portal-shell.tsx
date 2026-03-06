@@ -5,12 +5,13 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import type { CreatorProfile } from "@/features/creators/actions/portal/get-creator-profile";
 import type { CreatorSubmissions } from "@/features/creators/actions/portal/get-creator-submissions";
-import type { CreatorUIState } from "@/features/creators/lib/get-creator-ui-state";
 import { useCreatorPortal } from "./creator-portal-context";
 import { OnboardingShell } from "./onboarding/onboarding-shell";
 import { CollaborationTab } from "./tabs/collaborations/collaboration-tab";
 import { CreatorProfileTab } from "./tabs/profile/profile-tab";
 import { ResetProfileButton } from "./tools/reset-profile-button";
+
+export type CreatorUIState = "pending_approval" | "pending_profile" | "live" | "declined";
 
 interface CreatorPortalShellProps {
   creator: CreatorProfile;

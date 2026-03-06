@@ -1,1 +1,1 @@
-export type { Creator } from "@/features/creators/types";
+export type { Creator } from "@/entities/creator/types";

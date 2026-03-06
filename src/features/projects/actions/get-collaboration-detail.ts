@@ -2,38 +2,12 @@
 
 import { and, eq, ne } from "drizzle-orm";
 import { collaborations } from "@/db/schema";
-import type { CollaborationHighlight } from "@/features/creators/types";
+import type { CollaborationHighlight } from "@/entities/creator/types";
+import type { CollaborationDetail } from "@/entities/collaboration/types";
 import type { CollabRatingRow } from "@/shared/lib/calculate-ratings";
 import { toMediaUrl } from "@/features/uploads/lib/r2-media-url";
 import { requireAdmin } from "@/shared/lib/auth";
 import { db } from "@/shared/lib/db";
-
-export type CollaborationDetail = {
-  id: string;
-  status: "active" | "closed";
-  project: { id: string; name: string };
-  creator: {
-    id: string;
-    fullName: string;
-    email: string;
-    profilePhotoUrl: string | null;
-    closedCollabRatings: CollabRatingRow[];
-  };
-  submissions: Array<{
-    id: string;
-    label: string;
-    submissionNumber: number;
-    deliveredAt: Date;
-    assets: Array<{
-      id: string;
-      filename: string;
-      mimeType: string;
-      sizeBytes: number;
-      url: string;
-    }>;
-  }>;
-  highlights: Array<{ id: string; filename: string; mimeType: string; url: string }>;
-};
 
 export async function getCollaborationDetail(
   collaborationId: string,

@@ -2,29 +2,10 @@
 
 import { eq } from "drizzle-orm";
 import { collaborations, projects } from "@/db/schema";
+import type { ProjectDetail } from "@/entities/project/types";
 import { toMediaUrl } from "@/features/uploads/lib/r2-media-url";
 import { requireAdmin } from "@/shared/lib/auth";
 import { db } from "@/shared/lib/db";
-
-export type ProjectDetail = {
-  id: string;
-  name: string;
-  description: string | null;
-  uploadToken: string;
-  collaborations: Array<{
-    id: string;
-    creator: {
-      id: string;
-      fullName: string;
-      email: string;
-      profilePhotoUrl: string | null;
-    };
-    submissions: Array<{
-      id: string;
-      assets: Array<{ id: string; filename: string }>;
-    }>;
-  }>;
-};
 
 export async function getProjectDetail(id: string): Promise<ProjectDetail | null> {
   await requireAdmin();

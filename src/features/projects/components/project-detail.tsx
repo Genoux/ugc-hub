@@ -3,7 +3,7 @@
 import { Check, ChevronLeft, ChevronRight, Copy, Folder } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
-import type { ProjectDetail as ProjectDetailType } from "@/features/projects/actions/get-project-detail";
+import type { ProjectDetail as ProjectDetailType } from "@/entities/project/types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/ui/avatar";
 import { Button } from "@/shared/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/shared/components/ui/tooltip";

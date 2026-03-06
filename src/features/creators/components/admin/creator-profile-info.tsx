@@ -12,7 +12,7 @@ import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/shared/components/ui/tooltip";
 import type { SocialPlatform } from "@/shared/lib/constants";
-import { BlacklistedHovercard } from "./creator-overlay/_components/blacklisted-hovercard";
+import { BlacklistedHovercard } from "./creator-overlay/blacklisted-hovercard";
 
 interface CreatorProfileInfoProps {
   creator: CreatorProfile;

@@ -1,5 +1,5 @@
 import { Ban, Hourglass, type LucideIcon, Sticker } from "lucide-react";
-import type { CreatorUIState } from "@/features/creators/lib/get-creator-ui-state";
+import type { CreatorUIState } from "@/features/creators/components/portal/creator-portal-shell";
 import { Button } from "@/shared/components/ui/button";
 import {
   Empty,

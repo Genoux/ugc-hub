@@ -7,7 +7,7 @@ import type {
   CollaborationHighlight,
   PortfolioVideo,
   PortfolioVideoEntry,
-} from "@/features/creators/types";
+} from "@/entities/creator/types";
 import { toMediaUrl } from "@/features/uploads/lib/r2-media-url";
 import { requireAdmin } from "@/shared/lib/auth";
 import type { ClerkUserProfile } from "@/shared/lib/clerk";

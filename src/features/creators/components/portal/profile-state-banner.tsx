@@ -2,7 +2,7 @@
 
 import { X } from "lucide-react";
 import { useCallback, useState } from "react";
-import type { CreatorUIState } from "@/features/creators/lib/get-creator-ui-state";
+import type { CreatorUIState } from "@/features/creators/components/portal/creator-portal-shell";
 import { Alert, AlertDescription, AlertTitle } from "@/shared/components/ui/alert";
 import { Button } from "@/shared/components/ui/button";
 import { cn } from "@/shared/lib/utils";

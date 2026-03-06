@@ -12,7 +12,7 @@ export default [
     settings: {
       "boundaries/elements": [
         {
-          // Next.js app router — pages, layouts, API routes
+          // Next.js app router. Pages, layouts, API routes
           type: "app",
           pattern: "src/app/**",
           mode: "file",
@@ -30,14 +30,20 @@ export default [
           mode: "file",
         },
         {
-          // Private sub-components — only importable from their parent folder
+          // Entity domain types (shared across features)
+          type: "entities",
+          pattern: "src/entities/**",
+          mode: "file",
+        },
+        {
+          // Private sub-components. Only importable from their parent folder
           type: "private-component",
           pattern: "src/features/*/**/*/_components/**",
           capture: ["name", "parent"],
           mode: "full",
         },
         {
-          // Feature domain logic — captures feature name and file's parent folder
+          // Feature domain logic. Captures feature name and file's parent folder
           type: "feature",
           pattern: "src/features/*/**/*/*",
           capture: ["name", "parent"],
@@ -62,12 +68,12 @@ export default [
           default: "disallow",
           rules: [
             {
-              // app layer can import from features, shared, db
+              // app layer can import from features, entities, shared, db
               from: "app",
-              allow: ["app", "feature", "shared", "db"],
+              allow: ["app", "feature", "shared", "entities", "db"],
             },
             {
-              // shared can only import from shared and db — never from features
+              // shared can only import from shared and db. Never from features
               from: "shared",
               allow: ["shared", "db"],
             },
@@ -77,25 +83,31 @@ export default [
               allow: ["db"],
             },
             {
-              // features can import from any feature, shared, db
-              // _components: only when in same parent folder (strict locality)
+              // features can import from any feature, entities, shared, db (and same-feature private only from same parent)
               from: "feature",
               allow: [
                 "feature",
                 ["private-component", { name: "${from.name}", parent: "${from.parent}" }],
                 "shared",
+                "entities",
                 "db",
               ],
             },
             {
-              // private-component can import from same parent's _components, feature, shared, db
+              // private-component can import from same parent's _components, feature, shared, entities, db
               from: "private-component",
               allow: [
                 ["feature", { name: "${from.name}" }],
                 ["private-component", { name: "${from.name}", parent: "${from.parent}" }],
                 "shared",
+                "entities",
                 "db",
               ],
+            },
+            {
+              // entities can import only shared and db
+              from: "entities",
+              allow: ["shared", "db"],
             },
           ],
         },
