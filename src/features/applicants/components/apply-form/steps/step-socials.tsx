@@ -73,9 +73,7 @@ export function StepSocials({ data, onChange, portfolioUrlError }: Props) {
           onChange={(e) => onChange({ portfolioUrl: e.target.value })}
           placeholder="https://yourportfolio.com"
         />
-        {portfolioUrlError && (
-          <p className="text-xs text-destructive">{portfolioUrlError}</p>
-        )}
+        {portfolioUrlError && <p className="text-xs text-destructive">{portfolioUrlError}</p>}
       </div>
     </div>
   );

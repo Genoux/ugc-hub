@@ -176,16 +176,9 @@ export function ApplyForm() {
 
   return (
     <Wizard variant="page">
-      
       <WizardPanel isPending={isPending}>
         <div className="absolute left-12 top-12 z-10">
-          <Image
-            src="/inBeat.svg"
-            alt=""
-            width={40}
-            height={40}
-            unoptimized
-          />
+          <Image src="/inBeat.svg" alt="" width={40} height={40} unoptimized />
         </div>
         <WizardStep stepKey={step} direction={directionRef.current} className="h-[600px]">
           {!isResultStep && (
