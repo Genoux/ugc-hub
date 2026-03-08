@@ -28,10 +28,8 @@ export function StepLocation({ data, onChange }: Props) {
   return (
     <div className="flex flex-col gap-8">
       <div className="space-y-1.5">
-        <Label>
-          Country <span className="text-xs text-muted-foreground">(optional)</span>
-        </Label>
-        <Select clearable value={data.country} onValueChange={(v) => onChange({ country: v })}>
+        <Label>Country</Label>
+        <Select value={data.country} onValueChange={(v) => onChange({ country: v })}>
           <SelectTrigger>
             <SelectValue placeholder="Select country" />
           </SelectTrigger>

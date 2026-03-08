@@ -3,7 +3,7 @@ import { z } from "zod";
 export const applyFormSchema = z.object({
   fullName: z.string().min(1, "Required"),
   email: z.string().email("Invalid email"),
-  country: z.string().optional(),
+  country: z.string().min(1, "Required"),
   languages: z.array(z.string()).min(1, "Select at least one language"),
   instagram_handle: z.string().optional(),
   tiktok_handle: z.string().optional(),

@@ -62,7 +62,7 @@ function canProceed(step: number, data: ApplyData): boolean {
     case 1:
       return data.fullName.trim().length > 0;
     case 2:
-      return data.languages.length > 0;
+      return data.country.trim().length > 0 && data.languages.length > 0;
     case 3:
       return (
         (!!data.instagram_handle || !!data.tiktok_handle || !!data.youtube_handle) &&
@@ -145,7 +145,7 @@ export function ApplyForm() {
       const response = await submitApplication({
         fullName: data.fullName,
         email: data.email,
-        country: data.country || undefined,
+        country: data.country,
         languages: data.languages,
         instagram_handle: data.instagram_handle || undefined,
         tiktok_handle: data.tiktok_handle || undefined,

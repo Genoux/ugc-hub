@@ -5,7 +5,7 @@ import { db } from "@/shared/lib/db";
 export type ApplicantData = {
   fullName: string;
   email: string;
-  country?: string;
+  country: string;
   languages?: string[];
   socialChannels?: {
     instagram_handle?: string;
