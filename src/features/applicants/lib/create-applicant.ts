@@ -6,7 +6,7 @@ export type ApplicantData = {
   fullName: string;
   email: string;
   country: string;
-  languages?: string[];
+  languages: string[];
   socialChannels?: {
     instagram_handle?: string;
     tiktok_handle?: string;

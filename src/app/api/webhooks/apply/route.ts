@@ -8,8 +8,8 @@ import { env } from "@/shared/lib/env";
 const bodySchema = z.object({
   fullName: z.string().min(1),
   email: z.email(),
-  country: z.string().optional(),
-  languages: z.array(z.enum(LANGUAGES)).optional(),
+  country: z.string().min(1, "Required"),
+  languages: z.array(z.enum(LANGUAGES)).min(1, "Required"),
   socialChannels: z
     .object({
       instagram_handle: z.string().optional(),
