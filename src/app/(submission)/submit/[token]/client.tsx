@@ -66,7 +66,7 @@ export function SubmitPageClient({ view }: { view: SubmitPageView }) {
               <Button variant="outline" onClick={() => router.push(ROUTES.signOut)}>
                 Sign out
               </Button>
-              <Button variant="default" onClick={() => router.push(ROUTES.creatorHome)}>
+              <Button  className="w-fit" variant="default" onClick={() => router.push(ROUTES.creatorHome)}>
                 Go to my profile
               </Button>
             </div>

@@ -44,7 +44,7 @@ export function StepAboutYou({ data, onChange }: Props) {
         </p>
         <Select clearable value={data.country} onValueChange={(v) => onChange({ country: v })}>
           <SelectTrigger>
-            <SelectValue placeholder="Select country" />
+            <SelectValue placeholder="Select" />
           </SelectTrigger>
           <SelectContent>
             {COUNTRIES.map((c) => (
@@ -58,9 +58,7 @@ export function StepAboutYou({ data, onChange }: Props) {
 
       <div className="flex gap-4 flex-wrap">
         <div className="space-y-2">
-          <Label>
-            Gender identity <span className="text-muted-foreground text-xs">(optional)</span>
-          </Label>
+          <Label>Gender identity</Label>
           <Select
             clearable
             value={data.genderIdentity}
@@ -80,9 +78,7 @@ export function StepAboutYou({ data, onChange }: Props) {
         </div>
 
         <div className="space-y-2">
-          <Label>
-            Age group <span className="text-muted-foreground text-xs">(optional)</span>
-          </Label>
+          <Label>Age group</Label>
           <Select
             clearable
             value={data.ageDemographic}
@@ -102,9 +98,7 @@ export function StepAboutYou({ data, onChange }: Props) {
         </div>
 
         <div className="space-y-2">
-          <Label>
-            Ethnicity <span className="text-muted-foreground text-xs">(optional)</span>
-          </Label>
+          <Label>Ethnicity</Label>
           <Select
             clearable
             value={data.ethnicity}

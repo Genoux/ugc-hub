@@ -22,7 +22,7 @@ export const creators = pgTable("creators", {
   // Basic info (Steps 1-2)
   fullName: text("full_name").notNull(),
   email: text("email").notNull().unique(),
-  country: text("country"),
+  country: text("country").notNull(),
   languages: jsonb("languages").$type<string[]>(),
   portfolioUrl: text("portfolio_url"),
 

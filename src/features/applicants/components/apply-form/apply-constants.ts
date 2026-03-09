@@ -2,22 +2,22 @@ export const APPLY_STEPS: Record<number, { name: string; header: string; body: s
   1: {
     name: "Identity",
     header: "Who are you?",
-    body: "Tell us your name.",
+    body: "Let's start with your full name",
   },
   2: {
     name: "Location",
     header: "Where are you from?",
-    body: "Tell us where you're based and what languages you create in.",
+    body: "Where are you based and what languages do you create in?",
   },
   3: {
     name: "Socials",
-    header: "Show your work",
-    body: "Share your social channels and portfolio link.",
+    header: "Your platforms",
+    body: "Share your social channels and/or portfolio link.",
   },
   4: {
     name: "Email",
     header: "Last step",
-    body: "Where should we send your application confirmation?",
+    body: "What email address can we reach you at?",
   },
 };
 

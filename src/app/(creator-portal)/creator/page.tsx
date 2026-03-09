@@ -17,11 +17,15 @@ export default async function CreatorPage() {
   const { userId } = await auth();
   if (!userId) redirect(ROUTES.signIn);
 
-  const { creator: row } = await getSessionCreator(userId);
+  const { creator: row, fullName: clerkFullName } = await getSessionCreator(userId);
   if (!row) redirect(ROUTES.signOut);
 
   const [creator, content] = await Promise.all([getCreatorProfile(), getCreatorSubmissions()]);
+
+  // Pre-populate fullName from Clerk when the DB value is empty (e.g. direct invite)
+  const resolvedCreator =
+    !creator.fullName && clerkFullName ? { ...creator, fullName: clerkFullName } : creator;
   const uiState = toCreatorUIState(row);
 
-  return <CreatorPortalShell creator={creator} uiState={uiState} content={content} />;
+  return <CreatorPortalShell creator={resolvedCreator} uiState={uiState} content={content} />;
 }

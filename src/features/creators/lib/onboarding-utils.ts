@@ -52,7 +52,13 @@ export function canProceed(step: number, data: OnboardingData, videoCount = 0): 
     case 7:
       return data.rateRangeSelf !== null;
     case 8:
-      return data.country.length > 0 && data.languages.length > 0;
+      return (
+        data.country.length > 0 &&
+        data.languages.length > 0 &&
+        data.genderIdentity.length > 0 &&
+        data.ageDemographic.length > 0 &&
+        data.ethnicity.length > 0
+      );
     case 9:
       return true;
     default:

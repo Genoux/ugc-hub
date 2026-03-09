@@ -3,10 +3,10 @@
 import { eq } from "drizzle-orm";
 import { creators } from "@/db/schema";
 import { toActionError } from "@/shared/lib/action-error";
+import { getAppUrl } from "@/shared/lib/app-url";
 import { requireAdmin } from "@/shared/lib/auth";
 import { sendInvitation } from "@/shared/lib/clerk";
 import { db } from "@/shared/lib/db";
-import { getAppUrl } from "@/shared/lib/app-url";
 import { ROUTES } from "@/shared/lib/routes";
 
 export async function reinviteCreator(creatorId: string) {
@@ -21,10 +21,7 @@ export async function reinviteCreator(creatorId: string) {
       throw new Error("Creator is not in pending join status");
     }
 
-    const result = await sendInvitation(
-      creator.email,
-      `${await getAppUrl()}${ROUTES.signUp}`,
-    );
+    const result = await sendInvitation(creator.email, `${await getAppUrl()}${ROUTES.signUp}`);
 
     // already_has_account = they can sign in directly, no invite needed
     if (!result.ok && result.reason !== "already_has_account") {

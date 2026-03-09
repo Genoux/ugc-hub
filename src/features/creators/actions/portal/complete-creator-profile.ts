@@ -35,9 +35,9 @@ const schema = z.object({
   contentFormats: z.array(z.string()).min(1),
   profilePhoto: z.string().min(1),
   rateRangeSelf: z.object({ min: z.number(), max: z.number() }).optional(),
-  genderIdentity: z.enum(GENDER_IDENTITIES).optional(),
-  ageDemographic: z.enum(AGE_DEMOGRAPHICS).optional(),
-  ethnicity: z.enum(ETHNICITIES).optional(),
+  genderIdentity: z.enum(GENDER_IDENTITIES),
+  ageDemographic: z.enum(AGE_DEMOGRAPHICS),
+  ethnicity: z.enum(ETHNICITIES),
 });
 
 export async function completeCreatorProfile(input: z.infer<typeof schema>) {
@@ -57,9 +57,9 @@ export async function completeCreatorProfile(input: z.infer<typeof schema>) {
         contentFormats: validated.contentFormats,
         profilePhoto: validated.profilePhoto,
         rateRangeSelf: validated.rateRangeSelf ?? null,
-        genderIdentity: validated.genderIdentity ?? null,
-        ageDemographic: validated.ageDemographic ?? null,
-        ethnicity: validated.ethnicity ?? null,
+        genderIdentity: validated.genderIdentity,
+        ageDemographic: validated.ageDemographic,
+        ethnicity: validated.ethnicity,
         profileCompleted: true,
         profileCompletedAt: new Date(),
         status: "joined",

@@ -4,10 +4,10 @@ import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { creators } from "@/db/schema";
 import { toActionError } from "@/shared/lib/action-error";
+import { getAppUrl } from "@/shared/lib/app-url";
 import { requireAdmin } from "@/shared/lib/auth";
 import { sendInvitation } from "@/shared/lib/clerk";
 import { db } from "@/shared/lib/db";
-import { getAppUrl } from "@/shared/lib/app-url";
 import { ROUTES } from "@/shared/lib/routes";
 import { approveApplicantSchema } from "../schemas";
 

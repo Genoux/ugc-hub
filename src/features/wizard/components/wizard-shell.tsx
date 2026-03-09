@@ -19,6 +19,8 @@ import { submitWizard } from "../actions/submit-wizard";
 import { WIZARD_STEPS } from "../lib/constants";
 import { StepSubmittingAs } from "./steps/step-submitting-as";
 import { StepUploadAssets } from "./steps/step-upload-assets";
+import { ROUTES } from "@/shared/lib/routes";
+import { useRouter } from "next/navigation";
 
 const CONTENT_STEPS = Object.keys(WIZARD_STEPS).length;
 const LOADING_STEP = CONTENT_STEPS + 1;
@@ -50,7 +52,7 @@ export function WizardShell({
 
   const isLoadingStep = step === LOADING_STEP;
   const isResultStep = step === COMPLETE_STEP;
-
+  const router = useRouter();
   const creatorProps = { creatorName, creatorEmail, creatorImageUrl, projectName };
 
   function handleBack() {
@@ -144,9 +146,10 @@ export function WizardShell({
             <WizardComplete
               title="Submission complete!"
               description="Your files have been received."
+              className="flex justify-center items-center"
             >
-              <Button type="button" asChild>
-                <a href="/creator">Go to my profile</a>
+              <Button onClick={() => router.push(ROUTES.creatorHome)}  className="w-fit"  >
+                Go to my profile
               </Button>
             </WizardComplete>
           )}

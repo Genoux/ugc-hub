@@ -57,7 +57,7 @@ export async function resetCreatorProfile() {
         profileCompletedAt: null,
         joinedAt: null,
         fullName: "",
-        country: null,
+        country: "Unknown",
         languages: null,
         socialChannels: null,
         portfolioUrl: null,

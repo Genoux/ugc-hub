@@ -45,6 +45,7 @@ export async function directInviteBulk(input: {
         toInvite.map((email) => ({
           email,
           fullName: "",
+          country: "Unknown",
           status: "approved_not_joined" as const,
           source: "direct_invite" as const,
           approvedAt: new Date(),

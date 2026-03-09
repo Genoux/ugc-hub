@@ -9,7 +9,6 @@ import { useCreatorPortal } from "./creator-portal-context";
 import { OnboardingShell } from "./onboarding/onboarding-shell";
 import { CollaborationTab } from "./tabs/collaborations/collaboration-tab";
 import { CreatorProfileTab } from "./tabs/profile/profile-tab";
-import { ResetProfileButton } from "./tools/reset-profile-button";
 
 export type CreatorUIState = "pending_approval" | "pending_profile" | "live" | "declined";
 
@@ -56,7 +55,6 @@ export function CreatorPortalShell({ creator, uiState, content }: CreatorPortalS
           />
         )}
       </AnimatePresence>
-      <ResetProfileButton />
       <div
         className="z-0 pointer-events-none absolute inset-x-0 bottom-0 h-16 backdrop-blur-lg mask-[linear-gradient(to_top,black,transparent)]"
         aria-hidden

@@ -115,7 +115,7 @@ export function WizardStep({ stepKey, direction, children, className }: WizardSt
           transition={{ duration: 0.3, ease: EASING_FUNCTION.exponential }}
           className={cn("mx-auto flex min-h-full w-full max-w-3xl flex-col", className)}
         >
-          <div className="flex flex-1 flex-col justify-center gap-4">{children}</div>
+          <div className="flex flex-1 flex-col justify-center gap-6">{children}</div>
         </motion.div>
       </AnimatePresence>
     </div>

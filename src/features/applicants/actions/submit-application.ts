@@ -1,7 +1,7 @@
 "use server";
 
-import { applyFormSchema, type ApplyFormInput } from "@/features/applicants/schemas";
 import { createApplicant } from "@/features/applicants/lib/create-applicant";
+import { type ApplyFormInput, applyFormSchema } from "@/features/applicants/schemas";
 import { toActionError } from "@/shared/lib/action-error";
 
 export async function submitApplication(input: ApplyFormInput) {

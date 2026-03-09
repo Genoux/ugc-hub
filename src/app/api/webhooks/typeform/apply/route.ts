@@ -115,13 +115,17 @@ export async function POST(req: Request) {
         ),
         ...(languagesAnswer.choices.other ? (["Other"] as const) : []),
       ]
-    : undefined;
+    : [];
+
+  if (languages.length === 0) {
+    return NextResponse.json({ error: "Missing required field: languages" }, { status: 400 });
+  }
 
   const result = await createApplicant({
     fullName,
     email,
-    country,
-    languages: languages?.length ? languages : undefined,
+    country: country ?? "Unknown",
+    languages,
     socialChannels: socialProfileUrl ? (parseSocialUrl(socialProfileUrl) ?? undefined) : undefined,
     portfolioUrl,
   });

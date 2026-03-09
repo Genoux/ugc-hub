@@ -31,6 +31,7 @@ export async function directInvite(input: { email: string }) {
       .values({
         email: validated.email,
         fullName: "",
+        country: "Unknown",
         status: "approved_not_joined",
         source: "direct_invite",
         approvedAt: new Date(),
