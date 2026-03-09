@@ -15,7 +15,6 @@ import {
 import { approveApplicant } from "../actions/approve-applicant";
 import { reinviteCreator } from "../actions/reinvite-creator";
 import { rejectApplicant } from "../actions/reject-applicant";
-import { revokeInvitation } from "../actions/revoke-invitation";
 
 type ActiveTab = Creator["status"];
 
@@ -119,18 +118,7 @@ export function ApplicantDetail({ creator, activeTab }: Props) {
     });
   };
 
-  const handleRevokeInvitation = () => {
-    startTransition(async () => {
-      try {
-        await revokeInvitation(creator.id);
-        toast.success("Invitation revoked");
-      } catch (error) {
-        toast.error(error instanceof Error ? error.message : "Failed to revoke invitation");
-      }
-    });
-  };
-
-  const showApproveActions = activeTab === "applicant";
+const showApproveActions = activeTab === "applicant";
   const showResendAction = activeTab === "approved_not_joined";
   const showReinviteAction = activeTab === "rejected";
 
@@ -172,13 +160,6 @@ export function ApplicantDetail({ creator, activeTab }: Props) {
               <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={handleReinvite} disabled={isPending}>
                   {isPending ? "Sending…" : "Resend invitation"}
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={handleRevokeInvitation}
-                  disabled={isPending}
-                  className="text-destructive focus:text-destructive"
-                >
-                  Revoke invitation
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

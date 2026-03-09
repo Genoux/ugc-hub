@@ -126,7 +126,7 @@ export function CreatorDatabase({ creators }: CreatorDatabaseProps) {
             className={`flex flex-1 flex-col min-h-0 ${filtersOpen ? "pointer-events-none" : ""}`}
           >
             {sortedCreators.length === 0 ? (
-              <Empty>
+              <Empty className="bg-transparent border-none">
                 <EmptyHeader>
                   <EmptyMedia variant="icon">
                     <Users size={16} />
