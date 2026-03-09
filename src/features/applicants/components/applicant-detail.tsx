@@ -12,7 +12,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/shared/components/ui/dropdown-menu";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/shared/components/ui/tooltip";
 import { approveApplicant } from "../actions/approve-applicant";
 import { reinviteCreator } from "../actions/reinvite-creator";
 import { rejectApplicant } from "../actions/reject-applicant";
@@ -36,28 +35,23 @@ function EmailRow({ email }: { email: string }) {
   };
 
   return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <Button
-          variant="ghost"
-          onClick={handleCopy}
-          className="w-full justify-between py-3 px-3 h-auto rounded-lg hover:bg-muted/50 font-normal"
-        >
-          <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground">
-            Email
-          </span>
-          <span className="inline-flex items-center gap-1.5 text-sm text-foreground">
-            {email}
-            {copied ? (
-              <Check className="h-3.5 w-3.5 text-primary" />
-            ) : (
-              <Copy className="h-3.5 w-3.5 text-muted-foreground" />
-            )}
-          </span>
-        </Button>
-      </TooltipTrigger>
-      <TooltipContent>{copied ? "Copied!" : "Click to copy email"}</TooltipContent>
-    </Tooltip>
+    <Button
+      variant="ghost"
+      onClick={handleCopy}
+      className="w-full flex-wrap justify-between py-3 px-3 h-auto rounded-lg hover:bg-muted/50 font-normal"
+    >
+      <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground">
+        Email
+      </span>
+      <span className="inline-flex items-center gap-1.5 text-sm text-foreground">
+        {email}
+        {copied ? (
+          <Check className="h-3.5 w-3.5 text-primary" />
+        ) : (
+          <Copy className="h-3.5 w-3.5 text-muted-foreground" />
+        )}
+      </span>
+    </Button>
   );
 }
 
@@ -82,7 +76,7 @@ function LinkRow({ label, value, href }: { label: string; value: string; href: s
 
 function MutedRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-center justify-between py-3 px-3">
+    <div className="flex gap-2 items-center justify-between py-3 px-3">
       <span className="text-sm text-muted-foreground">{label}</span>
       <span className="text-sm text-muted-foreground italic">{value}</span>
     </div>
@@ -161,10 +155,10 @@ export function ApplicantDetail({ creator, activeTab }: Props) {
                   : "Unknown"}
             </Badge>
             <h2 className="text-xl font-semibold text-foreground">
-              {creator.fullName || creator.email}
+              {creator.fullName}
             </h2>
             <p className="mt-0.5 text-sm text-muted-foreground">
-              {creator.country || "Location not specified"}
+              {creator.country}
             </p>
           </div>
           {showActionsMenu && (
@@ -224,40 +218,25 @@ export function ApplicantDetail({ creator, activeTab }: Props) {
 
         {showApproveActions && (
           <div className="mt-6 pt-4 border-t border-border flex gap-3">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button onClick={handleApprove} disabled={isPending}>
-                  Invite to Pool
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Approve and send invite to join the pool</TooltipContent>
-            </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button onClick={handleReject} disabled={isPending} variant="outline">
-                  Reject
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Reject this application</TooltipContent>
-            </Tooltip>
+            <Button onClick={handleApprove} disabled={isPending}>
+              Invite to Pool
+            </Button>
+            <Button onClick={handleReject} disabled={isPending} variant="outline">
+              Reject
+            </Button>
           </div>
         )}
 
         {showReinviteAction && (
           <div className="mt-6 pt-4 border-t border-border">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  onClick={handleApprove}
-                  disabled={isPending}
-                  variant="outline"
-                  className="w-full h-12"
-                >
-                  {isPending ? "Sending…" : "Re-invite to pool"}
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Re-invite this creator to the pool</TooltipContent>
-            </Tooltip>
+            <Button
+              onClick={handleApprove}
+              disabled={isPending}
+              variant="outline"
+              className="w-full h-12"
+            >
+              {isPending ? "Sending…" : "Re-invite to pool"}
+            </Button>
           </div>
         )}
       </div>
