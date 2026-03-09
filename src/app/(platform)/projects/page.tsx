@@ -1,33 +1,22 @@
-import { countDistinct, eq, sql } from "drizzle-orm";
-import { collaborations, projects, submissions } from "@/db/schema";
+"use client";
+
+import { useQuery } from "@tanstack/react-query";
+import { getProjectsList } from "@/features/projects/actions/get-projects-list";
 import { ProjectList } from "@/features/projects/components/project-list";
-import { db } from "@/shared/lib/db";
+import { PageLoader } from "@/shared/components/layout/page-loader";
+import { platformQueryKeys } from "@/shared/lib/platform-query-keys";
 
-export default async function ProjectsPage() {
-  const rows = await db
-    .select({
-      id: projects.id,
-      name: projects.name,
-      description: projects.description,
-      createdAt: projects.createdAt,
-      totalCreators: countDistinct(collaborations.creatorId),
-      totalSubmissions: sql<number>`COUNT(DISTINCT ${submissions.id})`,
-    })
-    .from(projects)
-    .leftJoin(collaborations, eq(collaborations.projectId, projects.id))
-    .leftJoin(submissions, eq(submissions.collaborationId, collaborations.id))
-    .groupBy(projects.id)
-    .orderBy(projects.createdAt);
+export default function ProjectsPage() {
+  const { data: projects, isLoading } = useQuery({
+    queryKey: platformQueryKeys.projects,
+    queryFn: getProjectsList,
+  });
 
-  const data = rows.map((row) => ({
-    ...row,
-    totalCreators: Number(row.totalCreators),
-    totalSubmissions: Number(row.totalSubmissions),
-  }));
+  if (isLoading) return <PageLoader />;
 
   return (
     <div className="flex flex-col gap-6 flex-1 p-8">
-      <ProjectList projects={data} />
+      <ProjectList projects={projects ?? []} />
     </div>
   );
 }

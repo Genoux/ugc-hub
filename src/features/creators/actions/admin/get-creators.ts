@@ -4,16 +4,13 @@ import { and, count, desc, eq, inArray } from "drizzle-orm";
 import { collaborations, creators } from "@/db/schema";
 import { type Creator, creatorSchema } from "@/features/creators/schemas";
 import { toMediaUrl } from "@/features/uploads/lib/r2-media-url";
+import { toActionError } from "@/shared/lib/action-error";
 import { requireAdmin } from "@/shared/lib/auth";
 import { db } from "@/shared/lib/db";
 
 export type CreatorListItem = Creator & { profilePhotoUrl: string | null };
 
-type GetCreatorsResult =
-  | { success: true; creators: CreatorListItem[] }
-  | { success: false; error: string };
-
-export async function getCreators(): Promise<GetCreatorsResult> {
+export async function getCreators(): Promise<CreatorListItem[]> {
   try {
     await requireAdmin();
 
@@ -35,14 +32,11 @@ export async function getCreators(): Promise<GetCreatorsResult> {
       creatorSchema.parse({ ...creator, collabCount: collabCount ?? 0 }),
     );
 
-    const withPhotos = parsed.map((creator) => ({
+    return parsed.map((creator) => ({
       ...creator,
       profilePhotoUrl: toMediaUrl(creator.profilePhoto),
     }));
-
-    return { success: true, creators: withPhotos };
-  } catch (error) {
-    console.error("Error listing creators:", error);
-    return { success: false, error: "Failed to fetch creators" };
+  } catch (err) {
+    throw toActionError(err);
   }
 }

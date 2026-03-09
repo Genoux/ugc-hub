@@ -1,7 +1,8 @@
 "use client";
 
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Check, Copy, ExternalLink, MoreVertical } from "lucide-react";
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import type { Creator } from "@/features/applicants/types";
 import { Badge } from "@/shared/components/ui/badge";
@@ -12,6 +13,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/shared/components/ui/dropdown-menu";
+import { platformQueryKeys } from "@/shared/lib/platform-query-keys";
 import { approveApplicant } from "../actions/approve-applicant";
 import { reinviteCreator } from "../actions/reinvite-creator";
 import { rejectApplicant } from "../actions/reject-applicant";
@@ -39,9 +41,7 @@ function EmailRow({ email }: { email: string }) {
       onClick={handleCopy}
       className="w-full flex-wrap justify-between py-3 px-3 h-auto rounded-lg hover:bg-muted/50 font-normal"
     >
-      <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground">
-        Email
-      </span>
+      <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground">Email</span>
       <span className="inline-flex items-center gap-1.5 text-sm text-foreground">
         {email}
         {copied ? (
@@ -83,42 +83,38 @@ function MutedRow({ label, value }: { label: string; value: string }) {
 }
 
 export function ApplicantDetail({ creator, activeTab }: Props) {
-  const [isPending, startTransition] = useTransition();
+  const queryClient = useQueryClient();
 
-  const handleApprove = () => {
-    startTransition(async () => {
-      try {
-        await approveApplicant(creator.id);
-        toast.success("Creator approved and invited");
-      } catch (error) {
-        toast.error(error instanceof Error ? error.message : "Failed to approve");
-      }
-    });
-  };
+  const { mutate: approve, isPending: isApproving } = useMutation({
+    mutationFn: () => approveApplicant(creator.id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: platformQueryKeys.applicants });
+      toast.success("Creator approved and invited");
+    },
+    onError: (err) => toast.error(err.message),
+  });
 
-  const handleReject = () => {
-    startTransition(async () => {
-      try {
-        await rejectApplicant(creator.id);
-        toast.success("Applicant rejected");
-      } catch (error) {
-        toast.error(error instanceof Error ? error.message : "Failed to reject");
-      }
-    });
-  };
+  const { mutate: reject, isPending: isRejecting } = useMutation({
+    mutationFn: () => rejectApplicant(creator.id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: platformQueryKeys.applicants });
+      toast.success("Applicant rejected");
+    },
+    onError: (err) => toast.error(err.message),
+  });
 
-  const handleReinvite = () => {
-    startTransition(async () => {
-      try {
-        await reinviteCreator(creator.id);
-        toast.success("Invitation resent");
-      } catch (error) {
-        toast.error(error instanceof Error ? error.message : "Failed to resend invitation");
-      }
-    });
-  };
+  const { mutate: reinvite, isPending: isReinviting } = useMutation({
+    mutationFn: () => reinviteCreator(creator.id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: platformQueryKeys.applicants });
+      toast.success("Invitation resent");
+    },
+    onError: (err) => toast.error(err.message),
+  });
 
-const showApproveActions = activeTab === "applicant";
+  const isPending = isApproving || isRejecting || isReinviting;
+
+  const showApproveActions = activeTab === "applicant";
   const showResendAction = activeTab === "approved_not_joined";
   const showReinviteAction = activeTab === "rejected";
 
@@ -127,8 +123,6 @@ const showApproveActions = activeTab === "applicant";
     tiktok_handle?: string;
     youtube_handle?: string;
   } | null;
-
-  const showActionsMenu = showResendAction;
 
   return (
     <div className="w-full animate-in fade-in duration-150">
@@ -142,14 +136,10 @@ const showApproveActions = activeTab === "applicant";
                   ? "Invited by email"
                   : "Unknown"}
             </Badge>
-            <h2 className="text-xl font-semibold text-foreground">
-              {creator.fullName}
-            </h2>
-            <p className="mt-0.5 text-sm text-muted-foreground">
-              {creator.country}
-            </p>
+            <h2 className="text-xl font-semibold text-foreground">{creator.fullName}</h2>
+            <p className="mt-0.5 text-sm text-muted-foreground">{creator.country}</p>
           </div>
-          {showActionsMenu && (
+          {showResendAction && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
@@ -158,8 +148,8 @@ const showApproveActions = activeTab === "applicant";
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={handleReinvite} disabled={isPending}>
-                  {isPending ? "Sending…" : "Resend invitation"}
+                <DropdownMenuItem onClick={() => reinvite()} disabled={isPending}>
+                  {isReinviting ? "Sending…" : "Resend invitation"}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -199,10 +189,10 @@ const showApproveActions = activeTab === "applicant";
 
         {showApproveActions && (
           <div className="mt-6 pt-4 border-t border-border flex gap-3">
-            <Button onClick={handleApprove} disabled={isPending}>
+            <Button onClick={() => approve()} disabled={isPending}>
               Invite to Pool
             </Button>
-            <Button onClick={handleReject} disabled={isPending} variant="outline">
+            <Button onClick={() => reject()} disabled={isPending} variant="outline">
               Reject
             </Button>
           </div>
@@ -211,12 +201,12 @@ const showApproveActions = activeTab === "applicant";
         {showReinviteAction && (
           <div className="mt-6 pt-4 border-t border-border">
             <Button
-              onClick={handleApprove}
+              onClick={() => approve()}
               disabled={isPending}
               variant="outline"
               className="w-full h-12"
             >
-              {isPending ? "Sending…" : "Re-invite to pool"}
+              {isApproving ? "Sending…" : "Re-invite to pool"}
             </Button>
           </div>
         )}

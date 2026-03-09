@@ -6,6 +6,7 @@ import { ApplicantDetail } from "@/features/applicants/components/applicant-deta
 import { ApplicantList } from "@/features/applicants/components/applicant-list";
 import { DirectInviteButton } from "@/features/applicants/components/direct-invite-button";
 import type { Creator } from "@/features/applicants/types";
+import { Button } from "@/shared/components/ui/button";
 import {
   Empty,
   EmptyDescription,
@@ -13,11 +14,9 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/shared/components/ui/empty";
-import { Sheet, SheetContent } from "@/shared/components/ui/sheet";
-import { Button } from "@/shared/components/ui/button";
 import { NumberDot } from "@/shared/components/ui/number-dot";
+import { Sheet, SheetContent } from "@/shared/components/ui/sheet";
 import { cn } from "@/shared/lib/utils";
-
 
 export type SortKey = "newest" | "oldest" | "name";
 
@@ -45,10 +44,10 @@ const EMPTY_MESSAGES: Record<TabKey, { title: string; description: string }> = {
 };
 
 interface Props {
-  initialCreators: Creator[];
+  creators: Creator[];
 }
 
-export function ApplicantsClient({ initialCreators }: Props) {
+export function ApplicantsClient({ creators }: Props) {
   const [activeTab, setActiveTab] = useState<TabKey>("applicant");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [sort, setSort] = useState<SortKey>("newest");
@@ -57,13 +56,13 @@ export function ApplicantsClient({ initialCreators }: Props) {
   const filtered = useMemo(() => {
     switch (activeTab) {
       case "applicant":
-        return initialCreators.filter((c) => c.status === "applicant");
+        return creators.filter((c) => c.status === "applicant");
       case "approved_not_joined":
-        return initialCreators.filter((c) => c.status === "approved_not_joined");
+        return creators.filter((c) => c.status === "approved_not_joined");
       case "rejected":
-        return initialCreators.filter((c) => c.status === "rejected");
+        return creators.filter((c) => c.status === "rejected");
     }
-  }, [initialCreators, activeTab]);
+  }, [creators, activeTab]);
 
   const sorted = useMemo(() => {
     return [...filtered].sort((a, b) => {
@@ -77,11 +76,11 @@ export function ApplicantsClient({ initialCreators }: Props) {
 
   const counts = useMemo(
     () => ({
-      applicant: initialCreators.filter((c) => c.status === "applicant").length,
-      approved_not_joined: initialCreators.filter((c) => c.status === "approved_not_joined").length,
-      rejected: initialCreators.filter((c) => c.status === "rejected").length,
+      applicant: creators.filter((c) => c.status === "applicant").length,
+      approved_not_joined: creators.filter((c) => c.status === "approved_not_joined").length,
+      rejected: creators.filter((c) => c.status === "rejected").length,
     }),
-    [initialCreators],
+    [creators],
   );
 
   const selected = sorted.find((c) => c.id === selectedId) ?? null;
@@ -115,13 +114,14 @@ export function ApplicantsClient({ initialCreators }: Props) {
         <Button
           key={tab.key}
           variant="ghost"
-          className={cn("gap-1.5", activeTab === tab.key && "bg-secondary text-secondary-foreground")}
+          className={cn(
+            "gap-1.5",
+            activeTab === tab.key && "bg-secondary text-secondary-foreground",
+          )}
           onClick={() => handleTabChange(tab.key)}
         >
           {tab.label}
-          {tab.key !== "rejected" && counts[tab.key] > 0 && (
-            <NumberDot count={counts[tab.key]} />
-          )}
+          {tab.key !== "rejected" && counts[tab.key] > 0 && <NumberDot count={counts[tab.key]} />}
         </Button>
       ))}
     </div>
@@ -131,9 +131,7 @@ export function ApplicantsClient({ initialCreators }: Props) {
     <div className="flex flex-col flex-1 min-h-0 gap-6 p-6">
       <header>
         <div className="flex items-center justify-between">
-          <h1 className="text-xl font-semibold">
-            Creator Applicants
-          </h1>
+          <h1 className="text-xl font-semibold">Creator Applicants</h1>
           <DirectInviteButton />
         </div>
       </header>

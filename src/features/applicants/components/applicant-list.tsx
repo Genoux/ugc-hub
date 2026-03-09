@@ -87,13 +87,7 @@ export function ApplicantList({ creators, selectedId, onSelect, sort, onSortChan
                       {new Date(c.appliedAt).toLocaleDateString()}
                     </span>
                   </div>
-                  {recent && (
-                    <Badge
-                      variant="outline"
-                    >
-                      New
-                    </Badge>
-                  )}
+                  {recent && <Badge variant="outline">New</Badge>}
                 </div>
               </Button>
             </li>

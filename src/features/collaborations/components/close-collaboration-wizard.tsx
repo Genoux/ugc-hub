@@ -347,10 +347,11 @@ export function CloseCollaborationWizard({
               )}
               {step === COMPLETE_STEP && (
                 <WizardComplete
+                  className="flex justify-center items-center"
                   title="Collaboration closed"
                   description="Ratings and rates have been recorded. The folder is now locked."
                 >
-                  <Button type="button" onClick={handleDone}>
+                  <Button className="w-fit" type="button" onClick={handleDone}>
                     Done
                   </Button>
                 </WizardComplete>

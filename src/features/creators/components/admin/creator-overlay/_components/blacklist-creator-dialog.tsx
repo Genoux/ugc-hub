@@ -1,6 +1,6 @@
 "use client";
 
-import { useTransition } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { blacklistCreator } from "@/features/creators/actions/admin/blacklist-creator";
 import { Button } from "@/shared/components/ui/button";
@@ -14,6 +14,7 @@ import {
 } from "@/shared/components/ui/dialog";
 import { Label } from "@/shared/components/ui/label";
 import { Textarea } from "@/shared/components/ui/textarea";
+import { platformQueryKeys } from "@/shared/lib/platform-query-keys";
 
 interface BlacklistCreatorDialogProps {
   open: boolean;
@@ -32,20 +33,21 @@ export function BlacklistCreatorDialog({
   reason,
   onReasonChange,
 }: BlacklistCreatorDialogProps) {
-  const [isPending, startTransition] = useTransition();
+  const queryClient = useQueryClient();
+
+  const { mutate, isPending } = useMutation({
+    mutationFn: () => blacklistCreator(creatorId, reason.trim()),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: platformQueryKeys.database });
+      toast.success(`${creatorName} has been blacklisted`);
+      onOpenChange(false);
+    },
+    onError: () => toast.error("Failed to blacklist creator. Please try again."),
+  });
 
   function handleSubmit() {
     if (!reason.trim()) return;
-
-    startTransition(async () => {
-      try {
-        await blacklistCreator(creatorId, reason.trim());
-        toast.success(`${creatorName} has been blacklisted`);
-        onOpenChange(false);
-      } catch {
-        toast.error("Failed to blacklist creator. Please try again.");
-      }
-    });
+    mutate();
   }
 
   return (

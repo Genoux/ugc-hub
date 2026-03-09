@@ -13,7 +13,6 @@ import {
   useProfilePhotoManager,
 } from "@/features/creators/hooks/portal/use-profile-photo-manager";
 import { buildOnboardingData, canProceed } from "@/features/creators/lib/onboarding-utils";
-import type { AgeDemographic, Ethnicity, GenderIdentity } from "@/shared/lib/constants";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -37,6 +36,7 @@ import {
   WizardTitle,
 } from "@/shared/components/wizard/wizard";
 import { useSteppedFlow } from "@/shared/hooks/use-stepped-flow";
+import type { AgeDemographic, Ethnicity, GenderIdentity } from "@/shared/lib/constants";
 import { STEPS } from "./onboarding-constants";
 import type { OnboardingData, OnboardingProps } from "./onboarding-types";
 import { StepAboutYou } from "./steps/step-about-you";

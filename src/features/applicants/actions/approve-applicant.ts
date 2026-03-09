@@ -1,7 +1,6 @@
 "use server";
 
 import { eq } from "drizzle-orm";
-import { revalidatePath } from "next/cache";
 import { creators } from "@/db/schema";
 import { toActionError } from "@/shared/lib/action-error";
 import { getAppUrl } from "@/shared/lib/app-url";
@@ -55,7 +54,6 @@ export async function approveApplicant(creatorId: string) {
       throw new Error("Failed to send invitation");
     }
 
-    revalidatePath("/applicants");
     return { success: true };
   } catch (err) {
     throw toActionError(err);

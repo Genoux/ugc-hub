@@ -1,7 +1,6 @@
 "use server";
 
 import { and, eq } from "drizzle-orm";
-import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { collaborations, creators } from "@/db/schema";
 import { toActionError } from "@/shared/lib/action-error";
@@ -48,7 +47,6 @@ export async function unblacklistCreator(creatorId: string) {
       })
       .where(eq(creators.id, input.creatorId));
 
-    revalidatePath("/database");
     return { success: true };
   } catch (err) {
     throw toActionError(err);

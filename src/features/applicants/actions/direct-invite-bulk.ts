@@ -1,7 +1,6 @@
 "use server";
 
 import { inArray } from "drizzle-orm";
-import { revalidatePath } from "next/cache";
 import { creators } from "@/db/schema";
 import { toActionError } from "@/shared/lib/action-error";
 import { getAppUrl } from "@/shared/lib/app-url";
@@ -65,7 +64,6 @@ export async function directInviteBulk(input: {
       throw err;
     }
 
-    revalidatePath("/applicants");
     return {
       success: true,
       sent: result.sent,

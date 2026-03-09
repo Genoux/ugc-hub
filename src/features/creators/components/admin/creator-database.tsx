@@ -123,10 +123,11 @@ export function CreatorDatabase({ creators }: CreatorDatabaseProps) {
           onClick={() => filtersOpen && setFiltersOpen(false)}
         >
           <div
-            className={`flex flex-1 flex-col min-h-0 ${filtersOpen ? "pointer-events-none" : ""}`}
+            className={`flex flex-1 flex-col min-h-0 ${filtersOpen ? "pointer-events-none" : "pointer-events-auto"}`}
           >
             {sortedCreators.length === 0 ? (
-              <Empty className="bg-transparent border-none">
+            <div className="flex flex-1 p-6">
+                <Empty>
                 <EmptyHeader>
                   <EmptyMedia variant="icon">
                     <Users size={16} />
@@ -135,6 +136,7 @@ export function CreatorDatabase({ creators }: CreatorDatabaseProps) {
                   <EmptyDescription>Try adjusting your filters or search query.</EmptyDescription>
                 </EmptyHeader>
               </Empty>
+            </div>
             ) : (
               <div className="grid grid-cols-1 gap-2 p-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
                 {sortedCreators.map((creator) => (
