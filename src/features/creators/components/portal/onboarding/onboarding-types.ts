@@ -32,9 +32,9 @@ export interface OnboardingData {
   country: string;
   languages: Language[];
   // Step 2
-  instagramHandle: string;
-  tiktokHandle: string;
-  youtubeHandle: string;
+  instagramUrl: string;
+  tiktokUrl: string;
+  youtubeUrl: string;
   portfolioUrl: string;
   // Step 3
   ugcCategories: UgcCategory[];
@@ -54,9 +54,9 @@ export const INITIAL_ONBOARDING_DATA: OnboardingData = {
   fullName: "",
   country: "",
   languages: [],
-  instagramHandle: "",
-  tiktokHandle: "",
-  youtubeHandle: "",
+  instagramUrl: "",
+  tiktokUrl: "",
+  youtubeUrl: "",
   portfolioUrl: "",
   ugcCategories: [],
   contentFormats: [],

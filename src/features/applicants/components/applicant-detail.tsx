@@ -119,9 +119,9 @@ export function ApplicantDetail({ creator, activeTab }: Props) {
   const showReinviteAction = activeTab === "rejected";
 
   const socialChannels = creator.socialChannels as {
-    instagram_handle?: string;
-    tiktok_handle?: string;
-    youtube_handle?: string;
+    instagram_url?: string;
+    tiktok_url?: string;
+    youtube_url?: string;
   } | null;
 
   return (
@@ -158,20 +158,20 @@ export function ApplicantDetail({ creator, activeTab }: Props) {
 
         <div>
           <EmailRow email={creator.email} />
-          {socialChannels?.instagram_handle ? (
+          {socialChannels?.instagram_url ? (
             <LinkRow
               label="Instagram"
-              value={`@${socialChannels.instagram_handle}`}
-              href={`https://instagram.com/${socialChannels.instagram_handle}`}
+              value={socialChannels.instagram_url.replace("https://", "")}
+              href={socialChannels.instagram_url}
             />
           ) : (
             <MutedRow label="Instagram" value="Not available" />
           )}
-          {socialChannels?.tiktok_handle ? (
+          {socialChannels?.tiktok_url ? (
             <LinkRow
               label="TikTok"
-              value={`@${socialChannels.tiktok_handle}`}
-              href={`https://tiktok.com/@${socialChannels.tiktok_handle}`}
+              value={socialChannels.tiktok_url.replace("https://", "")}
+              href={socialChannels.tiktok_url}
             />
           ) : (
             <MutedRow label="TikTok" value="Not available" />

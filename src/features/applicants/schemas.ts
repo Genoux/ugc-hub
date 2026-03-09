@@ -5,9 +5,9 @@ export const applyFormSchema = z.object({
   email: z.email("Invalid email"),
   country: z.string().min(1, "Required"),
   languages: z.array(z.string()).min(1, "Select at least one language"),
-  instagram_handle: z.string().optional(),
-  tiktok_handle: z.string().optional(),
-  youtube_handle: z.string().optional(),
+  instagram_url: z.url().optional(),
+  tiktok_url: z.url().optional(),
+  youtube_url: z.url().optional(),
   portfolioUrl: z.string().url("Invalid URL").or(z.literal("")).optional(),
 });
 

@@ -9,58 +9,39 @@ interface Props {
   onChange: (updates: Partial<OnboardingData>) => void;
 }
 
-function HandleInput({
-  id,
-  label,
-  value,
-  onChange,
-}: {
-  id: string;
-  label: string;
-  value: string;
-  onChange: (v: string) => void;
-}) {
-  return (
-    <div className="space-y-1.5">
-      <Label htmlFor={id}>{label}</Label>
-      <div className="relative">
-        <span className="text-muted-foreground absolute inset-y-0 left-3 flex items-center text-sm select-none">
-          @
-        </span>
-        <Input
-          id={id}
-          className="pl-7"
-          value={value}
-          onChange={(e) => onChange(e.target.value.replace(/^@/, ""))}
-          placeholder="yourhandle"
-        />
-      </div>
-    </div>
-  );
-}
-
 export function StepSocials({ data, onChange }: Props) {
   return (
     <div className="space-y-5">
-      <HandleInput
-        id="instagram"
-        label="Instagram handle"
-        value={data.instagramHandle}
-        onChange={(v) => onChange({ instagramHandle: v })}
-      />
-      <HandleInput
-        id="tiktok"
-        label="TikTok handle"
-        value={data.tiktokHandle}
-        onChange={(v) => onChange({ tiktokHandle: v })}
-      />
-      <HandleInput
-        id="youtube"
-        label="YouTube handle"
-        value={data.youtubeHandle}
-        onChange={(v) => onChange({ youtubeHandle: v })}
-      />
-      {/* TODO: Validate that the handles is valid */}
+      <div className="space-y-1.5">
+        <Label htmlFor="instagram">Instagram URL</Label>
+        <Input
+          id="instagram"
+          type="url"
+          value={data.instagramUrl}
+          onChange={(e) => onChange({ instagramUrl: e.target.value })}
+          placeholder="https://instagram.com/yourhandle"
+        />
+      </div>
+      <div className="space-y-1.5">
+        <Label htmlFor="tiktok">TikTok URL</Label>
+        <Input
+          id="tiktok"
+          type="url"
+          value={data.tiktokUrl}
+          onChange={(e) => onChange({ tiktokUrl: e.target.value })}
+          placeholder="https://tiktok.com/@yourhandle"
+        />
+      </div>
+      <div className="space-y-1.5">
+        <Label htmlFor="youtube">YouTube URL</Label>
+        <Input
+          id="youtube"
+          type="url"
+          value={data.youtubeUrl}
+          onChange={(e) => onChange({ youtubeUrl: e.target.value })}
+          placeholder="https://youtube.com/@yourhandle"
+        />
+      </div>
       <div className="space-y-1.5">
         <Label htmlFor="portfolio">
           Portfolio URL <span className="text-muted-foreground">(optional)</span>

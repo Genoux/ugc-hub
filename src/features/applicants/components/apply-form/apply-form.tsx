@@ -27,9 +27,9 @@ export interface ApplyData {
   email: string;
   country: string;
   languages: string[];
-  instagram_handle: string;
-  tiktok_handle: string;
-  youtube_handle: string;
+  instagram_url: string;
+  tiktok_url: string;
+  youtube_url: string;
   portfolioUrl: string;
 }
 
@@ -38,9 +38,9 @@ const INITIAL_DATA: ApplyData = {
   email: "",
   country: "",
   languages: [],
-  instagram_handle: "",
-  tiktok_handle: "",
-  youtube_handle: "",
+  instagram_url: "",
+  tiktok_url: "",
+  youtube_url: "",
   portfolioUrl: "",
 };
 
@@ -65,7 +65,10 @@ function canProceed(step: number, data: ApplyData): boolean {
       return data.country.trim().length > 0 && data.languages.length > 0;
     case 3:
       return (
-        (!!data.instagram_handle || !!data.tiktok_handle || !!data.youtube_handle) &&
+        (isValidUrl(data.instagram_url) || isValidUrl(data.tiktok_url) || isValidUrl(data.youtube_url)) &&
+        (!data.instagram_url || isValidUrl(data.instagram_url)) &&
+        (!data.tiktok_url || isValidUrl(data.tiktok_url)) &&
+        (!data.youtube_url || isValidUrl(data.youtube_url)) &&
         (!data.portfolioUrl || isValidUrl(data.portfolioUrl))
       );
     case 4:
@@ -147,9 +150,9 @@ export function ApplyForm() {
         email: data.email,
         country: data.country,
         languages: data.languages,
-        instagram_handle: data.instagram_handle || undefined,
-        tiktok_handle: data.tiktok_handle || undefined,
-        youtube_handle: data.youtube_handle || undefined,
+        instagram_url: data.instagram_url || undefined,
+        tiktok_url: data.tiktok_url || undefined,
+        youtube_url: data.youtube_url || undefined,
         portfolioUrl: data.portfolioUrl || undefined,
       });
 

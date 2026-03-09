@@ -16,9 +16,9 @@ const schema = z.object({
   languages: z.array(z.string()).min(1),
   socialChannels: z
     .object({
-      instagram_handle: z.string().optional(),
-      tiktok_handle: z.string().optional(),
-      youtube_handle: z.string().optional(),
+      instagram_url: z.url().optional(),
+      tiktok_url: z.url().optional(),
+      youtube_url: z.url().optional(),
     })
     .optional(),
   portfolioUrl: z

@@ -202,9 +202,9 @@ export function OnboardingShell({ creator, onComplete, onClose }: OnboardingProp
     country: data.country,
     languages: data.languages,
     socialChannels: {
-      instagram_handle: data.instagramHandle || undefined,
-      tiktok_handle: data.tiktokHandle || undefined,
-      youtube_handle: data.youtubeHandle || undefined,
+      instagram_url: data.instagramUrl || undefined,
+      tiktok_url: data.tiktokUrl || undefined,
+      youtube_url: data.youtubeUrl || undefined,
     },
     portfolioUrl: data.portfolioUrl || undefined,
     ugcCategories: data.ugcCategories,

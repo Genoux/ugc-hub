@@ -14,9 +14,9 @@ export async function submitApplication(input: ApplyFormInput) {
       country: data.country,
       languages: data.languages,
       socialChannels: {
-        instagram_handle: data.instagram_handle || undefined,
-        tiktok_handle: data.tiktok_handle || undefined,
-        youtube_handle: data.youtube_handle || undefined,
+        instagram_url: data.instagram_url || undefined,
+        tiktok_url: data.tiktok_url || undefined,
+        youtube_url: data.youtube_url || undefined,
       },
       portfolioUrl: data.portfolioUrl || undefined,
     });

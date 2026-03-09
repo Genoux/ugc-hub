@@ -9,9 +9,9 @@ import {
 } from "@/shared/lib/constants";
 
 export const socialChannelsSchema = z.object({
-  instagram_handle: z.string().optional(),
-  tiktok_handle: z.string().optional(),
-  youtube_handle: z.string().optional(),
+  instagram_url: z.url().optional(),
+  tiktok_url: z.url().optional(),
+  youtube_url: z.url().optional(),
   portfolio_url: z.string().optional(),
 });
 

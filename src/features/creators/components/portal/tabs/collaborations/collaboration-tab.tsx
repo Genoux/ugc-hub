@@ -24,7 +24,7 @@ export function CollaborationTab({ content }: CollaborationTabProps) {
 
   if (collaborations.length === 0) {
     return (
-      <div className="fixed top-[calc(3.5rem+1px)] inset-x-0 bottom-0 flex items-center justify-center">
+      <div className="flex min-h-0 flex-1 flex-col items-center justify-center">
         <Empty>
           <EmptyHeader>
             <EmptyMedia variant="icon">
