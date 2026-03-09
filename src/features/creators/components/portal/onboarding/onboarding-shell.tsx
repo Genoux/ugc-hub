@@ -13,6 +13,7 @@ import {
   useProfilePhotoManager,
 } from "@/features/creators/hooks/portal/use-profile-photo-manager";
 import { buildOnboardingData, canProceed } from "@/features/creators/lib/onboarding-utils";
+import type { AgeDemographic, Ethnicity, GenderIdentity } from "@/shared/lib/constants";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -210,9 +211,9 @@ export function OnboardingShell({ creator, onComplete, onClose }: OnboardingProp
     contentFormats: data.contentFormats,
     profilePhoto: data.profilePhoto,
     rateRangeSelf: data.rateRangeSelf ?? undefined,
-    genderIdentity: data.genderIdentity || undefined,
-    ageDemographic: data.ageDemographic || undefined,
-    ethnicity: data.ethnicity || undefined,
+    genderIdentity: data.genderIdentity as GenderIdentity,
+    ageDemographic: data.ageDemographic as AgeDemographic,
+    ethnicity: data.ethnicity as Ethnicity,
   });
 
   const handleSaveAndClose = () => {
