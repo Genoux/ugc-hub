@@ -64,7 +64,7 @@ export function useCreatorFilters(creators: CreatorListItem[]) {
       if (
         filters.socialPlatforms.length &&
         !filters.socialPlatforms.every((p) => {
-          const key = SOCIAL_PLATFORMS.find((sp) => sp.value === p)?.handleKey;
+          const key = SOCIAL_PLATFORMS.find((sp) => sp.value === p)?.urlKey;
           return c.socialChannels?.[key as keyof typeof c.socialChannels];
         })
       )
