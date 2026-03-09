@@ -1,5 +1,6 @@
 "use server";
 
+import * as Sentry from "@sentry/nextjs";
 import { createApplicant } from "@/features/applicants/lib/create-applicant";
 import { type ApplyFormInput, applyFormSchema } from "@/features/applicants/schemas";
 import { toActionError } from "@/shared/lib/action-error";
@@ -8,7 +9,7 @@ export async function submitApplication(input: ApplyFormInput) {
   try {
     const data = applyFormSchema.parse(input);
 
-    return await createApplicant({
+    const result = await createApplicant({
       fullName: data.fullName,
       email: data.email,
       country: data.country,
@@ -20,7 +21,22 @@ export async function submitApplication(input: ApplyFormInput) {
       },
       portfolioUrl: data.portfolioUrl || undefined,
     });
+
+    if (result.success) {
+      Sentry.logger.info("Application submitted", {
+        log_source: "apply",
+        email: data.email,
+        full_name: data.fullName,
+        country: data.country,
+      });
+    }
+
+    return result;
   } catch (err) {
+    Sentry.captureException(err, {
+      tags: { action: "submit-application" },
+      extra: { email: input.email },
+    });
     throw toActionError(err);
   }
 }

@@ -53,3 +53,5 @@ next-env.d.ts
 */db/migrations
 /scripts
 /docs
+# Sentry Config File
+.env.sentry-build-plugin
