@@ -1,7 +1,6 @@
 "use server";
 
 import { eq } from "drizzle-orm";
-import { revalidatePath } from "next/cache";
 import { collaborations, creators } from "@/db/schema";
 import { toActionError } from "@/shared/lib/action-error";
 import { requireAdmin } from "@/shared/lib/auth";
@@ -32,9 +31,6 @@ export async function closeCollaboration(input: CloseCollaborationInput) {
       .update(creators)
       .set({ overallRating: data.overallRating })
       .where(eq(creators.id, data.creatorId));
-
-    revalidatePath("/projects/[id]/creators/[collaborationId]", "page");
-    revalidatePath("/database");
   } catch (err) {
     throw toActionError(err);
   }

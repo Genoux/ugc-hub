@@ -1,5 +1,6 @@
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
 import { CheckCircle2 } from "lucide-react";
 import { AnimatePresence } from "motion/react";
 import Link from "next/link";
@@ -21,15 +22,25 @@ import {
   BreadcrumbSeparator,
 } from "@/shared/components/ui/breadcrumb";
 import { Button } from "@/shared/components/ui/button";
+import { platformQueryKeys } from "@/shared/lib/platform-query-keys";
 
 interface CreatorCollaborationProps {
   collaboration: CollaborationDetail;
 }
 
 export function CreatorCollaboration({ collaboration }: CreatorCollaborationProps) {
+  const queryClient = useQueryClient();
   const { id, status, project, creator, submissions } = collaboration;
   const [isClosed, setIsClosed] = useState(status === "closed");
   const [showCloseWizard, setShowCloseWizard] = useState(false);
+
+  function handleCloseSuccess() {
+    setIsClosed(true);
+    queryClient.invalidateQueries({
+      queryKey: platformQueryKeys.collaborationDetail(project.id, id),
+    });
+    queryClient.invalidateQueries({ queryKey: platformQueryKeys.database });
+  }
 
   const allAssets = submissions.flatMap((s) =>
     s.assets.map((a) => ({ id: a.id, filename: a.filename, url: a.url })),
@@ -140,7 +151,7 @@ export function CreatorCollaboration({ collaboration }: CreatorCollaborationProp
         {showCloseWizard && (
           <CloseCollaborationWizard
             onClose={() => setShowCloseWizard(false)}
-            onSuccess={() => setIsClosed(true)}
+            onSuccess={handleCloseSuccess}
             collaborationId={id}
             creatorId={creator.id}
             creatorName={creator.fullName}

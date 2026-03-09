@@ -12,9 +12,9 @@ const bodySchema = z.object({
   languages: z.array(z.enum(LANGUAGES)).min(1, "Required"),
   socialChannels: z
     .object({
-      instagram_handle: z.string().optional(),
-      tiktok_handle: z.string().optional(),
-      youtube_handle: z.string().optional(),
+      instagram_url: z.url().optional(),
+      tiktok_url: z.url().optional(),
+      youtube_url: z.url().optional(),
       other_links: z.array(z.string()).optional(),
     })
     .optional(),

@@ -13,7 +13,6 @@ import {
   useProfilePhotoManager,
 } from "@/features/creators/hooks/portal/use-profile-photo-manager";
 import { buildOnboardingData, canProceed } from "@/features/creators/lib/onboarding-utils";
-import type { AgeDemographic, Ethnicity, GenderIdentity } from "@/shared/lib/constants";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -37,6 +36,7 @@ import {
   WizardTitle,
 } from "@/shared/components/wizard/wizard";
 import { useSteppedFlow } from "@/shared/hooks/use-stepped-flow";
+import type { AgeDemographic, Ethnicity, GenderIdentity } from "@/shared/lib/constants";
 import { STEPS } from "./onboarding-constants";
 import type { OnboardingData, OnboardingProps } from "./onboarding-types";
 import { StepAboutYou } from "./steps/step-about-you";
@@ -202,9 +202,9 @@ export function OnboardingShell({ creator, onComplete, onClose }: OnboardingProp
     country: data.country,
     languages: data.languages,
     socialChannels: {
-      instagram_handle: data.instagramHandle || undefined,
-      tiktok_handle: data.tiktokHandle || undefined,
-      youtube_handle: data.youtubeHandle || undefined,
+      instagram_url: data.instagramUrl || undefined,
+      tiktok_url: data.tiktokUrl || undefined,
+      youtube_url: data.youtubeUrl || undefined,
     },
     portfolioUrl: data.portfolioUrl || undefined,
     ugcCategories: data.ugcCategories,

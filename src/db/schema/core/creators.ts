@@ -28,9 +28,9 @@ export const creators = pgTable("creators", {
 
   // Social channels
   socialChannels: jsonb("social_channels").$type<{
-    instagram_handle?: string;
-    tiktok_handle?: string;
-    youtube_handle?: string;
+    instagram_url?: string;
+    tiktok_url?: string;
+    youtube_url?: string;
     other_links?: string[];
   }>(),
 

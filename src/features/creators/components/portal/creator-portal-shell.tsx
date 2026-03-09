@@ -9,7 +9,7 @@ import { useCreatorPortal } from "./creator-portal-context";
 import { OnboardingShell } from "./onboarding/onboarding-shell";
 import { CollaborationTab } from "./tabs/collaborations/collaboration-tab";
 import { CreatorProfileTab } from "./tabs/profile/profile-tab";
-
+import { ProfileStateBanner } from "./profile-state-banner";
 export type CreatorUIState = "pending_approval" | "pending_profile" | "live" | "declined";
 
 interface CreatorPortalShellProps {
@@ -34,14 +34,17 @@ export function CreatorPortalShell({ creator, uiState, content }: CreatorPortalS
   };
 
   return (
-    <div className="flex min-h-full flex-col pb-40 pt-6 px-6">
+    <div className="flex min-h-full flex-col pb-32 pt-6 px-6">
       <div className="mx-auto w-full max-w-5xl flex flex-col min-h-full">
         {activeTab === "profile" && (
+          <>
+          <ProfileStateBanner uiState={uiState} />
           <CreatorProfileTab
             creator={creator}
             uiState={uiState}
             onOpenOnboarding={() => setOnboardingOpen(true)}
           />
+          </>
         )}
         {activeTab === "content" && <CollaborationTab content={content} />}
       </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useTransition } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { unblacklistCreator } from "@/features/creators/actions/admin/unblacklist-creator";
 import {
@@ -13,6 +13,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/shared/components/ui/alert-dialog";
+import { platformQueryKeys } from "@/shared/lib/platform-query-keys";
 
 interface UnblacklistCreatorDialogProps {
   open: boolean;
@@ -28,19 +29,17 @@ export function UnblacklistCreatorDialog({
   creatorId,
   creatorName,
 }: UnblacklistCreatorDialogProps) {
-  const [isPending, startTransition] = useTransition();
+  const queryClient = useQueryClient();
 
-  function handleConfirm() {
-    startTransition(async () => {
-      try {
-        await unblacklistCreator(creatorId);
-        toast.success(`${creatorName} has been removed from the blacklist`);
-        onOpenChange(false);
-      } catch {
-        toast.error("Failed to remove creator from blacklist. Please try again.");
-      }
-    });
-  }
+  const { mutate, isPending } = useMutation({
+    mutationFn: () => unblacklistCreator(creatorId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: platformQueryKeys.database });
+      toast.success(`${creatorName} has been removed from the blacklist`);
+      onOpenChange(false);
+    },
+    onError: () => toast.error("Failed to remove creator from blacklist. Please try again."),
+  });
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
@@ -53,7 +52,7 @@ export function UnblacklistCreatorDialog({
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
-          <AlertDialogAction onClick={handleConfirm} disabled={isPending}>
+          <AlertDialogAction onClick={() => mutate()} disabled={isPending}>
             Remove from blacklist
           </AlertDialogAction>
         </AlertDialogFooter>

@@ -17,9 +17,9 @@ export function buildOnboardingData(creator: CreatorProfile): OnboardingData {
     fullName: creator.fullName ?? "",
     country: creator.country ?? "",
     languages: (creator.languages ?? []) as Language[],
-    instagramHandle: creator.socialChannels?.instagram_handle ?? "",
-    tiktokHandle: creator.socialChannels?.tiktok_handle ?? "",
-    youtubeHandle: creator.socialChannels?.youtube_handle ?? "",
+    instagramUrl: creator.socialChannels?.instagram_url ?? "",
+    tiktokUrl: creator.socialChannels?.tiktok_url ?? "",
+    youtubeUrl: creator.socialChannels?.youtube_url ?? "",
     portfolioUrl: creator.portfolioUrl ?? "",
     ugcCategories: (creator.ugcCategories ?? []) as UgcCategory[],
     contentFormats: (creator.contentFormats ?? []) as ContentFormat[],
@@ -31,15 +31,29 @@ export function buildOnboardingData(creator: CreatorProfile): OnboardingData {
   };
 }
 
+function isValidUrl(url: string): boolean {
+  try {
+    new URL(url);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function isValidOrEmpty(url: string): boolean {
+  return url.trim().length === 0 || isValidUrl(url);
+}
+
 export function canProceed(step: number, data: OnboardingData, videoCount = 0): boolean {
   switch (step) {
     case 1:
       return data.fullName.trim().length > 0;
     case 2:
       return (
-        data.instagramHandle.trim().length > 0 ||
-        data.tiktokHandle.trim().length > 0 ||
-        data.youtubeHandle.trim().length > 0
+        (isValidUrl(data.instagramUrl) || isValidUrl(data.tiktokUrl) || isValidUrl(data.youtubeUrl)) &&
+        isValidOrEmpty(data.instagramUrl) &&
+        isValidOrEmpty(data.tiktokUrl) &&
+        isValidOrEmpty(data.youtubeUrl)
       );
     case 3:
       return data.ugcCategories.length > 0;

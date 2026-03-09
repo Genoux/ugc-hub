@@ -47,30 +47,15 @@ function getAnswer(answers: z.infer<typeof answerSchema>[], ref: string) {
 
 type SocialChannels = NonNullable<Parameters<typeof createApplicant>[0]["socialChannels"]>;
 
-// Returns null for unrecognized platforms — we only store known handles
+// Returns null for unrecognized platforms — we only store known social URLs
 function parseSocialUrl(url: string): SocialChannels | null {
   try {
-    const { hostname, pathname } = new URL(url);
+    const { hostname } = new URL(url);
     const domain = hostname.replace(/^www\./, "");
-    const segments = pathname.split("/").filter(Boolean);
 
-    if (domain === "instagram.com" || domain === "instagr.am") {
-      const handle = segments[0];
-      if (handle) return { instagram_handle: handle };
-    }
-
-    if (domain === "tiktok.com") {
-      const segment = segments[0];
-      // TikTok paths are /@username
-      const handle = segment?.startsWith("@") ? segment.slice(1) : segment;
-      if (handle) return { tiktok_handle: handle };
-    }
-
-    if (domain === "youtube.com" || domain === "youtu.be") {
-      // Handles /c/name, /@handle, /user/name, /channel/UCxxx
-      const handle = segments[0]?.startsWith("@") ? segments[0] : (segments[1] ?? segments[0]);
-      if (handle) return { youtube_handle: handle };
-    }
+    if (domain === "instagram.com" || domain === "instagr.am") return { instagram_url: url };
+    if (domain === "tiktok.com") return { tiktok_url: url };
+    if (domain === "youtube.com" || domain === "youtu.be") return { youtube_url: url };
   } catch {
     // Invalid URL
   }

@@ -28,17 +28,17 @@ export function CreatorProfileInfo({ creator, layout = "sidebar" }: CreatorProfi
   const blacklisted = creator.status === "blacklisted" ? creator : null;
 
   const socialLinks = [
-    creator.socialChannels?.instagram_handle && {
+    creator.socialChannels?.instagram_url && {
       label: "Instagram",
-      handle: `@${creator.socialChannels.instagram_handle}`,
+      handle: creator.socialChannels.instagram_url.replace("https://", ""),
     },
-    creator.socialChannels?.tiktok_handle && {
+    creator.socialChannels?.tiktok_url && {
       label: "TikTok",
-      handle: `@${creator.socialChannels.tiktok_handle}`,
+      handle: creator.socialChannels.tiktok_url.replace("https://", ""),
     },
-    creator.socialChannels?.youtube_handle && {
+    creator.socialChannels?.youtube_url && {
       label: "YouTube",
-      handle: `@${creator.socialChannels.youtube_handle}`,
+      handle: creator.socialChannels.youtube_url.replace("https://", ""),
     },
   ].filter(Boolean) as { label: string; handle: string }[];
 

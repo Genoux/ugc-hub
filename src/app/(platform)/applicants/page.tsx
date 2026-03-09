@@ -1,14 +1,18 @@
-import { inArray } from "drizzle-orm";
-import { creators } from "@/db/schema";
+"use client";
+
+import { useQuery } from "@tanstack/react-query";
+import { getApplicants } from "@/features/applicants/actions/get-applicants";
 import { ApplicantsClient } from "@/features/applicants/components/applicants-client";
-import { db } from "@/shared/lib/db";
+import { PageLoader } from "@/shared/components/layout/page-loader";
+import { platformQueryKeys } from "@/shared/lib/platform-query-keys";
 
-export default async function ApplicantsPage() {
-  const allCreators = await db
-    .select()
-    .from(creators)
-    .where(inArray(creators.status, ["applicant", "approved_not_joined", "rejected"]))
-    .orderBy(creators.appliedAt);
+export default function ApplicantsPage() {
+  const { data: creators, isLoading } = useQuery({
+    queryKey: platformQueryKeys.applicants,
+    queryFn: getApplicants,
+  });
 
-  return <ApplicantsClient initialCreators={allCreators} />;
+  if (isLoading) return <PageLoader />;
+
+  return <ApplicantsClient creators={creators ?? []} />;
 }
