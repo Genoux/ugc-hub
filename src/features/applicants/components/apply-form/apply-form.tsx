@@ -172,7 +172,7 @@ export function ApplyForm() {
     else goToStep(step + 1);
   };
 
-  const asideStep = Math.min(step, 3);
+  const asideStep = Math.min(step, 4);
 
   return (
     <Wizard variant="page">
@@ -228,7 +228,6 @@ export function ApplyForm() {
           </div>
         )}
       </WizardPanel>
-
       <WizardAside stepKey={asideStep} direction={directionRef.current} visible={!isResultStep}>
         <Image
           src={`/creator/onboarding/step${asideStep}.jpg`}
