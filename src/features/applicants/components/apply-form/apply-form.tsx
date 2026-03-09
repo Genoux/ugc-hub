@@ -110,7 +110,7 @@ function StepContent({
         <WizardComplete
           className="items-center"
           title="Application submitted"
-          description="Thanks for applying! We'll review your application and get back to you soon."
+          description="We'll review your application and get back to you soon."
         >
           <div className="flex flex-col w-full gap-2 justify-center">
             <p className="text-sm text-center text-muted-foreground">You can close this page.</p>
