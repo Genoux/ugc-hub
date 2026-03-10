@@ -17,6 +17,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/shared/components/ui/carousel";
+import { UPLOAD_SIZE_LIMITS } from "@/shared/lib/constants";
 import type { PortfolioVideoEntry, UploadingVideoEntry } from "../onboarding-types";
 
 const ACCEPTED_TYPES = ["video/mp4", "video/quicktime", "video/x-msvideo", "video/webm"] as const;
@@ -90,7 +91,7 @@ export function StepVideos({
                 <AssetCard
                   src={entry.objectUrl}
                   filename={entry.filename}
-                  size="sm"
+                  size="xs"
                   actionSlot={
                     <Button
                       variant="ghost"
@@ -137,8 +138,8 @@ export function StepVideos({
         <FileDropZone
           onFilesAdd={handleFilesAdd}
           accept={ACCEPTED_TYPES}
-          maxFileSize={500 * 1024 * 1024}
-          hint="MP4, MOV or WebM · Max 500 MB each"
+          maxFileSize={UPLOAD_SIZE_LIMITS.video}
+          hint="MP4, MOV or WebM · Max 1 GB each"
         />
       )}
 

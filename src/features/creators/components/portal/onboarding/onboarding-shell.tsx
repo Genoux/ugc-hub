@@ -300,7 +300,7 @@ export function OnboardingShell({ creator, onComplete, onClose }: OnboardingProp
             )}
           </WizardHeader>
 
-          <div className="flex flex-1 flex-col justify-center gap-4">
+          <div className="flex flex-1 min-h-0 flex-col gap-4">
             <WizardStep stepKey={step} direction={directionRef.current}>
               {!isResultStep && (
                 <div className="flex flex-col gap-2">
@@ -356,7 +356,7 @@ export function OnboardingShell({ creator, onComplete, onClose }: OnboardingProp
             </WizardStep>
 
             {!isResultStep && creator.profileCompleted && (
-              <div className="w-full flex justify-center pb-21">
+              <div className="w-full flex justify-center pb-12">
                 <ProgressDots
                   filledSteps={filledSteps}
                   current={step}

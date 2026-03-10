@@ -6,7 +6,7 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { getSessionCreator } from "@/features/creators/lib/get-session-creator";
 import { R2_BUCKET_NAME, r2Client } from "@/features/uploads/lib/r2-client";
-import { UPLOAD_CONFIG } from "@/features/uploads/lib/upload-config";
+import { UPLOAD_SIZE_LIMITS } from "@/shared/lib/constants";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -17,8 +17,8 @@ const ALLOWED_MIME_TYPES: Record<string, string[]> = {
 };
 
 const MAX_FILE_SIZE: Record<string, number> = {
-  profile_picture: 5 * 1024 * 1024,
-  portfolio_video: UPLOAD_CONFIG.maxFileSize, // 500 MB
+  profile_picture: UPLOAD_SIZE_LIMITS.image,
+  portfolio_video: UPLOAD_SIZE_LIMITS.video,
 };
 
 export async function POST(request: NextRequest) {

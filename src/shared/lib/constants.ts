@@ -180,4 +180,7 @@ export const EASING_FUNCTION = {
 
 export const ALLOWED_UPLOAD_MIME_TYPES = ["video/mp4", "video/quicktime"] as const;
 
-export const DEFAULT_UPLOAD_MAX_FILE_SIZE = 5 * 1024 * 1024 * 1024; // 5GB
+export const UPLOAD_SIZE_LIMITS = {
+  image: 15 * 1024 * 1024,       //  15 MB — profile pictures
+  video: 1 * 1024 * 1024 * 1024, //   1 GB — all video
+} as const;

@@ -5,6 +5,8 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { creators } from "@/db/schema";
 import { requireCreator } from "@/features/creators/lib/require-creator";
+import { getR2SignedUrl } from "@/features/uploads/lib/r2-serve";
+import { notifySlack } from "@/integrations/slack/notify-slack";
 import { toActionError } from "@/shared/lib/action-error";
 import { AGE_DEMOGRAPHICS, ETHNICITIES, GENDER_IDENTITIES } from "@/shared/lib/constants";
 import { db } from "@/shared/lib/db";
@@ -66,6 +68,16 @@ export async function completeCreatorProfile(input: z.infer<typeof schema>) {
         joinedAt: new Date(),
       })
       .where(eq(creators.id, creator.id));
+
+    void getR2SignedUrl(validated.profilePhoto).then((profileImageUrl) =>
+      notifySlack({
+        type: "creator_profile_complete",
+        creatorId: creator.id,
+        fullName: validated.fullName,
+        email: creator.email ?? undefined,
+        profileImageUrl: profileImageUrl ?? undefined,
+      })
+    ).catch(console.error);
 
     revalidatePath("/creator");
   } catch (err) {

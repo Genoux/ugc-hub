@@ -10,6 +10,7 @@ import {
   WizardAside,
   WizardDescription,
   WizardFooter,
+  WizardHeader,
   WizardPanel,
   WizardStep,
   WizardTitle,
@@ -182,9 +183,10 @@ export function ApplyForm() {
   return (
     <Wizard variant="page">
       <WizardPanel isPending={isPending}>
-        <div className="absolute left-12 top-12 z-10">
+        <WizardHeader>
           <Image src="/inBeat.svg" alt="" width={40} height={40} unoptimized />
-        </div>
+          <span />
+        </WizardHeader>
         <WizardStep stepKey={step} direction={directionRef.current} className="h-[600px]">
           {!isResultStep && (
             <div className="flex flex-col gap-2">
@@ -221,9 +223,9 @@ export function ApplyForm() {
         </WizardStep>
 
         {!isResultStep && (
-          <div className="flex mx-auto justify-start ">
+          <div className="flex justify-center absolute bottom-10 left-0 right-0 w-full">
             <ProgressDots
-              className="w-full flex justify-start"
+              className="flex justify-center"
               variant="dots"
               current={step}
               steps={APPLY_STEPS}
