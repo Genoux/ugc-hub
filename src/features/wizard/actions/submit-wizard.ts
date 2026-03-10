@@ -3,6 +3,7 @@
 import { auth, clerkClient } from "@clerk/nextjs/server";
 import { and, eq } from "drizzle-orm";
 import { collaborations, creators, projects, submissions } from "@/db/schema";
+import { notifySlack } from "@/integrations/slack/notify-slack";
 import { toActionError } from "@/shared/lib/action-error";
 import { db } from "@/shared/lib/db";
 
@@ -20,7 +21,7 @@ export async function submitWizard(data: { token: string; creatorId: string }) {
 
     const creator = await db.query.creators.findFirst({
       where: eq(creators.id, data.creatorId),
-      columns: { id: true, clerkUserId: true, email: true },
+      columns: { id: true, clerkUserId: true, email: true, fullName: true },
     });
 
     if (!creator) throw new Error("Creator not found");
@@ -63,6 +64,13 @@ export async function submitWizard(data: { token: string; creatorId: string }) {
         submissionNumber: nextSubmissionNumber,
       })
       .returning();
+
+    void notifySlack({
+      type: "creator_uploaded_content",
+      creatorName: creator.fullName ?? creator.email ?? data.creatorId,
+      projectName: project.name,
+      submissionLabel: submission.label,
+    }).catch(console.error);
 
     return { project, folder: collab, submission };
   } catch (err) {
