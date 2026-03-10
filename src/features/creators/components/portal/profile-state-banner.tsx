@@ -27,7 +27,8 @@ const BANNER_CONFIG = {
   live: {
     className: "border-emerald-200/70 bg-emerald-50/50 text-emerald-800",
     title: "Your profile is live",
-    message: "Welcome! You're now visible to brands and can receive collaboration invitations by email.",
+    message:
+      "Welcome! You're now visible to brands and can receive collaboration invitations by email.",
     dismissable: true,
   },
   declined: {

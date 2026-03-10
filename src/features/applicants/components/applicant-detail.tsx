@@ -60,13 +60,13 @@ function LinkRow({ label, value, href }: { label: string; value: string; href: s
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="flex items-center justify-between py-3 px-3 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
+      className="flex flex-wrap items-center gap-2 justify-between py-3 px-3 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
     >
       <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground">
         {label}
       </span>
       <span className="inline-flex items-center gap-1.5 text-sm text-foreground">
-        {value}
+        <span className="truncate max-w-40">{value}</span>
         <ExternalLink className="h-3.5 w-3.5 text-muted-foreground" />
       </span>
     </a>

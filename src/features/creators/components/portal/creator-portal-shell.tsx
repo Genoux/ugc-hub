@@ -7,9 +7,9 @@ import type { CreatorProfile } from "@/features/creators/actions/portal/get-crea
 import type { CreatorSubmissions } from "@/features/creators/actions/portal/get-creator-submissions";
 import { useCreatorPortal } from "./creator-portal-context";
 import { OnboardingShell } from "./onboarding/onboarding-shell";
+import { ProfileStateBanner } from "./profile-state-banner";
 import { CollaborationTab } from "./tabs/collaborations/collaboration-tab";
 import { CreatorProfileTab } from "./tabs/profile/profile-tab";
-import { ProfileStateBanner } from "./profile-state-banner";
 export type CreatorUIState = "pending_approval" | "pending_profile" | "live" | "declined";
 
 interface CreatorPortalShellProps {
@@ -38,12 +38,12 @@ export function CreatorPortalShell({ creator, uiState, content }: CreatorPortalS
       <div className="mx-auto w-full max-w-5xl flex flex-col min-h-full">
         {activeTab === "profile" && (
           <>
-          <ProfileStateBanner uiState={uiState} />
-          <CreatorProfileTab
-            creator={creator}
-            uiState={uiState}
-            onOpenOnboarding={() => setOnboardingOpen(true)}
-          />
+            <ProfileStateBanner uiState={uiState} />
+            <CreatorProfileTab
+              creator={creator}
+              uiState={uiState}
+              onOpenOnboarding={() => setOnboardingOpen(true)}
+            />
           </>
         )}
         {activeTab === "content" && <CollaborationTab content={content} />}

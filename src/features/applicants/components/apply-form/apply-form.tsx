@@ -65,7 +65,9 @@ function canProceed(step: number, data: ApplyData): boolean {
       return data.country.trim().length > 0 && data.languages.length > 0;
     case 3:
       return (
-        (isValidUrl(data.instagram_url) || isValidUrl(data.tiktok_url) || isValidUrl(data.youtube_url)) &&
+        (isValidUrl(data.instagram_url) ||
+          isValidUrl(data.tiktok_url) ||
+          isValidUrl(data.youtube_url)) &&
         (!data.instagram_url || isValidUrl(data.instagram_url)) &&
         (!data.tiktok_url || isValidUrl(data.tiktok_url)) &&
         (!data.youtube_url || isValidUrl(data.youtube_url)) &&

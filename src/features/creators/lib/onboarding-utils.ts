@@ -50,7 +50,9 @@ export function canProceed(step: number, data: OnboardingData, videoCount = 0): 
       return data.fullName.trim().length > 0;
     case 2:
       return (
-        (isValidUrl(data.instagramUrl) || isValidUrl(data.tiktokUrl) || isValidUrl(data.youtubeUrl)) &&
+        (isValidUrl(data.instagramUrl) ||
+          isValidUrl(data.tiktokUrl) ||
+          isValidUrl(data.youtubeUrl)) &&
         isValidOrEmpty(data.instagramUrl) &&
         isValidOrEmpty(data.tiktokUrl) &&
         isValidOrEmpty(data.youtubeUrl)
