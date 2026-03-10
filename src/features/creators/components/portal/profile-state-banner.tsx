@@ -1,7 +1,7 @@
 "use client";
 
 import { X } from "lucide-react";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { CreatorUIState } from "@/features/creators/components/portal/creator-portal-shell";
 import { Alert, AlertDescription, AlertTitle } from "@/shared/components/ui/alert";
 import { Button } from "@/shared/components/ui/button";
@@ -54,7 +54,11 @@ function getLiveDismissed() {
 
 export function ProfileStateBanner({ uiState, onOpenOnboarding }: ProfileStateBannerProps) {
   const config = BANNER_CONFIG[uiState];
-  const [dismissed, setDismissed] = useState(() => uiState === "live" && getLiveDismissed());
+  const [dismissed, setDismissed] = useState(false);
+
+  useEffect(() => {
+    if (uiState === "live" && getLiveDismissed()) setDismissed(true);
+  }, [uiState]);
 
   const dismiss = useCallback(() => {
     try {
