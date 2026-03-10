@@ -22,7 +22,7 @@ export function Wizard({ variant, children, className }: WizardProps) {
     return (
       <motion.div
         className={cn(
-          "fixed inset-0 flex min-h-[max(775px,100vh)] flex-col overflow-auto z-50 min-w-[368px]",
+          "fixed inset-0 flex min-h-[max(600px,100vh)] flex-col overflow-auto z-50 min-w-[368px]",
           className,
         )}
         initial={{ opacity: 0, y: 250 }}
@@ -88,7 +88,7 @@ type WizardHeaderProps = {
 
 export function WizardHeader({ children, className }: WizardHeaderProps) {
   return (
-    <div className={cn("flex shrink-0 items-center justify-between w-full p-4", className)}>
+    <div className={cn("flex shrink-0 items-center justify-between w-full pl-12 pt-10", className)}>
       {children}
     </div>
   );
@@ -105,7 +105,7 @@ type WizardStepProps = {
 
 export function WizardStep({ stepKey, direction, children, className }: WizardStepProps) {
   return (
-    <div className="flex flex-col w-full justify-center max-w-xl mx-auto overflow-y-auto px-6">
+    <div className="flex flex-col w-full max-w-xl mx-auto overflow-y-auto px-6 flex-1 min-h-0">
       <AnimatePresence mode="wait" initial={false}>
         <motion.div
           key={stepKey}

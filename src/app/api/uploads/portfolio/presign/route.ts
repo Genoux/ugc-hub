@@ -6,6 +6,7 @@ import { NextResponse } from "next/server";
 import { R2_BUCKET_NAME, r2Client } from "@/features/uploads/lib/r2-client";
 import { UPLOAD_CONFIG } from "@/features/uploads/lib/upload-config";
 import { requireAdmin } from "@/shared/lib/auth";
+import { UPLOAD_SIZE_LIMITS } from "@/shared/lib/constants";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -24,7 +25,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "File type not allowed" }, { status: 400 });
     }
 
-    if (fileSize > UPLOAD_CONFIG.maxFileSize) {
+    if (fileSize > UPLOAD_SIZE_LIMITS.video) {
       return NextResponse.json({ error: "File size exceeds limit" }, { status: 400 });
     }
 
