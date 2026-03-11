@@ -59,7 +59,7 @@ export function useCreatorFilters(creators: CreatorListItem[]) {
           return false;
       }
       if (filters.ethnicity.length) {
-        if (!c.ethnicity || !filters.ethnicity.includes(c.ethnicity as never)) return false;
+        if (!c.ethnicity?.some((e) => filters.ethnicity.includes(e as never))) return false;
       }
       if (
         filters.socialPlatforms.length &&

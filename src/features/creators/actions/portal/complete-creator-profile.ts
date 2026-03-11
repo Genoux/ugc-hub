@@ -39,13 +39,15 @@ const schema = z.object({
   rateRangeSelf: z.object({ min: z.number(), max: z.number() }).optional(),
   genderIdentity: z.enum(GENDER_IDENTITIES),
   ageDemographic: z.enum(AGE_DEMOGRAPHICS),
-  ethnicity: z.enum(ETHNICITIES),
+  ethnicities: z.array(z.enum(ETHNICITIES)).min(1),
 });
 
 export async function completeCreatorProfile(input: z.infer<typeof schema>) {
   try {
     const creator = await requireCreator();
     const validated = schema.parse(input);
+
+    const wasAlreadyCompleted = creator.profileCompleted;
 
     await db
       .update(creators)
@@ -61,7 +63,7 @@ export async function completeCreatorProfile(input: z.infer<typeof schema>) {
         rateRangeSelf: validated.rateRangeSelf ?? null,
         genderIdentity: validated.genderIdentity,
         ageDemographic: validated.ageDemographic,
-        ethnicity: validated.ethnicity,
+        ethnicity: validated.ethnicities,
         profileCompleted: true,
         profileCompletedAt: new Date(),
         status: "joined",
@@ -69,15 +71,17 @@ export async function completeCreatorProfile(input: z.infer<typeof schema>) {
       })
       .where(eq(creators.id, creator.id));
 
-    void getR2SignedUrl(validated.profilePhoto).then((profileImageUrl) =>
-      notifySlack({
-        type: "creator_profile_complete",
-        creatorId: creator.id,
-        fullName: validated.fullName,
-        email: creator.email ?? undefined,
-        profileImageUrl: profileImageUrl ?? undefined,
-      })
-    ).catch(console.error);
+    if (!wasAlreadyCompleted) {
+      void getR2SignedUrl(validated.profilePhoto).then((profileImageUrl) =>
+        notifySlack({
+          type: "creator_profile_complete",
+          creatorId: creator.id,
+          fullName: validated.fullName,
+          email: creator.email ?? undefined,
+          profileImageUrl: profileImageUrl ?? undefined,
+        })
+      ).catch(console.error);
+    }
 
     revalidatePath("/creator");
   } catch (err) {

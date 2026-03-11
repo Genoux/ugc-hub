@@ -213,7 +213,7 @@ export function OnboardingShell({ creator, onComplete, onClose }: OnboardingProp
     rateRangeSelf: data.rateRangeSelf ?? undefined,
     genderIdentity: data.genderIdentity as GenderIdentity,
     ageDemographic: data.ageDemographic as AgeDemographic,
-    ethnicity: data.ethnicity as Ethnicity,
+    ethnicities: data.ethnicities as Ethnicity[],
   });
 
   const handleSaveAndClose = () => {

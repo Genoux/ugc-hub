@@ -104,7 +104,7 @@ export function CreatorProfileInfo({ creator, layout = "sidebar" }: CreatorProfi
         <div className="space-y-3 border-t border-border pt-3">
           <LabeledField label="Age range" value={creator.ageDemographic} />
           <LabeledField label="Gender" value={creator.genderIdentity} />
-          <LabeledField label="Ethnicity" value={creator.ethnicity} />
+          <LabeledField label="Ethnicity" value={creator.ethnicity?.join(", ")} />
         </div>
       )}
 

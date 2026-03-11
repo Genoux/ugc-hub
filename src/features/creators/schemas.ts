@@ -30,7 +30,7 @@ export const creatorSchema = z.object({
   // not when reading back from the DB where old values may exist.
   genderIdentity: z.string().nullable(),
   ageDemographic: z.string().nullable(),
-  ethnicity: z.string().nullable(),
+  ethnicity: z.array(z.string()).nullable(),
   languages: z.array(z.enum(LANGUAGES)).nullable(),
   portfolioUrl: z.string().nullable(),
   primaryChannel: z.enum(PRIMARY_CHANNELS).nullable(),

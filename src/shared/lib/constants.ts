@@ -118,11 +118,10 @@ export const COUNTRIES = [
 ];
 
 export const RATE_BANDS = [
-  { label: "$50 – $150", value: { min: 50, max: 150 } },
-  { label: "$150 – $300", value: { min: 150, max: 300 } },
-  { label: "$300 – $600", value: { min: 300, max: 600 } },
-  { label: "$600 – $1,000", value: { min: 600, max: 1000 } },
-  { label: "$1,000+", value: { min: 1000, max: 9999 } },
+  { label: "$50 – $150", tag: "Getting started", tagColor: "emerald", value: { min: 50, max: 150 } },
+  { label: "$150 – $300", tag: "Standard Rates (Most Collabs)", tagColor: "sky", value: { min: 150, max: 300 } },
+  { label: "$300 – $600", tag: "Premium UGC", tagColor: "violet", value: { min: 300, max: 600 } },
+  { label: "$600 – $1,000", tag: "Specialty / Super Niche (Rare)", tagColor: "amber", value: { min: 600, max: 1000 } },
 ];
 
 export type PrimaryChannel = (typeof PRIMARY_CHANNELS)[number];

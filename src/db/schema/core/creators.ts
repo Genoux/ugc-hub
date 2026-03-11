@@ -38,7 +38,7 @@ export const creators = pgTable("creators", {
   profilePhoto: text("profile_photo"),
   genderIdentity: text("gender_identity"),
   ageDemographic: text("age_demographic"),
-  ethnicity: text("ethnicity"),
+  ethnicity: text("ethnicity").array(),
   primaryChannel: text("primary_channel"), // "Instagram" | "TikTok" | "YouTube"
 
   // Content specialization

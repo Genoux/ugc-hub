@@ -1,6 +1,5 @@
 "use client";
 
-import { Button } from "@/shared/components/ui/button";
 import { Label } from "@/shared/components/ui/label";
 import {
   Select,
@@ -20,6 +19,7 @@ import {
   LANGUAGES,
   type Language,
 } from "@/shared/lib/constants";
+import { TogglePills } from "@/shared/components/blocks/toggle-pills";
 import type { OnboardingData } from "../onboarding-types";
 
 interface Props {
@@ -28,13 +28,6 @@ interface Props {
 }
 
 export function StepAboutYou({ data, onChange }: Props) {
-  const toggleLanguage = (lang: string) => {
-    const next = data.languages.includes(lang as Language)
-      ? data.languages.filter((l) => l !== lang)
-      : [...data.languages, lang as Language];
-    onChange({ languages: next });
-  };
-
   return (
     <div className="flex flex-col gap-8">
       <div className="space-y-1.5">
@@ -96,26 +89,20 @@ export function StepAboutYou({ data, onChange }: Props) {
             </SelectContent>
           </Select>
         </div>
+      </div>
 
-        <div className="space-y-2">
-          <Label>Ethnicity</Label>
-          <Select
-            clearable
-            value={data.ethnicity}
-            onValueChange={(v) => onChange({ ethnicity: v as Ethnicity | "" })}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select" />
-            </SelectTrigger>
-            <SelectContent>
-              {ETHNICITIES.map((e) => (
-                <SelectItem key={e} value={e}>
-                  {e}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+      <div className="space-y-2">
+        <Label>Ethnicity</Label>
+        <TogglePills
+          options={ETHNICITIES}
+          selected={data.ethnicities}
+          onToggle={(e) => {
+            const next = data.ethnicities.includes(e as Ethnicity)
+              ? data.ethnicities.filter((x) => x !== e)
+              : [...data.ethnicities, e as Ethnicity];
+            onChange({ ethnicities: next });
+          }}
+        />
       </div>
 
       <div className="space-y-3">
@@ -125,26 +112,16 @@ export function StepAboutYou({ data, onChange }: Props) {
             Only select languages where you have no accent or a barely noticeable accent.
           </p>
         </div>
-        <div className="flex flex-wrap gap-1.5">
-          {LANGUAGES.map((lang) => {
-            const selected = data.languages.includes(lang);
-            return (
-              <Button
-                key={lang}
-                type="button"
-                variant={selected ? "default" : "outline"}
-                onClick={() => toggleLanguage(lang)}
-                className={`text-sm border border-transparent ${
-                  selected
-                    ? "border-foreground bg-foreground text-background"
-                    : "border-border text-muted-foreground "
-                }`}
-              >
-                {lang}
-              </Button>
-            );
-          })}
-        </div>
+        <TogglePills
+          options={LANGUAGES}
+          selected={data.languages}
+          onToggle={(lang) => {
+            const next = data.languages.includes(lang as Language)
+              ? data.languages.filter((l) => l !== lang)
+              : [...data.languages, lang as Language];
+            onChange({ languages: next });
+          }}
+        />
       </div>
     </div>
   );

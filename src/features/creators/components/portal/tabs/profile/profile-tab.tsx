@@ -70,7 +70,7 @@ export function CreatorProfileTab({ creator, uiState, onOpenOnboarding }: Creato
           <LabeledField label="Gender" value={creator.genderIdentity} />
           <LabeledField label="Languages" value={creator.languages?.join(", ")} />
           <LabeledField label="Age group" value={creator.ageDemographic} />
-          <LabeledField label="Ethnicity" value={creator.ethnicity} />
+          <LabeledField label="Ethnicity" value={creator.ethnicity?.join(", ")} />
           <hr />
           <ProfileSocials
             links={[...socialLinks, { label: "Portfolio", handle: creator.portfolioUrl ?? "" }]}
