@@ -2,38 +2,11 @@
 
 import { and, eq, ne } from "drizzle-orm";
 import { collaborations } from "@/db/schema";
-import type { CollaborationHighlight } from "@/features/creators/constants";
-import type { CollabRatingRow } from "@/features/collaborations/lib/calculate-ratings";
+import type { CollaborationDetail } from "@/entities/collaboration/types";
+import type { CollaborationHighlight } from "@/entities/creator/types";
 import { toMediaUrl } from "@/features/uploads/lib/r2-media-url";
 import { requireAdmin } from "@/shared/lib/auth";
 import { db } from "@/shared/lib/db";
-
-export type CollaborationDetail = {
-  id: string;
-  status: "active" | "closed";
-  project: { id: string; name: string };
-  creator: {
-    id: string;
-    fullName: string;
-    email: string;
-    profilePhotoUrl: string | null;
-    closedCollabRatings: CollabRatingRow[];
-  };
-  submissions: Array<{
-    id: string;
-    label: string;
-    submissionNumber: number;
-    deliveredAt: Date;
-    assets: Array<{
-      id: string;
-      filename: string;
-      mimeType: string;
-      sizeBytes: number;
-      url: string;
-    }>;
-  }>;
-  highlights: Array<{ id: string; filename: string; mimeType: string; url: string }>;
-};
 
 export async function getCollaborationDetail(
   collaborationId: string,
@@ -45,7 +18,16 @@ export async function getCollaborationDetail(
     where: eq(collaborations.id, collaborationId),
     with: {
       project: { columns: { id: true, name: true } },
-      creator: { columns: { id: true, fullName: true, email: true, profilePhoto: true } },
+      creator: {
+        columns: {
+          id: true,
+          fullName: true,
+          email: true,
+          profilePhoto: true,
+          profilePhotoBlurDataUrl: true,
+          profileCompletedAt: true,
+        },
+      },
       submissions: {
         columns: { id: true, label: true, submissionNumber: true, deliveredAt: true },
         orderBy: (s, { asc }) => [asc(s.submissionNumber)],
@@ -83,7 +65,8 @@ export async function getCollaborationDetail(
       id: raw.creator.id,
       fullName: raw.creator.fullName,
       email: raw.creator.email,
-      profilePhotoUrl: toMediaUrl(raw.creator.profilePhoto),
+      profilePhotoUrl: toMediaUrl(raw.creator.profilePhoto, raw.creator.profileCompletedAt),
+      profilePhotoBlurDataUrl: raw.creator.profilePhotoBlurDataUrl ?? null,
       closedCollabRatings,
     },
     submissions: raw.submissions.map((submission) => ({

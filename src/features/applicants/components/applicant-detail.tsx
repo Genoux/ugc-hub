@@ -1,7 +1,8 @@
 "use client";
 
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Check, Copy, ExternalLink, MoreVertical } from "lucide-react";
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import type { Creator } from "@/features/applicants/types";
 import { Badge } from "@/shared/components/ui/badge";
@@ -12,11 +13,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/shared/components/ui/dropdown-menu";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/shared/components/ui/tooltip";
+import { platformQueryKeys } from "@/shared/lib/platform-query-keys";
 import { approveApplicant } from "../actions/approve-applicant";
 import { reinviteCreator } from "../actions/reinvite-creator";
 import { rejectApplicant } from "../actions/reject-applicant";
-import { revokeInvitation } from "../actions/revoke-invitation";
 
 type ActiveTab = Creator["status"];
 
@@ -36,28 +36,21 @@ function EmailRow({ email }: { email: string }) {
   };
 
   return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <Button
-          variant="ghost"
-          onClick={handleCopy}
-          className="w-full justify-between py-3 px-3 h-auto rounded-lg hover:bg-muted/50 font-normal"
-        >
-          <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground">
-            Email
-          </span>
-          <span className="inline-flex items-center gap-1.5 text-sm text-foreground">
-            {email}
-            {copied ? (
-              <Check className="h-3.5 w-3.5 text-primary" />
-            ) : (
-              <Copy className="h-3.5 w-3.5 text-muted-foreground" />
-            )}
-          </span>
-        </Button>
-      </TooltipTrigger>
-      <TooltipContent>{copied ? "Copied!" : "Click to copy email"}</TooltipContent>
-    </Tooltip>
+    <Button
+      variant="ghost"
+      onClick={handleCopy}
+      className="w-full flex-wrap justify-between py-3 px-3 h-auto rounded-lg hover:bg-muted/50 font-normal"
+    >
+      <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground">Email</span>
+      <span className="inline-flex items-center gap-1.5 text-sm text-foreground">
+        {email}
+        {copied ? (
+          <Check className="h-3.5 w-3.5 text-primary" />
+        ) : (
+          <Copy className="h-3.5 w-3.5 text-muted-foreground" />
+        )}
+      </span>
+    </Button>
   );
 }
 
@@ -67,13 +60,13 @@ function LinkRow({ label, value, href }: { label: string; value: string; href: s
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="flex items-center justify-between py-3 px-3 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
+      className="flex flex-wrap items-center gap-2 justify-between py-3 px-3 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
     >
       <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground">
         {label}
       </span>
       <span className="inline-flex items-center gap-1.5 text-sm text-foreground">
-        {value}
+        <span className="truncate max-w-40">{value}</span>
         <ExternalLink className="h-3.5 w-3.5 text-muted-foreground" />
       </span>
     </a>
@@ -82,7 +75,7 @@ function LinkRow({ label, value, href }: { label: string; value: string; href: s
 
 function MutedRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-center justify-between py-3 px-3">
+    <div className="flex gap-2 items-center justify-between py-3 px-3">
       <span className="text-sm text-muted-foreground">{label}</span>
       <span className="text-sm text-muted-foreground italic">{value}</span>
     </div>
@@ -90,63 +83,46 @@ function MutedRow({ label, value }: { label: string; value: string }) {
 }
 
 export function ApplicantDetail({ creator, activeTab }: Props) {
-  const [isPending, startTransition] = useTransition();
+  const queryClient = useQueryClient();
 
-  const handleApprove = () => {
-    startTransition(async () => {
-      try {
-        await approveApplicant(creator.id);
-        toast.success("Creator approved and invited");
-      } catch (error) {
-        toast.error(error instanceof Error ? error.message : "Failed to approve");
-      }
-    });
-  };
+  const { mutate: approve, isPending: isApproving } = useMutation({
+    mutationFn: () => approveApplicant(creator.id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: platformQueryKeys.applicants });
+      toast.success("Creator approved and invited");
+    },
+    onError: (err) => toast.error(err.message),
+  });
 
-  const handleReject = () => {
-    startTransition(async () => {
-      try {
-        await rejectApplicant(creator.id);
-        toast.success("Applicant rejected");
-      } catch (error) {
-        toast.error(error instanceof Error ? error.message : "Failed to reject");
-      }
-    });
-  };
+  const { mutate: reject, isPending: isRejecting } = useMutation({
+    mutationFn: () => rejectApplicant(creator.id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: platformQueryKeys.applicants });
+      toast.success("Applicant rejected");
+    },
+    onError: (err) => toast.error(err.message),
+  });
 
-  const handleReinvite = () => {
-    startTransition(async () => {
-      try {
-        await reinviteCreator(creator.id);
-        toast.success("Invitation resent");
-      } catch (error) {
-        toast.error(error instanceof Error ? error.message : "Failed to resend invitation");
-      }
-    });
-  };
+  const { mutate: reinvite, isPending: isReinviting } = useMutation({
+    mutationFn: () => reinviteCreator(creator.id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: platformQueryKeys.applicants });
+      toast.success("Invitation resent");
+    },
+    onError: (err) => toast.error(err.message),
+  });
 
-  const handleRevokeInvitation = () => {
-    startTransition(async () => {
-      try {
-        await revokeInvitation(creator.id);
-        toast.success("Invitation revoked");
-      } catch (error) {
-        toast.error(error instanceof Error ? error.message : "Failed to revoke invitation");
-      }
-    });
-  };
+  const isPending = isApproving || isRejecting || isReinviting;
 
   const showApproveActions = activeTab === "applicant";
   const showResendAction = activeTab === "approved_not_joined";
   const showReinviteAction = activeTab === "rejected";
 
   const socialChannels = creator.socialChannels as {
-    instagram_handle?: string;
-    tiktok_handle?: string;
-    youtube_handle?: string;
+    instagram_url?: string;
+    tiktok_url?: string;
+    youtube_url?: string;
   } | null;
-
-  const showActionsMenu = showResendAction;
 
   return (
     <div className="w-full animate-in fade-in duration-150">
@@ -160,14 +136,10 @@ export function ApplicantDetail({ creator, activeTab }: Props) {
                   ? "Invited by email"
                   : "Unknown"}
             </Badge>
-            <h2 className="text-xl font-semibold text-foreground">
-              {creator.fullName || creator.email}
-            </h2>
-            <p className="mt-0.5 text-sm text-muted-foreground">
-              {creator.country || "Location not specified"}
-            </p>
+            <h2 className="text-xl font-semibold text-foreground">{creator.fullName}</h2>
+            <p className="mt-0.5 text-sm text-muted-foreground">{creator.country}</p>
           </div>
-          {showActionsMenu && (
+          {showResendAction && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
@@ -176,15 +148,8 @@ export function ApplicantDetail({ creator, activeTab }: Props) {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={handleReinvite} disabled={isPending}>
-                  {isPending ? "Sending…" : "Resend invitation"}
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={handleRevokeInvitation}
-                  disabled={isPending}
-                  className="text-destructive focus:text-destructive"
-                >
-                  Revoke invitation
+                <DropdownMenuItem onClick={() => reinvite()} disabled={isPending}>
+                  {isReinviting ? "Sending…" : "Resend invitation"}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -193,20 +158,20 @@ export function ApplicantDetail({ creator, activeTab }: Props) {
 
         <div>
           <EmailRow email={creator.email} />
-          {socialChannels?.instagram_handle ? (
+          {socialChannels?.instagram_url ? (
             <LinkRow
               label="Instagram"
-              value={`@${socialChannels.instagram_handle}`}
-              href={`https://instagram.com/${socialChannels.instagram_handle}`}
+              value={socialChannels.instagram_url.replace("https://", "")}
+              href={socialChannels.instagram_url}
             />
           ) : (
             <MutedRow label="Instagram" value="Not available" />
           )}
-          {socialChannels?.tiktok_handle ? (
+          {socialChannels?.tiktok_url ? (
             <LinkRow
               label="TikTok"
-              value={`@${socialChannels.tiktok_handle}`}
-              href={`https://tiktok.com/@${socialChannels.tiktok_handle}`}
+              value={socialChannels.tiktok_url.replace("https://", "")}
+              href={socialChannels.tiktok_url}
             />
           ) : (
             <MutedRow label="TikTok" value="Not available" />
@@ -224,40 +189,25 @@ export function ApplicantDetail({ creator, activeTab }: Props) {
 
         {showApproveActions && (
           <div className="mt-6 pt-4 border-t border-border flex gap-3">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button onClick={handleApprove} disabled={isPending}>
-                  Invite to Pool
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Approve and send invite to join the pool</TooltipContent>
-            </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button onClick={handleReject} disabled={isPending} variant="outline">
-                  Reject
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Reject this application</TooltipContent>
-            </Tooltip>
+            <Button onClick={() => approve()} disabled={isPending}>
+              Invite to Pool
+            </Button>
+            <Button onClick={() => reject()} disabled={isPending} variant="outline">
+              Reject
+            </Button>
           </div>
         )}
 
         {showReinviteAction && (
           <div className="mt-6 pt-4 border-t border-border">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  onClick={handleApprove}
-                  disabled={isPending}
-                  variant="outline"
-                  className="w-full h-12"
-                >
-                  {isPending ? "Sending…" : "Re-invite to pool"}
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Re-invite this creator to the pool</TooltipContent>
-            </Tooltip>
+            <Button
+              onClick={() => approve()}
+              disabled={isPending}
+              variant="outline"
+              className="w-full h-12"
+            >
+              {isApproving ? "Sending…" : "Re-invite to pool"}
+            </Button>
           </div>
         )}
       </div>

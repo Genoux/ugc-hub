@@ -2,10 +2,11 @@
 
 import { motion } from "motion/react";
 import { useState } from "react";
-import { EASING_FUNCTION } from "@/shared/lib/constant";
+import { EASING_FUNCTION } from "@/shared/lib/constants";
 import { cn } from "@/shared/lib/utils";
 
 const SIZE = {
+  xs: "w-32",
   sm: "w-42",
   md: "w-52",
   lg: "w-64",

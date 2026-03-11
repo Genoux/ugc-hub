@@ -1,8 +1,8 @@
 "use client";
 
 import { X } from "lucide-react";
-import { useCallback, useState } from "react";
-import type { CreatorUIState } from "@/features/creators/lib/get-creator-ui-state";
+import { useCallback, useEffect, useState } from "react";
+import type { CreatorUIState } from "@/features/creators/components/portal/creator-portal-shell";
 import { Alert, AlertDescription, AlertTitle } from "@/shared/components/ui/alert";
 import { Button } from "@/shared/components/ui/button";
 import { cn } from "@/shared/lib/utils";
@@ -26,8 +26,9 @@ const BANNER_CONFIG = {
   },
   live: {
     className: "border-emerald-200/70 bg-emerald-50/50 text-emerald-800",
-    title: "You're live",
-    message: "Your profile is visible and discoverable.",
+    title: "Your profile is live",
+    message:
+      "Welcome to the pool! You're now visible to brands and can receive collaboration invitations by email.",
     dismissable: true,
   },
   declined: {
@@ -53,7 +54,11 @@ function getLiveDismissed() {
 
 export function ProfileStateBanner({ uiState, onOpenOnboarding }: ProfileStateBannerProps) {
   const config = BANNER_CONFIG[uiState];
-  const [dismissed, setDismissed] = useState(() => uiState === "live" && getLiveDismissed());
+  const [dismissed, setDismissed] = useState(false);
+
+  useEffect(() => {
+    if (uiState === "live" && getLiveDismissed()) setDismissed(true);
+  }, [uiState]);
 
   const dismiss = useCallback(() => {
     try {

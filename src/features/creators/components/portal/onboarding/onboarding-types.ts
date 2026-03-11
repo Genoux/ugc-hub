@@ -23,17 +23,18 @@ import type {
   GenderIdentity,
   Language,
   UgcCategory,
-} from "@/features/creators/constants";
+} from "@/shared/lib/constants";
 
+//TODO: Rename for Onboarding or OnboardingPayload
 export interface OnboardingData {
   // Step 1
   fullName: string;
   country: string;
   languages: Language[];
   // Step 2
-  instagramHandle: string;
-  tiktokHandle: string;
-  youtubeHandle: string;
+  instagramUrl: string;
+  tiktokUrl: string;
+  youtubeUrl: string;
   portfolioUrl: string;
   // Step 3
   ugcCategories: UgcCategory[];
@@ -46,16 +47,16 @@ export interface OnboardingData {
   // Step 8
   genderIdentity: GenderIdentity | "";
   ageDemographic: AgeDemographic | "";
-  ethnicity: Ethnicity | "";
+  ethnicities: Ethnicity[];
 }
 
 export const INITIAL_ONBOARDING_DATA: OnboardingData = {
   fullName: "",
   country: "",
   languages: [],
-  instagramHandle: "",
-  tiktokHandle: "",
-  youtubeHandle: "",
+  instagramUrl: "",
+  tiktokUrl: "",
+  youtubeUrl: "",
   portfolioUrl: "",
   ugcCategories: [],
   contentFormats: [],
@@ -63,7 +64,7 @@ export const INITIAL_ONBOARDING_DATA: OnboardingData = {
   rateRangeSelf: null,
   genderIdentity: "",
   ageDemographic: "",
-  ethnicity: "",
+  ethnicities: [],
 };
 
 import type { CreatorProfile } from "@/features/creators/actions/portal/get-creator-profile";

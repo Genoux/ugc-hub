@@ -1,13 +1,12 @@
 "use server";
 
 import { eq } from "drizzle-orm";
-import { revalidatePath } from "next/cache";
 import { creators } from "@/db/schema";
 import { toActionError } from "@/shared/lib/action-error";
+import { getAppUrl } from "@/shared/lib/app-url";
 import { requireAdmin } from "@/shared/lib/auth";
 import { sendInvitation } from "@/shared/lib/clerk";
 import { db } from "@/shared/lib/db";
-import { env } from "@/shared/lib/env";
 import { ROUTES } from "@/shared/lib/routes";
 import { approveApplicantSchema } from "../schemas";
 
@@ -43,7 +42,7 @@ export async function approveApplicant(creatorId: string) {
 
     let result: Awaited<ReturnType<typeof sendInvitation>>;
     try {
-      result = await sendInvitation(creator.email, `${env.NEXT_PUBLIC_APP_URL}${ROUTES.signUp}`);
+      result = await sendInvitation(creator.email, `${await getAppUrl()}${ROUTES.signUp}`);
     } catch (err) {
       await revert();
       throw err;
@@ -55,7 +54,6 @@ export async function approveApplicant(creatorId: string) {
       throw new Error("Failed to send invitation");
     }
 
-    revalidatePath("/applicants");
     return { success: true };
   } catch (err) {
     throw toActionError(err);

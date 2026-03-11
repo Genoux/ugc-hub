@@ -11,12 +11,12 @@ export const STEPS: Record<number, { name: string; header: string; body: string 
   },
   3: {
     name: "Niche",
-    header: "Your niche",
+    header: "Your niches",
     body: "Select the niches that best describe your content universe.",
   },
   4: {
     name: "Style",
-    header: "Your style",
+    header: "Your content types",
     body: "Select every format you're comfortable with. Brands look for creators who can execute multiple styles.",
   },
   5: {

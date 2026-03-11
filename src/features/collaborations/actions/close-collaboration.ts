@@ -1,8 +1,8 @@
 "use server";
 
 import { eq } from "drizzle-orm";
-import { revalidatePath } from "next/cache";
 import { collaborations, creators } from "@/db/schema";
+import { notifySlack } from "@/integrations/slack/notify-slack";
 import { toActionError } from "@/shared/lib/action-error";
 import { requireAdmin } from "@/shared/lib/auth";
 import { db } from "@/shared/lib/db";
@@ -33,8 +33,24 @@ export async function closeCollaboration(input: CloseCollaborationInput) {
       .set({ overallRating: data.overallRating })
       .where(eq(creators.id, data.creatorId));
 
-    revalidatePath("/projects/[id]/creators/[collaborationId]", "page");
-    revalidatePath("/database");
+    const collab = await db.query.collaborations.findFirst({
+      where: eq(collaborations.id, data.collaborationId),
+      with: {
+        project: { columns: { name: true } },
+        creator: { columns: { fullName: true } },
+      },
+    });
+
+    if (collab) {
+      void notifySlack({
+        type: "admin_closed_collab",
+        collabId: data.collaborationId,
+        creatorName: collab.creator.fullName ?? "Unknown",
+        projectName: collab.project.name,
+        piecesOfContent: data.piecesOfContent,
+        totalPaidCents: Math.round(data.totalPaid * 100),
+      }).catch(console.error);
+    }
   } catch (err) {
     throw toActionError(err);
   }

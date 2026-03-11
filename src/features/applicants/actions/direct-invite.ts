@@ -1,13 +1,12 @@
 "use server";
 
 import { eq } from "drizzle-orm";
-import { revalidatePath } from "next/cache";
 import { creators } from "@/db/schema";
 import { toActionError } from "@/shared/lib/action-error";
+import { getAppUrl } from "@/shared/lib/app-url";
 import { requireAdmin } from "@/shared/lib/auth";
 import { sendInvitation } from "@/shared/lib/clerk";
 import { db } from "@/shared/lib/db";
-import { env } from "@/shared/lib/env";
 import { ROUTES } from "@/shared/lib/routes";
 import { directInviteSchema } from "../schemas";
 
@@ -31,6 +30,7 @@ export async function directInvite(input: { email: string }) {
       .values({
         email: validated.email,
         fullName: "",
+        country: "Unknown",
         status: "approved_not_joined",
         source: "direct_invite",
         approvedAt: new Date(),
@@ -44,7 +44,7 @@ export async function directInvite(input: { email: string }) {
 
     let result: Awaited<ReturnType<typeof sendInvitation>>;
     try {
-      result = await sendInvitation(validated.email, `${env.NEXT_PUBLIC_APP_URL}${ROUTES.signUp}`, {
+      result = await sendInvitation(validated.email, `${await getAppUrl()}${ROUTES.signUp}`, {
         role: "creator",
         creatorId: newCreator.id,
       });
@@ -58,7 +58,6 @@ export async function directInvite(input: { email: string }) {
       return { success: false, error: "already_invited_or_exists" as const };
     }
 
-    revalidatePath("/applicants");
     return { success: true };
   } catch (err) {
     throw toActionError(err);

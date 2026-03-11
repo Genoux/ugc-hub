@@ -15,7 +15,6 @@ import {
   AlertDialogTitle,
 } from "@/shared/components/ui/alert-dialog";
 import { Button } from "@/shared/components/ui/button";
-import { ProgressDots } from "@/shared/components/wizard/progress-dots";
 import {
   Wizard,
   WizardAside,
@@ -29,8 +28,8 @@ import {
 import { WizardComplete } from "@/shared/components/wizard/wizard-complete";
 import { WizardLoading } from "@/shared/components/wizard/wizard-loading";
 import { useSteppedFlow } from "@/shared/hooks/use-stepped-flow";
-import type { CollabRatingRow } from "../lib/calculate-ratings";
-import { calculateCreatorRating } from "../lib/calculate-ratings";
+import type { CollabRatingRow } from "../../../shared/lib/calculate-ratings";
+import { calculateCreatorRating } from "../../../shared/lib/calculate-ratings";
 import { closeCollaboration } from "../actions/close-collaboration";
 import { CLOSE_WIZARD_STEPS } from "../lib/close-wizard-constants";
 import { canProceed } from "../lib/close-wizard-utils";
@@ -52,6 +51,7 @@ interface CloseCollaborationWizardProps {
   creatorId: string;
   creatorName: string;
   profilePhotoUrl: string;
+  profilePhotoBlurDataUrl?: string | null;
   submissionName: string;
   closedCollabRatings: CollabRatingRow[];
 }
@@ -63,6 +63,7 @@ export function CloseCollaborationWizard({
   creatorId,
   creatorName,
   profilePhotoUrl,
+  profilePhotoBlurDataUrl,
   submissionName,
   closedCollabRatings,
 }: CloseCollaborationWizardProps) {
@@ -84,7 +85,7 @@ export function CloseCollaborationWizard({
 
   const stepCanProceed = canProceed(step, ratings, piecesOfContent, totalPaid, portfolioFiles);
 
-  const filledSteps = new Set(
+  const _filledSteps = new Set(
     Object.keys(CLOSE_WIZARD_STEPS)
       .map(Number)
       .filter(
@@ -329,6 +330,7 @@ export function CloseCollaborationWizard({
               {step === 4 && (
                 <StepCloseConfirm
                   profilePhotoUrl={profilePhotoUrl}
+                  profilePhotoBlurDataUrl={profilePhotoBlurDataUrl}
                   creatorName={creatorName}
                   submissionName={submissionName}
                   ratings={ratings as CollaborationRatingsInput}
@@ -348,10 +350,11 @@ export function CloseCollaborationWizard({
               )}
               {step === COMPLETE_STEP && (
                 <WizardComplete
+                  className="flex justify-center items-center"
                   title="Collaboration closed"
                   description="Ratings and rates have been recorded. The folder is now locked."
                 >
-                  <Button type="button" onClick={handleDone}>
+                  <Button className="w-fit" type="button" onClick={handleDone}>
                     Done
                   </Button>
                 </WizardComplete>
@@ -398,7 +401,15 @@ export function CloseCollaborationWizard({
         <WizardAside stepKey="creator" direction={1} visible={!isResultStep}>
           <div className="relative flex h-full flex-col items-center justify-center gap-4 overflow-hidden p-8">
             <div className="absolute inset-0 backdrop-blur-md z-10" />
-            <Image src={profilePhotoUrl} alt="" fill unoptimized className="object-cover" />
+            <Image
+              src={profilePhotoUrl}
+              alt=""
+              fill
+              unoptimized
+              placeholder={profilePhotoBlurDataUrl ? "blur" : "empty"}
+              blurDataURL={profilePhotoBlurDataUrl ?? undefined}
+              className="object-cover"
+            />
             <div className="relative z-10 flex flex-col items-center gap-4">
               <Image
                 src={profilePhotoUrl}
@@ -406,6 +417,8 @@ export function CloseCollaborationWizard({
                 width={80}
                 height={80}
                 unoptimized
+                placeholder={profilePhotoBlurDataUrl ? "blur" : "empty"}
+                blurDataURL={profilePhotoBlurDataUrl ?? undefined}
                 className="size-40 rounded-full object-cover shadow-hub"
               />
               <div className="text-center">

@@ -5,12 +5,12 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import type { CreatorProfile } from "@/features/creators/actions/portal/get-creator-profile";
 import type { CreatorSubmissions } from "@/features/creators/actions/portal/get-creator-submissions";
-import type { CreatorUIState } from "@/features/creators/lib/get-creator-ui-state";
 import { useCreatorPortal } from "./creator-portal-context";
-import { OnboardingShell } from "./onboarding";
+import { OnboardingShell } from "./onboarding/onboarding-shell";
+import { ProfileStateBanner } from "./profile-state-banner";
 import { CollaborationTab } from "./tabs/collaborations/collaboration-tab";
 import { CreatorProfileTab } from "./tabs/profile/profile-tab";
-import { ResetProfileButton } from "./tools/reset-profile-button";
+export type CreatorUIState = "pending_approval" | "pending_profile" | "live" | "declined";
 
 interface CreatorPortalShellProps {
   creator: CreatorProfile;
@@ -34,14 +34,17 @@ export function CreatorPortalShell({ creator, uiState, content }: CreatorPortalS
   };
 
   return (
-    <div className="flex min-h-full flex-col pb-40 pt-6 px-6">
+    <div className="flex min-h-full flex-col pb-32 pt-6 px-6">
       <div className="mx-auto w-full max-w-5xl flex flex-col min-h-full">
         {activeTab === "profile" && (
-          <CreatorProfileTab
-            creator={creator}
-            uiState={uiState}
-            onOpenOnboarding={() => setOnboardingOpen(true)}
-          />
+          <div className="space-y-6">
+            <ProfileStateBanner uiState={uiState} />
+            <CreatorProfileTab
+              creator={creator}
+              uiState={uiState}
+              onOpenOnboarding={() => setOnboardingOpen(true)}
+            />
+          </div>
         )}
         {activeTab === "content" && <CollaborationTab content={content} />}
       </div>
@@ -55,7 +58,6 @@ export function CreatorPortalShell({ creator, uiState, content }: CreatorPortalS
           />
         )}
       </AnimatePresence>
-      <ResetProfileButton />
       <div
         className="z-0 pointer-events-none absolute inset-x-0 bottom-0 h-16 backdrop-blur-lg mask-[linear-gradient(to_top,black,transparent)]"
         aria-hidden

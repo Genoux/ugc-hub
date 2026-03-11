@@ -1,5 +1,5 @@
 import { Ban, Hourglass, type LucideIcon, Sticker } from "lucide-react";
-import type { CreatorUIState } from "@/features/creators/lib/get-creator-ui-state";
+import type { CreatorUIState } from "@/features/creators/components/portal/creator-portal-shell";
 import { Button } from "@/shared/components/ui/button";
 import {
   Empty,
@@ -88,7 +88,7 @@ export function ProfileEmptyState({
       {uiState !== "declined" ? <ProfileSkeleton /> : null}
 
       <div className="fixed top-[calc(3.5rem+1px)] inset-x-0 bottom-0 flex items-center justify-center backdrop-blur-sm bg-black/2 m-4 rounded-lg">
-        <Empty>
+        <Empty className="bg-transparent border-none">
           <EmptyHeader>
             <EmptyMedia variant="icon">
               <Icon size={16} />

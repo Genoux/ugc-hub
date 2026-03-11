@@ -2,7 +2,7 @@
 
 import { AnimatePresence, motion } from "motion/react";
 import type { ReactNode } from "react";
-import { EASING_FUNCTION } from "@/shared/lib/constant";
+import { EASING_FUNCTION } from "@/shared/lib/constants";
 import { cn } from "@/shared/lib/utils";
 
 const SLIDE_OFFSET = 12;
@@ -22,7 +22,7 @@ export function Wizard({ variant, children, className }: WizardProps) {
     return (
       <motion.div
         className={cn(
-          "fixed inset-0 flex min-h-[max(775px,100vh)] flex-col overflow-auto z-50 min-w-[368px]",
+          "fixed inset-0 flex min-h-[max(600px,100vh)] flex-col overflow-auto z-50 min-w-[368px]",
           className,
         )}
         initial={{ opacity: 0, y: 250 }}
@@ -68,7 +68,7 @@ export function WizardPanel({ isPending = false, children, className }: WizardPa
       <div className="relative flex h-full w-full flex-col">
         <div
           className={cn(
-            "flex min-h-0 flex-1 flex-col transition-opacity duration-200",
+            "flex min-h-0 flex-1 flex-col justify-center transition-opacity duration-200",
             isPending && "opacity-40 pointer-events-none select-none",
           )}
         >
@@ -88,7 +88,7 @@ type WizardHeaderProps = {
 
 export function WizardHeader({ children, className }: WizardHeaderProps) {
   return (
-    <div className={cn("flex shrink-0 items-center justify-between w-full p-4", className)}>
+    <div className={cn("flex shrink-0 items-center justify-between w-full px-8 pt-8", className)}>
       {children}
     </div>
   );
@@ -105,7 +105,7 @@ type WizardStepProps = {
 
 export function WizardStep({ stepKey, direction, children, className }: WizardStepProps) {
   return (
-    <div className="flex flex-col min-h-0 flex-1 w-full max-w-xl mx-auto overflow-y-auto px-6">
+    <div className="flex flex-col w-full max-w-xl mx-auto overflow-y-auto px-6 flex-1 min-h-0">
       <AnimatePresence mode="wait" initial={false}>
         <motion.div
           key={stepKey}
@@ -115,7 +115,7 @@ export function WizardStep({ stepKey, direction, children, className }: WizardSt
           transition={{ duration: 0.3, ease: EASING_FUNCTION.exponential }}
           className={cn("mx-auto flex min-h-full w-full max-w-3xl flex-col", className)}
         >
-          <div className="flex flex-1 flex-col justify-center gap-4">{children}</div>
+          <div className="flex flex-1 flex-col justify-center gap-6">{children}</div>
         </motion.div>
       </AnimatePresence>
     </div>

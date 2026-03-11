@@ -4,14 +4,15 @@ import { eq } from "drizzle-orm";
 import { creators } from "@/db/schema";
 import type {
   CollaborationHighlight,
-  PortfolioVideoEntry,
   PortfolioVideo,
-} from "@/features/creators/constants";
-import { creatorSchema, type Creator } from "@/features/creators/schemas";
+  PortfolioVideoEntry,
+} from "@/entities/creator/types";
+import { type Creator, creatorSchema } from "@/features/creators/schemas";
 import { toMediaUrl } from "@/features/uploads/lib/r2-media-url";
+import { requireAdmin } from "@/shared/lib/auth";
 import type { ClerkUserProfile } from "@/shared/lib/clerk";
 import { getClerkUserProfile } from "@/shared/lib/clerk";
-import { requireAdmin } from "@/shared/lib/auth";
+import type { DbCreatorStatus } from "@/shared/lib/constants";
 import { db } from "@/shared/lib/db";
 
 type SubmissionAsset = { id: string; filename: string; mimeType: string; url: string };
@@ -23,7 +24,10 @@ type CollabSubmission = {
   assets: SubmissionAsset[];
 };
 
-type CreatorProfileBase = Omit<Creator, "status" | "blacklistReason" | "blacklistedAt" | "blacklistedBy"> & {
+type CreatorProfileBase = Omit<
+  Creator,
+  "status" | "blacklistReason" | "blacklistedAt" | "blacklistedBy"
+> & {
   profilePhotoUrl: string | null;
   portfolioVideos: PortfolioVideo[];
   closedCollaborations: {
@@ -51,7 +55,7 @@ export type CreatorProfile =
       blacklistedByProfile: ClerkUserProfile;
     })
   | (CreatorProfileBase & {
-      status: Exclude<Creator["status"], "blacklisted">;
+      status: Exclude<DbCreatorStatus, "blacklisted">;
       blacklistReason: string | null;
       blacklistedAt: Date | null;
       blacklistedBy: string | null;
@@ -100,7 +104,7 @@ export async function getCreatorProfile(creatorId: string): Promise<CreatorProfi
 
   const creator = creatorSchema.parse(row);
 
-  const profilePhotoUrl = toMediaUrl(row.profilePhoto);
+  const profilePhotoUrl = toMediaUrl(row.profilePhoto, row.profileCompletedAt);
 
   const portfolioVideos = ((row.portfolioVideos ?? []) as PortfolioVideoEntry[]).map((v) => ({
     id: v.id,
@@ -148,5 +152,11 @@ export async function getCreatorProfile(creatorId: string): Promise<CreatorProfi
     : null;
 
   // Cast is safe: the DB enforces that blacklistReason/blacklistedBy are non-null when status === "blacklisted"
-  return { ...creator, profilePhotoUrl, blacklistedByProfile, portfolioVideos, closedCollaborations } as CreatorProfile;
+  return {
+    ...creator,
+    profilePhotoUrl,
+    blacklistedByProfile,
+    portfolioVideos,
+    closedCollaborations,
+  } as CreatorProfile;
 }

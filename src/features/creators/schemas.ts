@@ -6,12 +6,12 @@ import {
   OVERALL_RATING_TIERS,
   PRIMARY_CHANNELS,
   UGC_CATEGORIES,
-} from "./constants";
+} from "@/shared/lib/constants";
 
 export const socialChannelsSchema = z.object({
-  instagram_handle: z.string().optional(),
-  tiktok_handle: z.string().optional(),
-  youtube_handle: z.string().optional(),
+  instagram_url: z.url().optional(),
+  tiktok_url: z.url().optional(),
+  youtube_url: z.url().optional(),
   portfolio_url: z.string().optional(),
 });
 
@@ -25,12 +25,13 @@ export const creatorSchema = z.object({
   fullName: z.string(),
   email: z.string().email(),
   profilePhoto: z.string().nullable(),
+  profilePhotoBlurDataUrl: z.string().nullable(),
   country: z.string().nullable(),
   // z.string() intentionally — enum validation belongs at the input layer (server action),
   // not when reading back from the DB where old values may exist.
   genderIdentity: z.string().nullable(),
   ageDemographic: z.string().nullable(),
-  ethnicity: z.string().nullable(),
+  ethnicity: z.array(z.string()).nullable(),
   languages: z.array(z.enum(LANGUAGES)).nullable(),
   portfolioUrl: z.string().nullable(),
   primaryChannel: z.enum(PRIMARY_CHANNELS).nullable(),

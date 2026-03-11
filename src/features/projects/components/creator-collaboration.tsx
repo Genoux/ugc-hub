@@ -1,16 +1,16 @@
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
 import { CheckCircle2 } from "lucide-react";
 import { AnimatePresence } from "motion/react";
 import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
+import type { CollaborationDetail } from "@/entities/collaboration/types";
 import { CloseCollaborationWizard } from "@/features/collaborations/components/close-collaboration-wizard";
-import { CreatorProfileSheet } from "@/features/creators/components/admin/creator-profile-sheet";
-import type { CollaborationDetail } from "@/features/projects/actions/get-collaboration-detail";
-import { DownloadButton } from "@/features/projects/components/download-button";
 import { SubmissionSection } from "@/features/projects/components/submission-section";
 import { AssetCard } from "@/shared/components/blocks/asset-card";
+import { DownloadButton } from "@/shared/components/blocks/download-button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/ui/avatar";
 import {
   Breadcrumb,
@@ -21,15 +21,26 @@ import {
   BreadcrumbSeparator,
 } from "@/shared/components/ui/breadcrumb";
 import { Button } from "@/shared/components/ui/button";
+import { platformQueryKeys } from "@/shared/lib/platform-query-keys";
+import { ROUTES } from "@/shared/lib/routes";
 
 interface CreatorCollaborationProps {
   collaboration: CollaborationDetail;
 }
 
 export function CreatorCollaboration({ collaboration }: CreatorCollaborationProps) {
+  const queryClient = useQueryClient();
   const { id, status, project, creator, submissions } = collaboration;
   const [isClosed, setIsClosed] = useState(status === "closed");
   const [showCloseWizard, setShowCloseWizard] = useState(false);
+
+  function handleCloseSuccess() {
+    setIsClosed(true);
+    queryClient.invalidateQueries({
+      queryKey: platformQueryKeys.collaborationDetail(project.id, id),
+    });
+    queryClient.invalidateQueries({ queryKey: platformQueryKeys.database });
+  }
 
   const allAssets = submissions.flatMap((s) =>
     s.assets.map((a) => ({ id: a.id, filename: a.filename, url: a.url })),
@@ -86,9 +97,9 @@ export function CreatorCollaboration({ collaboration }: CreatorCollaborationProp
               <AvatarFallback className="text-base">{creator.fullName[0]}</AvatarFallback>
             </Avatar>
             <div>
-              <CreatorProfileSheet creatorId={creator.id} creatorName={creator.fullName}>
+              <Link href={ROUTES.creatorProfile(creator.id)}>
                 <h1 className="hover:underline text-2xl font-semibold">{creator.fullName}</h1>
-              </CreatorProfileSheet>
+              </Link>
 
               <p className="text-sm text-muted-foreground">{creator.email}</p>
             </div>
@@ -140,11 +151,12 @@ export function CreatorCollaboration({ collaboration }: CreatorCollaborationProp
         {showCloseWizard && (
           <CloseCollaborationWizard
             onClose={() => setShowCloseWizard(false)}
-            onSuccess={() => setIsClosed(true)}
+            onSuccess={handleCloseSuccess}
             collaborationId={id}
             creatorId={creator.id}
             creatorName={creator.fullName}
             profilePhotoUrl={creator.profilePhotoUrl ?? ""}
+            profilePhotoBlurDataUrl={creator.profilePhotoBlurDataUrl}
             submissionName={project.name}
             closedCollabRatings={creator.closedCollabRatings}
           />

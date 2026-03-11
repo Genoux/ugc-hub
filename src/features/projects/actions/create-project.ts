@@ -1,7 +1,6 @@
 "use server";
 
 import { randomBytes } from "node:crypto";
-import { revalidatePath } from "next/cache";
 import type { z } from "zod";
 import { projects } from "@/db/schema";
 import { toActionError } from "@/shared/lib/action-error";
@@ -32,7 +31,6 @@ export async function createProject(input: z.infer<typeof projectSchema>) {
       })
       .returning();
 
-    revalidatePath("/projects");
     return project;
   } catch (err) {
     throw toActionError(err);

@@ -4,9 +4,9 @@ import { eq } from "drizzle-orm";
 import { creators } from "@/db/schema";
 import type {
   CollaborationHighlight,
-  PortfolioVideoEntry,
   PortfolioVideo,
-} from "@/features/creators/constants";
+  PortfolioVideoEntry,
+} from "@/entities/creator/types";
 import { requireCreator } from "@/features/creators/lib/require-creator";
 import { creatorSchema } from "@/features/creators/schemas";
 import { toMediaUrl } from "@/features/uploads/lib/r2-media-url";
@@ -42,7 +42,7 @@ export async function getCreatorProfile(): Promise<CreatorProfile> {
 
   const creator = creatorSchema.parse(row);
 
-  const profilePhotoUrl = toMediaUrl(row.profilePhoto);
+  const profilePhotoUrl = toMediaUrl(row.profilePhoto, row.profileCompletedAt);
 
   const portfolioVideos = ((row.portfolioVideos ?? []) as PortfolioVideoEntry[]).map((v) => ({
     id: v.id,

@@ -22,23 +22,24 @@ export const creators = pgTable("creators", {
   // Basic info (Steps 1-2)
   fullName: text("full_name").notNull(),
   email: text("email").notNull().unique(),
-  country: text("country"),
+  country: text("country").notNull(),
   languages: jsonb("languages").$type<string[]>(),
   portfolioUrl: text("portfolio_url"),
 
   // Social channels
   socialChannels: jsonb("social_channels").$type<{
-    instagram_handle?: string;
-    tiktok_handle?: string;
-    youtube_handle?: string;
+    instagram_url?: string;
+    tiktok_url?: string;
+    youtube_url?: string;
     other_links?: string[];
   }>(),
 
   // Full profile (Steps 3-9)
   profilePhoto: text("profile_photo"),
+  profilePhotoBlurDataUrl: text("profile_photo_blur_data_url"),
   genderIdentity: text("gender_identity"),
   ageDemographic: text("age_demographic"),
-  ethnicity: text("ethnicity"),
+  ethnicity: text("ethnicity").array(),
   primaryChannel: text("primary_channel"), // "Instagram" | "TikTok" | "YouTube"
 
   // Content specialization

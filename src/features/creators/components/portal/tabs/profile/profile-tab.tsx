@@ -1,7 +1,7 @@
 import Image from "next/image";
 import type { CreatorProfile } from "@/features/creators/actions/portal/get-creator-profile";
-import type { CreatorUIState } from "@/features/creators/lib/get-creator-ui-state";
 import { LabeledField } from "@/features/creators/components/labeled-field";
+import type { CreatorUIState } from "@/features/creators/components/portal/creator-portal-shell";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import { ProfileEmptyState } from "./profile-empty-state";
@@ -27,24 +27,24 @@ export function CreatorProfileTab({ creator, uiState, onOpenOnboarding }: Creato
 
   const socials = creator.socialChannels;
   const socialLinks = [
-    socials?.instagram_handle && {
+    socials?.instagram_url && {
       label: "Instagram",
-      handle: `@${socials.instagram_handle}`,
+      handle: socials.instagram_url.replace("https://", ""),
     },
-    socials?.tiktok_handle && {
+    socials?.tiktok_url && {
       label: "TikTok",
-      handle: `@${socials.tiktok_handle}`,
+      handle: socials.tiktok_url.replace("https://", ""),
     },
-    socials?.youtube_handle && {
+    socials?.youtube_url && {
       label: "YouTube",
-      handle: `@${socials.youtube_handle}`,
+      handle: socials.youtube_url.replace("https://", ""),
     },
   ].filter(Boolean) as { label: string; handle: string }[];
 
   const profilePhotoUrl = creator.profilePhotoUrl ?? "";
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 lg:pt-10 gap-6 lg:gap-10 max-w-xl lg:max-w-none w-full mx-auto">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 max-w-xl lg:max-w-none w-full mx-auto">
       <div className="flex flex-col lg:col-span-4 w-full lg:sticky top-6 self-start gap-6 lg:gap-2">
         <div className="relative w-full h-56 lg:h-auto aspect-square lg:max-w-none lg:mx-0 rounded-4xl lg:rounded-sm shadow-hub bg-muted overflow-hidden">
           <Image
@@ -70,7 +70,7 @@ export function CreatorProfileTab({ creator, uiState, onOpenOnboarding }: Creato
           <LabeledField label="Gender" value={creator.genderIdentity} />
           <LabeledField label="Languages" value={creator.languages?.join(", ")} />
           <LabeledField label="Age group" value={creator.ageDemographic} />
-          <LabeledField label="Ethnicity" value={creator.ethnicity} />
+          <LabeledField label="Ethnicity" value={creator.ethnicity?.join(", ")} />
           <hr />
           <ProfileSocials
             links={[...socialLinks, { label: "Portfolio", handle: creator.portfolioUrl ?? "" }]}

@@ -1,11 +1,9 @@
 "use client";
 
-import { RATING_TIERS } from "@/features/creators/constants";
-import { Button } from "@/shared/components/ui/button";
-import { Field, FieldDescription, FieldLabel } from "@/shared/components/ui/field";
+import { TogglePills } from "@/shared/components/blocks/toggle-pills";
 import { Label } from "@/shared/components/ui/label";
 import { Textarea } from "@/shared/components/ui/textarea";
-import { cn } from "@/shared/lib/utils";
+import { RATING_TIERS } from "@/shared/lib/constants";
 import type { CollaborationRatingsInput } from "../../schemas";
 
 const DIMENSIONS: { key: keyof CollaborationRatingsInput; label: string; description: string }[] = [
@@ -42,26 +40,11 @@ export function StepRatings({ ratings, notes, onChange, onNotesChange }: StepRat
             <p className="text-sm font-medium">{label}</p>
             <p className="text-xs text-muted-foreground">{description}</p>
           </div>
-          <div className="flex flex-wrap gap-1.5">
-            {RATING_TIERS.map((tier) => {
-              const isSelected = ratings[key] === tier;
-              return (
-                <Button
-                  key={tier}
-                  onClick={() => onChange({ ...ratings, [key]: tier })}
-                  variant={isSelected ? "default" : "outline"}
-                  className={cn(
-                    "text-sm capitalize border border-transparent",
-                    isSelected
-                      ? "border-foreground bg-foreground text-background"
-                      : "border-border text-muted-foreground",
-                  )}
-                >
-                  {tier}
-                </Button>
-              );
-            })}
-          </div>
+          <TogglePills
+            options={RATING_TIERS}
+            selected={ratings[key] ? [ratings[key] as string] : []}
+            onToggle={(tier) => onChange({ ...ratings, [key]: tier })}
+          />
         </div>
       ))}
       <hr />

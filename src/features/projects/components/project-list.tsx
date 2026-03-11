@@ -14,10 +14,9 @@ import {
   useReactTable,
   type VisibilityState,
 } from "@tanstack/react-table";
-import { Download, MoreVertical, Plus } from "lucide-react";
+import { PlusIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { toast } from "sonner";
 import { Button } from "@/shared/components/ui/button";
 import {
   Dialog,
@@ -26,12 +25,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/shared/components/ui/dialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/shared/components/ui/dropdown-menu";
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@/shared/components/ui/empty";
 import {
   Table,
@@ -42,8 +35,6 @@ import {
   TableRow,
 } from "@/shared/components/ui/table";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/shared/components/ui/tooltip";
-import { getAssets } from "../actions/get-assets";
-import { downloadAssets } from "../lib/download-assets";
 import { ProjectForm } from "./project-form";
 
 type Project = {
@@ -132,7 +123,7 @@ export function ProjectList({ projects }: { projects: Project[] }) {
             <TooltipTrigger asChild>
               <DialogTrigger asChild>
                 <Button className="cursor-pointer" variant="outline" size="sm">
-                  <Plus />
+                  <PlusIcon />
                   <span className="hidden lg:inline">New Project</span>
                 </Button>
               </DialogTrigger>
@@ -189,7 +180,7 @@ export function ProjectList({ projects }: { projects: Project[] }) {
             <EmptyDescription>Create a project folder to collect creator content</EmptyDescription>
           </EmptyHeader>
           <Button onClick={() => setIsDialogOpen(true)} size="sm" variant="outline">
-            <Plus className="size-4" />
+            <PlusIcon className="size-4" />
             New Project
           </Button>
         </Empty>

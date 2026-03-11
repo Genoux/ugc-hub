@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { OVERALL_RATING_TIERS, RATING_TIERS } from "@/features/creators/constants";
+import { OVERALL_RATING_TIERS, RATING_TIERS } from "@/shared/lib/constants";
 
 export const collaborationRatingsSchema = z.object({
   visual_quality: z.enum(RATING_TIERS),

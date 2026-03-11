@@ -2,6 +2,7 @@
 
 import { CheckIcon, X } from "lucide-react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useRef, useState, useTransition } from "react";
 import { completeCreatorProfile } from "@/features/creators/actions/portal/complete-creator-profile";
 import {
@@ -24,6 +25,7 @@ import {
   AlertDialogTitle,
 } from "@/shared/components/ui/alert-dialog";
 import { Button } from "@/shared/components/ui/button";
+import { ProgressDots } from "@/shared/components/wizard/progress-dots";
 import {
   Wizard,
   WizardAside,
@@ -34,9 +36,8 @@ import {
   WizardStep,
   WizardTitle,
 } from "@/shared/components/wizard/wizard";
-import { ProgressDots } from "@/shared/components/wizard/progress-dots";
 import { useSteppedFlow } from "@/shared/hooks/use-stepped-flow";
-import { cn } from "@/shared/lib/utils";
+import type { AgeDemographic, Ethnicity, GenderIdentity } from "@/shared/lib/constants";
 import { STEPS } from "./onboarding-constants";
 import type { OnboardingData, OnboardingProps } from "./onboarding-types";
 import { StepAboutYou } from "./steps/step-about-you";
@@ -116,6 +117,7 @@ function StepContent({
 }
 
 export function OnboardingShell({ creator, onComplete, onClose }: OnboardingProps) {
+  const router = useRouter();
   const { step, goToStep, directionRef } = useSteppedFlow(TOTAL_STEPS);
   const [data, setData] = useState<OnboardingData>(() => buildOnboardingData(creator));
   const [isPending, startTransition] = useTransition();
@@ -202,24 +204,25 @@ export function OnboardingShell({ creator, onComplete, onClose }: OnboardingProp
     country: data.country,
     languages: data.languages,
     socialChannels: {
-      instagram_handle: data.instagramHandle || undefined,
-      tiktok_handle: data.tiktokHandle || undefined,
-      youtube_handle: data.youtubeHandle || undefined,
+      instagram_url: data.instagramUrl || undefined,
+      tiktok_url: data.tiktokUrl || undefined,
+      youtube_url: data.youtubeUrl || undefined,
     },
     portfolioUrl: data.portfolioUrl || undefined,
     ugcCategories: data.ugcCategories,
     contentFormats: data.contentFormats,
     profilePhoto: data.profilePhoto,
     rateRangeSelf: data.rateRangeSelf ?? undefined,
-    genderIdentity: data.genderIdentity || undefined,
-    ageDemographic: data.ageDemographic || undefined,
-    ethnicity: data.ethnicity || undefined,
+    genderIdentity: data.genderIdentity as GenderIdentity,
+    ageDemographic: data.ageDemographic as AgeDemographic,
+    ethnicities: data.ethnicities as Ethnicity[],
   });
 
   const handleSaveAndClose = () => {
     startTransition(async () => {
       try {
         await completeCreatorProfile(buildProfilePayload());
+        router.refresh();
         onClose();
       } catch (err) {
         setSubmitError(err instanceof Error ? err.message : "Something went wrong");
@@ -233,6 +236,7 @@ export function OnboardingShell({ creator, onComplete, onClose }: OnboardingProp
       setSubmitError(null);
       try {
         await completeCreatorProfile(buildProfilePayload());
+        router.refresh();
         if (creator.profileCompleted) {
           onClose();
         } else {
@@ -270,10 +274,9 @@ export function OnboardingShell({ creator, onComplete, onClose }: OnboardingProp
           <WizardHeader>
             <Button
               type="button"
-              variant="ghost"
+              variant="outline"
               size="icon"
               onClick={handleRequestClose}
-              className="text-muted-foreground hover:text-foreground"
               aria-label="Close"
             >
               <X className="size-5" />
@@ -281,7 +284,7 @@ export function OnboardingShell({ creator, onComplete, onClose }: OnboardingProp
             {creator.profileCompleted && !isResultStep ? (
               <Button
                 type="button"
-                variant="ghost"
+                variant="default"
                 size="icon"
                 onClick={handleSaveAndClose}
                 disabled={
@@ -290,7 +293,6 @@ export function OnboardingShell({ creator, onComplete, onClose }: OnboardingProp
                   (step === 5 && photoManager.isUploading) ||
                   (step === 6 && videoManager.isUploading)
                 }
-                className="text-muted-foreground hover:text-foreground"
                 aria-label="Save and close"
               >
                 <CheckIcon className="size-5" />
@@ -300,7 +302,7 @@ export function OnboardingShell({ creator, onComplete, onClose }: OnboardingProp
             )}
           </WizardHeader>
 
-          <div className="flex flex-1 flex-col justify-center gap-4">
+          <div className="flex flex-1 min-h-0 flex-col gap-4">
             <WizardStep stepKey={step} direction={directionRef.current}>
               {!isResultStep && (
                 <div className="flex flex-col gap-2">
@@ -356,7 +358,7 @@ export function OnboardingShell({ creator, onComplete, onClose }: OnboardingProp
             </WizardStep>
 
             {!isResultStep && creator.profileCompleted && (
-              <div className="w-full flex justify-center pb-21">
+              <div className="w-full flex justify-center pb-12">
                 <ProgressDots
                   filledSteps={filledSteps}
                   current={step}

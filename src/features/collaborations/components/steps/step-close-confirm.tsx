@@ -4,8 +4,8 @@ import Image from "next/image";
 import { RatingBadge } from "@/shared/components/blocks/rating-badge";
 import { Label } from "@/shared/components/ui/label";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/shared/components/ui/tooltip";
-import type { CollabRatingRow } from "../../lib/calculate-ratings";
-import { calculateCreatorRating, calculateOverallRating } from "../../lib/calculate-ratings";
+import type { CollabRatingRow } from "@/shared/lib/calculate-ratings";
+import { calculateCreatorRating, calculateOverallRating } from "@/shared/lib/calculate-ratings";
 import type { CollaborationRatingsInput } from "../../schemas";
 import type { PortfolioFile } from "./step-portfolio";
 
@@ -17,6 +17,7 @@ const DIMENSION_LABELS: { key: keyof CollaborationRatingsInput; label: string }[
 
 interface StepCloseConfirmProps {
   profilePhotoUrl: string;
+  profilePhotoBlurDataUrl?: string | null;
   creatorName: string;
   submissionName: string;
   ratings: CollaborationRatingsInput;
@@ -29,6 +30,7 @@ interface StepCloseConfirmProps {
 
 export function StepCloseConfirm({
   profilePhotoUrl,
+  profilePhotoBlurDataUrl,
   creatorName,
   submissionName,
   ratings,
@@ -60,6 +62,8 @@ export function StepCloseConfirm({
           width={40}
           height={40}
           unoptimized
+          placeholder={profilePhotoBlurDataUrl ? "blur" : "empty"}
+          blurDataURL={profilePhotoBlurDataUrl ?? undefined}
           className="size-10 rounded-full object-cover shrink-0"
         />
         <div className="flex-1 min-w-0">

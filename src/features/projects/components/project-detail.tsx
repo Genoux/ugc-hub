@@ -3,9 +3,16 @@
 import { Check, ChevronLeft, ChevronRight, Copy, Folder } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
-import type { ProjectDetail as ProjectDetailType } from "@/features/projects/actions/get-project-detail";
+import type { ProjectDetail as ProjectDetailType } from "@/entities/project/types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/ui/avatar";
 import { Button } from "@/shared/components/ui/button";
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/shared/components/ui/empty";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/shared/components/ui/tooltip";
 
 interface ProjectDetailProps {
@@ -23,7 +30,7 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
   }
 
   return (
-    <div className="flex flex-1 flex-col gap-6 p-8">
+    <div className="flex min-h-0 flex-1 flex-col gap-6 p-8">
       <div className="flex flex-col gap-6">
         <Button variant="outline" size="sm" asChild className="w-fit">
           <Link href="/projects">
@@ -53,20 +60,22 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
         </div>
       </div>
 
-      <div className="flex flex-col gap-3">
-        <p className="text-sm text-muted-foreground">
+      <div className="flex min-h-0 flex-1 flex-col gap-3">
+        <p className="text-sm text-muted-foreground shrink-0">
           {project.collaborations.length} creator{project.collaborations.length !== 1 ? "s" : ""}
         </p>
 
         {project.collaborations.length === 0 ? (
-          <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed py-16 text-center">
-            <Folder className="h-8 w-8 text-muted-foreground/50" />
-            <div>
-              <p className="text-sm font-medium">No uploads yet</p>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                Share the upload link to start receiving content
-              </p>
-            </div>
+          <div className="flex min-h-0 flex-1 flex-col gap-4">
+            <Empty>
+              <EmptyHeader>
+                <EmptyMedia variant="icon">
+                  <Folder className="h-8 w-8 text-muted-foreground/50" />
+                </EmptyMedia>
+              </EmptyHeader>
+              <EmptyTitle>No uploads yet</EmptyTitle>
+              <EmptyDescription>Share the upload link to start receiving content</EmptyDescription>
+            </Empty>
           </div>
         ) : (
           <div className="space-y-2">

@@ -6,12 +6,12 @@ import { db } from "@/shared/lib/db";
 export type ApplicantData = {
   fullName: string;
   email: string;
-  country?: string;
-  languages?: string[];
+  country: string;
+  languages: string[];
   socialChannels?: {
-    instagram_handle?: string;
-    tiktok_handle?: string;
-    youtube_handle?: string;
+    instagram_url?: string;
+    tiktok_url?: string;
+    youtube_url?: string;
     other_links?: string[];
   };
   portfolioUrl?: string;

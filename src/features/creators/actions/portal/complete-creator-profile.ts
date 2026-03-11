@@ -4,9 +4,12 @@ import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { creators } from "@/db/schema";
-import { AGE_DEMOGRAPHICS, ETHNICITIES, GENDER_IDENTITIES } from "@/features/creators/constants";
 import { requireCreator } from "@/features/creators/lib/require-creator";
+import { generateBlurPlaceholder } from "@/features/uploads/lib/generate-blur-placeholder";
+import { getR2SignedUrl } from "@/features/uploads/lib/r2-serve";
+import { notifySlack } from "@/integrations/slack/notify-slack";
 import { toActionError } from "@/shared/lib/action-error";
+import { AGE_DEMOGRAPHICS, ETHNICITIES, GENDER_IDENTITIES } from "@/shared/lib/constants";
 import { db } from "@/shared/lib/db";
 
 const schema = z.object({
@@ -16,9 +19,9 @@ const schema = z.object({
   languages: z.array(z.string()).min(1),
   socialChannels: z
     .object({
-      instagram_handle: z.string().optional(),
-      tiktok_handle: z.string().optional(),
-      youtube_handle: z.string().optional(),
+      instagram_url: z.url().optional(),
+      tiktok_url: z.url().optional(),
+      youtube_url: z.url().optional(),
     })
     .optional(),
   portfolioUrl: z
@@ -35,15 +38,17 @@ const schema = z.object({
   contentFormats: z.array(z.string()).min(1),
   profilePhoto: z.string().min(1),
   rateRangeSelf: z.object({ min: z.number(), max: z.number() }).optional(),
-  genderIdentity: z.enum(GENDER_IDENTITIES).optional(),
-  ageDemographic: z.enum(AGE_DEMOGRAPHICS).optional(),
-  ethnicity: z.enum(ETHNICITIES).optional(),
+  genderIdentity: z.enum(GENDER_IDENTITIES),
+  ageDemographic: z.enum(AGE_DEMOGRAPHICS),
+  ethnicities: z.array(z.enum(ETHNICITIES)).min(1),
 });
 
 export async function completeCreatorProfile(input: z.infer<typeof schema>) {
   try {
     const creator = await requireCreator();
     const validated = schema.parse(input);
+
+    const wasAlreadyCompleted = creator.profileCompleted;
 
     await db
       .update(creators)
@@ -57,15 +62,39 @@ export async function completeCreatorProfile(input: z.infer<typeof schema>) {
         contentFormats: validated.contentFormats,
         profilePhoto: validated.profilePhoto,
         rateRangeSelf: validated.rateRangeSelf ?? null,
-        genderIdentity: validated.genderIdentity ?? null,
-        ageDemographic: validated.ageDemographic ?? null,
-        ethnicity: validated.ethnicity ?? null,
+        genderIdentity: validated.genderIdentity,
+        ageDemographic: validated.ageDemographic,
+        ethnicity: validated.ethnicities,
         profileCompleted: true,
         profileCompletedAt: new Date(),
-        status: "joined",
-        joinedAt: new Date(),
+        ...(!wasAlreadyCompleted && { status: "joined", joinedAt: new Date() }),
       })
       .where(eq(creators.id, creator.id));
+
+    if (!wasAlreadyCompleted) {
+      void getR2SignedUrl(validated.profilePhoto)
+        .then((profileImageUrl) =>
+          notifySlack({
+            type: "creator_profile_complete",
+            creatorId: creator.id,
+            fullName: validated.fullName,
+            email: creator.email ?? undefined,
+            profileImageUrl: profileImageUrl ?? undefined,
+          }),
+        )
+        .catch(console.error);
+    }
+
+    void generateBlurPlaceholder(validated.profilePhoto)
+      .then((blurDataUrl) =>
+        blurDataUrl
+          ? db
+              .update(creators)
+              .set({ profilePhotoBlurDataUrl: blurDataUrl })
+              .where(eq(creators.id, creator.id))
+          : undefined,
+      )
+      .catch(console.error);
 
     revalidatePath("/creator");
   } catch (err) {

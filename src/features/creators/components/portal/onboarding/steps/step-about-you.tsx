@@ -1,5 +1,28 @@
 "use client";
 
+import { Button } from "@/shared/components/ui/button";
+import {
+  Combobox,
+  ComboboxChip,
+  ComboboxChips,
+  ComboboxChipsInput,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxList,
+  ComboboxTrigger,
+  ComboboxValue,
+  useComboboxAnchor,
+} from "@/shared/components/ui/combobox";
+import { Label } from "@/shared/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/components/ui/select";
 import {
   AGE_DEMOGRAPHICS,
   type AgeDemographic,
@@ -10,16 +33,7 @@ import {
   type GenderIdentity,
   LANGUAGES,
   type Language,
-} from "@/features/creators/constants";
-import { Button } from "@/shared/components/ui/button";
-import { Label } from "@/shared/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/shared/components/ui/select";
+} from "@/shared/lib/constants";
 import type { OnboardingData } from "../onboarding-types";
 
 interface Props {
@@ -28,39 +42,45 @@ interface Props {
 }
 
 export function StepAboutYou({ data, onChange }: Props) {
-  const toggleLanguage = (lang: string) => {
-    const next = data.languages.includes(lang as Language)
-      ? data.languages.filter((l) => l !== lang)
-      : [...data.languages, lang as Language];
-    onChange({ languages: next });
-  };
+  const ethnicityAnchor = useComboboxAnchor();
+  const languageAnchor = useComboboxAnchor();
 
   return (
-    <div className="flex flex-col gap-8">
-      <div className="space-y-1.5">
+    <div className="flex flex-col gap-6">
+      <div className="space-y-2">
         <Label>Shipping country</Label>
         <p className="text-muted-foreground text-xs">
           We ship products to your address for UGC shoots. Make sure your country is correct!
         </p>
-        <Select clearable value={data.country} onValueChange={(v) => onChange({ country: v })}>
-          <SelectTrigger>
-            <SelectValue placeholder="Select country" />
-          </SelectTrigger>
-          <SelectContent>
-            {COUNTRIES.map((c) => (
-              <SelectItem key={c} value={c}>
-                {c}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <Combobox
+          items={COUNTRIES}
+          value={data.country}
+          onValueChange={(v) => onChange({ country: v ?? "" })}
+        >
+          <ComboboxTrigger
+            render={
+              <Button variant="outline" className="min-w-40 justify-between font-normal rounded-md">
+                <ComboboxValue placeholder="Select country" />
+              </Button>
+            }
+          />
+          <ComboboxContent>
+            <ComboboxInput showTrigger={false} placeholder="Search countries..." />
+            <ComboboxEmpty>No countries found.</ComboboxEmpty>
+            <ComboboxList>
+              {(country) => (
+                <ComboboxItem key={country} value={country}>
+                  {country}
+                </ComboboxItem>
+              )}
+            </ComboboxList>
+          </ComboboxContent>
+        </Combobox>
       </div>
 
       <div className="flex gap-4 flex-wrap">
         <div className="space-y-2">
-          <Label>
-            Gender identity <span className="text-muted-foreground text-xs">(optional)</span>
-          </Label>
+          <Label>Gender identity</Label>
           <Select
             clearable
             value={data.genderIdentity}
@@ -80,9 +100,7 @@ export function StepAboutYou({ data, onChange }: Props) {
         </div>
 
         <div className="space-y-2">
-          <Label>
-            Age group <span className="text-muted-foreground text-xs">(optional)</span>
-          </Label>
+          <Label>Age group</Label>
           <Select
             clearable
             value={data.ageDemographic}
@@ -100,57 +118,67 @@ export function StepAboutYou({ data, onChange }: Props) {
             </SelectContent>
           </Select>
         </div>
-
-        <div className="space-y-2">
-          <Label>
-            Ethnicity <span className="text-muted-foreground text-xs">(optional)</span>
-          </Label>
-          <Select
-            clearable
-            value={data.ethnicity}
-            onValueChange={(v) => onChange({ ethnicity: v as Ethnicity | "" })}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select" />
-            </SelectTrigger>
-            <SelectContent>
-              {ETHNICITIES.map((e) => (
-                <SelectItem key={e} value={e}>
-                  {e}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
       </div>
 
-      <div className="space-y-3">
-        <div className="space-y-1.5">
-          <Label>Languages</Label>
-          <p className="text-muted-foreground text-xs">
-            Only select languages where you have no accent or a barely noticeable accent.
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-1.5">
-          {LANGUAGES.map((lang) => {
-            const selected = data.languages.includes(lang);
-            return (
-              <Button
-                key={lang}
-                type="button"
-                variant={selected ? "default" : "outline"}
-                onClick={() => toggleLanguage(lang)}
-                className={`text-sm border border-transparent ${
-                  selected
-                    ? "border-foreground bg-foreground text-background"
-                    : "border-border text-muted-foreground "
-                }`}
-              >
-                {lang}
-              </Button>
-            );
-          })}
-        </div>
+      <div className="space-y-2">
+        <Label>Ethnicity</Label>
+        <Combobox
+          items={ETHNICITIES}
+          multiple
+          value={data.ethnicities}
+          onValueChange={(v) => onChange({ ethnicities: v as Ethnicity[] })}
+        >
+          <ComboboxChips ref={ethnicityAnchor}>
+            <ComboboxValue>
+              {data.ethnicities.map((e) => (
+                <ComboboxChip key={e}>{e}</ComboboxChip>
+              ))}
+            </ComboboxValue>
+            <ComboboxChipsInput placeholder="Search ethnicities..." />
+          </ComboboxChips>
+          <ComboboxContent anchor={ethnicityAnchor}>
+            <ComboboxEmpty>No ethnicities found.</ComboboxEmpty>
+            <ComboboxList>
+              {(e) => (
+                <ComboboxItem key={e} value={e}>
+                  {e}
+                </ComboboxItem>
+              )}
+            </ComboboxList>
+          </ComboboxContent>
+        </Combobox>
+      </div>
+
+      <div className="space-y-2">
+        <Label>Languages</Label>
+        <p className="text-muted-foreground text-xs">
+          Only select languages where you have no accent or a barely noticeable accent.
+        </p>
+        <Combobox
+          items={LANGUAGES}
+          multiple
+          value={data.languages}
+          onValueChange={(v) => onChange({ languages: v as Language[] })}
+        >
+          <ComboboxChips ref={languageAnchor}>
+            <ComboboxValue>
+              {data.languages.map((lang) => (
+                <ComboboxChip key={lang}>{lang}</ComboboxChip>
+              ))}
+            </ComboboxValue>
+            <ComboboxChipsInput placeholder="Search languages..." />
+          </ComboboxChips>
+          <ComboboxContent anchor={languageAnchor}>
+            <ComboboxEmpty>No languages found.</ComboboxEmpty>
+            <ComboboxList>
+              {(lang) => (
+                <ComboboxItem key={lang} value={lang}>
+                  {lang}
+                </ComboboxItem>
+              )}
+            </ComboboxList>
+          </ComboboxContent>
+        </Combobox>
       </div>
     </div>
   );

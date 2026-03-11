@@ -1,12 +1,11 @@
 "use server";
 
 import { and, eq } from "drizzle-orm";
-import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { collaborations, creators } from "@/db/schema";
-import { calculateCreatorRating } from "@/features/collaborations/lib/calculate-ratings";
 import { toActionError } from "@/shared/lib/action-error";
 import { requireAdmin } from "@/shared/lib/auth";
+import { calculateCreatorRating } from "@/shared/lib/calculate-ratings";
 import { db } from "@/shared/lib/db";
 
 const unblacklistCreatorSchema = z.object({
@@ -31,7 +30,9 @@ export async function unblacklistCreator(creatorId: string) {
         ratingReliabilitySpeed: collaborations.ratingReliabilitySpeed,
       })
       .from(collaborations)
-      .where(and(eq(collaborations.creatorId, input.creatorId), eq(collaborations.status, "closed")));
+      .where(
+        and(eq(collaborations.creatorId, input.creatorId), eq(collaborations.status, "closed")),
+      );
 
     const restoredRating = calculateCreatorRating(closedCollabs);
 
@@ -46,7 +47,6 @@ export async function unblacklistCreator(creatorId: string) {
       })
       .where(eq(creators.id, input.creatorId));
 
-    revalidatePath("/database");
     return { success: true };
   } catch (err) {
     throw toActionError(err);

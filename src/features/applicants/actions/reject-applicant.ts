@@ -1,7 +1,6 @@
 "use server";
 
 import { eq } from "drizzle-orm";
-import { revalidatePath } from "next/cache";
 import { creators } from "@/db/schema";
 import { toActionError } from "@/shared/lib/action-error";
 import { requireAdmin } from "@/shared/lib/auth";
@@ -25,7 +24,6 @@ export async function rejectApplicant(creatorId: string) {
       })
       .where(eq(creators.id, input.creatorId));
 
-    revalidatePath("/applicants");
     return { success: true };
   } catch (err) {
     throw toActionError(err);

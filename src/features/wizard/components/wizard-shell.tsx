@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useMultipartUpload } from "@/features/uploads/hooks/use-multipart-upload";
@@ -12,13 +13,14 @@ import {
   WizardStep,
   WizardTitle,
 } from "@/shared/components/wizard/wizard";
-import { useSteppedFlow } from "@/shared/hooks/use-stepped-flow";
 import { WizardComplete } from "@/shared/components/wizard/wizard-complete";
 import { WizardLoading } from "@/shared/components/wizard/wizard-loading";
+import { useSteppedFlow } from "@/shared/hooks/use-stepped-flow";
+import { ROUTES } from "@/shared/lib/routes";
 import { submitWizard } from "../actions/submit-wizard";
+import { WIZARD_STEPS } from "../lib/constants";
 import { StepSubmittingAs } from "./steps/step-submitting-as";
 import { StepUploadAssets } from "./steps/step-upload-assets";
-import { WIZARD_STEPS } from "./wizard-constants";
 
 const CONTENT_STEPS = Object.keys(WIZARD_STEPS).length;
 const LOADING_STEP = CONTENT_STEPS + 1;
@@ -50,7 +52,7 @@ export function WizardShell({
 
   const isLoadingStep = step === LOADING_STEP;
   const isResultStep = step === COMPLETE_STEP;
-
+  const router = useRouter();
   const creatorProps = { creatorName, creatorEmail, creatorImageUrl, projectName };
 
   function handleBack() {
@@ -141,9 +143,13 @@ export function WizardShell({
             />
           )}
           {step === 4 && (
-            <WizardComplete title="Submission complete!" description="Your files have been received.">
-              <Button type="button" asChild>
-                <a href="/creator">Go to my profile</a>
+            <WizardComplete
+              title="Submission complete!"
+              description="Your files have been received."
+              className="flex justify-center items-center"
+            >
+              <Button onClick={() => router.push(ROUTES.creatorHome)} className="w-fit">
+                Go to my profile
               </Button>
             </WizardComplete>
           )}

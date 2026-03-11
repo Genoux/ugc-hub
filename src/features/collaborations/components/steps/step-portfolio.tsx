@@ -18,12 +18,7 @@ interface StepPortfolioProps {
   onFileRemove: (index: number) => void;
 }
 
-export function StepPortfolio({
-  creatorName,
-  files,
-  onFilesAdd,
-  onFileRemove,
-}: StepPortfolioProps) {
+export function StepPortfolio({ files, onFilesAdd, onFileRemove }: StepPortfolioProps) {
   function handleInvalidFiles(rejected: { names: string[]; reason: "type" | "size" }) {
     if (rejected.reason === "type") toast.error("File type not supported");
     else toast.error("File too large (max 500MB)");

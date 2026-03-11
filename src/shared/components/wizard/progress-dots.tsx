@@ -9,13 +9,51 @@ interface ProgressDotsProps {
   steps: Record<number, { name: string }>;
   filledSteps: Set<number>;
   onStepClick: (step: number) => void;
+  variant?: "default" | "dots";
+  className?: string;
 }
 
-export function ProgressDots({ current, steps, filledSteps, onStepClick }: ProgressDotsProps) {
+export function ProgressDots({
+  className,
+  current,
+  steps,
+  filledSteps,
+  onStepClick,
+  variant = "default",
+}: ProgressDotsProps) {
   const stepEntries = Object.entries(steps).map(([key, val]) => ({
     step: Number(key),
     name: val.name,
   }));
+
+  if (variant === "dots") {
+    return (
+      <div
+        className={cn("flex items-center gap-1.5", className)}
+        role="progressbar"
+        aria-valuenow={current}
+        aria-valuemin={1}
+        aria-valuemax={stepEntries.length}
+        aria-label={steps[current]?.name}
+      >
+        {stepEntries.map(({ step }) => {
+          const isCurrent = step === current;
+          const isCompleted = step < current;
+          return (
+            <div
+              key={step}
+              className={cn(
+                "h-1.5 rounded-full transition-all duration-300",
+                isCurrent && "w-4 bg-foreground",
+                isCompleted && "w-1.5 bg-foreground/40",
+                !isCurrent && !isCompleted && "w-1.5 bg-muted-foreground/25",
+              )}
+            />
+          );
+        })}
+      </div>
+    );
+  }
 
   return (
     <div

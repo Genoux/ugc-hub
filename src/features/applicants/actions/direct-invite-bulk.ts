@@ -1,13 +1,12 @@
 "use server";
 
 import { inArray } from "drizzle-orm";
-import { revalidatePath } from "next/cache";
 import { creators } from "@/db/schema";
 import { toActionError } from "@/shared/lib/action-error";
+import { getAppUrl } from "@/shared/lib/app-url";
 import { requireAdmin } from "@/shared/lib/auth";
 import { sendInvitationBulk } from "@/shared/lib/clerk";
 import { db } from "@/shared/lib/db";
-import { env } from "@/shared/lib/env";
 import { ROUTES } from "@/shared/lib/routes";
 import { directInviteBulkSchema } from "../schemas";
 
@@ -45,6 +44,7 @@ export async function directInviteBulk(input: {
         toInvite.map((email) => ({
           email,
           fullName: "",
+          country: "Unknown",
           status: "approved_not_joined" as const,
           source: "direct_invite" as const,
           approvedAt: new Date(),
@@ -57,14 +57,13 @@ export async function directInviteBulk(input: {
 
     let result: Awaited<ReturnType<typeof sendInvitationBulk>>;
     try {
-      result = await sendInvitationBulk(toInvite, `${env.NEXT_PUBLIC_APP_URL}${ROUTES.signUp}`);
+      result = await sendInvitationBulk(toInvite, `${await getAppUrl()}${ROUTES.signUp}`);
     } catch (err) {
       // No invite was sent — roll back to avoid ghost records
       await db.delete(creators).where(inArray(creators.id, insertedIds));
       throw err;
     }
 
-    revalidatePath("/applicants");
     return {
       success: true,
       sent: result.sent,

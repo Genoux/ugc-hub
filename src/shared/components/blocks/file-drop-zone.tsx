@@ -2,7 +2,7 @@
 
 import { Upload } from "lucide-react";
 import { useRef } from "react";
-import { ALLOWED_UPLOAD_MIME_TYPES, DEFAULT_UPLOAD_MAX_FILE_SIZE } from "@/shared/lib/constant";
+import { ALLOWED_UPLOAD_MIME_TYPES, UPLOAD_SIZE_LIMITS } from "@/shared/lib/constants";
 import { cn } from "@/shared/lib/utils";
 
 interface FileDropZoneProps {
@@ -19,7 +19,7 @@ interface FileDropZoneProps {
 export function FileDropZone({
   onFilesAdd,
   accept = ALLOWED_UPLOAD_MIME_TYPES,
-  maxFileSize = DEFAULT_UPLOAD_MAX_FILE_SIZE,
+  maxFileSize = UPLOAD_SIZE_LIMITS.video,
   multiple = true,
   onInvalidFiles,
   className,

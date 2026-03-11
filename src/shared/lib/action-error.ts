@@ -1,3 +1,4 @@
+import * as Sentry from "@sentry/nextjs";
 import { ZodError } from "zod";
 
 // External service errors (Clerk, Stripe, etc.) should be handled in their
@@ -10,7 +11,6 @@ export function toActionError(err: unknown): Error {
 
   if (err instanceof Error) return err;
 
-  // TODO: replace with Sentry.captureException(err) when Sentry is added
-  console.error("[Action] Unexpected error:", err);
+  Sentry.captureException(err);
   return new Error("An unexpected error occurred");
 }

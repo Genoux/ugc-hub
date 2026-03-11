@@ -1,23 +1,19 @@
 "use client";
 
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type React from "react";
-import { useTransition } from "react";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
+import { platformQueryKeys } from "@/shared/lib/platform-query-keys";
 import { createProject } from "../actions/create-project";
 
 export function ProjectForm({ onSuccess }: { onSuccess?: () => void }) {
-  const [isPending, startTransition] = useTransition();
+  const queryClient = useQueryClient();
 
-  function handleSubmit(e: React.SyntheticEvent<HTMLFormElement>) {
-    e.preventDefault();
-
-    const form = e.currentTarget;
-    const formData = new FormData(form);
-
-    startTransition(async () => {
-      await createProject({
+  const { mutate, isPending } = useMutation({
+    mutationFn: (formData: FormData) =>
+      createProject({
         name: formData.get("name") as string,
         description: (formData.get("description") as string) || undefined,
         assetRequirements: {
@@ -25,11 +21,17 @@ export function ProjectForm({ onSuccess }: { onSuccess?: () => void }) {
           maxFiles: 10,
           maxFileSize: 100 * 1024 * 1024,
         },
-      });
-
-      form.reset();
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: platformQueryKeys.projects });
       onSuccess?.();
-    });
+    },
+  });
+
+  function handleSubmit(e: React.SyntheticEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const form = e.currentTarget;
+    mutate(new FormData(form), { onSuccess: () => form.reset() });
   }
 
   return (

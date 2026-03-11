@@ -1,7 +1,8 @@
 "use client";
 
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Mail, UserPlus, Users } from "lucide-react";
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/shared/components/ui/button";
 import {
@@ -16,17 +17,23 @@ import { Label } from "@/shared/components/ui/label";
 import { Tabs, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
 import { Textarea } from "@/shared/components/ui/textarea";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/shared/components/ui/tooltip";
+import { platformQueryKeys } from "@/shared/lib/platform-query-keys";
 import { directInvite } from "../actions/direct-invite";
 import { directInviteBulk } from "../actions/direct-invite-bulk";
 
 type Mode = "single" | "bulk";
 
+const SINGLE_ERROR_MESSAGES = {
+  already_exists: "This email is already in the system — use the applicants page instead.",
+  already_invited_or_exists: "This email already has a Clerk account.",
+} as const;
+
 export function DirectInviteButton() {
+  const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState<Mode>("single");
   const [email, setEmail] = useState("");
   const [bulkText, setBulkText] = useState("");
-  const [isPending, startTransition] = useTransition();
 
   const handleClose = () => {
     setOpen(false);
@@ -35,60 +42,62 @@ export function DirectInviteButton() {
     setMode("single");
   };
 
+  const { mutate: inviteSingle, isPending: isSinglePending } = useMutation({
+    mutationFn: () => directInvite({ email: email.trim() }),
+    onSuccess: (result) => {
+      if (!result.success) {
+        toast.error(
+          (result.error ? SINGLE_ERROR_MESSAGES[result.error] : undefined) ??
+            "Failed to send invitation",
+        );
+        return;
+      }
+      queryClient.invalidateQueries({ queryKey: platformQueryKeys.applicants });
+      toast.success(`Invitation sent to ${email.trim()}`);
+      handleClose();
+    },
+    onError: (err) => toast.error(err.message),
+  });
+
+  const { mutate: inviteBulk, isPending: isBulkPending } = useMutation({
+    mutationFn: () => {
+      const emails = bulkText
+        .split("\n")
+        .map((l) => l.trim())
+        .filter(Boolean);
+      return directInviteBulk({ emails });
+    },
+    onSuccess: (result) => {
+      if (!result.success) {
+        toast.error(result.error);
+        return;
+      }
+      queryClient.invalidateQueries({ queryKey: platformQueryKeys.applicants });
+      const parts = [`${result.sent} invitation${result.sent !== 1 ? "s" : ""} sent`];
+      if (result.skipped > 0) parts.push(`${result.skipped} skipped (already registered)`);
+      toast.success(parts.join(" · "));
+      handleClose();
+    },
+    onError: (err) => toast.error(err.message),
+  });
+
+  const isPending = isSinglePending || isBulkPending;
+
   const handleSingle = () => {
     if (!email.trim()) {
       toast.error("Please enter an email");
       return;
     }
-
-    startTransition(async () => {
-      try {
-        const result = await directInvite({ email: email.trim() });
-        if (!result.success) {
-          const messages = {
-            already_exists:
-              "This email is already in the system — use the applicants page instead.",
-            already_invited_or_exists: "This email already has a Clerk account.",
-          } as const;
-          toast.error(
-            (result.error ? messages[result.error] : undefined) ?? "Failed to send invitation",
-          );
-          return;
-        }
-        toast.success(`Invitation sent to ${email.trim()}`);
-        handleClose();
-      } catch (err) {
-        toast.error(err instanceof Error ? err.message : "Failed to send invitation");
-      }
-    });
+    inviteSingle();
   };
 
   const handleBulk = () => {
-    const emails = bulkText
-      .split("\n")
-      .map((l) => l.trim())
-      .filter(Boolean);
-
+    const emails = bulkText.split("\n").filter((l) => l.trim());
     if (emails.length === 0) {
       toast.error("Please enter at least one email");
       return;
     }
-
-    startTransition(async () => {
-      try {
-        const result = await directInviteBulk({ emails });
-        if (!result.success) {
-          toast.error(result.error);
-          return;
-        }
-        const parts = [`${result.sent} invitation${result.sent !== 1 ? "s" : ""} sent`];
-        if (result.skipped > 0) parts.push(`${result.skipped} skipped (already registered)`);
-        toast.success(parts.join(" · "));
-        handleClose();
-      } catch (err) {
-        toast.error(err instanceof Error ? err.message : "Failed to send invitations");
-      }
-    });
+    inviteBulk();
   };
 
   return (
@@ -140,7 +149,7 @@ export function DirectInviteButton() {
                   disabled={isPending}
                 />
                 <Button onClick={handleSingle} disabled={!email.trim() || isPending} size="sm">
-                  {isPending ? "Sending..." : "Send"}
+                  {isSinglePending ? "Sending..." : "Send"}
                 </Button>
               </div>
               <p className="text-xs text-muted-foreground">
@@ -169,7 +178,7 @@ export function DirectInviteButton() {
                 className="w-full"
                 size="sm"
               >
-                {isPending
+                {isBulkPending
                   ? "Sending..."
                   : `Send ${bulkText.split("\n").filter((l) => l.trim()).length || ""} invitations`}
               </Button>

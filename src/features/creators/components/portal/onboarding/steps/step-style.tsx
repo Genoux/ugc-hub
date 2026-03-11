@@ -1,7 +1,7 @@
 "use client";
 
-import { CONTENT_FORMATS, type ContentFormat } from "@/features/creators/constants";
-import { Button } from "@/shared/components/ui/button";
+import { TogglePills } from "@/shared/components/blocks/toggle-pills";
+import { CONTENT_FORMATS, type ContentFormat } from "@/shared/lib/constants";
 import type { OnboardingData } from "../onboarding-types";
 
 interface Props {
@@ -10,33 +10,16 @@ interface Props {
 }
 
 export function StepStyle({ data, onChange }: Props) {
-  const toggle = (value: string) => {
-    const next = data.contentFormats.includes(value as ContentFormat)
-      ? data.contentFormats.filter((v) => v !== value)
-      : [...data.contentFormats, value as ContentFormat];
-    onChange({ contentFormats: next });
-  };
-
   return (
-    <div className="flex flex-wrap gap-2">
-      {CONTENT_FORMATS.map((format) => {
-        const selected = data.contentFormats.includes(format);
-        return (
-          <Button
-            key={format}
-            type="button"
-            variant={selected ? "default" : "outline"}
-            onClick={() => toggle(format)}
-            className={`text-sm border border-transparent ${
-              selected
-                ? "border-foreground bg-foreground text-background"
-                : "border-border text-muted-foreground "
-            }`}
-          >
-            {format}
-          </Button>
-        );
-      })}
-    </div>
+    <TogglePills
+      options={CONTENT_FORMATS}
+      selected={data.contentFormats}
+      onToggle={(value) => {
+        const next = data.contentFormats.includes(value as ContentFormat)
+          ? data.contentFormats.filter((v) => v !== value)
+          : [...data.contentFormats, value as ContentFormat];
+        onChange({ contentFormats: next });
+      }}
+    />
   );
 }
