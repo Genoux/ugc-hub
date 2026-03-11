@@ -24,7 +24,7 @@ export async function putToR2(
         reject(new Error(`R2 upload failed: ${xhr.status}`));
       }
     };
-    xhr.onerror = () => reject(new Error("R2 upload failed"));
+    xhr.onerror = () => reject(new Error("There was an error uploading your file. Please try again."));
 
     xhr.open("PUT", uploadUrl);
     xhr.setRequestHeader(

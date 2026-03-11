@@ -51,14 +51,7 @@ export function CreatorProfileInfo({ creator, layout = "sidebar" }: CreatorProfi
         unoptimized
         className="object-cover group-hover:scale-105 transition-transform duration-300"
       />
-      <div
-        className="absolute bottom-0 left-0 right-0 h-full bg-black/20 backdrop-blur-xs pointer-events-none"
-        style={{
-          maskImage: "linear-gradient(to top, black 0%, black 10%, transparent 100%)",
-          WebkitMaskImage: "linear-gradient(to top, black 0%, black 10%, transparent 100%)",
-        }}
-      />
-      <div className="absolute inset-0 flex flex-col bg-linear-to-b from-transparent to-black/60 p-4">
+      <div className="absolute inset-0 flex flex-col bg-linear-to-t from-black/80 from-0% via-black/40 via-40% to-transparent p-4">
         <div className="mt-auto flex flex-col gap-1">
           <div className="flex flex-col gap-2">
             <RatingBadge rating={creator.overallRating} className="w-fit" />

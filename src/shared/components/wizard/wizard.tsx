@@ -88,7 +88,7 @@ type WizardHeaderProps = {
 
 export function WizardHeader({ children, className }: WizardHeaderProps) {
   return (
-    <div className={cn("flex shrink-0 items-center justify-between w-full pl-12 pt-10", className)}>
+    <div className={cn("flex shrink-0 items-center justify-between w-full px-10 pt-10", className)}>
       {children}
     </div>
   );
