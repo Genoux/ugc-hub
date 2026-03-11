@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { ilike } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { creators } from "@/db/schema";
 import { db } from "@/shared/lib/db";
@@ -24,11 +24,11 @@ export type CreateApplicantResult =
 
 export async function createApplicant(data: ApplicantData): Promise<CreateApplicantResult> {
   const existing = await db.query.creators.findFirst({
-    where: eq(creators.email, data.email),
-    columns: { id: true, status: true },
+    where: ilike(creators.email, data.email),
+    columns: { id: true },
   });
 
-  if (existing && existing.status !== "rejected") {
+  if (existing) {
     return { success: false, conflict: true };
   }
 

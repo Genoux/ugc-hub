@@ -12,18 +12,13 @@ import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/shared/components/ui/tooltip";
 import type { SocialPlatform } from "@/shared/lib/constants";
-import { BlacklistedHovercard } from "./creator-profile/blacklisted-hovercard";
+import { BlacklistedHovercard } from "./blacklisted-hovercard";
 
 interface CreatorProfileInfoProps {
   creator: CreatorProfile;
-  /**
-   * "sidebar" (default): always-stacked layout for the fixed-width desktop sidebar.
-   * "mobile": image + name side-by-side on phones wider than 400px, stacked below.
-   */
-  layout?: "sidebar" | "mobile";
 }
 
-export function CreatorProfileInfo({ creator, layout = "sidebar" }: CreatorProfileInfoProps) {
+export function CreatorProfileInfo({ creator }: CreatorProfileInfoProps) {
   const rateRange = creator.rateRangeInternal || creator.rateRangeSelf;
   const blacklisted = creator.status === "blacklisted" ? creator : null;
 
@@ -168,18 +163,6 @@ export function CreatorProfileInfo({ creator, layout = "sidebar" }: CreatorProfi
       {rateRange && <LabeledField label="Rate" value={`$${rateRange.min}–${rateRange.max}`} />}
     </>
   );
-
-  if (layout === "mobile") {
-    return (
-      <div className="px-4 pb-6 space-y-4">
-        <div className="flex flex-col min-[400px]:flex-row gap-4">
-          <div className="w-full min-[400px]:w-[45%] shrink-0">{profileHero}</div>
-          <div className="flex flex-col gap-3 justify-end min-w-0">{copyEmailButton}</div>
-        </div>
-        {details}
-      </div>
-    );
-  }
 
   return (
     <div className="p-4 space-y-4">
