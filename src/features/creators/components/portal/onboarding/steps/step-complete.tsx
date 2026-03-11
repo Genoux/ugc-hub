@@ -33,11 +33,11 @@ export function StepComplete({ error, onExit, onRetry }: Props) {
 
   return (
     <WizardComplete
-      title="You're all set!"
-      description="Your profile is complete and discoverable."
+      title="You're in the pool!"
+      description="You are now discoverable by brands! Keep an eye on your emails, collaboration opportunities will come in there!"
     >
       <Button className="w-fit mx-auto" type="button" onClick={onExit}>
-        Go to dashboard
+        Go to your profile
       </Button>
     </WizardComplete>
   );

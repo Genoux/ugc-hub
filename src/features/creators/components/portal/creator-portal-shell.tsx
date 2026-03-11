@@ -37,14 +37,14 @@ export function CreatorPortalShell({ creator, uiState, content }: CreatorPortalS
     <div className="flex min-h-full flex-col pb-32 pt-6 px-6">
       <div className="mx-auto w-full max-w-5xl flex flex-col min-h-full">
         {activeTab === "profile" && (
-          <>
+          <div className="space-y-6">
             <ProfileStateBanner uiState={uiState} />
             <CreatorProfileTab
               creator={creator}
               uiState={uiState}
               onOpenOnboarding={() => setOnboardingOpen(true)}
             />
-          </>
+          </div>
         )}
         {activeTab === "content" && <CollaborationTab content={content} />}
       </div>

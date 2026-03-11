@@ -270,10 +270,9 @@ export function OnboardingShell({ creator, onComplete, onClose }: OnboardingProp
           <WizardHeader>
             <Button
               type="button"
-              variant="ghost"
+              variant="outline"
               size="icon"
               onClick={handleRequestClose}
-              className="text-muted-foreground hover:text-foreground"
               aria-label="Close"
             >
               <X className="size-5" />
@@ -281,7 +280,7 @@ export function OnboardingShell({ creator, onComplete, onClose }: OnboardingProp
             {creator.profileCompleted && !isResultStep ? (
               <Button
                 type="button"
-                variant="ghost"
+                variant="default"
                 size="icon"
                 onClick={handleSaveAndClose}
                 disabled={
@@ -290,7 +289,6 @@ export function OnboardingShell({ creator, onComplete, onClose }: OnboardingProp
                   (step === 5 && photoManager.isUploading) ||
                   (step === 6 && videoManager.isUploading)
                 }
-                className="text-muted-foreground hover:text-foreground"
                 aria-label="Save and close"
               >
                 <CheckIcon className="size-5" />
