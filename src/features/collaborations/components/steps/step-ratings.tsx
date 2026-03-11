@@ -1,8 +1,8 @@
 "use client";
 
+import { TogglePills } from "@/shared/components/blocks/toggle-pills";
 import { Label } from "@/shared/components/ui/label";
 import { Textarea } from "@/shared/components/ui/textarea";
-import { TogglePills } from "@/shared/components/blocks/toggle-pills";
 import { RATING_TIERS } from "@/shared/lib/constants";
 import type { CollaborationRatingsInput } from "../../schemas";
 
@@ -42,7 +42,7 @@ export function StepRatings({ ratings, notes, onChange, onNotesChange }: StepRat
           </div>
           <TogglePills
             options={RATING_TIERS}
-            selected={ratings[key] ? [ratings[key]!] : []}
+            selected={ratings[key] ? [ratings[key] as string] : []}
             onToggle={(tier) => onChange({ ...ratings, [key]: tier })}
           />
         </div>

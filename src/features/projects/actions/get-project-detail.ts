@@ -16,7 +16,15 @@ export async function getProjectDetail(id: string): Promise<ProjectDetail | null
       where: eq(collaborations.projectId, id),
       orderBy: (f, { desc }) => [desc(f.createdAt)],
       with: {
-        creator: { columns: { id: true, fullName: true, email: true, profilePhoto: true, profileCompletedAt: true } },
+        creator: {
+          columns: {
+            id: true,
+            fullName: true,
+            email: true,
+            profilePhoto: true,
+            profileCompletedAt: true,
+          },
+        },
         submissions: {
           with: { assets: { columns: { id: true, filename: true } } },
         },

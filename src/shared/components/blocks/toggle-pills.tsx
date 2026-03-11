@@ -17,10 +17,11 @@ export function TogglePills({ options, selected, onToggle }: TogglePillsProps) {
             type="button"
             variant={isSelected ? "default" : "outline"}
             onClick={() => onToggle(option)}
-            className={`text-xs px-2.5 py-1 border border-transparent ${isSelected
-              ? "border-foreground bg-foreground text-background"
-              : "border-border text-muted-foreground"
-              }`}
+            className={`text-xs px-2.5 py-1 border border-transparent ${
+              isSelected
+                ? "border-foreground bg-foreground text-background"
+                : "border-border text-muted-foreground"
+            }`}
           >
             {option}
           </Button>

@@ -36,7 +36,6 @@ import {
 } from "@/shared/lib/constants";
 import type { OnboardingData } from "../onboarding-types";
 
-
 interface Props {
   data: OnboardingData;
   onChange: (updates: Partial<OnboardingData>) => void;

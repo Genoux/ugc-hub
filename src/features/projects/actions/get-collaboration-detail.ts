@@ -19,7 +19,14 @@ export async function getCollaborationDetail(
     with: {
       project: { columns: { id: true, name: true } },
       creator: {
-        columns: { id: true, fullName: true, email: true, profilePhoto: true, profilePhotoBlurDataUrl: true, profileCompletedAt: true },
+        columns: {
+          id: true,
+          fullName: true,
+          email: true,
+          profilePhoto: true,
+          profilePhotoBlurDataUrl: true,
+          profileCompletedAt: true,
+        },
       },
       submissions: {
         columns: { id: true, label: true, submissionNumber: true, deliveredAt: true },

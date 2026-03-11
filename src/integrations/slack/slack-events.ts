@@ -8,16 +8,26 @@ const appUrl =
 export type SlackEvent =
   | (ApplyFormInput & { type: "creator_apply"; appliedAt: Date })
   | {
-    type: "admin_closed_collab";
-    collabId: string;
-    creatorName: string;
-    projectName: string;
-    piecesOfContent: number;
-    totalPaidCents: number;
-  }
-  | { type: "creator_profile_complete"; creatorId: string; fullName: string; email?: string; profileImageUrl?: string }
-  | { type: "creator_uploaded_content"; creatorName: string; projectName: string; submissionLabel: string };
-
+      type: "admin_closed_collab";
+      collabId: string;
+      creatorName: string;
+      projectName: string;
+      piecesOfContent: number;
+      totalPaidCents: number;
+    }
+  | {
+      type: "creator_profile_complete";
+      creatorId: string;
+      fullName: string;
+      email?: string;
+      profileImageUrl?: string;
+    }
+  | {
+      type: "creator_uploaded_content";
+      creatorName: string;
+      projectName: string;
+      submissionLabel: string;
+    };
 
 function header(text: string) {
   return { type: "header", text: { type: "plain_text", text, emoji: false } };
@@ -63,7 +73,9 @@ function buildCreatorApplyBlocks(event: Extract<SlackEvent, { type: "creator_app
     event.instagram_url && `<${event.instagram_url}|Instagram>`,
     event.tiktok_url && `<${event.tiktok_url}|TikTok>`,
     event.youtube_url && `<${event.youtube_url}|YouTube>`,
-  ].filter(Boolean).join("  ·  ");
+  ]
+    .filter(Boolean)
+    .join("  ·  ");
 
   return [
     header("✦ New Creator Application"),
@@ -73,19 +85,38 @@ function buildCreatorApplyBlocks(event: Extract<SlackEvent, { type: "creator_app
     ]),
     fields([
       { label: "Email", value: event.email },
-      ...(event.languages?.length ? [{ label: "Languages", value: event.languages.join(", ") }] : []),
+      ...(event.languages?.length
+        ? [{ label: "Languages", value: event.languages.join(", ") }]
+        : []),
     ]),
-    ...(socials || event.portfolioUrl ? [fields([
-      ...(socials ? [{ label: "Socials", value: socials }] : []),
-      ...(event.portfolioUrl ? [{ label: "Portfolio", value: `<${event.portfolioUrl}|View>` }] : []),
-    ])] : []),
+    ...(socials || event.portfolioUrl
+      ? [
+          fields([
+            ...(socials ? [{ label: "Socials", value: socials }] : []),
+            ...(event.portfolioUrl
+              ? [{ label: "Portfolio", value: `<${event.portfolioUrl}|View>` }]
+              : []),
+          ]),
+        ]
+      : []),
     { type: "section", text: { type: "plain_text", text: "\n" } },
     divider,
-    { type: "actions", elements: [{ type: "button", text: { type: "plain_text", text: "View Applicants" }, url: `${appUrl}/applicants` }] },
+    {
+      type: "actions",
+      elements: [
+        {
+          type: "button",
+          text: { type: "plain_text", text: "View Applicants" },
+          url: `${appUrl}/applicants`,
+        },
+      ],
+    },
   ];
 }
 
-function buildCollabClosedBlocks(event: Extract<SlackEvent, { type: "admin_closed_collab" }>): object[] {
+function buildCollabClosedBlocks(
+  event: Extract<SlackEvent, { type: "admin_closed_collab" }>,
+): object[] {
   return [
     header("◈ Collaboration Closed"),
     divider,
@@ -99,27 +130,51 @@ function buildCollabClosedBlocks(event: Extract<SlackEvent, { type: "admin_close
     ]),
     { type: "section", text: { type: "plain_text", text: "\n" } },
     divider,
-    { type: "actions", elements: [{ type: "button", text: { type: "plain_text", text: "View Submissions" }, url: `${appUrl}/submissions` }] },
+    {
+      type: "actions",
+      elements: [
+        {
+          type: "button",
+          text: { type: "plain_text", text: "View Submissions" },
+          url: `${appUrl}/submissions`,
+        },
+      ],
+    },
   ];
 }
 
-function buildProfileCompleteBlocks(event: Extract<SlackEvent, { type: "creator_profile_complete" }>): object[] {
+function buildProfileCompleteBlocks(
+  event: Extract<SlackEvent, { type: "creator_profile_complete" }>,
+): object[] {
   return [
     header("◉ Profile Completed"),
     { type: "section", text: { type: "plain_text", text: "\n" } },
     {
       type: "context",
       elements: [
-        ...(event.profileImageUrl ? [{ type: "image", image_url: event.profileImageUrl, alt_text: event.fullName }] : []),
+        ...(event.profileImageUrl
+          ? [{ type: "image", image_url: event.profileImageUrl, alt_text: event.fullName }]
+          : []),
         { type: "mrkdwn", text: `*${event.fullName}* has completed their profile.` },
       ],
     },
     divider,
-    { type: "actions", elements: [{ type: "button", text: { type: "plain_text", text: "View Creator" }, url: `${appUrl}/database` }] },
+    {
+      type: "actions",
+      elements: [
+        {
+          type: "button",
+          text: { type: "plain_text", text: "View Creator" },
+          url: `${appUrl}/database`,
+        },
+      ],
+    },
   ];
 }
 
-function buildContentUploadedBlocks(event: Extract<SlackEvent, { type: "creator_uploaded_content" }>): object[] {
+function buildContentUploadedBlocks(
+  event: Extract<SlackEvent, { type: "creator_uploaded_content" }>,
+): object[] {
   return [
     header("⬡ Content Uploaded"),
     fields([
@@ -129,6 +184,15 @@ function buildContentUploadedBlocks(event: Extract<SlackEvent, { type: "creator_
     ]),
     { type: "section", text: { type: "plain_text", text: "\n" } },
     divider,
-    { type: "actions", elements: [{ type: "button", text: { type: "plain_text", text: "View Submissions" }, url: `${appUrl}/submissions` }] },
+    {
+      type: "actions",
+      elements: [
+        {
+          type: "button",
+          text: { type: "plain_text", text: "View Submissions" },
+          url: `${appUrl}/submissions`,
+        },
+      ],
+    },
   ];
 }

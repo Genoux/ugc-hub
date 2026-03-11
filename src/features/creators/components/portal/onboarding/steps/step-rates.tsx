@@ -45,24 +45,19 @@ export function StepRates({ data, onChange }: Props) {
             key={band.label}
             type="button"
             onClick={() => onChange({ rateRangeSelf: band.value })}
-            className={`w-full rounded-lg border px-4 py-3 text-left text-sm transition-colors ${isSelected(band)
-              ? "border-foreground font-medium"
-              : "border-border hover:border-foreground/30"
-              }`}
+            className={`w-full rounded-lg border px-4 py-3 text-left text-sm transition-colors ${
+              isSelected(band)
+                ? "border-foreground font-medium"
+                : "border-border hover:border-foreground/30"
+            }`}
           >
             <div className="flex items-center justify-between gap-3">
               <span>{band.label} per video</span>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Badge
-                    className={`${TAG_CLASSES[band.tagColor]}`}
-                  >
-                    {band.tag}
-                  </Badge>
+                  <Badge className={`${TAG_CLASSES[band.tagColor]}`}>{band.tag}</Badge>
                 </TooltipTrigger>
-                <TooltipContent className="max-w-sm">
-                  {RATE_BAND_TOOLTIPS[band.tag]}
-                </TooltipContent>
+                <TooltipContent className="max-w-sm">{RATE_BAND_TOOLTIPS[band.tag]}</TooltipContent>
               </Tooltip>
             </div>
           </button>

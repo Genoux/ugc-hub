@@ -9,7 +9,6 @@ import type {
   UgcCategory,
 } from "@/shared/lib/constants";
 
-
 export const MIN_PORTFOLIO_VIDEOS = 2;
 export const MAX_PORTFOLIO_VIDEOS = 5;
 
