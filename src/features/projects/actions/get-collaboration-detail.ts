@@ -18,7 +18,9 @@ export async function getCollaborationDetail(
     where: eq(collaborations.id, collaborationId),
     with: {
       project: { columns: { id: true, name: true } },
-      creator: { columns: { id: true, fullName: true, email: true, profilePhoto: true } },
+      creator: {
+        columns: { id: true, fullName: true, email: true, profilePhoto: true, profilePhotoBlurDataUrl: true, profileCompletedAt: true },
+      },
       submissions: {
         columns: { id: true, label: true, submissionNumber: true, deliveredAt: true },
         orderBy: (s, { asc }) => [asc(s.submissionNumber)],
@@ -56,7 +58,8 @@ export async function getCollaborationDetail(
       id: raw.creator.id,
       fullName: raw.creator.fullName,
       email: raw.creator.email,
-      profilePhotoUrl: toMediaUrl(raw.creator.profilePhoto),
+      profilePhotoUrl: toMediaUrl(raw.creator.profilePhoto, raw.creator.profileCompletedAt),
+      profilePhotoBlurDataUrl: raw.creator.profilePhotoBlurDataUrl ?? null,
       closedCollabRatings,
     },
     submissions: raw.submissions.map((submission) => ({

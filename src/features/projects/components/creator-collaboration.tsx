@@ -156,6 +156,7 @@ export function CreatorCollaboration({ collaboration }: CreatorCollaborationProp
             creatorId={creator.id}
             creatorName={creator.fullName}
             profilePhotoUrl={creator.profilePhotoUrl ?? ""}
+            profilePhotoBlurDataUrl={creator.profilePhotoBlurDataUrl}
             submissionName={project.name}
             closedCollabRatings={creator.closedCollabRatings}
           />

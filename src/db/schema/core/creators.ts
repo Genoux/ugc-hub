@@ -36,6 +36,7 @@ export const creators = pgTable("creators", {
 
   // Full profile (Steps 3-9)
   profilePhoto: text("profile_photo"),
+  profilePhotoBlurDataUrl: text("profile_photo_blur_data_url"),
   genderIdentity: text("gender_identity"),
   ageDemographic: text("age_demographic"),
   ethnicity: text("ethnicity").array(),

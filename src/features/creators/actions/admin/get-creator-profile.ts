@@ -104,7 +104,7 @@ export async function getCreatorProfile(creatorId: string): Promise<CreatorProfi
 
   const creator = creatorSchema.parse(row);
 
-  const profilePhotoUrl = toMediaUrl(row.profilePhoto);
+  const profilePhotoUrl = toMediaUrl(row.profilePhoto, row.profileCompletedAt);
 
   const portfolioVideos = ((row.portfolioVideos ?? []) as PortfolioVideoEntry[]).map((v) => ({
     id: v.id,

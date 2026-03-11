@@ -34,7 +34,7 @@ export async function getCreators(): Promise<CreatorListItem[]> {
 
     return parsed.map((creator) => ({
       ...creator,
-      profilePhotoUrl: toMediaUrl(creator.profilePhoto),
+      profilePhotoUrl: toMediaUrl(creator.profilePhoto, creator.profileCompletedAt),
     }));
   } catch (err) {
     throw toActionError(err);

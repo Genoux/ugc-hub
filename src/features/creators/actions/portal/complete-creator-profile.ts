@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { creators } from "@/db/schema";
 import { requireCreator } from "@/features/creators/lib/require-creator";
+import { generateBlurPlaceholder } from "@/features/uploads/lib/generate-blur-placeholder";
 import { getR2SignedUrl } from "@/features/uploads/lib/r2-serve";
 import { notifySlack } from "@/integrations/slack/notify-slack";
 import { toActionError } from "@/shared/lib/action-error";
@@ -66,22 +67,34 @@ export async function completeCreatorProfile(input: z.infer<typeof schema>) {
         ethnicity: validated.ethnicities,
         profileCompleted: true,
         profileCompletedAt: new Date(),
-        status: "joined",
-        joinedAt: new Date(),
+        ...(!wasAlreadyCompleted && { status: "joined", joinedAt: new Date() }),
       })
       .where(eq(creators.id, creator.id));
 
     if (!wasAlreadyCompleted) {
-      void getR2SignedUrl(validated.profilePhoto).then((profileImageUrl) =>
-        notifySlack({
-          type: "creator_profile_complete",
-          creatorId: creator.id,
-          fullName: validated.fullName,
-          email: creator.email ?? undefined,
-          profileImageUrl: profileImageUrl ?? undefined,
-        })
-      ).catch(console.error);
+      void getR2SignedUrl(validated.profilePhoto)
+        .then((profileImageUrl) =>
+          notifySlack({
+            type: "creator_profile_complete",
+            creatorId: creator.id,
+            fullName: validated.fullName,
+            email: creator.email ?? undefined,
+            profileImageUrl: profileImageUrl ?? undefined,
+          }),
+        )
+        .catch(console.error);
     }
+
+    void generateBlurPlaceholder(validated.profilePhoto)
+      .then((blurDataUrl) =>
+        blurDataUrl
+          ? db
+              .update(creators)
+              .set({ profilePhotoBlurDataUrl: blurDataUrl })
+              .where(eq(creators.id, creator.id))
+          : undefined,
+      )
+      .catch(console.error);
 
     revalidatePath("/creator");
   } catch (err) {

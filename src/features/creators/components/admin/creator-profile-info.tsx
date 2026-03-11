@@ -49,6 +49,8 @@ export function CreatorProfileInfo({ creator, layout = "sidebar" }: CreatorProfi
         alt={creator.fullName}
         fill
         unoptimized
+        placeholder={creator.profilePhotoBlurDataUrl ? "blur" : "empty"}
+        blurDataURL={creator.profilePhotoBlurDataUrl ?? undefined}
         className="object-cover group-hover:scale-105 transition-transform duration-300"
       />
       <div className="absolute inset-0 flex flex-col bg-linear-to-t from-black/80 from-0% to-transparent to-30% p-4">

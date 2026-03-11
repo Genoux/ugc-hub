@@ -2,6 +2,7 @@
 
 import { CheckIcon, X } from "lucide-react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useRef, useState, useTransition } from "react";
 import { completeCreatorProfile } from "@/features/creators/actions/portal/complete-creator-profile";
 import {
@@ -116,6 +117,7 @@ function StepContent({
 }
 
 export function OnboardingShell({ creator, onComplete, onClose }: OnboardingProps) {
+  const router = useRouter();
   const { step, goToStep, directionRef } = useSteppedFlow(TOTAL_STEPS);
   const [data, setData] = useState<OnboardingData>(() => buildOnboardingData(creator));
   const [isPending, startTransition] = useTransition();
@@ -220,6 +222,7 @@ export function OnboardingShell({ creator, onComplete, onClose }: OnboardingProp
     startTransition(async () => {
       try {
         await completeCreatorProfile(buildProfilePayload());
+        router.refresh();
         onClose();
       } catch (err) {
         setSubmitError(err instanceof Error ? err.message : "Something went wrong");
@@ -233,6 +236,7 @@ export function OnboardingShell({ creator, onComplete, onClose }: OnboardingProp
       setSubmitError(null);
       try {
         await completeCreatorProfile(buildProfilePayload());
+        router.refresh();
         if (creator.profileCompleted) {
           onClose();
         } else {
