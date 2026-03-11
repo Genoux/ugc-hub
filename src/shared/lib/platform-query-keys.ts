@@ -5,4 +5,5 @@ export const platformQueryKeys = {
   projectDetail: (id: string) => ["platform", "project", id] as const,
   collaborationDetail: (projectId: string, collaborationId: string) =>
     ["platform", "collaboration", projectId, collaborationId] as const,
+  creatorProfile: (id: string) => ["platform", "creator", id] as const,
 } as const;

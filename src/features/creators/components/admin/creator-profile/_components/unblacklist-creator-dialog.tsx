@@ -35,6 +35,7 @@ export function UnblacklistCreatorDialog({
     mutationFn: () => unblacklistCreator(creatorId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: platformQueryKeys.database });
+      queryClient.invalidateQueries({ queryKey: platformQueryKeys.creatorProfile(creatorId) });
       toast.success(`${creatorName} has been removed from the blacklist`);
       onOpenChange(false);
     },

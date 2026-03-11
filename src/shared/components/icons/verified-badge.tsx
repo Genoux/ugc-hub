@@ -35,8 +35,8 @@ export function VerifiedBadge({ className }: VerifiedBadgeProps) {
           y2="23.5892"
           gradientUnits="userSpaceOnUse"
         >
-          <stop stop-color="#a78bfa" />
-          <stop offset="1" stop-color="#7c3aed" />
+          <stop stopColor="#a78bfa" />
+          <stop offset="1" stopColor="#7c3aed" />
         </linearGradient>
         <clipPath id="clip0_10_292">
           <rect width="24" height="24" fill="white" />

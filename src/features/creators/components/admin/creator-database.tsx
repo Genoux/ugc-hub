@@ -2,11 +2,7 @@
 
 import { motion } from "framer-motion";
 import { ArrowUpDown, Search, SlidersHorizontal, Users } from "lucide-react";
-import { useEffect, useState } from "react";
-import {
-  type CreatorProfile,
-  getCreatorProfile,
-} from "@/features/creators/actions/admin/get-creator-profile";
+import { useState } from "react";
 import type { CreatorListItem } from "@/features/creators/actions/admin/get-creators";
 import {
   SORT_OPTIONS,
@@ -29,7 +25,6 @@ import {
 import { Input } from "@/shared/components/ui/input";
 import { EASING_FUNCTION } from "@/shared/lib/constants";
 import { CreatorCard } from "./creator-card";
-import { CreatorOverlay } from "./creator-overlay/creator-overlay";
 import { DatabaseFilters } from "./database-filters";
 
 interface CreatorDatabaseProps {
@@ -37,9 +32,7 @@ interface CreatorDatabaseProps {
 }
 
 export function CreatorDatabase({ creators }: CreatorDatabaseProps) {
-  const [selectedCreatorId, setSelectedCreatorId] = useState<string | null>(null);
   const [filtersOpen, setFiltersOpen] = useState(false);
-  const [creator, setCreatorAssets] = useState<CreatorProfile | null>(null);
   const {
     search,
     setSearch,
@@ -50,12 +43,6 @@ export function CreatorDatabase({ creators }: CreatorDatabaseProps) {
     sortedCreators,
     currentSortLabel,
   } = useCreatorFilters(creators);
-
-  useEffect(() => {
-    if (!selectedCreatorId) return;
-    setCreatorAssets(null);
-    getCreatorProfile(selectedCreatorId).then(setCreatorAssets);
-  }, [selectedCreatorId]);
 
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
@@ -138,23 +125,15 @@ export function CreatorDatabase({ creators }: CreatorDatabaseProps) {
                 </Empty>
               </div>
             ) : (
-              <div className="grid grid-cols-1 gap-2 p-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
+              <div className="grid grid-cols-1 gap-2 p-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                 {sortedCreators.map((creator) => (
-                  <CreatorCard
-                    key={creator.id}
-                    creator={creator}
-                    onClick={() => setSelectedCreatorId(creator.id)}
-                  />
+                  <CreatorCard key={creator.id} creator={creator} />
                 ))}
               </div>
             )}
           </div>
         </button>
       </div>
-
-      {selectedCreatorId && (
-        <CreatorOverlay creator={creator} onClose={() => setSelectedCreatorId(null)} />
-      )}
     </div>
   );
 }

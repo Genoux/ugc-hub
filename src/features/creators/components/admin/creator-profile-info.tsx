@@ -12,7 +12,7 @@ import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/shared/components/ui/tooltip";
 import type { SocialPlatform } from "@/shared/lib/constants";
-import { BlacklistedHovercard } from "./creator-overlay/blacklisted-hovercard";
+import { BlacklistedHovercard } from "./creator-profile/blacklisted-hovercard";
 
 interface CreatorProfileInfoProps {
   creator: CreatorProfile;
@@ -51,7 +51,7 @@ export function CreatorProfileInfo({ creator, layout = "sidebar" }: CreatorProfi
         unoptimized
         className="object-cover group-hover:scale-105 transition-transform duration-300"
       />
-      <div className="absolute inset-0 flex flex-col bg-linear-to-t from-black/80 from-0% via-black/40 via-40% to-transparent p-4">
+      <div className="absolute inset-0 flex flex-col bg-linear-to-t from-black/80 from-0% to-transparent to-30% p-4">
         <div className="mt-auto flex flex-col gap-1">
           <div className="flex flex-col gap-2">
             <RatingBadge rating={creator.overallRating} className="w-fit" />
@@ -180,7 +180,7 @@ export function CreatorProfileInfo({ creator, layout = "sidebar" }: CreatorProfi
   }
 
   return (
-    <div className="p-4 sm:p-6 space-y-4">
+    <div className="p-4 space-y-4">
       {profileHero}
       {copyEmailButton}
       {details}
