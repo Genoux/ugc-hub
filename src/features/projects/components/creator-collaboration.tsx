@@ -39,7 +39,7 @@ export function CreatorCollaboration({ collaboration }: CreatorCollaborationProp
     queryClient.invalidateQueries({
       queryKey: platformQueryKeys.collaborationDetail(project.id, id),
     });
-    queryClient.invalidateQueries({ queryKey: platformQueryKeys.database });
+    queryClient.invalidateQueries({ queryKey: platformQueryKeys.databasePrefix });
   }
 
   const allAssets = submissions.flatMap((s) =>

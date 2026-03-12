@@ -8,26 +8,26 @@ const appUrl =
 export type SlackEvent =
   | (ApplyFormInput & { type: "creator_apply"; appliedAt: Date })
   | {
-      type: "admin_closed_collab";
-      collabId: string;
-      creatorName: string;
-      projectName: string;
-      piecesOfContent: number;
-      totalPaidCents: number;
-    }
+    type: "admin_closed_collab";
+    collabId: string;
+    creatorName: string;
+    projectName: string;
+    piecesOfContent: number;
+    totalPaidCents: number;
+  }
   | {
-      type: "creator_profile_complete";
-      creatorId: string;
-      fullName: string;
-      email?: string;
-      profileImageUrl?: string;
-    }
+    type: "creator_profile_complete";
+    creatorId: string;
+    fullName: string;
+    email?: string;
+    profileImageUrl?: string;
+  }
   | {
-      type: "creator_uploaded_content";
-      creatorName: string;
-      projectName: string;
-      submissionLabel: string;
-    };
+    type: "creator_uploaded_content";
+    creatorName: string;
+    projectName: string;
+    submissionLabel: string;
+  };
 
 function header(text: string) {
   return { type: "header", text: { type: "plain_text", text, emoji: false } };
@@ -91,13 +91,13 @@ function buildCreatorApplyBlocks(event: Extract<SlackEvent, { type: "creator_app
     ]),
     ...(socials || event.portfolioUrl
       ? [
-          fields([
-            ...(socials ? [{ label: "Socials", value: socials }] : []),
-            ...(event.portfolioUrl
-              ? [{ label: "Portfolio", value: `<${event.portfolioUrl}|View>` }]
-              : []),
-          ]),
-        ]
+        fields([
+          ...(socials ? [{ label: "Socials", value: socials }] : []),
+          ...(event.portfolioUrl
+            ? [{ label: "Portfolio", value: `<${event.portfolioUrl}|View>` }]
+            : []),
+        ]),
+      ]
       : []),
     { type: "section", text: { type: "plain_text", text: "\n" } },
     divider,
@@ -165,7 +165,7 @@ function buildProfileCompleteBlocks(
         {
           type: "button",
           text: { type: "plain_text", text: "View Creator" },
-          url: `${appUrl}/database`,
+          url: `${appUrl}/database/${event.creatorId}`,
         },
       ],
     },

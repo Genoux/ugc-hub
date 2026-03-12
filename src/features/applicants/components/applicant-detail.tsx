@@ -20,9 +20,12 @@ import { rejectApplicant } from "../actions/reject-applicant";
 
 type ActiveTab = Creator["status"];
 
+type TabKey = "applicant" | "approved_not_joined" | "rejected";
+
 interface Props {
   creator: Creator;
   activeTab: ActiveTab;
+  onMutationSuccess?: (destinationTab: TabKey) => void;
 }
 
 function EmailRow({ email }: { email: string }) {
@@ -82,14 +85,15 @@ function MutedRow({ label, value }: { label: string; value: string }) {
   );
 }
 
-export function ApplicantDetail({ creator, activeTab }: Props) {
+export function ApplicantDetail({ creator, activeTab, onMutationSuccess }: Props) {
   const queryClient = useQueryClient();
 
   const { mutate: approve, isPending: isApproving } = useMutation({
     mutationFn: () => approveApplicant(creator.id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: platformQueryKeys.applicants });
+      queryClient.invalidateQueries({ queryKey: platformQueryKeys.applicantsPrefix });
       toast.success("Creator approved and invited");
+      onMutationSuccess?.("approved_not_joined");
     },
     onError: (err) => toast.error(err.message),
   });
@@ -97,8 +101,9 @@ export function ApplicantDetail({ creator, activeTab }: Props) {
   const { mutate: reject, isPending: isRejecting } = useMutation({
     mutationFn: () => rejectApplicant(creator.id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: platformQueryKeys.applicants });
+      queryClient.invalidateQueries({ queryKey: platformQueryKeys.applicantsPrefix });
       toast.success("Applicant rejected");
+      onMutationSuccess?.("rejected");
     },
     onError: (err) => toast.error(err.message),
   });
@@ -106,8 +111,9 @@ export function ApplicantDetail({ creator, activeTab }: Props) {
   const { mutate: reinvite, isPending: isReinviting } = useMutation({
     mutationFn: () => reinviteCreator(creator.id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: platformQueryKeys.applicants });
+      queryClient.invalidateQueries({ queryKey: platformQueryKeys.applicantsPrefix });
       toast.success("Invitation resent");
+      onMutationSuccess?.("approved_not_joined");
     },
     onError: (err) => toast.error(err.message),
   });

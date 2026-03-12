@@ -35,8 +35,8 @@ interface Props {
 
 export function ApplicantList({ creators, selectedId, onSelect, sort, onSortChange }: Props) {
   return (
-    <div className="flex flex-col min-h-0 flex-1">
-      <div className="flex items-center justify-between mb-2 px-1">
+    <div className="flex flex-col">
+      <div className="sticky top-0 z-10 bg-background flex items-center justify-between mb-3 px-1 py-1">
         <span className="text-xs text-muted-foreground">
           {creators.length} {creators.length === 1 ? "applicant" : "applicants"}
         </span>
@@ -63,9 +63,10 @@ export function ApplicantList({ creators, selectedId, onSelect, sort, onSortChan
             ))}
           </DropdownMenuContent>
         </DropdownMenu>
+        <div className="pointer-events-none absolute inset-x-0 top-full h-6 bg-linear-to-b from-background to-transparent" />
       </div>
 
-      <ul className="overflow-y-auto space-y-0.5">
+      <ul className="space-y-0.5">
         {creators.map((c) => {
           const recent = isRecentlyApplied(c.appliedAt);
           return (

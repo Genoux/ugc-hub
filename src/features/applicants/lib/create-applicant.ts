@@ -32,17 +32,25 @@ export async function createApplicant(data: ApplicantData): Promise<CreateApplic
     return { success: false, conflict: true };
   }
 
-  await db.insert(creators).values({
-    fullName: data.fullName,
-    email: data.email,
-    country: data.country,
-    languages: data.languages,
-    socialChannels: data.socialChannels,
-    portfolioUrl: data.portfolioUrl,
-    source: "applicant",
-    status: "applicant",
-    appliedAt: new Date(),
-  });
+  try {
+    await db.insert(creators).values({
+      fullName: data.fullName,
+      email: data.email,
+      country: data.country,
+      languages: data.languages,
+      socialChannels: data.socialChannels,
+      portfolioUrl: data.portfolioUrl,
+      source: "applicant",
+      status: "applicant",
+      appliedAt: new Date(),
+    });
+  } catch (err) {
+    const code = err && typeof err === "object" && "code" in err ? (err as { code: string }).code : null;
+    if (code === "23505") {
+      return { success: false, conflict: true };
+    }
+    return { success: false, conflict: false, error: err };
+  }
 
   revalidatePath("/applicants");
   return { success: true };

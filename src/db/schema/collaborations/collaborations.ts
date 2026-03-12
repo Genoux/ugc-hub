@@ -1,4 +1,5 @@
 import {
+  index,
   integer,
   jsonb,
   pgEnum,
@@ -59,5 +60,9 @@ export const collaborations = pgTable(
     // Timestamps
     createdAt: timestamp("created_at").notNull().defaultNow(),
   },
-  (t) => [unique("collaborations_creator_project_unique").on(t.creatorId, t.projectId)],
+  (t) => [
+    unique("collaborations_creator_project_unique").on(t.creatorId, t.projectId),
+    index("collabs_creator_id_idx").on(t.creatorId),
+    index("collabs_status_idx").on(t.status),
+  ],
 );

@@ -38,8 +38,8 @@ export function CreatorCard({ creator }: CreatorCardProps) {
           alt={creator.fullName}
           fill
           unoptimized
-          placeholder={"blur"}
-          loading="eager"
+          placeholder={creator.profilePhotoBlurDataUrl ? "blur" : "empty"}
+          loading="lazy"
           blurDataURL={creator.profilePhotoBlurDataUrl ?? undefined}
           className="object-cover group-hover:scale-105 transition-transform duration-300"
         />

@@ -38,7 +38,7 @@ export default function RootLayout({
     <ClerkProvider afterSignOutUrl="/sign-in">
       <html lang="en" suppressHydrationWarning>
         <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-[480px] min-w-[368px] flex flex-col`}
+          className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-[600px] min-w-[368px] flex flex-col`}
         >
           <div className="min-h-0 flex-1 overflow-y-auto">
             <Toaster position="top-center" />
