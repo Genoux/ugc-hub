@@ -33,7 +33,8 @@ export async function GET(request: Request, { params }: { params: Promise<{ key:
 
   const cacheControl = `private, max-age=${BROWSER_MAX_AGE}, stale-while-revalidate=${BROWSER_STALE_WHILE_REVALIDATE}`;
 
-  if (process.env.NODE_ENV === "development" && key[0]?.startsWith("http")) {
+  const isNonProd = process.env.NODE_ENV === "development" || process.env.VERCEL_ENV === "preview" || process.env.VERCEL_ENV === "development";
+  if (isNonProd && key[0]?.startsWith("http")) {
     const externalUrl = `${key[0]}//${key.slice(1).join("/")}` as string;
     if (externalUrl.startsWith("http://") || externalUrl.startsWith("https://")) {
       const res = await fetch(externalUrl, {
