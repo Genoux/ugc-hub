@@ -4,7 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Check, Copy, ExternalLink, MoreVertical } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-import type { Creator } from "@/features/applicants/types";
+import type { ApplicantTabKey, Creator } from "@/features/applicants/types";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import {
@@ -18,11 +18,10 @@ import { approveApplicant } from "../actions/approve-applicant";
 import { reinviteCreator } from "../actions/reinvite-creator";
 import { rejectApplicant } from "../actions/reject-applicant";
 
-type ActiveTab = Creator["status"];
-
 interface Props {
   creator: Creator;
-  activeTab: ActiveTab;
+  activeTab: Creator["status"];
+  onMutationSuccess?: (destinationTab: ApplicantTabKey) => void;
 }
 
 function EmailRow({ email }: { email: string }) {
@@ -82,14 +81,15 @@ function MutedRow({ label, value }: { label: string; value: string }) {
   );
 }
 
-export function ApplicantDetail({ creator, activeTab }: Props) {
+export function ApplicantDetail({ creator, activeTab, onMutationSuccess }: Props) {
   const queryClient = useQueryClient();
 
   const { mutate: approve, isPending: isApproving } = useMutation({
     mutationFn: () => approveApplicant(creator.id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: platformQueryKeys.applicants });
+      queryClient.invalidateQueries({ queryKey: platformQueryKeys.applicantsPrefix });
       toast.success("Creator approved and invited");
+      onMutationSuccess?.("approved_not_joined");
     },
     onError: (err) => toast.error(err.message),
   });
@@ -97,8 +97,9 @@ export function ApplicantDetail({ creator, activeTab }: Props) {
   const { mutate: reject, isPending: isRejecting } = useMutation({
     mutationFn: () => rejectApplicant(creator.id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: platformQueryKeys.applicants });
+      queryClient.invalidateQueries({ queryKey: platformQueryKeys.applicantsPrefix });
       toast.success("Applicant rejected");
+      onMutationSuccess?.("rejected");
     },
     onError: (err) => toast.error(err.message),
   });
@@ -106,8 +107,9 @@ export function ApplicantDetail({ creator, activeTab }: Props) {
   const { mutate: reinvite, isPending: isReinviting } = useMutation({
     mutationFn: () => reinviteCreator(creator.id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: platformQueryKeys.applicants });
+      queryClient.invalidateQueries({ queryKey: platformQueryKeys.applicantsPrefix });
       toast.success("Invitation resent");
+      onMutationSuccess?.("approved_not_joined");
     },
     onError: (err) => toast.error(err.message),
   });
@@ -118,24 +120,25 @@ export function ApplicantDetail({ creator, activeTab }: Props) {
   const showResendAction = activeTab === "approved_not_joined";
   const showReinviteAction = activeTab === "rejected";
 
-  const socialChannels = creator.socialChannels as {
-    instagram_url?: string;
-    tiktok_url?: string;
-    youtube_url?: string;
-  } | null;
-
   return (
     <div className="w-full animate-in fade-in duration-150">
       <div className="border border-border rounded-lg p-6">
         <div className="flex items-start gap-4 pb-5">
-          <div className="min-w-0 flex-1">
-            <Badge variant="outline" className="mb-2">
-              {creator.source === "applicant"
-                ? "Applied"
-                : creator.source === "direct_invite"
-                  ? "Invited by email"
-                  : "Unknown"}
-            </Badge>
+          <div className="min-w-0 flex-1 gap-2">
+            <div className="flex items-center gap-2">
+              <Badge variant="outline" className="mb-2">
+                {creator.source === "applicant"
+                  ? "Applied"
+                  : creator.source === "direct_invite"
+                    ? "Invited by email"
+                    : "Unknown"}
+              </Badge>
+              {activeTab === "approved_not_joined" && (
+                <Badge variant="outline" className="mb-2">
+                  {creator.clerkUserId === null ? "Pending signup" : "Signed up"}
+                </Badge>
+              )}
+            </div>
             <h2 className="text-xl font-semibold text-foreground">{creator.fullName}</h2>
             <p className="mt-0.5 text-sm text-muted-foreground">{creator.country}</p>
           </div>
@@ -158,20 +161,20 @@ export function ApplicantDetail({ creator, activeTab }: Props) {
 
         <div>
           <EmailRow email={creator.email} />
-          {socialChannels?.instagram_url ? (
+          {creator.socialChannels?.instagram_url ? (
             <LinkRow
               label="Instagram"
-              value={socialChannels.instagram_url.replace("https://", "")}
-              href={socialChannels.instagram_url}
+              value={creator.socialChannels.instagram_url.replace("https://", "")}
+              href={creator.socialChannels.instagram_url}
             />
           ) : (
             <MutedRow label="Instagram" value="Not available" />
           )}
-          {socialChannels?.tiktok_url ? (
+          {creator.socialChannels?.tiktok_url ? (
             <LinkRow
               label="TikTok"
-              value={socialChannels.tiktok_url.replace("https://", "")}
-              href={socialChannels.tiktok_url}
+              value={creator.socialChannels.tiktok_url.replace("https://", "")}
+              href={creator.socialChannels.tiktok_url}
             />
           ) : (
             <MutedRow label="TikTok" value="Not available" />

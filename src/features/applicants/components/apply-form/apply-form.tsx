@@ -1,7 +1,8 @@
 "use client";
 
+import * as Sentry from "@sentry/nextjs";
 import Image from "next/image";
-import { useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { submitApplication } from "@/features/applicants/actions/submit-application";
 import { Button } from "@/shared/components/ui/button";
 import { ProgressDots } from "@/shared/components/wizard/progress-dots";
@@ -145,6 +146,40 @@ export function ApplyForm() {
     Array.from({ length: FORM_STEPS }, (_, i) => i + 1).filter((s) => canProceed(s, data)),
   );
 
+  // Keep a ref so the beforeunload handler always reads the latest values
+  // without needing to be re-registered on every render.
+  const stepRef = useRef(step);
+  const filledStepsRef = useRef(filledSteps);
+  useEffect(() => {
+    stepRef.current = step;
+    filledStepsRef.current = filledSteps;
+  });
+
+  useEffect(() => {
+    const handleUnload = () => {
+      const currentStep = stepRef.current;
+      // Only fire when the user is mid-form — not on step 1 with nothing filled,
+      // and not after a successful submission (step 5).
+      const hasStarted = filledStepsRef.current.size > 0 || currentStep > 1;
+      const hasCompleted = currentStep === TOTAL_APPLY_STEPS;
+      if (!hasStarted || hasCompleted) return;
+
+      Sentry.captureEvent({
+        message: "Apply form abandoned",
+        level: "info",
+        tags: { abandonedAtStep: String(currentStep) },
+        extra: {
+          abandonedAtStep: currentStep,
+          abandonedAtStepName: APPLY_STEPS[currentStep]?.name ?? "unknown",
+          completedSteps: [...filledStepsRef.current].map((s) => APPLY_STEPS[s]?.name),
+        },
+      });
+    };
+
+    window.addEventListener("beforeunload", handleUnload);
+    return () => window.removeEventListener("beforeunload", handleUnload);
+  }, []); // intentionally empty — relies on refs for fresh values
+
   const handleSubmit = () => {
     startTransition(async () => {
       setSubmitError(null);
@@ -174,6 +209,12 @@ export function ApplyForm() {
   };
 
   const handleNext = () => {
+    Sentry.addBreadcrumb({
+      category: "apply-form",
+      message: `Step passed: ${APPLY_STEPS[step]?.name}`,
+      level: "info",
+      data: { step, stepName: APPLY_STEPS[step]?.name },
+    });
     if (isLastFormStep) handleSubmit();
     else goToStep(step + 1);
   };

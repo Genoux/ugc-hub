@@ -44,7 +44,8 @@ export function StepSocials({ data, onChange }: Props) {
       </div>
       <div className="space-y-1.5">
         <Label htmlFor="portfolio">
-          Portfolio URL <span className="text-muted-foreground">(optional)</span>
+          Portfolio or examples of your work{" "}
+          <span className="text-xs text-muted-foreground">(optional)</span>
         </Label>
         <Input
           id="portfolio"
@@ -53,6 +54,9 @@ export function StepSocials({ data, onChange }: Props) {
           onChange={(e) => onChange({ portfolioUrl: e.target.value })}
           placeholder="https://yourportfolio.com"
         />
+        <p className="text-xs text-muted-foreground">
+          Don't have a portfolio? Share an updated Google Drive link with samples of your work
+        </p>
       </div>
     </div>
   );

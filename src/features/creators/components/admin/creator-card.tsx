@@ -38,21 +38,22 @@ export function CreatorCard({ creator }: CreatorCardProps) {
           alt={creator.fullName}
           fill
           unoptimized
-          placeholder={"blur"}
-          loading="eager"
+          placeholder={creator.profilePhotoBlurDataUrl ? "blur" : "empty"}
+          loading="lazy"
           blurDataURL={creator.profilePhotoBlurDataUrl ?? undefined}
           className="object-cover group-hover:scale-105 transition-transform duration-300"
         />
-        <div className="absolute inset-0 flex flex-col bg-linear-to-t from-black/80 from-0% to-transparent to-30% p-4">
+        <div className="absolute inset-0 flex flex-col bg-linear-to-t from-black/100 from-0% to-transparent to-40% p-4">
           <div className="flex justify-start">
             <RatingBadge rating={creator.overallRating} />
           </div>
           <div className="mt-auto flex flex-col gap-1">
-            <div className="flex flex-col gap-0.5">
+            <div className="flex flex-col gap-1">
               <div className="flex items-center gap-2">
                 <h3 className="font-semibold text-white text-xl truncate">{creator.fullName}</h3>
                 {creator.overallRating === "top creator" && <VerifiedBadge className="size-5" />}
               </div>
+              <p className="text-sm text-left text-white/80">{creator.country}</p>
               <div className="text-sm text-left font-semibold text-white/80">{rateDisplay}</div>
             </div>
           </div>

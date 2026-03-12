@@ -1,7 +1,6 @@
 import { ClerkProvider } from "@clerk/nextjs";
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { LayoutDebugClient } from "@/shared/components/tools/layout-debug-client";
 import { Toaster } from "@/shared/components/ui/sonner";
 import "./globals.css";
 
@@ -38,13 +37,12 @@ export default function RootLayout({
     <ClerkProvider afterSignOutUrl="/sign-in">
       <html lang="en" suppressHydrationWarning>
         <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-[480px] min-w-[368px] flex flex-col`}
+          className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-[600px] min-w-[368px] flex flex-col`}
         >
           <div className="min-h-0 flex-1 overflow-y-auto">
             <Toaster position="top-center" />
             {children}
           </div>
-          <LayoutDebugClient />
         </body>
       </html>
     </ClerkProvider>

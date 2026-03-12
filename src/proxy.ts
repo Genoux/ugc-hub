@@ -79,6 +79,11 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
     if (!email.toLowerCase().endsWith(`@${ALLOWED_DOMAIN}`)) {
       return NextResponse.redirect(new URL(ROUTES.creatorHome, req.url));
     }
+
+    // Temp: projects page disabled
+    if (req.nextUrl.pathname === "/projects") {
+      return NextResponse.redirect(new URL("/database", req.url));
+    }
   }
 
   if (isCreatorRoute(req)) {

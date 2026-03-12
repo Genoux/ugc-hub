@@ -165,7 +165,7 @@ function buildProfileCompleteBlocks(
         {
           type: "button",
           text: { type: "plain_text", text: "View Creator" },
-          url: `${appUrl}/database`,
+          url: `${appUrl}/database/${event.creatorId}`,
         },
       ],
     },
