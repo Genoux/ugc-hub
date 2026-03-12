@@ -19,6 +19,8 @@ export function NavMain({
     title: string;
     url: string;
     icon?: LucideIcon;
+    disabled?: boolean;
+    span?: string;
   }[];
 }) {
   const pathname = usePathname();
@@ -31,10 +33,21 @@ export function NavMain({
             const isActive = pathname === item.url || pathname.startsWith(`${item.url}/`);
             return (
               <SidebarMenuItem key={item.title}>
-                <SidebarMenuButton tooltip={item.title} asChild isActive={isActive}>
-                  <Link href={item.url}>
+                <SidebarMenuButton
+                  className={item.disabled ? "opacity-50" : ""}
+                  tooltip={item.disabled ? item.title : undefined}
+                  asChild
+                  isActive={isActive}
+                >
+                  <Link
+                    href={item.disabled ? "#" : item.url}
+                    onClick={item.disabled ? (e) => e.preventDefault() : undefined}
+                    aria-disabled={item.disabled}
+                    className="flex items-center"
+                  >
                     {item.icon && <item.icon />}
                     <span>{item.title}</span>
+                    {item.span && <span className="text-xs">{item.span}</span>}
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>

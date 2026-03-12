@@ -19,16 +19,20 @@ const navItems = [
     title: "Applicants",
     url: "/applicants",
     icon: UserPlus,
+    disabled: false,
   },
   {
     title: "Database",
     url: "/database",
     icon: Users,
+    disabled: false,
   },
   {
     title: "Projects",
     url: "/projects",
     icon: Folder,
+    disabled: true,
+    span: "(Coming soon)",
   },
 ];
 
