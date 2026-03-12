@@ -45,7 +45,8 @@ export async function createApplicant(data: ApplicantData): Promise<CreateApplic
       appliedAt: new Date(),
     });
   } catch (err) {
-    const code = err && typeof err === "object" && "code" in err ? (err as { code: string }).code : null;
+    const code =
+      err && typeof err === "object" && "code" in err ? (err as { code: string }).code : null;
     if (code === "23505") {
       return { success: false, conflict: true };
     }

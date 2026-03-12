@@ -1,7 +1,6 @@
 import { ClerkProvider } from "@clerk/nextjs";
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { LayoutDebugClient } from "@/shared/components/tools/layout-debug-client";
 import { Toaster } from "@/shared/components/ui/sonner";
 import "./globals.css";
 
@@ -44,7 +43,6 @@ export default function RootLayout({
             <Toaster position="top-center" />
             {children}
           </div>
-          <LayoutDebugClient />
         </body>
       </html>
     </ClerkProvider>

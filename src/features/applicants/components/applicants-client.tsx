@@ -7,6 +7,7 @@ import { getApplicantCounts, getApplicants } from "@/features/applicants/actions
 import { ApplicantDetail } from "@/features/applicants/components/applicant-detail";
 import { ApplicantList } from "@/features/applicants/components/applicant-list";
 import { DirectInviteButton } from "@/features/applicants/components/direct-invite-button";
+import type { ApplicantTabKey, SortKey } from "@/features/applicants/types";
 import { PageLoader } from "@/shared/components/layout/page-loader";
 import { Button } from "@/shared/components/ui/button";
 import {
@@ -23,17 +24,13 @@ import { useInfiniteScroll } from "@/shared/hooks/use-infinite-scroll";
 import { platformQueryKeys } from "@/shared/lib/platform-query-keys";
 import { cn } from "@/shared/lib/utils";
 
-export type SortKey = "newest" | "oldest" | "name";
-
-type TabKey = "applicant" | "approved_not_joined" | "rejected";
-
-const TABS: { key: TabKey; label: string }[] = [
+const TABS: { key: ApplicantTabKey; label: string }[] = [
   { key: "applicant", label: "New" },
-  { key: "approved_not_joined", label: "Not joined" },
+  { key: "approved_not_joined", label: "Pending" },
   { key: "rejected", label: "Rejected" },
 ];
 
-const EMPTY_MESSAGES: Record<TabKey, { title: string; description: string }> = {
+const EMPTY_MESSAGES: Record<ApplicantTabKey, { title: string; description: string }> = {
   applicant: {
     title: "No new applicants",
     description: "New applications will appear here when creators apply.",
@@ -49,7 +46,7 @@ const EMPTY_MESSAGES: Record<TabKey, { title: string; description: string }> = {
 };
 
 export function ApplicantsClient() {
-  const [activeTab, setActiveTab] = useState<TabKey>("applicant");
+  const [activeTab, setActiveTab] = useState<ApplicantTabKey>("applicant");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [sort, setSort] = useState<SortKey>("newest");
   const [detailOpen, setDetailOpen] = useState(false);
@@ -96,11 +93,11 @@ export function ApplicantsClient() {
   const desktopSelected = selected ?? creators[0] ?? null;
 
   const handleTabChange = (value: string) => {
-    setActiveTab(value as TabKey);
+    setActiveTab(value as ApplicantTabKey);
     setSelectedId(null);
   };
 
-  const handleMutationSuccess = (destinationTab: TabKey) => {
+  const handleMutationSuccess = (destinationTab: ApplicantTabKey) => {
     setActiveTab(destinationTab);
     setSelectedId(null);
   };

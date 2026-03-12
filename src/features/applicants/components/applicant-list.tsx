@@ -1,8 +1,7 @@
 "use client";
 
 import { ArrowUpDown } from "lucide-react";
-import type { SortKey } from "@/features/applicants/components/applicants-client";
-import type { Creator } from "@/features/applicants/types";
+import type { Creator, SortKey } from "@/features/applicants/types";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import {
@@ -85,7 +84,16 @@ export function ApplicantList({ creators, selectedId, onSelect, sort, onSortChan
                       {c.fullName || c.email}
                     </span>
                     <span className="block text-xs text-muted-foreground truncate">
-                      {new Date(c.appliedAt).toLocaleDateString()}
+                      {new Date(c.appliedAt).toLocaleDateString(undefined, {
+                        month: "numeric",
+                        day: "numeric",
+                        year: "numeric",
+                      })}{" "}
+                      {new Date(c.appliedAt).toLocaleTimeString(undefined, {
+                        hour: "numeric",
+                        minute: "2-digit",
+                        timeZoneName: "short",
+                      })}
                     </span>
                   </div>
                   {recent && <Badge variant="outline">New</Badge>}
