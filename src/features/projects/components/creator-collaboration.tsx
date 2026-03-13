@@ -8,7 +8,6 @@ import { useState } from "react";
 import { toast } from "sonner";
 import type { CollaborationDetail } from "@/entities/collaboration/types";
 import { CloseCollaborationWizard } from "@/features/collaborations/components/close-collaboration-wizard";
-import { CreatorProfileSheet } from "@/features/creators/components/admin/creator-profile-sheet";
 import { SubmissionSection } from "@/features/projects/components/submission-section";
 import { AssetCard } from "@/shared/components/blocks/asset-card";
 import { DownloadButton } from "@/shared/components/blocks/download-button";
@@ -23,6 +22,7 @@ import {
 } from "@/shared/components/ui/breadcrumb";
 import { Button } from "@/shared/components/ui/button";
 import { platformQueryKeys } from "@/shared/lib/platform-query-keys";
+import { ROUTES } from "@/shared/lib/routes";
 
 interface CreatorCollaborationProps {
   collaboration: CollaborationDetail;
@@ -39,7 +39,7 @@ export function CreatorCollaboration({ collaboration }: CreatorCollaborationProp
     queryClient.invalidateQueries({
       queryKey: platformQueryKeys.collaborationDetail(project.id, id),
     });
-    queryClient.invalidateQueries({ queryKey: platformQueryKeys.database });
+    queryClient.invalidateQueries({ queryKey: platformQueryKeys.databasePrefix });
   }
 
   const allAssets = submissions.flatMap((s) =>
@@ -97,9 +97,9 @@ export function CreatorCollaboration({ collaboration }: CreatorCollaborationProp
               <AvatarFallback className="text-base">{creator.fullName[0]}</AvatarFallback>
             </Avatar>
             <div>
-              <CreatorProfileSheet creatorId={creator.id} creatorName={creator.fullName}>
+              <Link href={ROUTES.creatorProfile(creator.id)}>
                 <h1 className="hover:underline text-2xl font-semibold">{creator.fullName}</h1>
-              </CreatorProfileSheet>
+              </Link>
 
               <p className="text-sm text-muted-foreground">{creator.email}</p>
             </div>
@@ -156,6 +156,7 @@ export function CreatorCollaboration({ collaboration }: CreatorCollaborationProp
             creatorId={creator.id}
             creatorName={creator.fullName}
             profilePhotoUrl={creator.profilePhotoUrl ?? ""}
+            profilePhotoBlurDataUrl={creator.profilePhotoBlurDataUrl}
             submissionName={project.name}
             closedCollabRatings={creator.closedCollabRatings}
           />

@@ -1,17 +1,16 @@
 "use client";
 
+import { useInfiniteQuery } from "@tanstack/react-query";
+import { useVirtualizer } from "@tanstack/react-virtual";
 import { motion } from "framer-motion";
 import { ArrowUpDown, Search, SlidersHorizontal, Users } from "lucide-react";
-import { useEffect, useState } from "react";
-import {
-  type CreatorProfile,
-  getCreatorProfile,
-} from "@/features/creators/actions/admin/get-creator-profile";
-import type { CreatorListItem } from "@/features/creators/actions/admin/get-creators";
+import { useCallback, useMemo, useRef, useState } from "react";
+import { getCreators } from "@/features/creators/actions/admin/get-creators";
 import {
   SORT_OPTIONS,
   useCreatorFilters,
 } from "@/features/creators/hooks/admin/use-creator-filters";
+import { PageLoader } from "@/shared/components/layout/page-loader";
 import { Button } from "@/shared/components/ui/button";
 import {
   DropdownMenu,
@@ -27,40 +26,73 @@ import {
   EmptyTitle,
 } from "@/shared/components/ui/empty";
 import { Input } from "@/shared/components/ui/input";
+import { LoadMoreSentinel } from "@/shared/components/ui/load-more-sentinel";
+import { useInfiniteScroll } from "@/shared/hooks/use-infinite-scroll";
 import { EASING_FUNCTION } from "@/shared/lib/constants";
+import { platformQueryKeys } from "@/shared/lib/platform-query-keys";
 import { CreatorCard } from "./creator-card";
-import { CreatorOverlay } from "./creator-overlay/creator-overlay";
 import { DatabaseFilters } from "./database-filters";
 
-interface CreatorDatabaseProps {
-  creators: CreatorListItem[];
+const ROW_HEIGHT = 408;
+
+function chunk<T>(arr: T[], size: number): T[][] {
+  const out: T[][] = [];
+  for (let i = 0; i < arr.length; i += size) {
+    out.push(arr.slice(i, i + size));
+  }
+  return out;
 }
 
-export function CreatorDatabase({ creators }: CreatorDatabaseProps) {
-  const [selectedCreatorId, setSelectedCreatorId] = useState<string | null>(null);
+export function CreatorDatabase() {
   const [filtersOpen, setFiltersOpen] = useState(false);
-  const [creator, setCreatorAssets] = useState<CreatorProfile | null>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
   const {
     search,
     setSearch,
+    debouncedSearch,
     sort,
     setSort,
     filters,
     setFilters,
-    sortedCreators,
     currentSortLabel,
-  } = useCreatorFilters(creators);
+  } = useCreatorFilters();
 
-  useEffect(() => {
-    if (!selectedCreatorId) return;
-    setCreatorAssets(null);
-    getCreatorProfile(selectedCreatorId).then(setCreatorAssets);
-  }, [selectedCreatorId]);
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useInfiniteQuery({
+    queryKey: platformQueryKeys.database(filters, sort, debouncedSearch),
+    queryFn: ({ pageParam }) =>
+      getCreators({
+        filters,
+        sort,
+        search: debouncedSearch,
+        page: pageParam,
+      }),
+    getNextPageParam: (last, all) => (last.hasMore ? all.length : undefined),
+    initialPageParam: 0,
+  });
+
+  const creators = useMemo(() => data?.pages.flatMap((p) => p.creators) ?? [], [data]);
+
+  const COLUMNS_PER_ROW = 4;
+  const rows = useMemo(() => chunk(creators, COLUMNS_PER_ROW), [creators]);
+
+  const virtualizer = useVirtualizer({
+    count: rows.length,
+    getScrollElement: useCallback(() => scrollContainerRef.current, []),
+    estimateSize: () => ROW_HEIGHT,
+    overscan: 2,
+  });
+
+  const sentinelRef = useInfiniteScroll({
+    scrollRef: scrollContainerRef,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+  });
 
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-      {/* Top bar: filter toggle + search + sort */}
-      <div className="z-20 bg-background border-b border-border px-6 py-3 flex items-center gap-3 shrink-0">
+      <div className="z-20 bg-background border-b border-border px-6 py-3 flex items-stretch gap-3 shrink-0">
         <Button
           type="button"
           variant={filtersOpen ? "default" : "outline"}
@@ -81,11 +113,10 @@ export function CreatorDatabase({ creators }: CreatorDatabaseProps) {
           />
         </div>
 
-        {/* Sort dropdown */}
-        <div className="ml-auto">
+        <div className="ml-auto flex h-full items-center gap-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button type="button" variant="outline" size="sm" className="gap-1.5">
+              <Button type="button" variant="outline" size="sm" className="h-full gap-1.5">
                 <ArrowUpDown className="h-3.5 w-3.5 text-muted-foreground" />
                 {currentSortLabel}
               </Button>
@@ -105,9 +136,7 @@ export function CreatorDatabase({ creators }: CreatorDatabaseProps) {
         </div>
       </div>
 
-      {/* Body: filter overlays content; content always full width */}
       <div className="relative flex flex-1 min-h-0 overflow-hidden">
-        {/* Filter: overlay from left, shadow only */}
         <motion.aside
           className="absolute inset-y-0 left-0 z-10 w-56 flex flex-col overflow-y-auto bg-background p-4 shadow-xl"
           initial={{ x: "-100%" }}
@@ -119,13 +148,16 @@ export function CreatorDatabase({ creators }: CreatorDatabaseProps) {
 
         <button
           type="button"
-          className={`flex min-h-0 flex-1 min-w-0 flex-col overflow-y-auto transition-[filter] duration-200 ${filtersOpen ? "blur-sm overflow-hidden" : ""}`}
+          className={`flex min-h-0 flex-1 min-w-0 flex-col transition-[filter] duration-200 ${filtersOpen ? "blur-sm overflow-hidden" : ""}`}
           onClick={() => filtersOpen && setFiltersOpen(false)}
         >
           <div
-            className={`flex flex-1 flex-col min-h-0 ${filtersOpen ? "pointer-events-none" : "pointer-events-auto"}`}
+            ref={scrollContainerRef}
+            className={`flex flex-col flex-1 min-h-0 overflow-y-auto ${filtersOpen ? "pointer-events-none" : "pointer-events-auto"}`}
           >
-            {sortedCreators.length === 0 ? (
+            {isLoading ? (
+              <PageLoader />
+            ) : creators.length === 0 ? (
               <div className="flex flex-1 p-6">
                 <Empty>
                   <EmptyHeader>
@@ -138,23 +170,44 @@ export function CreatorDatabase({ creators }: CreatorDatabaseProps) {
                 </Empty>
               </div>
             ) : (
-              <div className="grid grid-cols-1 gap-2 p-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
-                {sortedCreators.map((creator) => (
-                  <CreatorCard
-                    key={creator.id}
-                    creator={creator}
-                    onClick={() => setSelectedCreatorId(creator.id)}
-                  />
-                ))}
+              <div className="p-4">
+                <div
+                  style={{
+                    height: `${virtualizer.getTotalSize()}px`,
+                    position: "relative",
+                    width: "100%",
+                  }}
+                >
+                  {virtualizer.getVirtualItems().map((virtualRow) => {
+                    const rowCreators = rows[virtualRow.index] ?? [];
+                    return (
+                      <div
+                        key={virtualRow.key}
+                        style={{
+                          position: "absolute",
+                          top: 0,
+                          left: 0,
+                          width: "100%",
+                          transform: `translateY(${virtualRow.start}px)`,
+                          height: `${virtualRow.size}px`,
+                        }}
+                        className="pb-2"
+                      >
+                        <div className="grid grid-cols-1 gap-2 h-full sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+                          {rowCreators.map((creator) => (
+                            <CreatorCard key={creator.id} creator={creator} />
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+                <LoadMoreSentinel sentinelRef={sentinelRef} isFetching={isFetchingNextPage} />
               </div>
             )}
           </div>
         </button>
       </div>
-
-      {selectedCreatorId && (
-        <CreatorOverlay creator={creator} onClose={() => setSelectedCreatorId(null)} />
-      )}
     </div>
   );
 }

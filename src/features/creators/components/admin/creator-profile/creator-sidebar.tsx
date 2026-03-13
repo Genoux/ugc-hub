@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import type { CreatorProfile } from "@/features/creators/actions/admin/get-creator-profile";
 import { EASING_FUNCTION } from "@/shared/lib/constants";
-import { CreatorProfileInfo } from "../creator-profile-info";
+import { CreatorProfileInfo } from "./_components/creator-profile-info";
 
 interface CreatorSidebarProps {
   creator: CreatorProfile;

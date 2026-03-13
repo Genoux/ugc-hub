@@ -53,30 +53,32 @@ export function CreatorContent({ creator, contentInert = false }: CreatorContent
         )}
       </div>
       <div className="min-h-full flex flex-col gap-8 pb-6 sm:pb-8">
-        <div className="flex flex-col gap-3">
-          <h2 className="text-base font-semibold flex items-center gap-1">
-            Portfolio <NumberDot count={allAssets.length} />
-          </h2>
-          <div className="flex overflow-x-auto gap-1">
-            {allAssets.map((asset) => (
-              <AssetCard
-                key={asset.id}
-                size="sm"
-                src={asset.url}
-                filename={asset.filename}
-                actionSlot={
-                  <DownloadButton
-                    assets={[{ id: asset.id, filename: asset.filename, url: asset.url }]}
-                    size="icon"
-                    variant="ghost"
-                    className="h-8 w-8 text-white! hover:bg-white/20"
-                    stopPropagation
-                  />
-                }
-              />
-            ))}
+        {allAssets.length > 0 && (
+          <div className="flex flex-col gap-3">
+            <h2 className="text-base font-semibold flex items-center gap-1">
+              Portfolio <NumberDot count={allAssets.length} />
+            </h2>
+            <div className="flex overflow-x-auto gap-1">
+              {allAssets.map((asset) => (
+                <AssetCard
+                  key={asset.id}
+                  size="sm"
+                  src={asset.url}
+                  filename={asset.filename}
+                  actionSlot={
+                    <DownloadButton
+                      assets={[{ id: asset.id, filename: asset.filename, url: asset.url }]}
+                      size="icon"
+                      variant="ghost"
+                      className="h-8 w-8 text-white! hover:bg-white/20"
+                      stopPropagation
+                    />
+                  }
+                />
+              ))}
+            </div>
           </div>
-        </div>
+        )}
         <div className="flex flex-col flex-1 gap-3">
           <h2 className="text-base font-semibold flex items-center gap-1">
             Collaborations

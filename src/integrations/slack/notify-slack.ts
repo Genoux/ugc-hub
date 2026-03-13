@@ -2,6 +2,7 @@ import { env } from "@/shared/lib/env";
 import { buildSlackBlocks, buildSlackText, type SlackEvent } from "./slack-events";
 
 export async function notifySlack(event: SlackEvent): Promise<void> {
+  if (process.env.NODE_ENV === "development") return;
   if (!env.SLACK_WEBHOOK_URL) return;
 
   try {

@@ -52,7 +52,7 @@ export function DirectInviteButton() {
         );
         return;
       }
-      queryClient.invalidateQueries({ queryKey: platformQueryKeys.applicants });
+      queryClient.invalidateQueries({ queryKey: platformQueryKeys.applicantsPrefix });
       toast.success(`Invitation sent to ${email.trim()}`);
       handleClose();
     },
@@ -72,7 +72,7 @@ export function DirectInviteButton() {
         toast.error(result.error);
         return;
       }
-      queryClient.invalidateQueries({ queryKey: platformQueryKeys.applicants });
+      queryClient.invalidateQueries({ queryKey: platformQueryKeys.applicantsPrefix });
       const parts = [`${result.sent} invitation${result.sent !== 1 ? "s" : ""} sent`];
       if (result.skipped > 0) parts.push(`${result.skipped} skipped (already registered)`);
       toast.success(parts.join(" · "));

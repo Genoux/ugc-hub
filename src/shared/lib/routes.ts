@@ -5,4 +5,5 @@ export const ROUTES = {
   signIn: "/sign-in",
   signUp: "/sign-up",
   signOut: "/sign-out",
+  creatorProfile: (id: string) => `/database/${id}`,
 } as const;

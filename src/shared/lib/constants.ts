@@ -94,35 +94,49 @@ export const SOCIAL_PLATFORMS = [
 export type SocialPlatform = (typeof SOCIAL_PLATFORMS)[number]["value"];
 
 export const COUNTRIES = [
-  "United States",
-  "United Kingdom",
-  "Canada",
   "Australia",
-  "France",
-  "Germany",
-  "Spain",
-  "Italy",
   "Brazil",
-  "Mexico",
-  "Netherlands",
-  "Sweden",
-  "Norway",
+  "Canada",
   "Denmark",
   "Finland",
-  "Japan",
-  "South Korea",
+  "France",
+  "Germany",
   "India",
-  "South Africa",
+  "Italy",
+  "Japan",
+  "Mexico",
+  "Netherlands",
   "Nigeria",
+  "Norway",
+  "South Africa",
+  "South Korea",
+  "Spain",
+  "Sweden",
+  "United Kingdom",
+  "United States",
   "Other",
 ];
 
 export const RATE_BANDS = [
-  { label: "$50 – $150", value: { min: 50, max: 150 } },
-  { label: "$150 – $300", value: { min: 150, max: 300 } },
-  { label: "$300 – $600", value: { min: 300, max: 600 } },
-  { label: "$600 – $1,000", value: { min: 600, max: 1000 } },
-  { label: "$1,000+", value: { min: 1000, max: 9999 } },
+  {
+    label: "$50 – $150",
+    tag: "Getting started",
+    tagColor: "emerald",
+    value: { min: 50, max: 150 },
+  },
+  {
+    label: "$150 – $300",
+    tag: "Standard Rates (Most Collabs)",
+    tagColor: "sky",
+    value: { min: 150, max: 300 },
+  },
+  { label: "$300 – $600", tag: "Premium UGC", tagColor: "violet", value: { min: 300, max: 600 } },
+  {
+    label: "$600 – $1,000",
+    tag: "Specialty / Super Niche (Rare)",
+    tagColor: "amber",
+    value: { min: 600, max: 1000 },
+  },
 ];
 
 export type PrimaryChannel = (typeof PRIMARY_CHANNELS)[number];
@@ -181,6 +195,6 @@ export const EASING_FUNCTION = {
 export const ALLOWED_UPLOAD_MIME_TYPES = ["video/mp4", "video/quicktime"] as const;
 
 export const UPLOAD_SIZE_LIMITS = {
-  image: 15 * 1024 * 1024,       //  15 MB — profile pictures
+  image: 15 * 1024 * 1024, //  15 MB — profile pictures
   video: 1 * 1024 * 1024 * 1024, //   1 GB — all video
 } as const;

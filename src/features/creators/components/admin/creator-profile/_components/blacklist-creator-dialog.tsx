@@ -38,7 +38,8 @@ export function BlacklistCreatorDialog({
   const { mutate, isPending } = useMutation({
     mutationFn: () => blacklistCreator(creatorId, reason.trim()),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: platformQueryKeys.database });
+      queryClient.invalidateQueries({ queryKey: platformQueryKeys.databasePrefix });
+      queryClient.invalidateQueries({ queryKey: platformQueryKeys.creatorProfile(creatorId) });
       toast.success(`${creatorName} has been blacklisted`);
       onOpenChange(false);
     },

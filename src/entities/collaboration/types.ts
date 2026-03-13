@@ -9,6 +9,7 @@ export type CollaborationDetail = {
     fullName: string;
     email: string;
     profilePhotoUrl: string | null;
+    profilePhotoBlurDataUrl: string | null;
     closedCollabRatings: CollabRatingRow[];
   };
   submissions: Array<{

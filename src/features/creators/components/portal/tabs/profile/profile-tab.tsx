@@ -44,7 +44,7 @@ export function CreatorProfileTab({ creator, uiState, onOpenOnboarding }: Creato
   const profilePhotoUrl = creator.profilePhotoUrl ?? "";
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 lg:pt-6 gap-6 lg:gap-10 max-w-xl lg:max-w-none w-full mx-auto">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 max-w-xl lg:max-w-none w-full mx-auto">
       <div className="flex flex-col lg:col-span-4 w-full lg:sticky top-6 self-start gap-6 lg:gap-2">
         <div className="relative w-full h-56 lg:h-auto aspect-square lg:max-w-none lg:mx-0 rounded-4xl lg:rounded-sm shadow-hub bg-muted overflow-hidden">
           <Image
@@ -70,7 +70,7 @@ export function CreatorProfileTab({ creator, uiState, onOpenOnboarding }: Creato
           <LabeledField label="Gender" value={creator.genderIdentity} />
           <LabeledField label="Languages" value={creator.languages?.join(", ")} />
           <LabeledField label="Age group" value={creator.ageDemographic} />
-          <LabeledField label="Ethnicity" value={creator.ethnicity} />
+          <LabeledField label="Ethnicity" value={creator.ethnicity?.join(", ")} />
           <hr />
           <ProfileSocials
             links={[...socialLinks, { label: "Portfolio", handle: creator.portfolioUrl ?? "" }]}

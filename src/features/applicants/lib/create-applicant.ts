@@ -1,4 +1,5 @@
-import { eq } from "drizzle-orm";
+import { ilike } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
 import { creators } from "@/db/schema";
 import { db } from "@/shared/lib/db";
 
@@ -23,25 +24,35 @@ export type CreateApplicantResult =
 
 export async function createApplicant(data: ApplicantData): Promise<CreateApplicantResult> {
   const existing = await db.query.creators.findFirst({
-    where: eq(creators.email, data.email),
-    columns: { id: true, status: true },
+    where: ilike(creators.email, data.email),
+    columns: { id: true },
   });
 
-  if (existing && existing.status !== "rejected") {
+  if (existing) {
     return { success: false, conflict: true };
   }
 
-  await db.insert(creators).values({
-    fullName: data.fullName,
-    email: data.email,
-    country: data.country,
-    languages: data.languages,
-    socialChannels: data.socialChannels,
-    portfolioUrl: data.portfolioUrl,
-    source: "applicant",
-    status: "applicant",
-    appliedAt: new Date(),
-  });
+  try {
+    await db.insert(creators).values({
+      fullName: data.fullName,
+      email: data.email,
+      country: data.country,
+      languages: data.languages,
+      socialChannels: data.socialChannels,
+      portfolioUrl: data.portfolioUrl,
+      source: "applicant",
+      status: "applicant",
+      appliedAt: new Date(),
+    });
+  } catch (err) {
+    const code =
+      err && typeof err === "object" && "code" in err ? (err as { code: string }).code : null;
+    if (code === "23505") {
+      return { success: false, conflict: true };
+    }
+    return { success: false, conflict: false, error: err };
+  }
 
+  revalidatePath("/applicants");
   return { success: true };
 }

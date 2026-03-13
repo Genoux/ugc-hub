@@ -47,7 +47,7 @@ export interface OnboardingData {
   // Step 8
   genderIdentity: GenderIdentity | "";
   ageDemographic: AgeDemographic | "";
-  ethnicity: Ethnicity | "";
+  ethnicities: Ethnicity[];
 }
 
 export const INITIAL_ONBOARDING_DATA: OnboardingData = {
@@ -64,7 +64,7 @@ export const INITIAL_ONBOARDING_DATA: OnboardingData = {
   rateRangeSelf: null,
   genderIdentity: "",
   ageDemographic: "",
-  ethnicity: "",
+  ethnicities: [],
 };
 
 import type { CreatorProfile } from "@/features/creators/actions/portal/get-creator-profile";
