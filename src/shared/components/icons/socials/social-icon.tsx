@@ -14,11 +14,7 @@ export function SocialIcon({ name, url }: SocialIconProps) {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={() => window.open(url, "_blank")}
-        >
+        <Button variant="outline" size="icon" onClick={() => window.open(url, "_blank")}>
           {name === "Instagram" && <InstagramIcon />}
           {name === "TikTok" && <TikTokIcon />}
           {name === "YouTube" && <YouTubeIcon />}
