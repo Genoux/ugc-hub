@@ -2,6 +2,7 @@
 
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 import { z } from "zod";
 import { creators } from "@/db/schema";
 import { requireCreator } from "@/features/creators/lib/require-creator";
@@ -72,17 +73,16 @@ export async function completeCreatorProfile(input: z.infer<typeof schema>) {
       .where(eq(creators.id, creator.id));
 
     if (!wasAlreadyCompleted) {
-      void getR2SignedUrl(validated.profilePhoto)
-        .then((profileImageUrl) =>
-          notifySlack({
-            type: "creator_profile_complete",
-            creatorId: creator.id,
-            fullName: validated.fullName,
-            email: creator.email ?? undefined,
-            profileImageUrl: profileImageUrl ?? undefined,
-          }),
-        )
-        .catch(console.error);
+      after(async () => {
+        const profileImageUrl = await getR2SignedUrl(validated.profilePhoto);
+        await notifySlack({
+          type: "creator_profile_complete",
+          creatorId: creator.id,
+          fullName: validated.fullName,
+          email: creator.email ?? undefined,
+          profileImageUrl: profileImageUrl ?? undefined,
+        });
+      });
     }
 
     void generateBlurPlaceholder(validated.profilePhoto)
