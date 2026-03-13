@@ -7,17 +7,17 @@ import { YouTubeIcon } from "./youtube";
 
 interface SocialIconProps {
   name: SocialPlatform;
-  handle: string;
+  url: string;
 }
 
-export function SocialIcon({ name, handle }: SocialIconProps) {
+export function SocialIcon({ name, url }: SocialIconProps) {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
         <Button
           variant="outline"
           size="icon"
-          onClick={() => window.open(`https://${name}.com/${handle}`, "_blank")}
+          onClick={() => window.open(url, "_blank")}
         >
           {name === "Instagram" && <InstagramIcon />}
           {name === "TikTok" && <TikTokIcon />}
@@ -25,7 +25,7 @@ export function SocialIcon({ name, handle }: SocialIconProps) {
         </Button>
       </TooltipTrigger>
       <TooltipContent>
-        <p>{handle}</p>
+        <p>{url}</p>
       </TooltipContent>
     </Tooltip>
   );
