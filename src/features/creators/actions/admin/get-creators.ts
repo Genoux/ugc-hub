@@ -86,8 +86,8 @@ export async function getCreators(params: GetCreatorsParams): Promise<GetCreator
       ...(filters.languages.length > 0
         ? [
             or(
-              ...filters.languages.map((lang) =>
-                sql`${creators.languages} @> ${JSON.stringify([lang])}::jsonb`,
+              ...filters.languages.map(
+                (lang) => sql`${creators.languages} @> ${JSON.stringify([lang])}::jsonb`,
               ),
             ),
           ]

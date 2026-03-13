@@ -92,7 +92,7 @@ export function CreatorDatabase() {
 
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-      <div className="z-20 bg-background border-b border-border px-6 py-3 flex items-center gap-3 shrink-0">
+      <div className="z-20 bg-background border-b border-border px-6 py-3 flex items-stretch gap-3 shrink-0">
         <Button
           type="button"
           variant={filtersOpen ? "default" : "outline"}
@@ -113,10 +113,10 @@ export function CreatorDatabase() {
           />
         </div>
 
-        <div className="ml-auto">
+        <div className="ml-auto flex h-full items-center gap-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button type="button" variant="outline" size="sm" className="gap-1.5">
+              <Button type="button" variant="outline" size="sm" className="h-full gap-1.5">
                 <ArrowUpDown className="h-3.5 w-3.5 text-muted-foreground" />
                 {currentSortLabel}
               </Button>
