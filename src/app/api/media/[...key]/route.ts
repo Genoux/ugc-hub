@@ -65,8 +65,8 @@ export async function GET(request: Request, { params }: { params: Promise<{ key:
       const headers: Record<string, string> = {
         "cache-control": cacheControl,
         "accept-ranges": "bytes",
-        "content-type": cached.contentType,
-        "content-length": cached.contentLength,
+        ...(cached.contentType && { "content-type": cached.contentType }),
+        ...(cached.contentLength && { "content-length": cached.contentLength }),
       };
       return new Response(cached.body, { status: 200, headers });
     }
@@ -99,8 +99,8 @@ export async function GET(request: Request, { params }: { params: Promise<{ key:
     const headers: Record<string, string> = {
       "cache-control": cacheControl,
       "accept-ranges": "bytes",
-      "content-type": contentType,
-      "content-length": contentLength,
+      ...(contentType && { "content-type": contentType }),
+      ...(contentLength && { "content-length": contentLength }),
     };
     return new Response(body, { status: 200, headers });
   }
