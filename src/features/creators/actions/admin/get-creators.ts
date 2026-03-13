@@ -1,6 +1,6 @@
 "use server";
 
-import { and, asc, count, desc, eq, ilike, inArray, sql } from "drizzle-orm";
+import { and, asc, count, desc, eq, ilike, inArray, or, sql } from "drizzle-orm";
 import { collaborations, creators } from "@/db/schema";
 import type { Filters } from "@/features/creators/components/admin/database-filters";
 import type { SortKey } from "@/features/creators/hooks/admin/use-creator-filters";
@@ -81,6 +81,16 @@ export async function getCreators(params: GetCreatorsParams): Promise<GetCreator
               SOCIAL_PLATFORMS.find((p) => p.value === platform)?.urlKey ?? "instagram_url";
             return sql`${creators.socialChannels}::jsonb ? ${urlKey}`;
           })
+        : []),
+      ...(filters.countries.length > 0 ? [inArray(creators.country, filters.countries)] : []),
+      ...(filters.languages.length > 0
+        ? [
+            or(
+              ...filters.languages.map(
+                (lang) => sql`${creators.languages} @> ${JSON.stringify([lang])}::jsonb`,
+              ),
+            ),
+          ]
         : []),
     ];
 

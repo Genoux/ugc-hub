@@ -11,6 +11,7 @@ import type {
   ContentFormat,
   Ethnicity,
   GenderIdentity,
+  Language,
   OverallRatingTier,
   SocialPlatform,
   UgcCategory,
@@ -18,8 +19,10 @@ import type {
 import {
   AGE_DEMOGRAPHICS,
   CONTENT_FORMATS,
+  COUNTRIES,
   ETHNICITIES,
   GENDER_IDENTITIES,
+  LANGUAGES,
   OVERALL_RATING_TIERS,
   SOCIAL_PLATFORMS,
   UGC_CATEGORIES,
@@ -33,6 +36,8 @@ export interface Filters {
   ageDemographic: AgeDemographic[];
   ethnicity: Ethnicity[];
   socialPlatforms: SocialPlatform[];
+  languages: Language[];
+  countries: string[];
 }
 
 export const emptyFilters: Filters = {
@@ -43,6 +48,8 @@ export const emptyFilters: Filters = {
   ageDemographic: [],
   ethnicity: [],
   socialPlatforms: [],
+  languages: [],
+  countries: [],
 };
 
 export function hasActiveFilters(f: Filters): boolean {
@@ -53,7 +60,9 @@ export function hasActiveFilters(f: Filters): boolean {
     f.genderIdentity.length > 0 ||
     f.ageDemographic.length > 0 ||
     f.ethnicity.length > 0 ||
-    f.socialPlatforms.length > 0
+    f.socialPlatforms.length > 0 ||
+    f.languages.length > 0 ||
+    f.countries.length > 0
   );
 }
 
@@ -66,6 +75,8 @@ export function countActiveFilters(f: Filters): number {
     f.ageDemographic,
     f.ethnicity,
     f.socialPlatforms,
+    f.languages,
+    f.countries,
   ].reduce((n, arr) => n + arr.length, 0);
 }
 
@@ -78,6 +89,8 @@ export function getActiveFilterLabels(f: Filters): string[] {
     ...f.ageDemographic,
     ...f.ethnicity,
     ...f.socialPlatforms,
+    ...f.languages,
+    ...f.countries,
   ];
 }
 
@@ -235,6 +248,24 @@ export function DatabaseFilters({ filters, onChange }: DatabaseFiltersProps) {
           options={ETHNICITIES}
           selected={filters.ethnicity}
           onChange={(v) => onChange({ ...filters, ethnicity: v })}
+        />
+      </FilterSection>
+
+      <FilterSection title="Languages" activeCount={filters.languages.length}>
+        <MultiSelect
+          prefix="language"
+          options={LANGUAGES}
+          selected={filters.languages}
+          onChange={(v) => onChange({ ...filters, languages: v })}
+        />
+      </FilterSection>
+
+      <FilterSection title="Country" activeCount={filters.countries.length}>
+        <MultiSelect
+          prefix="country"
+          options={COUNTRIES}
+          selected={filters.countries}
+          onChange={(v) => onChange({ ...filters, countries: v })}
         />
       </FilterSection>
     </div>

@@ -43,6 +43,8 @@ export function useCreatorFilters() {
       ageDemographic: prev.ageDemographic.filter((s) => s !== label),
       ethnicity: prev.ethnicity.filter((s) => s !== label),
       socialPlatforms: prev.socialPlatforms.filter((s) => s !== label),
+      languages: prev.languages.filter((s) => s !== label),
+      countries: prev.countries.filter((s) => s !== label),
     }));
   };
 
