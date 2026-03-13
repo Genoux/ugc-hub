@@ -25,17 +25,17 @@ export function CreatorProfileInfo({ creator }: CreatorProfileInfoProps) {
   const socialLinks = [
     creator.socialChannels?.instagram_url && {
       label: "Instagram",
-      handle: creator.socialChannels.instagram_url.replace("https://", ""),
+      url: creator.socialChannels.instagram_url,
     },
     creator.socialChannels?.tiktok_url && {
       label: "TikTok",
-      handle: creator.socialChannels.tiktok_url.replace("https://", ""),
+      url: creator.socialChannels.tiktok_url,
     },
     creator.socialChannels?.youtube_url && {
       label: "YouTube",
-      handle: creator.socialChannels.youtube_url.replace("https://", ""),
+      url: creator.socialChannels.youtube_url,
     },
-  ].filter(Boolean) as { label: string; handle: string }[];
+  ].filter(Boolean) as { label: string; url: string }[];
 
   const profileHero = (
     <div className="relative aspect-4/5 w-full rounded-2xl overflow-hidden bg-muted">
@@ -140,8 +140,8 @@ export function CreatorProfileInfo({ creator }: CreatorProfileInfoProps) {
       <hr />
 
       <div className="flex items-center gap-2">
-        {socialLinks.map(({ label, handle }) => (
-          <SocialIcon key={label} name={label as SocialPlatform} handle={handle} />
+        {socialLinks.map(({ label, url }) => (
+          <SocialIcon key={label} name={label as SocialPlatform} url={url} />
         ))}
         {creator.portfolioUrl && (
           <Tooltip>
