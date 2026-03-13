@@ -2,6 +2,7 @@
 
 import { auth, clerkClient } from "@clerk/nextjs/server";
 import { and, eq } from "drizzle-orm";
+import { after } from "next/server";
 import { collaborations, creators, projects, submissions } from "@/db/schema";
 import { notifySlack } from "@/integrations/slack/notify-slack";
 import { toActionError } from "@/shared/lib/action-error";
@@ -65,12 +66,14 @@ export async function submitWizard(data: { token: string; creatorId: string }) {
       })
       .returning();
 
-    void notifySlack({
-      type: "creator_uploaded_content",
-      creatorName: creator.fullName ?? creator.email ?? data.creatorId,
-      projectName: project.name,
-      submissionLabel: submission.label,
-    }).catch(console.error);
+    after(() =>
+      notifySlack({
+        type: "creator_uploaded_content",
+        creatorName: creator.fullName ?? creator.email ?? data.creatorId,
+        projectName: project.name,
+        submissionLabel: submission.label,
+      }),
+    );
 
     return { project, folder: collab, submission };
   } catch (err) {
