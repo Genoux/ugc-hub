@@ -5,6 +5,17 @@ import { Check, Copy, ExternalLink, MoreVertical } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import type { ApplicantTabKey, Creator } from "@/features/applicants/types";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/shared/components/ui/alert-dialog";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import {
@@ -203,14 +214,25 @@ export function ApplicantDetail({ creator, activeTab, onMutationSuccess }: Props
 
         {showReinviteAction && (
           <div className="mt-6 pt-4 border-t border-border">
-            <Button
-              onClick={() => approve()}
-              disabled={isPending}
-              variant="outline"
-              className="w-full h-12"
-            >
-              {isApproving ? "Sending…" : "Re-invite to pool"}
-            </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button disabled={isPending} variant="outline" className="w-full h-12">
+                  {isApproving ? "Sending…" : "Re-invite to pool"}
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent size="sm">
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Re-invite {creator.fullName}?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This will send an invitation email. The creator will be moved to Pending status.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={() => approve()}>Re-invite</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         )}
       </div>

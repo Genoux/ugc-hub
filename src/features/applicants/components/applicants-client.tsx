@@ -97,9 +97,9 @@ export function ApplicantsClient() {
     setSelectedId(null);
   };
 
-  const handleMutationSuccess = (destinationTab: ApplicantTabKey) => {
-    setActiveTab(destinationTab);
+  const handleMutationSuccess = (_destinationTab: ApplicantTabKey) => {
     setSelectedId(null);
+    setDetailOpen(false);
   };
 
   const handleMobileSelect = (id: string) => {
