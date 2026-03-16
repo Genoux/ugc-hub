@@ -103,43 +103,43 @@ export function ApplicantList({ creators, selectedId, onSelect, onNavigate }: Pr
 
   return (
     <ul className="space-y-0.5">
-        {creators.map((c) => {
-          const recent = isRecentlyApplied(c.appliedAt);
-          const isSelected = selectedId === c.id;
-          return (
-            <li key={c.id} ref={isSelected ? selectedItemRef : undefined}>
-              <Button
-                variant="ghost"
-                onClick={() => onSelect(c.id)}
-                className={cn(
-                  "w-full justify-start text-left px-3 py-3 h-auto font-normal rounded-lg flex items-center gap-3",
-                  selectedId === c.id ? "bg-muted" : "hover:bg-muted/50",
-                )}
-              >
-                <div className="min-w-0 flex-1 flex items-center justify-between gap-3">
-                  <div className="flex flex-col gap-1">
-                    <span className="text-sm font-medium text-foreground truncate">
-                      {c.fullName || c.email}
-                    </span>
-                    <span className="block text-xs text-muted-foreground truncate">
-                      {new Date(c.appliedAt).toLocaleDateString(undefined, {
-                        month: "numeric",
-                        day: "numeric",
-                        year: "numeric",
-                      })}{" "}
-                      {new Date(c.appliedAt).toLocaleTimeString(undefined, {
-                        hour: "numeric",
-                        minute: "2-digit",
-                        timeZoneName: "short",
-                      })}
-                    </span>
-                  </div>
-                  {recent && <Badge variant="outline">New</Badge>}
+      {creators.map((c) => {
+        const recent = isRecentlyApplied(c.appliedAt);
+        const isSelected = selectedId === c.id;
+        return (
+          <li key={c.id} ref={isSelected ? selectedItemRef : undefined}>
+            <Button
+              variant="ghost"
+              onClick={() => onSelect(c.id)}
+              className={cn(
+                "w-full justify-start text-left px-3 py-3 h-auto font-normal rounded-lg flex items-center gap-3",
+                selectedId === c.id ? "bg-muted" : "hover:bg-muted/50",
+              )}
+            >
+              <div className="min-w-0 flex-1 flex items-center justify-between gap-3">
+                <div className="flex flex-col gap-1">
+                  <span className="text-sm font-medium text-foreground truncate">
+                    {c.fullName || c.email}
+                  </span>
+                  <span className="block text-xs text-muted-foreground truncate">
+                    {new Date(c.appliedAt).toLocaleDateString(undefined, {
+                      month: "numeric",
+                      day: "numeric",
+                      year: "numeric",
+                    })}{" "}
+                    {new Date(c.appliedAt).toLocaleTimeString(undefined, {
+                      hour: "numeric",
+                      minute: "2-digit",
+                      timeZoneName: "short",
+                    })}
+                  </span>
                 </div>
-              </Button>
-            </li>
-          );
-        })}
+                {recent && <Badge variant="outline">New</Badge>}
+              </div>
+            </Button>
+          </li>
+        );
+      })}
     </ul>
   );
 }

@@ -4,6 +4,7 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { motion } from "framer-motion";
 import { ArrowUpDown, Search, SlidersHorizontal, Users } from "lucide-react";
+import { AnimatePresence } from "motion/react";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { getCreators } from "@/features/creators/actions/admin/get-creators";
 import {
@@ -30,7 +31,6 @@ import { LoadMoreSentinel } from "@/shared/components/ui/load-more-sentinel";
 import { useInfiniteScroll } from "@/shared/hooks/use-infinite-scroll";
 import { EASING_FUNCTION } from "@/shared/lib/constants";
 import { platformQueryKeys } from "@/shared/lib/platform-query-keys";
-import { AnimatePresence } from "motion/react";
 import { CreatorCard } from "./creator-card";
 import { DatabaseFilters } from "./database-filters";
 

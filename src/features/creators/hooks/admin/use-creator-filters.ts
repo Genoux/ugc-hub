@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
 import { parseAsArrayOf, parseAsString, parseAsStringEnum, useQueryStates } from "nuqs";
+import { useEffect, useState } from "react";
 import {
   countActiveFilters,
   emptyFilters,

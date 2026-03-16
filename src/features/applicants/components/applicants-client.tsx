@@ -5,7 +5,10 @@ import { Users } from "lucide-react";
 import { useMemo, useRef, useState } from "react";
 import { getApplicantCounts, getApplicants } from "@/features/applicants/actions/get-applicants";
 import { ApplicantDetail } from "@/features/applicants/components/applicant-detail";
-import { ApplicantList, ApplicantListHeader } from "@/features/applicants/components/applicant-list";
+import {
+  ApplicantList,
+  ApplicantListHeader,
+} from "@/features/applicants/components/applicant-list";
 import { DirectInviteButton } from "@/features/applicants/components/direct-invite-button";
 import type { ApplicantTabKey, SortKey } from "@/features/applicants/types";
 import { PageLoader } from "@/shared/components/layout/page-loader";
@@ -200,13 +203,19 @@ export function ApplicantsClient() {
               <div className="shrink-0">
                 <ApplicantListHeader count={creators.length} sort={sort} onSortChange={setSort} />
               </div>
-              <div ref={desktopScrollRef} className="flex flex-col flex-1 min-h-0 min-w-0 overflow-y-auto">
+              <div
+                ref={desktopScrollRef}
+                className="flex flex-col flex-1 min-h-0 min-w-0 overflow-y-auto"
+              >
                 <ApplicantList
                   creators={creators}
                   selectedId={desktopSelected?.id ?? null}
                   onSelect={setSelectedId}
                 />
-                <LoadMoreSentinel sentinelRef={desktopSentinelRef} isFetching={isFetchingNextPage} />
+                <LoadMoreSentinel
+                  sentinelRef={desktopSentinelRef}
+                  isFetching={isFetchingNextPage}
+                />
               </div>
             </div>
             <main className="flex flex-col pb-8 min-w-0 min-h-0">

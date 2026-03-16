@@ -157,8 +157,7 @@ function buildProfileCompleteBlocks(
   event: Extract<SlackEvent, { type: "creator_profile_complete" }>,
 ): object[] {
   const contextImage =
-    event.profileImageUrl?.startsWith("https://") &&
-    event.profileImageUrl.length <= 3000
+    event.profileImageUrl?.startsWith("https://") && event.profileImageUrl.length <= 3000
       ? { type: "image" as const, image_url: event.profileImageUrl, alt_text: event.fullName }
       : null;
 

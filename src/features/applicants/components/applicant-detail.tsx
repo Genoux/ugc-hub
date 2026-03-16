@@ -2,6 +2,7 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Check, Copy, ExternalLink, MoreVertical } from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
 import type { ApplicantTabKey, Creator } from "@/features/applicants/types";
@@ -28,7 +29,6 @@ import { platformQueryKeys } from "@/shared/lib/platform-query-keys";
 import { approveApplicant } from "../actions/approve-applicant";
 import { reinviteCreator } from "../actions/reinvite-creator";
 import { rejectApplicant } from "../actions/reject-applicant";
-import Link from "next/link";
 
 interface Props {
   creator: Creator;

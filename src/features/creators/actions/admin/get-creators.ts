@@ -55,7 +55,10 @@ export async function getCreators(params: GetCreatorsParams): Promise<GetCreator
       ...(ratingFilters.length > 0
         ? [
             includeBlacklisted
-              ? or(inArray(creators.overallRating, ratingFilters), eq(creators.status, "blacklisted"))
+              ? or(
+                  inArray(creators.overallRating, ratingFilters),
+                  eq(creators.status, "blacklisted"),
+                )
               : inArray(creators.overallRating, ratingFilters),
           ]
         : []),
