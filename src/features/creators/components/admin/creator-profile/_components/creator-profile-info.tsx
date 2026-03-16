@@ -12,7 +12,6 @@ import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/shared/components/ui/tooltip";
 import type { SocialPlatform } from "@/shared/lib/constants";
-import { BlacklistedHovercard } from "./blacklisted-hovercard";
 
 interface CreatorProfileInfoProps {
   creator: CreatorProfile;
@@ -20,7 +19,6 @@ interface CreatorProfileInfoProps {
 
 export function CreatorProfileInfo({ creator }: CreatorProfileInfoProps) {
   const rateRange = creator.rateRangeInternal || creator.rateRangeSelf;
-  const blacklisted = creator.status === "blacklisted" ? creator : null;
 
   const socialLinks = [
     creator.socialChannels?.instagram_url && {
@@ -55,12 +53,6 @@ export function CreatorProfileInfo({ creator }: CreatorProfileInfoProps) {
             <div className="flex items-center gap-2">
               <h3 className="font-semibold text-white text-xl truncate">{creator.fullName}</h3>
               {creator.overallRating === "top creator" && <VerifiedBadge className="size-5" />}
-              {blacklisted && (
-                <BlacklistedHovercard
-                  reason={blacklisted.blacklistReason}
-                  blacklistedBy={blacklisted.blacklistedByProfile}
-                />
-              )}
             </div>
           </div>
         </div>

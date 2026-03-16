@@ -4,6 +4,7 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { motion } from "framer-motion";
 import { ArrowUpDown, Search, SlidersHorizontal, Users } from "lucide-react";
+import { AnimatePresence } from "motion/react";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { getCreators } from "@/features/creators/actions/admin/get-creators";
 import {
@@ -145,10 +146,18 @@ export function CreatorDatabase() {
         >
           <DatabaseFilters filters={filters} onChange={setFilters} />
         </motion.aside>
-
+        <AnimatePresence mode="wait">
+          <motion.div
+            className="absolute inset-0 z-5 bg-black/70"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: filtersOpen ? 1 : 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.4, ease: EASING_FUNCTION.exponential }}
+          />
+        </AnimatePresence>
         <button
           type="button"
-          className={`flex min-h-0 flex-1 min-w-0 flex-col transition-[filter] duration-200 ${filtersOpen ? "blur-sm overflow-hidden" : ""}`}
+          className={`flex min-h-0 flex-1 min-w-0 flex-col`}
           onClick={() => filtersOpen && setFiltersOpen(false)}
         >
           <div

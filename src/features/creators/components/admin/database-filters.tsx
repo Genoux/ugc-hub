@@ -5,7 +5,6 @@ import { useState } from "react";
 import { Button } from "@/shared/components/ui/button";
 import { Checkbox } from "@/shared/components/ui/checkbox";
 import { Label } from "@/shared/components/ui/label";
-import { NumberDot } from "@/shared/components/ui/number-dot";
 import type {
   AgeDemographic,
   ContentFormat,
@@ -97,12 +96,10 @@ export function getActiveFilterLabels(f: Filters): string[] {
 function FilterSection({
   title,
   defaultOpen = false,
-  activeCount,
   children,
 }: {
   title: string;
   defaultOpen?: boolean;
-  activeCount: number;
   children: React.ReactNode;
 }) {
   const [open, setOpen] = useState(defaultOpen);
@@ -117,7 +114,6 @@ function FilterSection({
       >
         <div className="flex items-center gap-2">
           <span className="flex items-center gap-2">{title}</span>
-          <NumberDot count={activeCount} />
         </div>
         <ChevronDown
           className={`h-3.5 w-3.5 text-muted-foreground transition-transform ${
@@ -188,7 +184,7 @@ interface DatabaseFiltersProps {
 export function DatabaseFilters({ filters, onChange }: DatabaseFiltersProps) {
   return (
     <div className="w-full flex flex-col gap-2">
-      <FilterSection title="Rating" defaultOpen activeCount={filters.overallRating.length}>
+      <FilterSection title="Rating" defaultOpen>
         <MultiSelect
           prefix="rating"
           options={OVERALL_RATING_TIERS}
@@ -197,7 +193,7 @@ export function DatabaseFilters({ filters, onChange }: DatabaseFiltersProps) {
         />
       </FilterSection>
 
-      <FilterSection title="Channels" activeCount={filters.socialPlatforms.length}>
+      <FilterSection title="Channels">
         <MultiSelect
           prefix="channel"
           options={SOCIAL_PLATFORMS.map((p) => p.value)}
@@ -206,7 +202,7 @@ export function DatabaseFilters({ filters, onChange }: DatabaseFiltersProps) {
         />
       </FilterSection>
 
-      <FilterSection title="UGC Categories" activeCount={filters.ugcCategories.length}>
+      <FilterSection title="UGC Categories">
         <MultiSelect
           prefix="ugc"
           options={UGC_CATEGORIES}
@@ -215,7 +211,7 @@ export function DatabaseFilters({ filters, onChange }: DatabaseFiltersProps) {
         />
       </FilterSection>
 
-      <FilterSection title="Content Formats" activeCount={filters.contentFormats.length}>
+      <FilterSection title="Content Formats">
         <MultiSelect
           prefix="format"
           options={CONTENT_FORMATS}
@@ -224,7 +220,7 @@ export function DatabaseFilters({ filters, onChange }: DatabaseFiltersProps) {
         />
       </FilterSection>
 
-      <FilterSection title="Gender" activeCount={filters.genderIdentity.length}>
+      <FilterSection title="Gender">
         <MultiSelect
           prefix="gender"
           options={GENDER_IDENTITIES}
@@ -233,7 +229,7 @@ export function DatabaseFilters({ filters, onChange }: DatabaseFiltersProps) {
         />
       </FilterSection>
 
-      <FilterSection title="Age" activeCount={filters.ageDemographic.length}>
+      <FilterSection title="Age">
         <MultiSelect
           prefix="age"
           options={AGE_DEMOGRAPHICS}
@@ -242,7 +238,7 @@ export function DatabaseFilters({ filters, onChange }: DatabaseFiltersProps) {
         />
       </FilterSection>
 
-      <FilterSection title="Ethnicity" activeCount={filters.ethnicity.length}>
+      <FilterSection title="Ethnicity">
         <MultiSelect
           prefix="ethnicity"
           options={ETHNICITIES}
@@ -251,7 +247,7 @@ export function DatabaseFilters({ filters, onChange }: DatabaseFiltersProps) {
         />
       </FilterSection>
 
-      <FilterSection title="Languages" activeCount={filters.languages.length}>
+      <FilterSection title="Languages">
         <MultiSelect
           prefix="language"
           options={LANGUAGES}
@@ -260,7 +256,7 @@ export function DatabaseFilters({ filters, onChange }: DatabaseFiltersProps) {
         />
       </FilterSection>
 
-      <FilterSection title="Country" activeCount={filters.countries.length}>
+      <FilterSection title="Country">
         <MultiSelect
           prefix="country"
           options={COUNTRIES}
