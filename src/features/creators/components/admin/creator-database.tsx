@@ -146,24 +146,22 @@ export function CreatorDatabase() {
         >
           <DatabaseFilters filters={filters} onChange={setFilters} />
         </motion.aside>
-        <AnimatePresence mode="wait">
-          <motion.div
-            className="absolute inset-0 z-5 bg-black/70"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: filtersOpen ? 1 : 0 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.4, ease: EASING_FUNCTION.exponential }}
-          />
+        <AnimatePresence>
+          {filtersOpen && (
+            <motion.div
+              className="absolute inset-0 z-5 bg-black/70 cursor-pointer"
+              initial={{ opacity: 0, pointerEvents: "auto" }}
+              animate={{ opacity: 1, pointerEvents: "auto" }}
+              exit={{ opacity: 0, pointerEvents: "none" }}
+              transition={{ duration: 0.4, ease: EASING_FUNCTION.exponential }}
+              onClick={() => setFiltersOpen(false)}
+            />
+          )}
         </AnimatePresence>
-        <button
-          type="button"
-          className={`flex min-h-0 flex-1 min-w-0 flex-col`}
-          onClick={() => filtersOpen && setFiltersOpen(false)}
+        <div
+          ref={scrollContainerRef}
+          className="flex flex-col flex-1 min-h-0 overflow-y-auto"
         >
-          <div
-            ref={scrollContainerRef}
-            className={`flex flex-col flex-1 min-h-0 overflow-y-auto ${filtersOpen ? "pointer-events-none" : "pointer-events-auto"}`}
-          >
             {isLoading ? (
               <PageLoader />
             ) : creators.length === 0 ? (
@@ -214,8 +212,7 @@ export function CreatorDatabase() {
                 <LoadMoreSentinel sentinelRef={sentinelRef} isFetching={isFetchingNextPage} />
               </div>
             )}
-          </div>
-        </button>
+        </div>
       </div>
     </div>
   );

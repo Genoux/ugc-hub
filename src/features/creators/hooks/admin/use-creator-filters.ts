@@ -53,7 +53,7 @@ export function useCreatorFilters() {
         "collaborations",
         "rate_low",
         "rate_high",
-      ]).withDefault("rating"),
+      ]).withDefault("newest"),
       rating: arrayOf(OVERALL_RATING_TIERS).withDefault([]),
       ugc: arrayOf(UGC_CATEGORIES).withDefault([]),
       fmt: arrayOf(CONTENT_FORMATS).withDefault([]),
