@@ -5,7 +5,7 @@ import { useVirtualizer } from "@tanstack/react-virtual";
 import { motion } from "framer-motion";
 import { ArrowUpDown, Search, SlidersHorizontal, Users } from "lucide-react";
 import { AnimatePresence } from "motion/react";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { getCreators } from "@/features/creators/actions/admin/get-creators";
 import {
   SORT_OPTIONS,
@@ -44,6 +44,8 @@ function chunk<T>(arr: T[], size: number): T[][] {
   return out;
 }
 
+const SCROLL_KEY = "creator-database-scroll";
+
 export function CreatorDatabase() {
   const [filtersOpen, setFiltersOpen] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -73,6 +75,25 @@ export function CreatorDatabase() {
   });
 
   const creators = useMemo(() => data?.pages.flatMap((p) => p.creators) ?? [], [data]);
+
+  useEffect(() => {
+    const el = scrollContainerRef.current;
+    if (!el) return;
+    const save = () => sessionStorage.setItem(SCROLL_KEY, String(el.scrollTop));
+    el.addEventListener("scroll", save, { passive: true });
+    return () => el.removeEventListener("scroll", save);
+  }, []);
+
+  const scrollRestored = useRef(false);
+  useEffect(() => {
+    if (isLoading || creators.length === 0 || scrollRestored.current) return;
+    const saved = sessionStorage.getItem(SCROLL_KEY);
+    if (!saved || saved === "0") return;
+    scrollRestored.current = true;
+    requestAnimationFrame(() => {
+      scrollContainerRef.current?.scrollTo({ top: Number(saved), behavior: "instant" });
+    });
+  }, [isLoading, creators.length]);
 
   const COLUMNS_PER_ROW = 4;
   const rows = useMemo(() => chunk(creators, COLUMNS_PER_ROW), [creators]);
