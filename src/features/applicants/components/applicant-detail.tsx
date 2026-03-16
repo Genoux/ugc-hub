@@ -28,6 +28,7 @@ import { platformQueryKeys } from "@/shared/lib/platform-query-keys";
 import { approveApplicant } from "../actions/approve-applicant";
 import { reinviteCreator } from "../actions/reinvite-creator";
 import { rejectApplicant } from "../actions/reject-applicant";
+import Link from "next/link";
 
 interface Props {
   creator: Creator;
@@ -46,48 +47,63 @@ function EmailRow({ email }: { email: string }) {
   };
 
   return (
-    <Button
-      variant="ghost"
-      onClick={handleCopy}
-      className="w-full flex-wrap justify-between py-3 px-3 h-auto rounded-lg hover:bg-muted/50 font-normal"
-    >
+    <div className="flex w-full justify-between">
       <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground">Email</span>
       <span className="inline-flex items-center gap-1.5 text-sm text-foreground">
         {email}
         {copied ? (
           <Check className="h-3.5 w-3.5 text-primary" />
         ) : (
-          <Copy className="h-3.5 w-3.5 text-muted-foreground" />
+          <Copy
+            className="h-3.5 w-3.5 text-muted-foreground cursor-pointer hover:text-primary"
+            onClick={handleCopy}
+          />
         )}
       </span>
-    </Button>
+    </div>
   );
 }
 
 function LinkRow({ label, value, href }: { label: string; value: string; href: string }) {
   return (
-    <a
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="flex flex-wrap items-center gap-2 justify-between py-3 px-3 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
-    >
+    <div className="flex w-full justify-between">
       <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground">
         {label}
       </span>
-      <span className="inline-flex items-center gap-1.5 text-sm text-foreground">
+      <Link
+        href={href}
+        target="_blank"
+        className="inline-flex items-center gap-1.5 text-sm text-foreground cursor-pointer group hover:underline"
+      >
         <span className="truncate max-w-40">{value}</span>
-        <ExternalLink className="h-3.5 w-3.5 text-muted-foreground" />
-      </span>
-    </a>
+        <ExternalLink className="h-3.5 w-3.5 text-muted-foreground group-hover:text-primary" />
+      </Link>
+    </div>
   );
 }
 
 function MutedRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex gap-2 items-center justify-between py-3 px-3">
+    <div className="flex w-full justify-between">
       <span className="text-sm text-muted-foreground">{label}</span>
       <span className="text-sm text-muted-foreground italic">{value}</span>
+    </div>
+  );
+}
+
+function AppliedAtRow({ approvedAt }: { approvedAt: Date }) {
+  return (
+    <div className="ml-auto border-t border-border pt-6 w-full">
+      <div className="text-xs text-muted-foreground text-right">
+        Approved at:{" "}
+        {new Date(approvedAt).toLocaleString(undefined, {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        })}
+      </div>
     </div>
   );
 }
@@ -132,8 +148,8 @@ export function ApplicantDetail({ creator, activeTab, onMutationSuccess }: Props
   const showReinviteAction = activeTab === "rejected";
 
   return (
-    <div className="w-full animate-in fade-in duration-150">
-      <div className="border border-border rounded-lg p-6">
+    <div className="w-full shadow-sm overflow-hidden border border-border rounded-lg">
+      <div className=" p-6">
         <div className="flex items-start gap-4 pb-5">
           <div className="min-w-0 flex-1 gap-2">
             <div className="flex items-center gap-2">
@@ -150,8 +166,6 @@ export function ApplicantDetail({ creator, activeTab, onMutationSuccess }: Props
                 </Badge>
               )}
             </div>
-            <h2 className="text-xl font-semibold text-foreground">{creator.fullName}</h2>
-            <p className="mt-0.5 text-sm text-muted-foreground">{creator.country}</p>
           </div>
           {showResendAction && (
             <DropdownMenu>
@@ -170,7 +184,15 @@ export function ApplicantDetail({ creator, activeTab, onMutationSuccess }: Props
           )}
         </div>
 
-        <div>
+        <div className="flex flex-col items-start gap-6">
+          <div>
+            <h2 className="text-md font-semibold text-foreground">
+              {creator.fullName || creator.email}
+            </h2>
+            {creator.country !== "Unknown" && (
+              <p className="mt-0.5 text-sm text-muted-foreground">{creator.country}</p>
+            )}
+          </div>
           <EmailRow email={creator.email} />
           {creator.socialChannels?.instagram_url ? (
             <LinkRow
@@ -199,26 +221,36 @@ export function ApplicantDetail({ creator, activeTab, onMutationSuccess }: Props
           ) : (
             <MutedRow label="Portfolio" value="Not available" />
           )}
+
+          {creator.approvedAt && <AppliedAtRow approvedAt={creator.approvedAt} />}
         </div>
 
         {showApproveActions && (
-          <div className="mt-6 pt-4 border-t border-border flex gap-3">
-            <Button onClick={() => approve()} disabled={isPending}>
+          <div className="flex gap-3 mt-6 pt-6 border-t border-border">
+            <Button size="lg" className="flex-2" onClick={() => approve()} disabled={isPending}>
               Invite to Pool
             </Button>
-            <Button onClick={() => reject()} disabled={isPending} variant="outline">
+            <Button
+              size="lg"
+              className="flex-1"
+              onClick={() => reject()}
+              disabled={isPending}
+              variant="outline"
+            >
               Reject
             </Button>
           </div>
         )}
 
         {showReinviteAction && (
-          <div className="mt-6 pt-4 border-t border-border">
+          <div className="mt-6 pt-6 border-t border-border">
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button disabled={isPending} variant="outline" className="w-full h-12">
-                  {isApproving ? "Sending…" : "Re-invite to pool"}
-                </Button>
+                <div>
+                  <Button size="lg" disabled={isPending} variant="outline" className="w-full">
+                    {isApproving ? "Sending…" : "Re-invite to pool"}
+                  </Button>
+                </div>
               </AlertDialogTrigger>
               <AlertDialogContent size="sm">
                 <AlertDialogHeader>

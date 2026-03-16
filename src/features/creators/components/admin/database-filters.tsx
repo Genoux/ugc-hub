@@ -117,7 +117,6 @@ function FilterSection({
       >
         <div className="flex items-center gap-2">
           <span className="flex items-center gap-2">{title}</span>
-          <NumberDot count={activeCount} />
         </div>
         <ChevronDown
           className={`h-3.5 w-3.5 text-muted-foreground transition-transform ${

@@ -39,11 +39,25 @@ export async function getCreators(params: GetCreatorsParams): Promise<GetCreator
     await requireAdmin();
 
     const { filters, sort, search, page } = params;
+    const includeBlacklisted = filters.overallRating.includes("blacklisted");
+    // Strip the pseudo-filter "blacklisted" — it's a status, not a rating tier.
+    // The status condition handles inclusion; rating condition should only match actual tiers.
+    const ratingFilters = filters.overallRating.filter((r) => r !== "blacklisted");
     const conditions = [
-      inArray(creators.status, ["joined", "blacklisted"]),
+      // When only "blacklisted" is selected (no rating tiers), target that status directly.
+      // When mixed, broaden status gate to include both so the rating clause can narrow it.
+      includeBlacklisted && ratingFilters.length === 0
+        ? eq(creators.status, "blacklisted")
+        : includeBlacklisted
+          ? inArray(creators.status, ["joined", "blacklisted"])
+          : eq(creators.status, "joined"),
       ...(search.trim() ? [ilike(creators.fullName, `%${search.trim()}%`)] : []),
-      ...(filters.overallRating.length > 0
-        ? [inArray(creators.overallRating, filters.overallRating)]
+      ...(ratingFilters.length > 0
+        ? [
+            includeBlacklisted
+              ? or(inArray(creators.overallRating, ratingFilters), eq(creators.status, "blacklisted"))
+              : inArray(creators.overallRating, ratingFilters),
+          ]
         : []),
       ...(filters.genderIdentity.length > 0
         ? [inArray(creators.genderIdentity, filters.genderIdentity)]
