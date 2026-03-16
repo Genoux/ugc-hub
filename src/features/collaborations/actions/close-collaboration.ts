@@ -1,7 +1,6 @@
 "use server";
 
 import { eq } from "drizzle-orm";
-import { after } from "next/server";
 import { collaborations, creators } from "@/db/schema";
 import { notifySlack } from "@/integrations/slack/notify-slack";
 import { toActionError } from "@/shared/lib/action-error";
@@ -43,16 +42,14 @@ export async function closeCollaboration(input: CloseCollaborationInput) {
     });
 
     if (collab) {
-      after(() =>
-        notifySlack({
-          type: "admin_closed_collab",
-          collabId: data.collaborationId,
-          creatorName: collab.creator.fullName ?? "Unknown",
-          projectName: collab.project.name,
-          piecesOfContent: data.piecesOfContent,
-          totalPaidCents: Math.round(data.totalPaid * 100),
-        }),
-      );
+      notifySlack({
+        type: "admin_closed_collab",
+        collabId: data.collaborationId,
+        creatorName: collab.creator.fullName ?? "Unknown",
+        projectName: collab.project.name,
+        piecesOfContent: data.piecesOfContent,
+        totalPaidCents: Math.round(data.totalPaid * 100),
+      });
     }
   } catch (err) {
     throw toActionError(err);
