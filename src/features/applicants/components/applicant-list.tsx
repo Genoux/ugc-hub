@@ -85,6 +85,7 @@ export function ApplicantList({ creators, selectedId, onSelect, onNavigate }: Pr
     const handler = (e: KeyboardEvent) => {
       if (e.key !== "ArrowDown" && e.key !== "ArrowUp") return;
       if (creators.length === 0) return;
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
 
       e.preventDefault();
       const idx = creators.findIndex((c) => c.id === selectedId);
