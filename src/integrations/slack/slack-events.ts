@@ -6,7 +6,6 @@ const appUrl = `https://${
     : process.env.VERCEL_URL
 }`;
 
-
 export type SlackEvent =
   | (ApplyFormInput & { type: "creator_apply"; appliedAt: Date })
   | {
