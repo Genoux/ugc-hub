@@ -5,7 +5,10 @@ import { Users } from "lucide-react";
 import { useMemo, useRef, useState } from "react";
 import { getApplicantCounts, getApplicants } from "@/features/applicants/actions/get-applicants";
 import { ApplicantDetail } from "@/features/applicants/components/applicant-detail";
-import { ApplicantList } from "@/features/applicants/components/applicant-list";
+import {
+  ApplicantList,
+  ApplicantListHeader,
+} from "@/features/applicants/components/applicant-list";
 import { DirectInviteButton } from "@/features/applicants/components/direct-invite-button";
 import type { ApplicantTabKey, SortKey } from "@/features/applicants/types";
 import { PageLoader } from "@/shared/components/layout/page-loader";
@@ -97,9 +100,9 @@ export function ApplicantsClient() {
     setSelectedId(null);
   };
 
-  const handleMutationSuccess = (destinationTab: ApplicantTabKey) => {
-    setActiveTab(destinationTab);
+  const handleMutationSuccess = (_destinationTab: ApplicantTabKey) => {
     setSelectedId(null);
+    setDetailOpen(false);
   };
 
   const handleMobileSelect = (id: string) => {
@@ -156,13 +159,15 @@ export function ApplicantsClient() {
           emptyState
         ) : (
           <>
+            <div className="shrink-0">
+              <ApplicantListHeader count={creators.length} sort={sort} onSortChange={setSort} />
+            </div>
             <div ref={mobileScrollRef} className="flex-1 min-h-0 overflow-y-auto">
               <ApplicantList
                 creators={creators}
                 selectedId={selected?.id ?? null}
                 onSelect={handleMobileSelect}
-                sort={sort}
-                onSortChange={setSort}
+                onNavigate={setSelectedId}
               />
               <LoadMoreSentinel sentinelRef={mobileSentinelRef} isFetching={isFetchingNextPage} />
             </div>
@@ -194,15 +199,24 @@ export function ApplicantsClient() {
           emptyState
         ) : (
           <div className="grid grid-cols-2 gap-6 flex-1 min-h-0">
-            <div ref={desktopScrollRef} className="flex flex-col min-h-0 min-w-0 overflow-y-auto">
-              <ApplicantList
-                creators={creators}
-                selectedId={desktopSelected?.id ?? null}
-                onSelect={setSelectedId}
-                sort={sort}
-                onSortChange={setSort}
-              />
-              <LoadMoreSentinel sentinelRef={desktopSentinelRef} isFetching={isFetchingNextPage} />
+            <div className="flex flex-col min-h-0 min-w-0">
+              <div className="shrink-0">
+                <ApplicantListHeader count={creators.length} sort={sort} onSortChange={setSort} />
+              </div>
+              <div
+                ref={desktopScrollRef}
+                className="flex flex-col flex-1 min-h-0 min-w-0 overflow-y-auto"
+              >
+                <ApplicantList
+                  creators={creators}
+                  selectedId={desktopSelected?.id ?? null}
+                  onSelect={setSelectedId}
+                />
+                <LoadMoreSentinel
+                  sentinelRef={desktopSentinelRef}
+                  isFetching={isFetchingNextPage}
+                />
+              </div>
             </div>
             <main className="flex flex-col pb-8 min-w-0 min-h-0">
               {desktopSelected && (

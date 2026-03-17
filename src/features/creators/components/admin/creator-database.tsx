@@ -4,7 +4,8 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { motion } from "framer-motion";
 import { ArrowUpDown, Search, SlidersHorizontal, Users } from "lucide-react";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { AnimatePresence } from "motion/react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { getCreators } from "@/features/creators/actions/admin/get-creators";
 import {
   SORT_OPTIONS,
@@ -43,6 +44,8 @@ function chunk<T>(arr: T[], size: number): T[][] {
   return out;
 }
 
+const SCROLL_KEY = "creator-database-scroll";
+
 export function CreatorDatabase() {
   const [filtersOpen, setFiltersOpen] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -72,6 +75,25 @@ export function CreatorDatabase() {
   });
 
   const creators = useMemo(() => data?.pages.flatMap((p) => p.creators) ?? [], [data]);
+
+  useEffect(() => {
+    const el = scrollContainerRef.current;
+    if (!el) return;
+    const save = () => sessionStorage.setItem(SCROLL_KEY, String(el.scrollTop));
+    el.addEventListener("scroll", save, { passive: true });
+    return () => el.removeEventListener("scroll", save);
+  }, []);
+
+  const scrollRestored = useRef(false);
+  useEffect(() => {
+    if (isLoading || creators.length === 0 || scrollRestored.current) return;
+    const saved = sessionStorage.getItem(SCROLL_KEY);
+    if (!saved || saved === "0") return;
+    scrollRestored.current = true;
+    requestAnimationFrame(() => {
+      scrollContainerRef.current?.scrollTo({ top: Number(saved), behavior: "instant" });
+    });
+  }, [isLoading, creators.length]);
 
   const COLUMNS_PER_ROW = 4;
   const rows = useMemo(() => chunk(creators, COLUMNS_PER_ROW), [creators]);
@@ -145,68 +167,70 @@ export function CreatorDatabase() {
         >
           <DatabaseFilters filters={filters} onChange={setFilters} />
         </motion.aside>
-
-        <button
-          type="button"
-          className={`flex min-h-0 flex-1 min-w-0 flex-col transition-[filter] duration-200 ${filtersOpen ? "blur-sm overflow-hidden" : ""}`}
-          onClick={() => filtersOpen && setFiltersOpen(false)}
-        >
-          <div
-            ref={scrollContainerRef}
-            className={`flex flex-col flex-1 min-h-0 overflow-y-auto ${filtersOpen ? "pointer-events-none" : "pointer-events-auto"}`}
-          >
-            {isLoading ? (
-              <PageLoader />
-            ) : creators.length === 0 ? (
-              <div className="flex flex-1 p-6">
-                <Empty>
-                  <EmptyHeader>
-                    <EmptyMedia variant="icon">
-                      <Users size={16} />
-                    </EmptyMedia>
-                    <EmptyTitle>No creators found</EmptyTitle>
-                    <EmptyDescription>Try adjusting your filters or search query.</EmptyDescription>
-                  </EmptyHeader>
-                </Empty>
-              </div>
-            ) : (
-              <div className="p-4">
-                <div
-                  style={{
-                    height: `${virtualizer.getTotalSize()}px`,
-                    position: "relative",
-                    width: "100%",
-                  }}
-                >
-                  {virtualizer.getVirtualItems().map((virtualRow) => {
-                    const rowCreators = rows[virtualRow.index] ?? [];
-                    return (
-                      <div
-                        key={virtualRow.key}
-                        style={{
-                          position: "absolute",
-                          top: 0,
-                          left: 0,
-                          width: "100%",
-                          transform: `translateY(${virtualRow.start}px)`,
-                          height: `${virtualRow.size}px`,
-                        }}
-                        className="pb-2"
-                      >
-                        <div className="grid grid-cols-1 gap-2 h-full sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-                          {rowCreators.map((creator) => (
-                            <CreatorCard key={creator.id} creator={creator} />
-                          ))}
-                        </div>
+        <AnimatePresence>
+          {filtersOpen && (
+            <motion.div
+              className="absolute inset-0 z-5 bg-black/70 cursor-pointer"
+              initial={{ opacity: 0, pointerEvents: "auto" }}
+              animate={{ opacity: 1, pointerEvents: "auto" }}
+              exit={{ opacity: 0, pointerEvents: "none" }}
+              transition={{ duration: 0.4, ease: EASING_FUNCTION.exponential }}
+              onClick={() => setFiltersOpen(false)}
+            />
+          )}
+        </AnimatePresence>
+        <div ref={scrollContainerRef} className="flex flex-col flex-1 min-h-0 overflow-y-auto">
+          {isLoading ? (
+            <PageLoader />
+          ) : creators.length === 0 ? (
+            <div className="flex flex-1 p-6">
+              <Empty>
+                <EmptyHeader>
+                  <EmptyMedia variant="icon">
+                    <Users size={16} />
+                  </EmptyMedia>
+                  <EmptyTitle>No creators found</EmptyTitle>
+                  <EmptyDescription>Try adjusting your filters or search query.</EmptyDescription>
+                </EmptyHeader>
+              </Empty>
+            </div>
+          ) : (
+            <div className="p-4">
+              <div
+                style={{
+                  height: `${virtualizer.getTotalSize()}px`,
+                  position: "relative",
+                  width: "100%",
+                }}
+              >
+                {virtualizer.getVirtualItems().map((virtualRow) => {
+                  const rowCreators = rows[virtualRow.index] ?? [];
+                  return (
+                    <div
+                      key={virtualRow.key}
+                      style={{
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
+                        width: "100%",
+                        transform: `translateY(${virtualRow.start}px)`,
+                        height: `${virtualRow.size}px`,
+                      }}
+                      className="pb-2"
+                    >
+                      <div className="grid grid-cols-1 gap-2 h-full sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+                        {rowCreators.map((creator) => (
+                          <CreatorCard key={creator.id} creator={creator} />
+                        ))}
                       </div>
-                    );
-                  })}
-                </div>
-                <LoadMoreSentinel sentinelRef={sentinelRef} isFetching={isFetchingNextPage} />
+                    </div>
+                  );
+                })}
               </div>
-            )}
-          </div>
-        </button>
+              <LoadMoreSentinel sentinelRef={sentinelRef} isFetching={isFetchingNextPage} />
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
