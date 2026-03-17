@@ -1,3 +1,4 @@
+import { sql } from "drizzle-orm";
 import {
   index,
   integer,
@@ -6,7 +7,7 @@ import {
   pgTable,
   text,
   timestamp,
-  unique,
+  uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
 import { creators } from "../core/creators";
@@ -20,10 +21,10 @@ export const collaborations = pgTable(
   {
     id: uuid("id").defaultRandom().primaryKey(),
 
-    // Parent references
-    projectId: uuid("project_id")
-      .notNull()
-      .references(() => projects.id, { onDelete: "cascade" }),
+    name: text("name"),
+
+    // Parent references (projectId null = manually logged collaboration)
+    projectId: uuid("project_id").references(() => projects.id, { onDelete: "cascade" }),
     creatorId: uuid("creator_id")
       .notNull()
       .references(() => creators.id, { onDelete: "cascade" }),
@@ -61,7 +62,9 @@ export const collaborations = pgTable(
     createdAt: timestamp("created_at").notNull().defaultNow(),
   },
   (t) => [
-    unique("collaborations_creator_project_unique").on(t.creatorId, t.projectId),
+    uniqueIndex("collabs_creator_project_unique_idx")
+      .on(t.creatorId, t.projectId)
+      .where(sql`${t.projectId} is not null`),
     index("collabs_creator_id_idx").on(t.creatorId),
     index("collabs_status_idx").on(t.status),
   ],

@@ -1,10 +1,13 @@
 "use client";
 
-import { FolderIcon } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
+import { FolderIcon, Plus } from "lucide-react";
+import { useState } from "react";
+import { LogCollaborationWizard } from "@/features/collaborations/components/log-collaboration-wizard";
 import type { CreatorProfile } from "@/features/creators/actions/admin/get-creator-profile";
 import { AssetCard } from "@/shared/components/blocks/asset-card";
 import { DownloadButton } from "@/shared/components/blocks/download-button";
-
+import { Button } from "@/shared/components/ui/button";
 import {
   Empty,
   EmptyDescription,
@@ -13,6 +16,7 @@ import {
   EmptyTitle,
 } from "@/shared/components/ui/empty";
 import { NumberDot } from "@/shared/components/ui/number-dot";
+import { platformQueryKeys } from "@/shared/lib/platform-query-keys";
 
 import { BlacklistedBanner } from "./_components/blacklisted-banner";
 import { CollaborationCard } from "./_components/collaboration-card";
@@ -23,6 +27,15 @@ interface CreatorContentProps {
 }
 
 export function CreatorContent({ creator, contentInert = false }: CreatorContentProps) {
+  const queryClient = useQueryClient();
+  const [logWizardOpen, setLogWizardOpen] = useState(false);
+
+  const closedCollabRatings = creator.closedCollaborations.map((c) => ({
+    ratingVisualQuality: c.ratingVisualQuality,
+    ratingActingDelivery: c.ratingActingDelivery,
+    ratingReliabilitySpeed: c.ratingReliabilitySpeed,
+  }));
+
   const allAssets = [
     ...creator.portfolioVideos.map((asset) => ({
       id: asset.id,
@@ -80,10 +93,24 @@ export function CreatorContent({ creator, contentInert = false }: CreatorContent
           </div>
         )}
         <div className="flex flex-col flex-1 gap-3">
-          <h2 className="text-base font-semibold flex items-center gap-1">
-            Collaborations
-            <NumberDot count={creator.closedCollaborations.length} />
-          </h2>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h2 className="text-base font-semibold flex items-center gap-1">
+              Collaborations
+              <NumberDot count={creator.closedCollaborations.length} />
+            </h2>
+            {!isBlacklisted && (
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                className="shrink-0"
+                onClick={() => setLogWizardOpen(true)}
+              >
+                <Plus className="mr-1 size-4" />
+                Log collaboration
+              </Button>
+            )}
+          </div>
           {creator.closedCollaborations.length > 0 ? (
             <div className="space-y-2">
               {creator.closedCollaborations.map((collab) => (
@@ -105,6 +132,22 @@ export function CreatorContent({ creator, contentInert = false }: CreatorContent
           )}
         </div>
       </div>
+
+      {logWizardOpen && (
+        <LogCollaborationWizard
+          onClose={() => setLogWizardOpen(false)}
+          onSuccess={() => {
+            void queryClient.invalidateQueries({
+              queryKey: platformQueryKeys.creatorProfile(creator.id),
+            });
+          }}
+          creatorId={creator.id}
+          creatorName={creator.fullName}
+          profilePhotoUrl={creator.profilePhotoUrl}
+          profilePhotoBlurDataUrl={creator.profilePhotoBlurDataUrl}
+          closedCollabRatings={closedCollabRatings}
+        />
+      )}
     </div>
   );
 }

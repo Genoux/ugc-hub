@@ -17,10 +17,7 @@ async function revokePendingInvitations(email: string): Promise<void> {
   await Promise.all(matching.map((inv) => client.invitations.revokeInvitation(inv.id)));
 }
 
-export async function sendInvitation(
-  email: string,
-  redirectUrl: string,
-): Promise<InviteOutcome> {
+export async function sendInvitation(email: string, redirectUrl: string): Promise<InviteOutcome> {
   const client = await clerkClient();
 
   try {

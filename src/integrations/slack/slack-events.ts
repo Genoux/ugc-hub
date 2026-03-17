@@ -17,6 +17,15 @@ export type SlackEvent =
       totalPaidCents: number;
     }
   | {
+      type: "admin_logged_collab";
+      collabId: string;
+      creatorId: string;
+      creatorName: string;
+      collabName: string;
+      piecesOfContent: number;
+      totalPaidCents: number;
+    }
+  | {
       type: "creator_profile_complete";
       creatorId: string;
       fullName: string;
@@ -53,6 +62,8 @@ export function buildSlackText(event: SlackEvent): string {
       return `New creator application: ${event.fullName} (${event.email}) — ${event.country}`;
     case "admin_closed_collab":
       return `Collaboration closed: ${event.creatorName} — ${event.projectName}`;
+    case "admin_logged_collab":
+      return `Collaboration logged: ${event.creatorName} — ${event.collabName}`;
     case "creator_profile_complete":
       return `Creator profile completed: ${event.fullName}`;
     case "creator_uploaded_content":
@@ -67,6 +78,8 @@ export function buildSlackBlocks(event: SlackEvent): object[] {
         return buildCreatorApplyBlocks(event);
       case "admin_closed_collab":
         return buildCollabClosedBlocks(event);
+      case "admin_logged_collab":
+        return buildCollabLoggedBlocks(event);
       case "creator_profile_complete":
         return buildProfileCompleteBlocks(event);
       case "creator_uploaded_content":
@@ -145,6 +158,34 @@ function buildCollabClosedBlocks(
           type: "button",
           text: { type: "plain_text", text: "View Submissions" },
           url: `${appUrl}/submissions`,
+        },
+      ],
+    },
+  ];
+}
+
+function buildCollabLoggedBlocks(
+  event: Extract<SlackEvent, { type: "admin_logged_collab" }>,
+): (object | null)[] {
+  return [
+    header("◈ Collaboration Logged"),
+    divider,
+    fields([
+      { label: "Creator", value: event.creatorName },
+      { label: "Collaboration", value: event.collabName },
+    ]),
+    fields([
+      { label: "Pieces", value: String(event.piecesOfContent) },
+      { label: "Total paid", value: `$${(event.totalPaidCents / 100).toFixed(2)}` },
+    ]),
+    divider,
+    {
+      type: "actions",
+      elements: [
+        {
+          type: "button",
+          text: { type: "plain_text", text: "View Creator" },
+          url: `${appUrl}/database/${event.creatorId}`,
         },
       ],
     },

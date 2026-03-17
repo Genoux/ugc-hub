@@ -32,7 +32,9 @@ export function StepPortfolio({ files, onFilesAdd, onFileRemove }: StepPortfolio
 
   return (
     <div className="space-y-2">
-      {fileList.length > 0 && <AssetFileList files={fileList} onRemove={handleRemoveFile} />}
+      {fileList.length > 0 && (
+        <AssetFileList size="sm" files={fileList} onRemove={handleRemoveFile} />
+      )}
 
       <FileDropZone
         onFilesAdd={onFilesAdd}

@@ -72,6 +72,7 @@ export async function getCreatorProfile(creatorId: string): Promise<CreatorProfi
         where: (c, { eq: eqFn }) => eqFn(c.status, "closed"),
         columns: {
           id: true,
+          name: true,
           closedAt: true,
           closedBy: true,
           piecesOfContent: true,
@@ -117,7 +118,7 @@ export async function getCreatorProfile(creatorId: string): Promise<CreatorProfi
   const closedCollaborations = await Promise.all(
     row.collaborations.map(async (collab) => ({
       id: collab.id,
-      projectName: collab.project.name,
+      projectName: collab.project?.name ?? collab.name ?? "Logged collaboration",
       closedAt: collab.closedAt as Date,
       closedBy: collab.closedBy ? await getClerkUserProfile(collab.closedBy) : null,
       piecesOfContent: collab.piecesOfContent,

@@ -40,7 +40,7 @@ export async function getCollaborationDetail(
     },
   });
 
-  if (!raw || raw.project.id !== projectId) return null;
+  if (!raw?.project || raw.project.id !== projectId) return null;
 
   const closedCollabRatings = await db
     .select({

@@ -4,12 +4,15 @@ import { ChevronRight } from "lucide-react";
 import Image from "next/image";
 import type { CreatorProfile } from "@/features/creators/actions/admin/get-creator-profile";
 import { LabeledField } from "@/features/creators/components/labeled-field";
+import { AssetCard } from "@/shared/components/blocks/asset-card";
+import { Author } from "@/shared/components/blocks/authored-note";
 import {
   CollapsibleContent,
   CollapsibleSection,
   CollapsibleTrigger,
   useCollapsible,
 } from "@/shared/components/blocks/collapsible-section";
+import { DownloadButton } from "@/shared/components/blocks/download-button";
 import { RatingBadge } from "@/shared/components/blocks/rating-badge";
 import { Button } from "@/shared/components/ui/button";
 import { BentoCard } from "./bento-card";
@@ -48,90 +51,84 @@ function CollaborationCardContent({
         </Button>
       </CollapsibleTrigger>
       <CollapsibleContent>
-        <div className="p-4 space-y-1">
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-1">
-            {totalPaid && (
-              <BentoCard>
+        <div className="p-4 space-y-4">
+          <div className="space-y-2">
+            <div className="grid grid-cols-1 lg:grid-cols-5 gap-2">
+              {totalPaid && (
+                <BentoCard className="col-span-2 lg:col-span-2">
+                  <LabeledField
+                    label="Total Paid"
+                    value={
+                      <p className="md:text-2xl text-xl font-bold text-foreground">
+                        ${totalPaid.toLocaleString()}
+                      </p>
+                    }
+                  />
+                  {perPiece != null && (
+                    <p className="text-xs text-muted-foreground">${perPiece.toFixed(0)} / piece</p>
+                  )}
+                </BentoCard>
+              )}
+              <BentoCard className="col-span-2 lg:col-span-2">
                 <LabeledField
-                  label="Total Paid"
-                  value={
-                    <p className="md:text-2xl text-xl font-bold text-foreground">
-                      ${totalPaid.toLocaleString()}
-                    </p>
-                  }
+                  label="Closed"
+                  value={collab.closedAt.toLocaleDateString(undefined, { dateStyle: "long" })}
                 />
-                {perPiece != null && (
-                  <p className="text-xs text-muted-foreground">${perPiece.toFixed(0)} / piece</p>
-                )}
               </BentoCard>
-            )}
-            <BentoCard>
-              <LabeledField
-                label="Closed"
-                value={collab.closedAt.toLocaleDateString(undefined, { dateStyle: "long" })}
-              />
-            </BentoCard>
-            {collab.piecesOfContent != null && (
-              <BentoCard className="col-span-2 lg:col-span-1">
-                <LabeledField label="Pieces of Content" value={collab.piecesOfContent} />
-              </BentoCard>
-            )}
-            {collab.reviewNotes && (
-              <BentoCard className="justify-between col-span-2">
-                <p className="text-xs text-muted-foreground font-medium">Review Notes</p>
-                <p className="text-xs text-foreground">{collab.reviewNotes}</p>
-                {collab.closedBy && (
-                  <div className="flex items-center gap-1.5">
-                    {collab.closedBy.imageUrl && (
-                      <Image
-                        src={collab.closedBy.imageUrl}
-                        alt={collab.closedBy.name ?? ""}
-                        width={16}
-                        height={16}
-                        className="rounded-full"
-                      />
-                    )}
-                    <p className="text-xs text-muted-foreground">
-                      {collab.closedBy.name ?? collab.closedBy.email}
-                    </p>
-                  </div>
-                )}
-              </BentoCard>
-            )}
-          </div>
-          {(collab.ratingVisualQuality ||
-            collab.ratingActingDelivery ||
-            collab.ratingReliabilitySpeed) && (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-1">
-              {collab.ratingVisualQuality && (
-                <BentoCard>
-                  <LabeledField
-                    label="Visual"
-                    value={<RatingBadge color="white" rating={collab.ratingVisualQuality} />}
-                  />
+              {collab.piecesOfContent != null && (
+                <BentoCard className="col-span-2 lg:col-span-1">
+                  <LabeledField label="Pieces of Content" value={collab.piecesOfContent} />
                 </BentoCard>
               )}
-              {collab.ratingActingDelivery && (
-                <BentoCard>
-                  <LabeledField
-                    label="Acting"
-                    value={<RatingBadge color="white" rating={collab.ratingActingDelivery} />}
-                  />
-                </BentoCard>
-              )}
-              {collab.ratingReliabilitySpeed && (
-                <BentoCard>
-                  <LabeledField
-                    label="Reliability"
-                    value={<RatingBadge color="white" rating={collab.ratingReliabilitySpeed} />}
-                  />
+              {collab.reviewNotes && (
+                <BentoCard className="justify-between col-span-3">
+                  <p className="text-xs text-muted-foreground font-medium">Review Notes</p>
+                  <p className="text-xs text-foreground">{collab.reviewNotes}</p>
+                  {collab.closedBy && <Author author={collab.closedBy} />}
                 </BentoCard>
               )}
             </div>
-          )}
-          {collab.submissions.map((submission) => (
-            <SubmissionSection key={submission.id} submission={submission} />
-          ))}
+            <div>
+              {(collab.ratingVisualQuality ||
+                collab.ratingActingDelivery ||
+                collab.ratingReliabilitySpeed) && (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-1">
+                  {collab.ratingVisualQuality && (
+                    <BentoCard>
+                      <LabeledField
+                        label="Visual"
+                        value={<RatingBadge color="white" rating={collab.ratingVisualQuality} />}
+                      />
+                    </BentoCard>
+                  )}
+                  {collab.ratingActingDelivery && (
+                    <BentoCard>
+                      <LabeledField
+                        label="Acting"
+                        value={<RatingBadge color="white" rating={collab.ratingActingDelivery} />}
+                      />
+                    </BentoCard>
+                  )}
+                  {collab.ratingReliabilitySpeed && (
+                    <BentoCard>
+                      <LabeledField
+                        label="Reliability"
+                        value={<RatingBadge color="white" rating={collab.ratingReliabilitySpeed} />}
+                      />
+                    </BentoCard>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+          <div className="space-y-2">
+            <h2 className="text-sm font-medium text-foreground">Highlights</h2>
+            <div className="flex gap-2">
+              {collab.highlights.map((h) => (
+                <AssetCard key={h.id} src={h.url} filename={h.filename} size="xs" />
+              ))}
+            </div>
+          </div>
         </div>
       </CollapsibleContent>
     </>

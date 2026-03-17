@@ -18,5 +18,24 @@ export const closeCollaborationSchema = z.object({
   notes: z.string().optional(),
 });
 
+export const logCollaborationHighlightSchema = z.object({
+  key: z.string().min(1),
+  filename: z.string().min(1),
+  mimeType: z.string().min(1),
+  sizeBytes: z.number().int().min(0),
+});
+
+export const logCollaborationSchema = z.object({
+  creatorId: z.string().uuid(),
+  name: z.string().min(1),
+  overallRating: z.enum(OVERALL_RATING_TIERS),
+  ratings: collaborationRatingsSchema,
+  piecesOfContent: z.number().int().min(1),
+  totalPaid: z.number().min(0),
+  notes: z.string().optional(),
+  highlights: z.array(logCollaborationHighlightSchema).optional(),
+});
+
 export type CollaborationRatingsInput = z.infer<typeof collaborationRatingsSchema>;
 export type CloseCollaborationInput = z.infer<typeof closeCollaborationSchema>;
+export type LogCollaborationInput = z.infer<typeof logCollaborationSchema>;
