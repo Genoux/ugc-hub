@@ -179,60 +179,57 @@ export function CreatorDatabase() {
             />
           )}
         </AnimatePresence>
-        <div
-          ref={scrollContainerRef}
-          className="flex flex-col flex-1 min-h-0 overflow-y-auto"
-        >
-            {isLoading ? (
-              <PageLoader />
-            ) : creators.length === 0 ? (
-              <div className="flex flex-1 p-6">
-                <Empty>
-                  <EmptyHeader>
-                    <EmptyMedia variant="icon">
-                      <Users size={16} />
-                    </EmptyMedia>
-                    <EmptyTitle>No creators found</EmptyTitle>
-                    <EmptyDescription>Try adjusting your filters or search query.</EmptyDescription>
-                  </EmptyHeader>
-                </Empty>
-              </div>
-            ) : (
-              <div className="p-4">
-                <div
-                  style={{
-                    height: `${virtualizer.getTotalSize()}px`,
-                    position: "relative",
-                    width: "100%",
-                  }}
-                >
-                  {virtualizer.getVirtualItems().map((virtualRow) => {
-                    const rowCreators = rows[virtualRow.index] ?? [];
-                    return (
-                      <div
-                        key={virtualRow.key}
-                        style={{
-                          position: "absolute",
-                          top: 0,
-                          left: 0,
-                          width: "100%",
-                          transform: `translateY(${virtualRow.start}px)`,
-                          height: `${virtualRow.size}px`,
-                        }}
-                        className="pb-2"
-                      >
-                        <div className="grid grid-cols-1 gap-2 h-full sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-                          {rowCreators.map((creator) => (
-                            <CreatorCard key={creator.id} creator={creator} />
-                          ))}
-                        </div>
+        <div ref={scrollContainerRef} className="flex flex-col flex-1 min-h-0 overflow-y-auto">
+          {isLoading ? (
+            <PageLoader />
+          ) : creators.length === 0 ? (
+            <div className="flex flex-1 p-6">
+              <Empty>
+                <EmptyHeader>
+                  <EmptyMedia variant="icon">
+                    <Users size={16} />
+                  </EmptyMedia>
+                  <EmptyTitle>No creators found</EmptyTitle>
+                  <EmptyDescription>Try adjusting your filters or search query.</EmptyDescription>
+                </EmptyHeader>
+              </Empty>
+            </div>
+          ) : (
+            <div className="p-4">
+              <div
+                style={{
+                  height: `${virtualizer.getTotalSize()}px`,
+                  position: "relative",
+                  width: "100%",
+                }}
+              >
+                {virtualizer.getVirtualItems().map((virtualRow) => {
+                  const rowCreators = rows[virtualRow.index] ?? [];
+                  return (
+                    <div
+                      key={virtualRow.key}
+                      style={{
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
+                        width: "100%",
+                        transform: `translateY(${virtualRow.start}px)`,
+                        height: `${virtualRow.size}px`,
+                      }}
+                      className="pb-2"
+                    >
+                      <div className="grid grid-cols-1 gap-2 h-full sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+                        {rowCreators.map((creator) => (
+                          <CreatorCard key={creator.id} creator={creator} />
+                        ))}
                       </div>
-                    );
-                  })}
-                </div>
-                <LoadMoreSentinel sentinelRef={sentinelRef} isFetching={isFetchingNextPage} />
+                    </div>
+                  );
+                })}
               </div>
-            )}
+              <LoadMoreSentinel sentinelRef={sentinelRef} isFetching={isFetchingNextPage} />
+            </div>
+          )}
         </div>
       </div>
     </div>
