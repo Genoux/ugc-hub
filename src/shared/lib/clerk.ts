@@ -1,41 +1,42 @@
 import { isClerkAPIResponseError } from "@clerk/nextjs/errors";
 import { clerkClient } from "@clerk/nextjs/server";
+import * as Sentry from "@sentry/nextjs";
 
-export type InviteResult =
-  | { ok: true }
-  | { ok: false; reason: "already_has_account" | "already_invited" };
+export type InviteOutcome = "sent" | "has_account";
 
 export type BulkInviteResult = {
   sent: number;
   skipped: number;
 };
 
+async function revokePendingInvitations(email: string): Promise<void> {
+  const client = await clerkClient();
+  const { data } = await client.invitations.getInvitationList({ query: email, status: "pending" });
+  // Clerk's query param does substring matching; filter to exact address before revoking
+  const matching = data.filter((inv) => inv.emailAddress === email);
+  await Promise.all(matching.map((inv) => client.invitations.revokeInvitation(inv.id)));
+}
+
 export async function sendInvitation(
   email: string,
   redirectUrl: string,
-  publicMetadata?: Record<string, unknown>,
-): Promise<InviteResult> {
+): Promise<InviteOutcome> {
   const client = await clerkClient();
 
   try {
-    await client.invitations.createInvitation({
-      emailAddress: email,
-      redirectUrl,
-      ignoreExisting: true,
-      ...(publicMetadata && { publicMetadata }),
-    });
-    return { ok: true };
+    await revokePendingInvitations(email);
+
+    await client.invitations.createInvitation({ emailAddress: email, redirectUrl });
+    return "sent";
   } catch (err) {
     if (isClerkAPIResponseError(err)) {
       // 422 = user already has a Clerk account, they can sign in directly
-      if (err.status === 422) return { ok: false, reason: "already_has_account" };
+      if (err.status === 422) return "has_account";
 
-      const code = err.errors?.[0]?.code;
-      if (code === "duplicate_record") return { ok: false, reason: "already_invited" };
+      Sentry.captureException(err, {
+        extra: { email, code: err.errors?.[0]?.code, errors: err.errors },
+      });
 
-      // Config/infra errors are not actionable by the user
-      // TODO: replace with Sentry.captureException(err) when Sentry is added
-      console.error("[Clerk] sendInvitation failed:", { email, code, errors: err.errors });
       throw new Error("Invitation service unavailable. Please try again later.");
     }
 
@@ -81,10 +82,8 @@ export async function sendInvitationBulk(
     return { sent: emails.length, skipped: 0 };
   } catch (err) {
     if (isClerkAPIResponseError(err)) {
-      // TODO: replace with Sentry.captureException(err) when Sentry is added
-      console.error("[Clerk] sendInvitationBulk failed:", {
-        code: err.errors?.[0]?.code,
-        errors: err.errors,
+      Sentry.captureException(err, {
+        extra: { code: err.errors?.[0]?.code, errors: err.errors },
       });
       throw new Error("Invitation service unavailable. Please try again later.");
     }

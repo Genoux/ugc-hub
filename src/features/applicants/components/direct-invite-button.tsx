@@ -23,11 +23,6 @@ import { directInviteBulk } from "../actions/direct-invite-bulk";
 
 type Mode = "single" | "bulk";
 
-const SINGLE_ERROR_MESSAGES = {
-  already_exists: "This email is already in the system — use the applicants page instead.",
-  already_invited_or_exists: "This email already has a Clerk account.",
-} as const;
-
 export function DirectInviteButton() {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
@@ -47,8 +42,9 @@ export function DirectInviteButton() {
     onSuccess: (result) => {
       if (!result.success) {
         toast.error(
-          (result.error ? SINGLE_ERROR_MESSAGES[result.error] : undefined) ??
-            "Failed to send invitation",
+          result.error === "already_exists"
+            ? "This email is already in the system"
+            : "Failed to send invitation",
         );
         return;
       }
