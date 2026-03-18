@@ -21,12 +21,10 @@ export async function reinviteCreator(creatorId: string) {
       throw new Error("Creator is not in pending join status");
     }
 
-    const result = await sendInvitation(creator.email, `${await getAppUrl()}${ROUTES.signUp}`);
+    // Already has a Clerk account — no invite needed, they can sign in directly
+    if (creator.clerkUserId) return { success: true };
 
-    // already_has_account = they can sign in directly, no invite needed
-    if (!result.ok && result.reason !== "already_has_account") {
-      throw new Error("Failed to resend invitation");
-    }
+    await sendInvitation(creator.email, `${await getAppUrl()}${ROUTES.signUp}`);
 
     return { success: true };
   } catch (err) {

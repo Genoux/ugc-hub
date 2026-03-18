@@ -1,10 +1,18 @@
 "use client";
 
-import { FolderIcon } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
+import { FolderIcon, Plus } from "lucide-react";
+import { AnimatePresence } from "motion/react";
+import { useState } from "react";
+import {
+  type LogCollabInitialData,
+  LogCollaborationWizard,
+} from "@/features/collaborations/components/log-collaboration-wizard";
+import type { CollaborationRatingsInput } from "@/features/collaborations/schemas";
 import type { CreatorProfile } from "@/features/creators/actions/admin/get-creator-profile";
 import { AssetCard } from "@/shared/components/blocks/asset-card";
 import { DownloadButton } from "@/shared/components/blocks/download-button";
-
+import { Button } from "@/shared/components/ui/button";
 import {
   Empty,
   EmptyDescription,
@@ -13,16 +21,53 @@ import {
   EmptyTitle,
 } from "@/shared/components/ui/empty";
 import { NumberDot } from "@/shared/components/ui/number-dot";
+import { platformQueryKeys } from "@/shared/lib/platform-query-keys";
 
 import { BlacklistedBanner } from "./_components/blacklisted-banner";
 import { CollaborationCard } from "./_components/collaboration-card";
 
-interface CreatorContentProps {
-  creator: CreatorProfile;
-  contentInert?: boolean;
+type ClosedCollab = CreatorProfile["closedCollaborations"][number];
+
+function collabToInitialData(collab: ClosedCollab): LogCollabInitialData {
+  if (!collab.ratingVisualQuality || !collab.ratingActingDelivery || !collab.ratingReliabilitySpeed) {
+    throw new Error("Cannot edit a collaboration that is missing ratings");
+  }
+  return {
+    collaborationId: collab.id,
+    name: collab.projectName,
+    projectId: collab.projectId,
+    ratings: {
+      visual_quality: collab.ratingVisualQuality as CollaborationRatingsInput["visual_quality"],
+      acting_line_delivery: collab.ratingActingDelivery as CollaborationRatingsInput["acting_line_delivery"],
+      reliability_speed: collab.ratingReliabilitySpeed as CollaborationRatingsInput["reliability_speed"],
+    },
+    piecesOfContent: Math.max(1, collab.piecesOfContent ?? 1),
+    totalPaidDollars: (collab.totalPaidCents ?? 0) / 100,
+    notes: collab.reviewNotes,
+    highlights: collab.highlights,
+  };
 }
 
-export function CreatorContent({ creator, contentInert = false }: CreatorContentProps) {
+function closedRatingsExcluding(collabs: ClosedCollab[], excludeId?: string) {
+  return collabs
+    .filter((c) => !excludeId || c.id !== excludeId)
+    .map((c) => ({
+      ratingVisualQuality: c.ratingVisualQuality,
+      ratingActingDelivery: c.ratingActingDelivery,
+      ratingReliabilitySpeed: c.ratingReliabilitySpeed,
+    }));
+}
+
+interface CreatorContentProps {
+  creator: CreatorProfile;
+}
+
+type WizardState = { mode: "log" } | { mode: "edit"; collab: ClosedCollab };
+
+export function CreatorContent({ creator }: CreatorContentProps) {
+  const queryClient = useQueryClient();
+  const [wizardState, setWizardState] = useState<WizardState | null>(null);
+
   const allAssets = [
     ...creator.portfolioVideos.map((asset) => ({
       id: asset.id,
@@ -41,18 +86,14 @@ export function CreatorContent({ creator, contentInert = false }: CreatorContent
   const isBlacklisted = creator.status === "blacklisted";
 
   return (
-    <div
-      className={`flex-1 min-w-0 flex flex-col overflow-y-auto p-4 sm:p-4 ${contentInert ? "pointer-events-none" : ""}`}
-    >
-      <div className="flex items-start justify-between w-full gap-20">
-        {isBlacklisted && (
-          <BlacklistedBanner
-            reason={creator.blacklistReason}
-            blacklistedBy={creator.blacklistedByProfile}
-          />
-        )}
-      </div>
-      <div className="min-h-full flex flex-col gap-8 pb-6 sm:pb-8">
+    <div className="flex-1 min-w-0 flex flex-col overflow-y-auto p-4 pb-8">
+      {isBlacklisted && (
+        <BlacklistedBanner
+          reason={creator.blacklistReason}
+          blacklistedBy={creator.blacklistedByProfile}
+        />
+      )}
+      <div className="flex flex-col flex-1 gap-8">
         {allAssets.length > 0 && (
           <div className="flex flex-col gap-3">
             <h2 className="text-base font-semibold flex items-center gap-1">
@@ -80,14 +121,32 @@ export function CreatorContent({ creator, contentInert = false }: CreatorContent
           </div>
         )}
         <div className="flex flex-col flex-1 gap-3">
-          <h2 className="text-base font-semibold flex items-center gap-1">
-            Collaborations
-            <NumberDot count={creator.closedCollaborations.length} />
-          </h2>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h2 className="text-base font-semibold flex items-center gap-1">
+              Collaborations
+              <NumberDot count={creator.closedCollaborations.length} />
+            </h2>
+            {!isBlacklisted && (
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                className="shrink-0"
+                onClick={() => setWizardState({ mode: "log" })}
+              >
+                <Plus className="mr-1 size-4" />
+                Log collaboration
+              </Button>
+            )}
+          </div>
           {creator.closedCollaborations.length > 0 ? (
             <div className="space-y-2">
               {creator.closedCollaborations.map((collab) => (
-                <CollaborationCard key={collab.id} collab={collab} />
+                <CollaborationCard
+                  key={collab.id}
+                  collab={collab}
+                  onEdit={(c) => setWizardState({ mode: "edit", collab: c })}
+                />
               ))}
             </div>
           ) : (
@@ -105,6 +164,29 @@ export function CreatorContent({ creator, contentInert = false }: CreatorContent
           )}
         </div>
       </div>
+
+      <AnimatePresence>
+        {wizardState && (
+          <LogCollaborationWizard
+            key={wizardState.mode === "edit" ? wizardState.collab.id : "log-new"}
+            initialData={wizardState.mode === "edit" ? collabToInitialData(wizardState.collab) : undefined}
+            onClose={() => setWizardState(null)}
+            onSuccess={() => {
+              void queryClient.invalidateQueries({
+                queryKey: platformQueryKeys.creatorProfile(creator.id),
+              });
+            }}
+            creatorId={creator.id}
+            creatorName={creator.fullName}
+            profilePhotoUrl={creator.profilePhotoUrl}
+            profilePhotoBlurDataUrl={creator.profilePhotoBlurDataUrl}
+            closedCollabRatings={closedRatingsExcluding(
+              creator.closedCollaborations,
+              wizardState.mode === "edit" ? wizardState.collab.id : undefined,
+            )}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

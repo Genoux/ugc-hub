@@ -46,7 +46,7 @@ export async function closeCollaboration(input: CloseCollaborationInput) {
         type: "admin_closed_collab",
         collabId: data.collaborationId,
         creatorName: collab.creator.fullName ?? "Unknown",
-        projectName: collab.project.name,
+        projectName: collab.project?.name ?? collab.name ?? "Collaboration",
         piecesOfContent: data.piecesOfContent,
         totalPaidCents: Math.round(data.totalPaid * 100),
       });

@@ -80,7 +80,7 @@ export function CreatorProfile({ creator }: CreatorProfileProps) {
         <div
           className={cn(
             "relative flex flex-1 min-w-0 min-h-0 transition-[filter] duration-200",
-            sidebarOpen && "blur-sm overflow-hidden sm:filter-none",
+            sidebarOpen && "blur-xs overflow-hidden sm:filter-none",
           )}
         >
           {sidebarOpen && (
@@ -91,7 +91,7 @@ export function CreatorProfile({ creator }: CreatorProfileProps) {
               onClick={() => setSidebarOpen(false)}
             />
           )}
-          <CreatorContent creator={creator} contentInert={sidebarOpen} />
+          <CreatorContent creator={creator} />
         </div>
       </div>
 

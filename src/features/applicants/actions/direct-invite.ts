@@ -40,22 +40,11 @@ export async function directInvite(input: { email: string }) {
 
     if (!newCreator) throw new Error("Insert failed");
 
-    const rollback = () => db.delete(creators).where(eq(creators.id, newCreator.id));
-
-    let result: Awaited<ReturnType<typeof sendInvitation>>;
     try {
-      result = await sendInvitation(validated.email, `${await getAppUrl()}${ROUTES.signUp}`, {
-        role: "creator",
-        creatorId: newCreator.id,
-      });
+      await sendInvitation(validated.email, `${await getAppUrl()}${ROUTES.signUp}`);
     } catch (err) {
-      await rollback();
+      await db.delete(creators).where(eq(creators.id, newCreator.id));
       throw err;
-    }
-
-    if (!result.ok) {
-      await rollback();
-      return { success: false, error: "already_invited_or_exists" as const };
     }
 
     return { success: true };

@@ -40,18 +40,11 @@ export async function approveApplicant(creatorId: string) {
         .set({ status: "applicant", approvedAt: null, invitedAt: null })
         .where(eq(creators.id, input.creatorId));
 
-    let result: Awaited<ReturnType<typeof sendInvitation>>;
     try {
-      result = await sendInvitation(creator.email, `${await getAppUrl()}${ROUTES.signUp}`);
+      await sendInvitation(creator.email, `${await getAppUrl()}${ROUTES.signUp}`);
     } catch (err) {
       await revert();
       throw err;
-    }
-
-    // already_has_account = they can sign in directly, layout matches by email
-    if (!result.ok && result.reason !== "already_has_account") {
-      await revert();
-      throw new Error("Failed to send invitation");
     }
 
     return { success: true };

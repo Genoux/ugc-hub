@@ -41,7 +41,8 @@ type CreatorProfileBase = Omit<
     ratingActingDelivery: string | null;
     ratingReliabilitySpeed: string | null;
     reviewNotes: string | null;
-    highlights: { id: string; filename: string; mimeType: string; url: string }[];
+    highlights: { id: string; r2Key: string; filename: string; mimeType: string; url: string }[];
+    projectId: string | null;
     submissions: CollabSubmission[];
   }[];
 };
@@ -72,6 +73,8 @@ export async function getCreatorProfile(creatorId: string): Promise<CreatorProfi
         where: (c, { eq: eqFn }) => eqFn(c.status, "closed"),
         columns: {
           id: true,
+          projectId: true,
+          name: true,
           closedAt: true,
           closedBy: true,
           piecesOfContent: true,
@@ -117,7 +120,7 @@ export async function getCreatorProfile(creatorId: string): Promise<CreatorProfi
   const closedCollaborations = await Promise.all(
     row.collaborations.map(async (collab) => ({
       id: collab.id,
-      projectName: collab.project.name,
+      projectName: collab.project?.name ?? collab.name ?? "Logged collaboration",
       closedAt: collab.closedAt as Date,
       closedBy: collab.closedBy ? await getClerkUserProfile(collab.closedBy) : null,
       piecesOfContent: collab.piecesOfContent,
@@ -128,10 +131,12 @@ export async function getCreatorProfile(creatorId: string): Promise<CreatorProfi
       reviewNotes: collab.reviewNotes,
       highlights: ((collab.highlights ?? []) as CollaborationHighlight[]).map((h) => ({
         id: h.id,
+        r2Key: h.r2Key,
         filename: h.filename,
         mimeType: h.mimeType,
         url: toMediaUrl(h.r2Key) ?? "",
       })),
+      projectId: collab.projectId ?? null,
       submissions: collab.submissions.map((s) => ({
         id: s.id,
         label: s.label,
