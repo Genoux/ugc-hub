@@ -10,6 +10,7 @@ interface StepLogDetailsProps {
   onNameChange: (value: string) => void;
   onPiecesChange: (value: string) => void;
   onTotalPaidChange: (value: string) => void;
+  showNameField?: boolean;
 }
 
 export function StepLogDetails({
@@ -19,6 +20,7 @@ export function StepLogDetails({
   onNameChange,
   onPiecesChange,
   onTotalPaidChange,
+  showNameField = true,
 }: StepLogDetailsProps) {
   const pieces = parseInt(piecesOfContent, 10);
   const paid = parseFloat(totalPaid);
@@ -26,21 +28,23 @@ export function StepLogDetails({
 
   return (
     <div className="space-y-4">
-      <div className="rounded-xl bg-muted/60 p-5">
-        <Field>
-          <FieldLabel htmlFor="log-collab-name">Collaboration name</FieldLabel>
-          <Input
-            id="log-collab-name"
-            value={collabName}
-            onChange={(e) => onNameChange(e.target.value)}
-            placeholder="e.g. Brand X — Q1 campaign"
-            autoComplete="off"
-          />
-          <FieldDescription>
-            Name this collaboration (Brand name, campaign name, etc.)
-          </FieldDescription>
-        </Field>
-      </div>
+      {showNameField && (
+        <div className="rounded-xl bg-muted/60 p-5">
+          <Field>
+            <FieldLabel htmlFor="log-collab-name">Collaboration name</FieldLabel>
+            <Input
+              id="log-collab-name"
+              value={collabName}
+              onChange={(e) => onNameChange(e.target.value)}
+              placeholder="e.g. Brand X — Q1 campaign"
+              autoComplete="off"
+            />
+            <FieldDescription>
+              Name this collaboration (Brand name, campaign name, etc.)
+            </FieldDescription>
+          </Field>
+        </div>
+      )}
 
       <div className="rounded-xl bg-muted/60 p-5 space-y-4">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">

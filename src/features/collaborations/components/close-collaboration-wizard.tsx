@@ -1,8 +1,7 @@
 "use client";
 
 import { X } from "lucide-react";
-import Image from "next/image";
-import { useCallback, useEffect, useRef, useState, useTransition } from "react";
+import { useCallback, useState, useTransition } from "react";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -17,7 +16,6 @@ import {
 import { Button } from "@/shared/components/ui/button";
 import {
   Wizard,
-  WizardAside,
   WizardDescription,
   WizardFooter,
   WizardHeader,
@@ -28,12 +26,15 @@ import {
 import { WizardComplete } from "@/shared/components/wizard/wizard-complete";
 import { WizardLoading } from "@/shared/components/wizard/wizard-loading";
 import { useSteppedFlow } from "@/shared/hooks/use-stepped-flow";
-import type { CollabRatingRow } from "../../../shared/lib/calculate-ratings";
-import { calculateCreatorRating } from "../../../shared/lib/calculate-ratings";
+import type { CollabRatingRow } from "@/shared/lib/calculate-ratings";
+import { calculateCreatorRating } from "@/shared/lib/calculate-ratings";
 import { closeCollaboration } from "../actions/close-collaboration";
+import { usePortfolioUpload } from "../hooks/use-portfolio-upload";
+import { useWizardCloseGuard } from "../hooks/use-wizard-close-guard";
 import { CLOSE_WIZARD_STEPS } from "../lib/close-wizard-constants";
 import { canProceed } from "../lib/close-wizard-utils";
 import type { CollaborationRatingsInput } from "../schemas";
+import { CreatorWizardAside } from "./creator-wizard-aside";
 import { StepCloseConfirm } from "./steps/step-close-confirm";
 import { type PortfolioFile, StepPortfolio } from "./steps/step-portfolio";
 import { StepRates } from "./steps/step-rates";
@@ -73,11 +74,7 @@ export function CloseCollaborationWizard({
   const [totalPaid, setTotalPaid] = useState("");
   const [notes, setNotes] = useState("");
   const [portfolioFiles, setPortfolioFiles] = useState<PortfolioFile[]>([]);
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [isUploading, setIsUploading] = useState(false);
   const [isPending, startTransition] = useTransition();
-  const [confirmingClose, setConfirmingClose] = useState(false);
-  const pendingCloseActionRef = useRef<(() => void) | null>(null);
 
   const isLoadingStep = step === LOADING_STEP;
   const isCompleteStep = step === COMPLETE_STEP;
@@ -93,21 +90,30 @@ export function CloseCollaborationWizard({
       ),
   );
 
-  function resetState() {
-    goToStep(1);
-    setRatings({});
-    setPiecesOfContent("");
-    setTotalPaid("");
-    setNotes("");
-    setPortfolioFiles([]);
-    setUploadProgress(0);
-    setIsUploading(false);
-  }
+  const onFilePersisted = useCallback(
+    async (args: { key: string; filename: string; mimeType: string; sizeBytes: number }) => {
+      const completeRes = await fetch("/api/uploads/portfolio/complete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          collaborationId,
+          key: args.key,
+          filename: args.filename,
+          mimeType: args.mimeType,
+          sizeBytes: args.sizeBytes,
+        }),
+      });
+      if (!completeRes.ok) throw new Error("Failed to register upload");
+    },
+    [collaborationId],
+  );
 
-  function handleClose() {
-    resetState();
-    onClose();
-  }
+  const { uploadProgress, setUploadProgress, isUploading, setIsUploading, uploadFiles } =
+    usePortfolioUpload({
+      creatorId,
+      sessionId: collaborationId,
+      onFilePersisted,
+    });
 
   function handleDone() {
     onSuccess();
@@ -121,97 +127,8 @@ export function CloseCollaborationWizard({
     notes !== "" ||
     portfolioFiles.length > 0;
 
-  const handleRequestClose = () => {
-    if (isResultStep) {
-      handleClose();
-      return;
-    }
-    if (!hasChanges()) {
-      handleClose();
-      return;
-    }
-    setConfirmingClose(true);
-  };
-
-  const runAfterAlertClosed = (action: () => void) => {
-    pendingCloseActionRef.current = action;
-    setConfirmingClose(false);
-  };
-
-  // Stable ref so the effect doesn't need handleRequestClose in its deps
-  const handleRequestCloseRef = useRef(handleRequestClose);
-  handleRequestCloseRef.current = handleRequestClose;
-
-  useEffect(() => {
-    function onKeyDown(e: KeyboardEvent) {
-      if (e.key === "Escape" && !isPending && !isUploading) {
-        handleRequestCloseRef.current();
-      }
-    }
-    document.addEventListener("keydown", onKeyDown);
-    return () => document.removeEventListener("keydown", onKeyDown);
-  }, [isPending, isUploading]);
-
-  const uploadPortfolioFiles = useCallback(
-    async (files: PortfolioFile[], totalFiles: number) => {
-      const pending = files.filter((f) => !f.uploaded);
-      if (pending.length === 0) return files;
-
-      const progressPerFile = totalFiles > 0 ? 80 / totalFiles : 80;
-      const updated = [...files];
-
-      for (const pf of pending) {
-        try {
-          const res = await fetch("/api/uploads/portfolio/presign", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              creatorCollaborationId: collaborationId,
-              creatorId,
-              filename: pf.file.name,
-              mimeType: pf.file.type,
-              fileSize: pf.file.size,
-            }),
-          });
-
-          if (!res.ok) throw new Error("Failed to get presigned URL");
-          const { uploadUrl, key } = await res.json();
-
-          const putRes = await fetch(uploadUrl, {
-            method: "PUT",
-            body: pf.file,
-            headers: { "Content-Type": pf.file.type },
-          });
-          if (!putRes.ok) throw new Error("Upload failed");
-
-          const completeRes = await fetch("/api/uploads/portfolio/complete", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              collaborationId,
-              key,
-              filename: pf.file.name,
-              mimeType: pf.file.type,
-              sizeBytes: pf.file.size,
-            }),
-          });
-          if (!completeRes.ok) throw new Error("Failed to register upload");
-
-          const idx = updated.indexOf(pf);
-          if (idx !== -1) {
-            updated[idx] = { ...updated[idx], key, uploaded: true };
-          }
-        } catch {
-          toast.error(`Failed to upload ${pf.file.name}`);
-        }
-
-        setUploadProgress((prev) => Math.min(prev + progressPerFile, 80));
-      }
-
-      return updated;
-    },
-    [collaborationId, creatorId],
-  );
+  const { confirmingClose, handleRequestClose, onAlertOpenChange, discardAndClose } =
+    useWizardCloseGuard({ isResultStep, isPending, isUploading, hasChanges, onClose });
 
   async function handleSubmit() {
     goToStep(LOADING_STEP);
@@ -224,7 +141,7 @@ export function CloseCollaborationWizard({
 
         if (pendingFiles.length > 0) {
           setIsUploading(true);
-          currentFiles = await uploadPortfolioFiles(portfolioFiles, pendingFiles.length);
+          currentFiles = await uploadFiles(portfolioFiles, pendingFiles.length);
           setPortfolioFiles(currentFiles);
           setIsUploading(false);
 
@@ -272,17 +189,21 @@ export function CloseCollaborationWizard({
       <Wizard variant="modal">
         <WizardPanel isPending={isPending && !isLoadingStep}>
           <WizardHeader>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              onClick={handleRequestClose}
-              disabled={isPending || isUploading}
-              className="text-muted-foreground hover:text-foreground"
-              aria-label="Close"
-            >
-              <X className="size-5" />
-            </Button>
+            {!isResultStep ? (
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={handleRequestClose}
+                disabled={isPending || isUploading}
+                className="text-muted-foreground hover:text-foreground"
+                aria-label="Close"
+              >
+                <X className="size-5" />
+              </Button>
+            ) : (
+              <span />
+            )}
             <span />
           </WizardHeader>
 
@@ -313,9 +234,7 @@ export function CloseCollaborationWizard({
               )}
               {step === 3 && (
                 <StepPortfolio
-                  creatorName={creatorName}
                   files={portfolioFiles}
-                  isUploading={isUploading}
                   onFilesAdd={(files) =>
                     setPortfolioFiles((prev) => [
                       ...prev,
@@ -397,50 +316,16 @@ export function CloseCollaborationWizard({
           </div>
         </WizardPanel>
 
-        {/* Static stepKey — content is the same for all form steps */}
-        <WizardAside stepKey="creator" direction={1} visible={!isResultStep}>
-          <div className="relative flex h-full flex-col items-center justify-center gap-4 overflow-hidden p-8">
-            <div className="absolute inset-0 backdrop-blur-md z-10" />
-            <Image
-              src={profilePhotoUrl}
-              alt=""
-              fill
-              unoptimized
-              placeholder={profilePhotoBlurDataUrl ? "blur" : "empty"}
-              blurDataURL={profilePhotoBlurDataUrl ?? undefined}
-              className="object-cover"
-            />
-            <div className="relative z-10 flex flex-col items-center gap-4">
-              <Image
-                src={profilePhotoUrl}
-                alt={creatorName}
-                width={80}
-                height={80}
-                unoptimized
-                placeholder={profilePhotoBlurDataUrl ? "blur" : "empty"}
-                blurDataURL={profilePhotoBlurDataUrl ?? undefined}
-                className="size-40 rounded-full object-cover shadow-hub"
-              />
-              <div className="text-center">
-                <p className="text-2xl font-semibold text-white">{creatorName}</p>
-                <p className="text-md text-white/80 mt-0.5">{submissionName}</p>
-              </div>
-            </div>
-          </div>
-        </WizardAside>
+        <CreatorWizardAside
+          creatorName={creatorName}
+          profilePhotoUrl={profilePhotoUrl}
+          profilePhotoBlurDataUrl={profilePhotoBlurDataUrl}
+          subtitle={submissionName}
+          visible={!isResultStep}
+        />
       </Wizard>
 
-      <AlertDialog
-        open={confirmingClose}
-        onOpenChange={(open) => {
-          setConfirmingClose(open);
-          if (!open) {
-            const action = pendingCloseActionRef.current;
-            pendingCloseActionRef.current = null;
-            setTimeout(() => action?.(), 250);
-          }
-        }}
-      >
+      <AlertDialog open={confirmingClose} onOpenChange={onAlertOpenChange}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Discard and close?</AlertDialogTitle>
@@ -449,10 +334,8 @@ export function CloseCollaborationWizard({
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setConfirmingClose(false)}>Stay</AlertDialogCancel>
-            <AlertDialogAction onClick={() => runAfterAlertClosed(handleClose)}>
-              Discard and close
-            </AlertDialogAction>
+            <AlertDialogCancel>Stay</AlertDialogCancel>
+            <AlertDialogAction onClick={discardAndClose}>Discard and close</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

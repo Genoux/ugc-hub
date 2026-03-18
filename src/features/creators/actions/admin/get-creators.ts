@@ -1,6 +1,6 @@
 "use server";
 
-import { and, asc, count, desc, eq, ilike, inArray, or, sql } from "drizzle-orm";
+import { and, asc, type Column, count, desc, eq, ilike, inArray, or, sql } from "drizzle-orm";
 import { collaborations, creators } from "@/db/schema";
 import type { Filters } from "@/features/creators/components/admin/database-filters";
 import type { SortKey } from "@/features/creators/hooks/admin/use-creator-filters";
@@ -8,6 +8,7 @@ import { type Creator, creatorSchema } from "@/features/creators/schemas";
 import { toMediaUrl } from "@/features/uploads/lib/r2-media-url";
 import { toActionError } from "@/shared/lib/action-error";
 import { requireAdmin } from "@/shared/lib/auth";
+import type { OverallRatingTier } from "@/shared/lib/constants";
 import { OVERALL_RATING_TIERS, SOCIAL_PLATFORMS } from "@/shared/lib/constants";
 import { db } from "@/shared/lib/db";
 
@@ -34,34 +35,45 @@ function ratingOrderSql() {
   return sql`CASE ${sql.join(cases, sql` `)} ELSE 99 END`;
 }
 
+function buildStatusRatingCondition(overallRating: OverallRatingTier[]) {
+  if (overallRating.length === 0) return eq(creators.status, "joined");
+  return and(
+    inArray(creators.status, ["joined", "blacklisted"]),
+    inArray(creators.overallRating, overallRating),
+  );
+}
+
+function buildSortOrder(sort: SortKey) {
+  switch (sort) {
+    case "rating":
+      return asc(ratingOrderSql());
+    case "newest":
+      return desc(creators.joinedAt);
+    case "collaborations":
+      return desc(count(collaborations.id));
+    case "rate_low":
+      return asc(sql`(${creators.rateRangeSelf}->>'min')::numeric`);
+    case "rate_high":
+      return desc(sql`(${creators.rateRangeSelf}->>'max')::numeric`);
+  }
+}
+
+function arrayOverlap<T extends string>(column: Column, values: T[]) {
+  return sql`${column} && ARRAY[${sql.join(
+    values.map((v) => sql`${v}`),
+    sql`, `,
+  )}]::text[]`;
+}
+
 export async function getCreators(params: GetCreatorsParams): Promise<GetCreatorsResult> {
   try {
     await requireAdmin();
 
     const { filters, sort, search, page } = params;
-    const includeBlacklisted = filters.overallRating.includes("blacklisted");
-    // Strip the pseudo-filter "blacklisted" — it's a status, not a rating tier.
-    // The status condition handles inclusion; rating condition should only match actual tiers.
-    const ratingFilters = filters.overallRating.filter((r) => r !== "blacklisted");
+
     const conditions = [
-      // When only "blacklisted" is selected (no rating tiers), target that status directly.
-      // When mixed, broaden status gate to include both so the rating clause can narrow it.
-      includeBlacklisted && ratingFilters.length === 0
-        ? eq(creators.status, "blacklisted")
-        : includeBlacklisted
-          ? inArray(creators.status, ["joined", "blacklisted"])
-          : eq(creators.status, "joined"),
+      buildStatusRatingCondition(filters.overallRating),
       ...(search.trim() ? [ilike(creators.fullName, `%${search.trim()}%`)] : []),
-      ...(ratingFilters.length > 0
-        ? [
-            includeBlacklisted
-              ? or(
-                  inArray(creators.overallRating, ratingFilters),
-                  eq(creators.status, "blacklisted"),
-                )
-              : inArray(creators.overallRating, ratingFilters),
-          ]
-        : []),
       ...(filters.genderIdentity.length > 0
         ? [inArray(creators.genderIdentity, filters.genderIdentity)]
         : []),
@@ -69,29 +81,15 @@ export async function getCreators(params: GetCreatorsParams): Promise<GetCreator
         ? [inArray(creators.ageDemographic, filters.ageDemographic)]
         : []),
       ...(filters.ugcCategories.length > 0
-        ? [
-            sql`${creators.ugcCategories} && ARRAY[${sql.join(
-              filters.ugcCategories.map((c) => sql`${c}`),
-              sql`, `,
-            )}]::text[]`,
-          ]
+        ? [arrayOverlap(creators.ugcCategories, filters.ugcCategories)]
         : []),
       ...(filters.contentFormats.length > 0
-        ? [
-            sql`${creators.contentFormats} && ARRAY[${sql.join(
-              filters.contentFormats.map((c) => sql`${c}`),
-              sql`, `,
-            )}]::text[]`,
-          ]
+        ? [arrayOverlap(creators.contentFormats, filters.contentFormats)]
         : []),
       ...(filters.ethnicity.length > 0
-        ? [
-            sql`${creators.ethnicity} && ARRAY[${sql.join(
-              filters.ethnicity.map((e) => sql`${e}`),
-              sql`, `,
-            )}]::text[]`,
-          ]
+        ? [arrayOverlap(creators.ethnicity, filters.ethnicity)]
         : []),
+      // AND semantics: creator must be present on all selected platforms.
       ...(filters.socialPlatforms.length > 0
         ? filters.socialPlatforms.map((platform) => {
             const urlKey =
@@ -111,19 +109,6 @@ export async function getCreators(params: GetCreatorsParams): Promise<GetCreator
         : []),
     ];
 
-    const orderBy =
-      sort === "rating"
-        ? asc(ratingOrderSql())
-        : sort === "newest"
-          ? desc(creators.joinedAt)
-          : sort === "collaborations"
-            ? desc(count(collaborations.id))
-            : sort === "rate_low"
-              ? asc(sql`(${creators.rateRangeSelf}->>'min')::numeric`)
-              : sort === "rate_high"
-                ? desc(sql`(${creators.rateRangeSelf}->>'max')::numeric`)
-                : asc(ratingOrderSql());
-
     const rows = await db
       .select({
         creator: creators,
@@ -136,23 +121,23 @@ export async function getCreators(params: GetCreatorsParams): Promise<GetCreator
       )
       .where(and(...conditions))
       .groupBy(creators.id)
-      .orderBy(orderBy)
+      .orderBy(buildSortOrder(sort))
       .limit(PAGE_SIZE + 1)
       .offset(page * PAGE_SIZE);
 
     const hasMore = rows.length > PAGE_SIZE;
     const slice = rows.slice(0, PAGE_SIZE);
 
-    const parsed = slice.map(({ creator, collabCount }) =>
-      creatorSchema.parse({ ...creator, collabCount: collabCount ?? 0 }),
-    );
-
-    const list = parsed.map((creator) => ({
-      ...creator,
-      profilePhotoUrl: toMediaUrl(creator.profilePhoto, creator.profileCompletedAt),
-    }));
-
-    return { creators: list, hasMore };
+    return {
+      creators: slice.map(({ creator, collabCount }) => {
+        const parsed = creatorSchema.parse({ ...creator, collabCount: collabCount ?? 0 });
+        return {
+          ...parsed,
+          profilePhotoUrl: toMediaUrl(parsed.profilePhoto, parsed.profileCompletedAt),
+        };
+      }),
+      hasMore,
+    };
   } catch (err) {
     throw toActionError(err);
   }

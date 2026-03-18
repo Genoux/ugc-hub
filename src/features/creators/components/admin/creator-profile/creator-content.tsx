@@ -2,8 +2,13 @@
 
 import { useQueryClient } from "@tanstack/react-query";
 import { FolderIcon, Plus } from "lucide-react";
+import { AnimatePresence } from "motion/react";
 import { useState } from "react";
-import { LogCollaborationWizard } from "@/features/collaborations/components/log-collaboration-wizard";
+import {
+  type LogCollabInitialData,
+  LogCollaborationWizard,
+} from "@/features/collaborations/components/log-collaboration-wizard";
+import type { CollaborationRatingsInput } from "@/features/collaborations/schemas";
 import type { CreatorProfile } from "@/features/creators/actions/admin/get-creator-profile";
 import { AssetCard } from "@/shared/components/blocks/asset-card";
 import { DownloadButton } from "@/shared/components/blocks/download-button";
@@ -21,20 +26,48 @@ import { platformQueryKeys } from "@/shared/lib/platform-query-keys";
 import { BlacklistedBanner } from "./_components/blacklisted-banner";
 import { CollaborationCard } from "./_components/collaboration-card";
 
+type ClosedCollab = CreatorProfile["closedCollaborations"][number];
+
+function collabToInitialData(collab: ClosedCollab): LogCollabInitialData {
+  if (!collab.ratingVisualQuality || !collab.ratingActingDelivery || !collab.ratingReliabilitySpeed) {
+    throw new Error("Cannot edit a collaboration that is missing ratings");
+  }
+  return {
+    collaborationId: collab.id,
+    name: collab.projectName,
+    projectId: collab.projectId,
+    ratings: {
+      visual_quality: collab.ratingVisualQuality as CollaborationRatingsInput["visual_quality"],
+      acting_line_delivery: collab.ratingActingDelivery as CollaborationRatingsInput["acting_line_delivery"],
+      reliability_speed: collab.ratingReliabilitySpeed as CollaborationRatingsInput["reliability_speed"],
+    },
+    piecesOfContent: Math.max(1, collab.piecesOfContent ?? 1),
+    totalPaidDollars: (collab.totalPaidCents ?? 0) / 100,
+    notes: collab.reviewNotes,
+    highlights: collab.highlights,
+  };
+}
+
+function closedRatingsExcluding(collabs: ClosedCollab[], excludeId?: string) {
+  return collabs
+    .filter((c) => !excludeId || c.id !== excludeId)
+    .map((c) => ({
+      ratingVisualQuality: c.ratingVisualQuality,
+      ratingActingDelivery: c.ratingActingDelivery,
+      ratingReliabilitySpeed: c.ratingReliabilitySpeed,
+    }));
+}
+
 interface CreatorContentProps {
   creator: CreatorProfile;
   contentInert?: boolean;
 }
 
+type WizardState = { mode: "log" } | { mode: "edit"; collab: ClosedCollab };
+
 export function CreatorContent({ creator, contentInert = false }: CreatorContentProps) {
   const queryClient = useQueryClient();
-  const [logWizardOpen, setLogWizardOpen] = useState(false);
-
-  const closedCollabRatings = creator.closedCollaborations.map((c) => ({
-    ratingVisualQuality: c.ratingVisualQuality,
-    ratingActingDelivery: c.ratingActingDelivery,
-    ratingReliabilitySpeed: c.ratingReliabilitySpeed,
-  }));
+  const [wizardState, setWizardState] = useState<WizardState | null>(null);
 
   const allAssets = [
     ...creator.portfolioVideos.map((asset) => ({
@@ -104,7 +137,7 @@ export function CreatorContent({ creator, contentInert = false }: CreatorContent
                 size="sm"
                 variant="outline"
                 className="shrink-0"
-                onClick={() => setLogWizardOpen(true)}
+                onClick={() => setWizardState({ mode: "log" })}
               >
                 <Plus className="mr-1 size-4" />
                 Log collaboration
@@ -114,7 +147,11 @@ export function CreatorContent({ creator, contentInert = false }: CreatorContent
           {creator.closedCollaborations.length > 0 ? (
             <div className="space-y-2">
               {creator.closedCollaborations.map((collab) => (
-                <CollaborationCard key={collab.id} collab={collab} />
+                <CollaborationCard
+                  key={collab.id}
+                  collab={collab}
+                  onEdit={(c) => setWizardState({ mode: "edit", collab: c })}
+                />
               ))}
             </div>
           ) : (
@@ -133,21 +170,28 @@ export function CreatorContent({ creator, contentInert = false }: CreatorContent
         </div>
       </div>
 
-      {logWizardOpen && (
-        <LogCollaborationWizard
-          onClose={() => setLogWizardOpen(false)}
-          onSuccess={() => {
-            void queryClient.invalidateQueries({
-              queryKey: platformQueryKeys.creatorProfile(creator.id),
-            });
-          }}
-          creatorId={creator.id}
-          creatorName={creator.fullName}
-          profilePhotoUrl={creator.profilePhotoUrl}
-          profilePhotoBlurDataUrl={creator.profilePhotoBlurDataUrl}
-          closedCollabRatings={closedCollabRatings}
-        />
-      )}
+      <AnimatePresence>
+        {wizardState && (
+          <LogCollaborationWizard
+            key={wizardState.mode === "edit" ? wizardState.collab.id : "log-new"}
+            initialData={wizardState.mode === "edit" ? collabToInitialData(wizardState.collab) : undefined}
+            onClose={() => setWizardState(null)}
+            onSuccess={() => {
+              void queryClient.invalidateQueries({
+                queryKey: platformQueryKeys.creatorProfile(creator.id),
+              });
+            }}
+            creatorId={creator.id}
+            creatorName={creator.fullName}
+            profilePhotoUrl={creator.profilePhotoUrl}
+            profilePhotoBlurDataUrl={creator.profilePhotoBlurDataUrl}
+            closedCollabRatings={closedRatingsExcluding(
+              creator.closedCollaborations,
+              wizardState.mode === "edit" ? wizardState.collab.id : undefined,
+            )}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

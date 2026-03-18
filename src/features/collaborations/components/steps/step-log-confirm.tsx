@@ -26,6 +26,9 @@ interface StepLogConfirmProps {
   totalPaid: string;
   portfolioFiles: PortfolioFile[];
   closedCollabRatings: CollabRatingRow[];
+  mode?: "log" | "edit";
+  /** Kept existing + staged new files (confirm step is pre-upload for new files) */
+  portfolioFileTotalCount?: number;
 }
 
 export function StepLogConfirm({
@@ -39,6 +42,8 @@ export function StepLogConfirm({
   totalPaid,
   portfolioFiles,
   closedCollabRatings,
+  mode = "log",
+  portfolioFileTotalCount,
 }: StepLogConfirmProps) {
   const projectedOverall = calculateCreatorRating([
     ...closedCollabRatings,
@@ -80,7 +85,11 @@ export function StepLogConfirm({
           <TooltipTrigger>
             <RatingBadge rating={projectedOverall} color="white" />
           </TooltipTrigger>
-          <TooltipContent>New overall rating after logging this collaboration</TooltipContent>
+          <TooltipContent>
+            {mode === "edit"
+              ? "New overall rating after saving changes"
+              : "New overall rating after logging this collaboration"}
+          </TooltipContent>
         </Tooltip>
       </div>
 
@@ -109,7 +118,7 @@ export function StepLogConfirm({
 
         <div className="flex items-center justify-between px-4 py-3">
           <span className="text-muted-foreground">Portfolio files</span>
-          <span className="font-medium">{portfolioFiles.length}</span>
+          <span className="font-medium">{portfolioFileTotalCount ?? portfolioFiles.length}</span>
         </div>
       </div>
 
@@ -121,7 +130,9 @@ export function StepLogConfirm({
       )}
 
       <p className="px-1 text-xs text-muted-foreground">
-        This will add a closed collaboration to the creator&apos;s profile.
+        {mode === "edit"
+          ? "This will update the collaboration on the creator's profile."
+          : "This will add a closed collaboration to the creator's profile."}
       </p>
     </div>
   );

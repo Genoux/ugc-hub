@@ -7,10 +7,12 @@ export function canProceedLogWizard(
   piecesOfContent: string,
   totalPaid: string,
   ratings: Partial<CollaborationRatingsInput>,
+  showNameField = true,
+  totalHighlights = 0,
 ): boolean {
   if (step === 1) {
     return (
-      collabName.trim().length > 0 &&
+      (!showNameField || collabName.trim().length > 0) &&
       parseInt(piecesOfContent, 10) > 0 &&
       !Number.isNaN(parseFloat(totalPaid)) &&
       parseFloat(totalPaid) >= 0
@@ -20,7 +22,7 @@ export function canProceedLogWizard(
     return !!(ratings.visual_quality && ratings.acting_line_delivery && ratings.reliability_speed);
   }
   if (step === 3) {
-    return true;
+    return totalHighlights > 0;
   }
   return true;
 }

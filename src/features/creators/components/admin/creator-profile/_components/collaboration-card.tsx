@@ -1,7 +1,6 @@
 "use client";
 
 import { ChevronRight } from "lucide-react";
-import Image from "next/image";
 import type { CreatorProfile } from "@/features/creators/actions/admin/get-creator-profile";
 import { LabeledField } from "@/features/creators/components/labeled-field";
 import { AssetCard } from "@/shared/components/blocks/asset-card";
@@ -12,50 +11,64 @@ import {
   CollapsibleTrigger,
   useCollapsible,
 } from "@/shared/components/blocks/collapsible-section";
-import { DownloadButton } from "@/shared/components/blocks/download-button";
 import { RatingBadge } from "@/shared/components/blocks/rating-badge";
 import { Button } from "@/shared/components/ui/button";
 import { BentoCard } from "./bento-card";
-import { SubmissionSection } from "./submission-section";
 
 type ClosedCollab = CreatorProfile["closedCollaborations"][number];
 
 interface CollaborationCardProps {
   collab: ClosedCollab;
+  onEdit: (collab: ClosedCollab) => void;
 }
 
 function CollaborationCardContent({
   collab,
   totalPaid,
   perPiece,
+  onEdit,
 }: {
   collab: ClosedCollab;
   totalPaid: number | null;
   perPiece: number | null;
+  onEdit: (collab: ClosedCollab) => void;
 }) {
   const { open } = useCollapsible();
 
   return (
     <>
-      <CollapsibleTrigger asChild>
-        <Button
-          variant="ghost"
-          className="w-full flex items-center justify-between rounded-none p-6 hover:bg-accent/40 transition-colors text-left"
-        >
-          <p className="text-sm font-medium text-foreground leading-none truncate">
-            {collab.projectName}
-          </p>
-          <ChevronRight
-            className={`h-4 w-4 text-muted-foreground transition-transform shrink-0 ${open ? "rotate-90" : ""}`}
-          />
-        </Button>
-      </CollapsibleTrigger>
+      <div className="flex w-full items-stretch hover:bg-accent/40">
+        <CollapsibleTrigger asChild>
+          <div className="w-full flex items-center justify-between  p-4">
+            <div className="flex items-center justify-between gap-2">
+              <ChevronRight
+                className={`h-4 w-4 shrink-0 text-muted-foreground transition-transform ${open ? "rotate-90" : ""}`}
+              />
+              <p className="truncate text-sm font-medium leading-none text-foreground">
+                {collab.projectName}
+              </p>
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              aria-label="Edit collaboration"
+              onClick={(e) => {
+                e.stopPropagation();
+                onEdit(collab);
+              }}
+            >
+              Edit
+            </Button>
+          </div>
+        </CollapsibleTrigger>
+      </div>
       <CollapsibleContent>
         <div className="p-4 space-y-4">
           <div className="space-y-2">
-            <div className="grid grid-cols-1 lg:grid-cols-5 gap-2">
+            <div className="flex flex-wrap gap-2">
               {totalPaid && (
-                <BentoCard className="col-span-2 lg:col-span-2">
+                <BentoCard className="flex-2 min-w-[140px]">
                   <LabeledField
                     label="Total Paid"
                     value={
@@ -69,19 +82,19 @@ function CollaborationCardContent({
                   )}
                 </BentoCard>
               )}
-              <BentoCard className="col-span-2 lg:col-span-2">
+              <BentoCard className="flex-2 min-w-[140px]">
                 <LabeledField
                   label="Closed"
                   value={collab.closedAt.toLocaleDateString(undefined, { dateStyle: "long" })}
                 />
               </BentoCard>
               {collab.piecesOfContent != null && (
-                <BentoCard className="col-span-2 lg:col-span-1">
+                <BentoCard className="flex-1 min-w-[100px]">
                   <LabeledField label="Pieces of Content" value={collab.piecesOfContent} />
                 </BentoCard>
               )}
               {collab.reviewNotes && (
-                <BentoCard className="justify-between col-span-3">
+                <BentoCard className="flex-3 min-w-[200px] justify-between">
                   <p className="text-xs text-muted-foreground font-medium">Review Notes</p>
                   <p className="text-xs text-foreground">{collab.reviewNotes}</p>
                   {collab.closedBy && <Author author={collab.closedBy} />}
@@ -135,14 +148,19 @@ function CollaborationCardContent({
   );
 }
 
-export function CollaborationCard({ collab }: CollaborationCardProps) {
+export function CollaborationCard({ collab, onEdit }: CollaborationCardProps) {
   const totalPaid = collab.totalPaidCents != null ? collab.totalPaidCents / 100 : null;
   const perPiece =
     totalPaid != null && collab.piecesOfContent ? totalPaid / collab.piecesOfContent : null;
 
   return (
     <CollapsibleSection>
-      <CollaborationCardContent collab={collab} totalPaid={totalPaid} perPiece={perPiece} />
+      <CollaborationCardContent
+        collab={collab}
+        totalPaid={totalPaid}
+        perPiece={perPiece}
+        onEdit={onEdit}
+      />
     </CollapsibleSection>
   );
 }

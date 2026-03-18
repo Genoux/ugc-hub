@@ -1,8 +1,7 @@
 "use client";
 
-import { X } from "lucide-react";
-import Image from "next/image";
-import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { CheckIcon, X } from "lucide-react";
+import { useMemo, useState, useTransition } from "react";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -17,7 +16,6 @@ import {
 import { Button } from "@/shared/components/ui/button";
 import {
   Wizard,
-  WizardAside,
   WizardDescription,
   WizardFooter,
   WizardHeader,
@@ -30,10 +28,14 @@ import { WizardLoading } from "@/shared/components/wizard/wizard-loading";
 import { useSteppedFlow } from "@/shared/hooks/use-stepped-flow";
 import type { CollabRatingRow } from "@/shared/lib/calculate-ratings";
 import { calculateCreatorRating } from "@/shared/lib/calculate-ratings";
+import { editCollaboration } from "../actions/edit-collaboration";
 import { logCollaboration } from "../actions/log-collaboration";
+import { usePortfolioUpload } from "../hooks/use-portfolio-upload";
+import { useWizardCloseGuard } from "../hooks/use-wizard-close-guard";
 import { LOG_WIZARD_STEPS } from "../lib/log-wizard-constants";
 import { canProceedLogWizard, hasLogWizardChanges } from "../lib/log-wizard-utils";
 import type { CollaborationRatingsInput } from "../schemas";
+import { CreatorWizardAside } from "./creator-wizard-aside";
 import { StepLogConfirm } from "./steps/step-log-confirm";
 import { StepLogDetails } from "./steps/step-log-details";
 import { type PortfolioFile, StepPortfolio } from "./steps/step-portfolio";
@@ -44,6 +46,17 @@ const LOADING_STEP = CONTENT_STEPS + 1;
 const COMPLETE_STEP = CONTENT_STEPS + 2;
 const TOTAL_STEPS = COMPLETE_STEP;
 
+export type LogCollabInitialData = {
+  collaborationId: string;
+  name: string;
+  projectId: string | null;
+  ratings: CollaborationRatingsInput;
+  piecesOfContent: number;
+  totalPaidDollars: number;
+  notes: string | null;
+  highlights: { id: string; r2Key: string; filename: string; url: string }[];
+};
+
 interface LogCollaborationWizardProps {
   onClose: () => void;
   onSuccess: () => void;
@@ -52,6 +65,7 @@ interface LogCollaborationWizardProps {
   profilePhotoUrl: string | null;
   profilePhotoBlurDataUrl?: string | null;
   closedCollabRatings: CollabRatingRow[];
+  initialData?: LogCollabInitialData;
 }
 
 export function LogCollaborationWizard({
@@ -62,137 +76,91 @@ export function LogCollaborationWizard({
   profilePhotoUrl,
   profilePhotoBlurDataUrl,
   closedCollabRatings,
+  initialData,
 }: LogCollaborationWizardProps) {
+  const isEdit = initialData != null;
   const uploadSessionId = useMemo(() => crypto.randomUUID(), []);
   const { step, goToStep, directionRef } = useSteppedFlow(TOTAL_STEPS);
-  const [collabName, setCollabName] = useState("");
-  const [ratings, setRatings] = useState<Partial<CollaborationRatingsInput>>({});
-  const [piecesOfContent, setPiecesOfContent] = useState("");
-  const [totalPaid, setTotalPaid] = useState("");
-  const [notes, setNotes] = useState("");
+  const [collabName, setCollabName] = useState(() => initialData?.name ?? "");
+  const [ratings, setRatings] = useState<Partial<CollaborationRatingsInput>>(
+    () => initialData?.ratings ?? {},
+  );
+  const [piecesOfContent, setPiecesOfContent] = useState(() =>
+    initialData ? String(initialData.piecesOfContent) : "",
+  );
+  const [totalPaid, setTotalPaid] = useState(() =>
+    initialData ? String(initialData.totalPaidDollars) : "",
+  );
+  const [notes, setNotes] = useState(() => initialData?.notes ?? "");
+  const [existingHighlights, setExistingHighlights] = useState(() => initialData?.highlights ?? []);
   const [portfolioFiles, setPortfolioFiles] = useState<PortfolioFile[]>([]);
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [isUploading, setIsUploading] = useState(false);
   const [isPending, startTransition] = useTransition();
-  const [confirmingClose, setConfirmingClose] = useState(false);
-  const pendingCloseActionRef = useRef<(() => void) | null>(null);
+
+  const { uploadProgress, setUploadProgress, isUploading, setIsUploading, uploadFiles } =
+    usePortfolioUpload({ creatorId, sessionId: uploadSessionId });
 
   const isLoadingStep = step === LOADING_STEP;
   const isCompleteStep = step === COMPLETE_STEP;
   const isResultStep = isLoadingStep || isCompleteStep;
 
-  const stepCanProceed = canProceedLogWizard(step, collabName, piecesOfContent, totalPaid, ratings);
-
-  const _filledSteps = new Set(
-    Object.keys(LOG_WIZARD_STEPS)
-      .map(Number)
-      .filter(
-        (s) => s >= step || canProceedLogWizard(s, collabName, piecesOfContent, totalPaid, ratings),
-      ),
+  const showNameField = !isEdit || initialData?.projectId == null;
+  const totalHighlights = existingHighlights.length + portfolioFiles.length;
+  const stepCanProceed = canProceedLogWizard(
+    step,
+    collabName,
+    piecesOfContent,
+    totalPaid,
+    ratings,
+    showNameField,
+    totalHighlights,
   );
-
-  function resetState() {
-    goToStep(1);
-    setCollabName("");
-    setRatings({});
-    setPiecesOfContent("");
-    setTotalPaid("");
-    setNotes("");
-    setPortfolioFiles([]);
-    setUploadProgress(0);
-    setIsUploading(false);
-  }
-
-  function handleClose() {
-    resetState();
-    onClose();
-  }
+  const allStepsValid =
+    isEdit &&
+    [1, 2, 3].every((s) =>
+      canProceedLogWizard(
+        s,
+        collabName,
+        piecesOfContent,
+        totalPaid,
+        ratings,
+        showNameField,
+        totalHighlights,
+      ),
+    );
 
   function handleDone() {
     onSuccess();
     onClose();
   }
 
-  const hasChanges = () =>
-    hasLogWizardChanges(collabName, piecesOfContent, totalPaid, notes, ratings, portfolioFiles);
-
-  const handleRequestClose = () => {
-    if (isResultStep) {
-      handleClose();
-      return;
+  const hasChanges = () => {
+    if (!isEdit) {
+      return hasLogWizardChanges(
+        collabName,
+        piecesOfContent,
+        totalPaid,
+        notes,
+        ratings,
+        portfolioFiles,
+      );
     }
-    if (!hasChanges()) {
-      handleClose();
-      return;
-    }
-    setConfirmingClose(true);
+    const init = initialData;
+    const r = ratings as CollaborationRatingsInput;
+    return (
+      (showNameField && collabName !== init.name) ||
+      piecesOfContent !== String(init.piecesOfContent) ||
+      totalPaid !== String(init.totalPaidDollars) ||
+      notes !== (init.notes ?? "") ||
+      r.visual_quality !== init.ratings.visual_quality ||
+      r.acting_line_delivery !== init.ratings.acting_line_delivery ||
+      r.reliability_speed !== init.ratings.reliability_speed ||
+      existingHighlights.length !== init.highlights.length ||
+      portfolioFiles.length > 0
+    );
   };
 
-  const runAfterAlertClosed = (action: () => void) => {
-    pendingCloseActionRef.current = action;
-    setConfirmingClose(false);
-  };
-
-  const handleRequestCloseRef = useRef(handleRequestClose);
-  handleRequestCloseRef.current = handleRequestClose;
-
-  useEffect(() => {
-    function onKeyDown(e: KeyboardEvent) {
-      if (e.key === "Escape" && !isPending && !isUploading) {
-        handleRequestCloseRef.current();
-      }
-    }
-    document.addEventListener("keydown", onKeyDown);
-    return () => document.removeEventListener("keydown", onKeyDown);
-  }, [isPending, isUploading]);
-
-  const uploadPortfolioFiles = useCallback(
-    async (files: PortfolioFile[], totalFiles: number) => {
-      const pending = files.filter((f) => !f.uploaded);
-      if (pending.length === 0) return files;
-
-      const progressPerFile = totalFiles > 0 ? 80 / totalFiles : 80;
-      const updated = [...files];
-
-      for (const pf of pending) {
-        try {
-          const res = await fetch("/api/uploads/portfolio/presign", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              creatorCollaborationId: uploadSessionId,
-              creatorId,
-              filename: pf.file.name,
-              mimeType: pf.file.type,
-              fileSize: pf.file.size,
-            }),
-          });
-
-          if (!res.ok) throw new Error("Failed to get presigned URL");
-          const { uploadUrl, key } = await res.json();
-
-          const putRes = await fetch(uploadUrl, {
-            method: "PUT",
-            body: pf.file,
-            headers: { "Content-Type": pf.file.type },
-          });
-          if (!putRes.ok) throw new Error("Upload failed");
-
-          const idx = updated.indexOf(pf);
-          if (idx !== -1) {
-            updated[idx] = { ...updated[idx], key, uploaded: true };
-          }
-        } catch {
-          toast.error(`Failed to upload ${pf.file.name}`);
-        }
-
-        setUploadProgress((prev) => Math.min(prev + progressPerFile, 80));
-      }
-
-      return updated;
-    },
-    [creatorId, uploadSessionId],
-  );
+  const { confirmingClose, handleRequestClose, onAlertOpenChange, discardAndClose } =
+    useWizardCloseGuard({ isResultStep, isPending, isUploading, hasChanges, onClose });
 
   async function handleSubmit() {
     goToStep(LOADING_STEP);
@@ -205,7 +173,7 @@ export function LogCollaborationWizard({
 
         if (pendingFiles.length > 0) {
           setIsUploading(true);
-          currentFiles = await uploadPortfolioFiles(portfolioFiles, pendingFiles.length);
+          currentFiles = await uploadFiles(portfolioFiles, pendingFiles.length);
           setPortfolioFiles(currentFiles);
           setIsUploading(false);
 
@@ -220,7 +188,7 @@ export function LogCollaborationWizard({
         }
 
         const r = ratings as CollaborationRatingsInput;
-        const highlights = currentFiles
+        const newHighlights = currentFiles
           .filter((f) => f.uploaded && f.key)
           .map((f) => ({
             key: f.key,
@@ -229,50 +197,94 @@ export function LogCollaborationWizard({
             sizeBytes: f.file.size,
           }));
 
-        await logCollaboration({
-          creatorId,
-          name: collabName.trim(),
-          overallRating: calculateCreatorRating([
-            ...closedCollabRatings,
-            {
-              ratingVisualQuality: r.visual_quality,
-              ratingActingDelivery: r.acting_line_delivery,
-              ratingReliabilitySpeed: r.reliability_speed,
-            },
-          ]),
-          ratings: r,
-          piecesOfContent: parseInt(piecesOfContent, 10),
-          totalPaid: parseFloat(totalPaid),
-          notes: notes || undefined,
-          highlights: highlights.length > 0 ? highlights : undefined,
-        });
+        const overallRating = calculateCreatorRating([
+          ...closedCollabRatings,
+          {
+            ratingVisualQuality: r.visual_quality,
+            ratingActingDelivery: r.acting_line_delivery,
+            ratingReliabilitySpeed: r.reliability_speed,
+          },
+        ]);
+
+        if (isEdit && initialData) {
+          await editCollaboration({
+            collaborationId: initialData.collaborationId,
+            creatorId,
+            ...(initialData.projectId == null ? { name: collabName.trim() } : {}),
+            overallRating,
+            ratings: r,
+            piecesOfContent: parseInt(piecesOfContent, 10),
+            totalPaid: parseFloat(totalPaid),
+            notes: notes || undefined,
+            keepHighlightKeys: existingHighlights.map((h) => h.r2Key),
+            newHighlights: newHighlights.length > 0 ? newHighlights : undefined,
+          });
+        } else {
+          await logCollaboration({
+            creatorId,
+            name: collabName.trim(),
+            overallRating,
+            ratings: r,
+            piecesOfContent: parseInt(piecesOfContent, 10),
+            totalPaid: parseFloat(totalPaid),
+            notes: notes || undefined,
+            highlights: newHighlights.length > 0 ? newHighlights : undefined,
+          });
+        }
 
         setUploadProgress(100);
         goToStep(COMPLETE_STEP);
       } catch {
-        toast.error("Failed to log collaboration. Please try again.");
+        toast.error(
+          isEdit ? "Failed to save changes." : "Failed to log collaboration. Please try again.",
+        );
         goToStep(4);
       }
     });
   }
+
+  const asideSubtitle = isEdit ? "Edit collaboration" : "Log collaboration";
+  const loadingTitle = isEdit ? "Saving changes" : "Logging collaboration";
+  const completeTitle = isEdit ? "Collaboration updated" : "Collaboration logged";
+  const completeDescription = isEdit
+    ? "Changes are saved on this creator's profile."
+    : "It now appears on this creator's profile.";
+  const submitLabel = isPending ? "Saving…" : isEdit ? "Save changes" : "Log collaboration";
 
   return (
     <>
       <Wizard variant="modal">
         <WizardPanel isPending={isPending && !isLoadingStep}>
           <WizardHeader>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              onClick={handleRequestClose}
-              disabled={isPending || isUploading}
-              className="text-muted-foreground hover:text-foreground"
-              aria-label="Close"
-            >
-              <X className="size-5" />
-            </Button>
-            <span />
+            {!isResultStep ? (
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={handleRequestClose}
+                disabled={isPending || isUploading}
+                className="text-muted-foreground hover:text-foreground"
+                aria-label="Close"
+              >
+                <X className="size-5" />
+              </Button>
+            ) : (
+              <span />
+            )}
+            {isEdit && !isResultStep ? (
+              <Button
+                type="button"
+                variant="default"
+                size="icon"
+                onClick={() => void handleSubmit()}
+                disabled={!allStepsValid || isPending || isUploading}
+                aria-label="Save and close"
+              >
+                <CheckIcon className="size-5" />
+              </Button>
+            ) : (
+              <span />
+            )}
           </WizardHeader>
 
           <div className="flex flex-1 flex-col justify-center gap-4">
@@ -292,6 +304,7 @@ export function LogCollaborationWizard({
                   onNameChange={setCollabName}
                   onPiecesChange={setPiecesOfContent}
                   onTotalPaidChange={setTotalPaid}
+                  showNameField={showNameField}
                 />
               )}
               {step === 2 && (
@@ -304,9 +317,14 @@ export function LogCollaborationWizard({
               )}
               {step === 3 && (
                 <StepPortfolio
-                  creatorName={creatorName}
                   files={portfolioFiles}
-                  isUploading={isUploading}
+                  existingHighlights={isEdit ? existingHighlights : undefined}
+                  onExistingRemove={
+                    isEdit
+                      ? (r2Key) =>
+                          setExistingHighlights((prev) => prev.filter((h) => h.r2Key !== r2Key))
+                      : undefined
+                  }
                   onFilesAdd={(files) =>
                     setPortfolioFiles((prev) => [
                       ...prev,
@@ -330,11 +348,13 @@ export function LogCollaborationWizard({
                   totalPaid={totalPaid}
                   portfolioFiles={portfolioFiles}
                   closedCollabRatings={closedCollabRatings}
+                  mode={isEdit ? "edit" : "log"}
+                  portfolioFileTotalCount={existingHighlights.length + portfolioFiles.length}
                 />
               )}
               {step === LOADING_STEP && (
                 <WizardLoading
-                  title="Logging collaboration"
+                  title={loadingTitle}
                   description="Uploading files and saving — please don't close this page."
                   progress={uploadProgress}
                 />
@@ -342,8 +362,8 @@ export function LogCollaborationWizard({
               {step === COMPLETE_STEP && (
                 <WizardComplete
                   className="flex items-center justify-center"
-                  title="Collaboration logged"
-                  description="It now appears on this creator's profile."
+                  title={completeTitle}
+                  description={completeDescription}
                 >
                   <Button className="w-fit" type="button" onClick={handleDone}>
                     Done
@@ -379,7 +399,7 @@ export function LogCollaborationWizard({
                       onClick={() => void handleSubmit()}
                       disabled={isPending || isUploading}
                     >
-                      {isPending ? "Saving…" : "Log collaboration"}
+                      {submitLabel}
                     </Button>
                   )}
                 </WizardFooter>
@@ -388,70 +408,24 @@ export function LogCollaborationWizard({
           </div>
         </WizardPanel>
 
-        <WizardAside stepKey="creator" direction={1} visible={!isResultStep}>
-          <div
-            className={`relative flex h-full flex-col items-center justify-center gap-4 overflow-hidden p-8 ${profilePhotoUrl ? "" : "bg-gradient-to-br from-slate-700 to-slate-900"}`}
-          >
-            <div className="absolute inset-0 z-10 bg-black/30" />
-            <div className="absolute inset-0 z-10 backdrop-blur-md" />
-            {profilePhotoUrl && (
-              <Image
-                src={profilePhotoUrl}
-                alt=""
-                fill
-                unoptimized
-                placeholder={profilePhotoBlurDataUrl ? "blur" : "empty"}
-                blurDataURL={profilePhotoBlurDataUrl ?? undefined}
-                className="object-cover"
-              />
-            )}
-            <div className="relative z-10 flex flex-col items-center gap-4">
-              {profilePhotoUrl ? (
-                <Image
-                  src={profilePhotoUrl}
-                  alt={creatorName}
-                  width={80}
-                  height={80}
-                  unoptimized
-                  placeholder={profilePhotoBlurDataUrl ? "blur" : "empty"}
-                  blurDataURL={profilePhotoBlurDataUrl ?? undefined}
-                  className="size-40 rounded-full object-cover shadow-hub"
-                />
-              ) : (
-                <div className="flex size-40 items-center justify-center rounded-full bg-white/20 text-3xl font-semibold text-white shadow-hub">
-                  {creatorName.slice(0, 1).toUpperCase()}
-                </div>
-              )}
-              <div className="text-center">
-                <p className="text-2xl font-semibold text-white">{creatorName}</p>
-                <p className="text-md mt-0.5 text-white/80">Log collaboration</p>
-              </div>
-            </div>
-          </div>
-        </WizardAside>
+        <CreatorWizardAside
+          creatorName={creatorName}
+          profilePhotoUrl={profilePhotoUrl}
+          profilePhotoBlurDataUrl={profilePhotoBlurDataUrl}
+          subtitle={asideSubtitle}
+          visible={!isResultStep}
+        />
       </Wizard>
 
-      <AlertDialog
-        open={confirmingClose}
-        onOpenChange={(open) => {
-          setConfirmingClose(open);
-          if (!open) {
-            const action = pendingCloseActionRef.current;
-            pendingCloseActionRef.current = null;
-            setTimeout(() => action?.(), 250);
-          }
-        }}
-      >
+      <AlertDialog open={confirmingClose} onOpenChange={onAlertOpenChange}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Discard and close?</AlertDialogTitle>
             <AlertDialogDescription>Your progress won&apos;t be saved.</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setConfirmingClose(false)}>Stay</AlertDialogCancel>
-            <AlertDialogAction onClick={() => runAfterAlertClosed(handleClose)}>
-              Discard and close
-            </AlertDialogAction>
+            <AlertDialogCancel>Stay</AlertDialogCancel>
+            <AlertDialogAction onClick={discardAndClose}>Discard and close</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
