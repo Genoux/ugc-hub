@@ -60,12 +60,11 @@ function closedRatingsExcluding(collabs: ClosedCollab[], excludeId?: string) {
 
 interface CreatorContentProps {
   creator: CreatorProfile;
-  contentInert?: boolean;
 }
 
 type WizardState = { mode: "log" } | { mode: "edit"; collab: ClosedCollab };
 
-export function CreatorContent({ creator, contentInert = false }: CreatorContentProps) {
+export function CreatorContent({ creator }: CreatorContentProps) {
   const queryClient = useQueryClient();
   const [wizardState, setWizardState] = useState<WizardState | null>(null);
 
@@ -87,18 +86,14 @@ export function CreatorContent({ creator, contentInert = false }: CreatorContent
   const isBlacklisted = creator.status === "blacklisted";
 
   return (
-    <div
-      className={`flex-1 min-w-0 flex flex-col overflow-y-auto p-4 sm:p-4 ${contentInert ? "pointer-events-none" : ""}`}
-    >
-      <div className="flex items-start justify-between w-full gap-20">
-        {isBlacklisted && (
-          <BlacklistedBanner
-            reason={creator.blacklistReason}
-            blacklistedBy={creator.blacklistedByProfile}
-          />
-        )}
-      </div>
-      <div className="min-h-full flex flex-col gap-8 pb-6 sm:pb-8">
+    <div className="flex-1 min-w-0 flex flex-col overflow-y-auto p-4 pb-8">
+      {isBlacklisted && (
+        <BlacklistedBanner
+          reason={creator.blacklistReason}
+          blacklistedBy={creator.blacklistedByProfile}
+        />
+      )}
+      <div className="flex flex-col flex-1 gap-8">
         {allAssets.length > 0 && (
           <div className="flex flex-col gap-3">
             <h2 className="text-base font-semibold flex items-center gap-1">
