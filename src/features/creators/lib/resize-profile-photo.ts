@@ -1,6 +1,6 @@
 import { GetObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 import sharp from "sharp";
-import { R2_BUCKET_NAME, r2Client } from "./r2-client";
+import { R2_BUCKET_NAME, r2Client } from "@/features/uploads/lib/r2-client";
 
 const MAX_DIMENSION = 1080;
 const WEBP_QUALITY = 85;

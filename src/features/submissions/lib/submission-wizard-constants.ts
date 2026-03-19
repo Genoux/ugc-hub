@@ -1,10 +1,10 @@
-export const WIZARD_STEPS: Record<number, { header: string; body: string }> = {
+export const SUBMISSION_WIZARD_STEPS: Record<number, { header: string; body: string }> = {
   1: {
     header: "Submitting",
     body: "Your assets will be linked to your account.",
   },
   2: {
     header: "Upload assets",
-    body: "MP4, MOV, images up to 500MB each.",
+    body: "MP4, MOV up to 500MB each.",
   },
 };

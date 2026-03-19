@@ -4,11 +4,9 @@ import { useQueryClient } from "@tanstack/react-query";
 import { FolderIcon, Plus } from "lucide-react";
 import { AnimatePresence } from "motion/react";
 import { useState } from "react";
-import {
-  type LogCollabInitialData,
-  LogCollaborationWizard,
-} from "@/features/collaborations/components/log-collaboration-wizard";
+import { CollaborationWizard } from "@/features/collaborations/components/collaboration-wizard";
 import type { CollaborationRatingsInput } from "@/features/collaborations/schemas";
+import type { LogCollabInitialData } from "@/features/collaborations/types";
 import type { CreatorProfile } from "@/features/creators/actions/admin/get-creator-profile";
 import { AssetCard } from "@/shared/components/blocks/asset-card";
 import { DownloadButton } from "@/shared/components/blocks/download-button";
@@ -173,7 +171,8 @@ export function CreatorContent({ creator }: CreatorContentProps) {
 
       <AnimatePresence>
         {wizardState && (
-          <LogCollaborationWizard
+          <CollaborationWizard
+            mode="log"
             key={wizardState.mode === "edit" ? wizardState.collab.id : "log-new"}
             initialData={
               wizardState.mode === "edit" ? collabToInitialData(wizardState.collab) : undefined

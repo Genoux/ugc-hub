@@ -5,16 +5,9 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useRef, useState, useTransition } from "react";
 import { completeCreatorProfile } from "@/features/creators/actions/portal/complete-creator-profile";
-import { uploadCreatorAsset } from "@/features/creators/hooks/portal/use-creator-asset-upload";
-import {
-  type PortfolioVideoManager,
-  usePortfolioVideoManager,
-} from "@/features/creators/hooks/portal/use-portfolio-video-manager";
-import {
-  type ProfilePhotoManager,
-  useProfilePhotoManager,
-} from "@/features/creators/hooks/portal/use-profile-photo-manager";
-import { buildOnboardingData, canProceed } from "@/features/creators/lib/onboarding-utils";
+import { usePortfolioVideoUpload } from "@/features/creators/hooks/portal/use-portfolio-video-upload";
+import { putToR2 } from "@/features/uploads/lib/r2-upload";
+import { buildOnboardingData, canProceed, MAX_PORTFOLIO_VIDEOS } from "@/features/creators/lib/onboarding-utils";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -53,13 +46,20 @@ import { StepVideos } from "./steps/step-videos";
 
 const TOTAL_STEPS = 9;
 
+type PendingVideoFile = { file: File; objectUrl: string };
+type ExistingVideo = { id: string; url: string; filename: string };
+
 interface StepContentProps {
   step: number;
   data: OnboardingData;
   onChange: (u: Partial<OnboardingData>) => void;
-  creatorId: string;
-  photoManager: ProfilePhotoManager;
-  videoManager: PortfolioVideoManager;
+  photoPreviewUrl: string | null;
+  onPhotoChange: (file: File, previewUrl: string) => void;
+  existingVideos: ExistingVideo[];
+  pendingVideoFiles: PendingVideoFile[];
+  onExistingVideoRemove: (id: string) => void;
+  onVideosAdd: (files: File[]) => void;
+  onVideoRemove: (index: number) => void;
   submitError: string | null;
   onExitResult: () => void;
   onRetryResult: () => void;
@@ -69,9 +69,13 @@ function StepContent({
   step,
   data,
   onChange,
-  creatorId,
-  photoManager,
-  videoManager,
+  photoPreviewUrl,
+  onPhotoChange,
+  existingVideos,
+  pendingVideoFiles,
+  onExistingVideoRemove,
+  onVideosAdd,
+  onVideoRemove,
   submitError,
   onExitResult,
   onRetryResult,
@@ -89,21 +93,19 @@ function StepContent({
       return (
         <StepPhoto
           photoKey={data.profilePhoto}
-          photoManager={photoManager}
+          previewUrl={photoPreviewUrl}
+          onFileChange={onPhotoChange}
           onChange={(key) => onChange({ profilePhoto: key })}
-          creatorId={creatorId}
         />
       );
     case 6:
       return (
         <StepVideos
-          doneEntries={videoManager.doneEntries}
-          uploadingEntries={videoManager.uploadingEntries}
-          onEntryAdd={videoManager.add}
-          onEntryRemove={videoManager.remove}
-          onUploadStart={videoManager.uploadStart}
-          onUploadEnd={videoManager.uploadEnd}
-          creatorId={creatorId}
+          existingVideos={existingVideos}
+          pendingFiles={pendingVideoFiles}
+          onExistingRemove={onExistingVideoRemove}
+          onFilesAdd={onVideosAdd}
+          onFileRemove={onVideoRemove}
         />
       );
     case 7:
@@ -124,16 +126,16 @@ export function OnboardingShell({ creator, onComplete, onClose }: OnboardingProp
   const [isPending, startTransition] = useTransition();
   const [confirmingClose, setConfirmingClose] = useState(false);
   const initialData = useRef(buildOnboardingData(creator));
-  const initialVideoIds = useRef(new Set(creator.portfolioVideos.map((v) => v.id)));
-  const photoManager = useProfilePhotoManager(creator.profilePhotoUrl);
-  const videoManager = usePortfolioVideoManager(
-    creator.portfolioVideos.map((v) => ({
-      assetId: v.id,
-      key: v.url,
-      filename: v.filename,
-      objectUrl: v.url,
-    })),
+  const initialPhotoUrl = useRef(creator.profilePhotoUrl ?? null);
+  const [pendingPhotoFile, setPendingPhotoFile] = useState<File | null>(null);
+  const [photoPreviewUrl, setPhotoPreviewUrl] = useState<string | null>(creator.profilePhotoUrl ?? null);
+
+  const [existingVideos, setExistingVideos] = useState<ExistingVideo[]>(() =>
+    creator.portfolioVideos.map((v) => ({ id: v.id, url: v.url, filename: v.filename })),
   );
+  const [pendingVideoFiles, setPendingVideoFiles] = useState<PendingVideoFile[]>([]);
+  const { upload: uploadVideos, resultsRef: videoResultsRef, resetResults: resetVideoResults } =
+    usePortfolioVideoUpload(creator.id);
 
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [closeReason, setCloseReason] = useState<"incomplete" | "leave_save" | "quit" | null>(null);
@@ -142,8 +144,9 @@ export function OnboardingShell({ creator, onComplete, onClose }: OnboardingProp
   const isLastFormStep = step === 8;
   const isResultStep = step === TOTAL_STEPS;
   const pendingCloseActionRef = useRef<(() => void | Promise<void>) | null>(null);
-
   const ALERT_CLOSE_MS = 250;
+
+  const videoCount = existingVideos.length + pendingVideoFiles.length;
 
   const handleStepChange = (next: number) => {
     setSubmitError(null);
@@ -151,12 +154,11 @@ export function OnboardingShell({ creator, onComplete, onClose }: OnboardingProp
   };
 
   const hasChanges = () => {
-    if (JSON.stringify(data) !== JSON.stringify(initialData.current)) {
-      return true;
-    }
-    const currentIds = videoManager.doneEntries.map((e) => e.assetId);
-    if (currentIds.length !== initialVideoIds.current.size) return true;
-    return currentIds.some((id) => !initialVideoIds.current.has(id));
+    if (JSON.stringify(data) !== JSON.stringify(initialData.current)) return true;
+    if (pendingPhotoFile !== null) return true;
+    if (existingVideos.length !== creator.portfolioVideos.length) return true;
+    if (pendingVideoFiles.length > 0) return true;
+    return false;
   };
 
   const handleRequestClose = () => {
@@ -170,7 +172,7 @@ export function OnboardingShell({ creator, onComplete, onClose }: OnboardingProp
       return;
     }
     const allComplete = [1, 2, 3, 4, 5, 6, 7, 8].every((s) =>
-      canProceed(s, data, videoManager.completedCount),
+      canProceed(s, data, videoCount),
     );
     if (hasChanges() && !allComplete) {
       setCloseReason("incomplete");
@@ -187,19 +189,26 @@ export function OnboardingShell({ creator, onComplete, onClose }: OnboardingProp
     setConfirmingClose(false);
   };
 
+  const discardPendingChanges = () => {
+    if (pendingPhotoFile) URL.revokeObjectURL(photoPreviewUrl ?? "");
+    setPendingPhotoFile(null);
+    setPhotoPreviewUrl(initialPhotoUrl.current);
+    for (const pf of pendingVideoFiles) URL.revokeObjectURL(pf.objectUrl);
+    setPendingVideoFiles([]);
+    setExistingVideos(creator.portfolioVideos.map((v) => ({ id: v.id, url: v.url, filename: v.filename })));
+  };
+
   const handleConfirmedClose = () => {
-    runAfterAlertClosed(async () => {
-      photoManager.revertPending();
-      await videoManager.abandonAll();
+    runAfterAlertClosed(() => {
+      discardPendingChanges();
       onClose();
     });
   };
 
   const handleRevertAndQuit = () => {
-    runAfterAlertClosed(async () => {
+    runAfterAlertClosed(() => {
       setData(initialData.current);
-      photoManager.revertPending();
-      await videoManager.abandonAll();
+      discardPendingChanges();
       onClose();
     });
   };
@@ -223,21 +232,54 @@ export function OnboardingShell({ creator, onComplete, onClose }: OnboardingProp
     ethnicities: data.ethnicities as Ethnicity[],
   });
 
-  /** Upload the pending profile photo if one was selected, or return the existing key. */
   const resolveProfilePhoto = async (): Promise<string> => {
-    if (photoManager.pendingFile) {
-      const { key } = await uploadCreatorAsset(creator.id, "profile_picture", photoManager.pendingFile);
-      photoManager.setPendingFile(null);
-      return key;
+    if (!pendingPhotoFile) return data.profilePhoto;
+
+    const res = await fetch("/api/uploads/creator-profile/presign", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        creatorId: creator.id,
+        filename: pendingPhotoFile.name,
+        mimeType: pendingPhotoFile.type,
+        fileSize: pendingPhotoFile.size,
+        assetType: "profile_picture",
+      }),
+    });
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      throw new Error((body as { error?: string }).error ?? "Failed to upload profile photo");
     }
-    return data.profilePhoto;
+    const { uploadUrl, key } = await res.json();
+    await putToR2(pendingPhotoFile, uploadUrl);
+    setPendingPhotoFile(null);
+    return key;
+  };
+
+  const resolveVideoUploads = async () => {
+    if (pendingVideoFiles.length === 0) return [];
+    resetVideoResults();
+    await uploadVideos(pendingVideoFiles.map((pf) => pf.file));
+    for (const pf of pendingVideoFiles) URL.revokeObjectURL(pf.objectUrl);
+    setPendingVideoFiles([]);
+    return videoResultsRef.current.map(({ file, key }) => ({
+      key,
+      filename: file.name,
+      mimeType: file.type,
+      sizeBytes: file.size,
+    }));
   };
 
   const handleSaveAndClose = () => {
     startTransition(async () => {
       try {
         const photoKey = await resolveProfilePhoto();
-        await completeCreatorProfile(buildProfilePayload(photoKey));
+        const newVideos = await resolveVideoUploads();
+        await completeCreatorProfile({
+          ...buildProfilePayload(photoKey),
+          keepVideoIds: existingVideos.map((v) => v.id),
+          newVideos,
+        });
         router.refresh();
         onClose();
       } catch (err) {
@@ -252,7 +294,12 @@ export function OnboardingShell({ creator, onComplete, onClose }: OnboardingProp
       setSubmitError(null);
       try {
         const photoKey = await resolveProfilePhoto();
-        await completeCreatorProfile(buildProfilePayload(photoKey));
+        const newVideos = await resolveVideoUploads();
+        await completeCreatorProfile({
+          ...buildProfilePayload(photoKey),
+          keepVideoIds: existingVideos.map((v) => v.id),
+          newVideos,
+        });
         router.refresh();
         if (creator.profileCompleted) {
           onClose();
@@ -275,7 +322,6 @@ export function OnboardingShell({ creator, onComplete, onClose }: OnboardingProp
     onComplete();
   };
 
-  const videoCount = videoManager.completedCount;
   const stepCanProceed = canProceed(step, data, videoCount);
   const allStepsComplete = [1, 2, 3, 4, 5, 6, 7, 8].every((s) => canProceed(s, data, videoCount));
   const filledSteps = new Set(
@@ -304,11 +350,7 @@ export function OnboardingShell({ creator, onComplete, onClose }: OnboardingProp
                 variant="default"
                 size="icon"
                 onClick={handleSaveAndClose}
-                disabled={
-                  !allStepsComplete ||
-                  isPending ||
-                  (step === 6 && videoManager.isUploading)
-                }
+                disabled={!allStepsComplete || isPending}
                 aria-label="Save and close"
               >
                 <CheckIcon className="size-5" />
@@ -330,9 +372,31 @@ export function OnboardingShell({ creator, onComplete, onClose }: OnboardingProp
                 step={step}
                 data={data}
                 onChange={update}
-                creatorId={creator.id}
-                photoManager={photoManager}
-                videoManager={videoManager}
+                photoPreviewUrl={photoPreviewUrl}
+                onPhotoChange={(file, previewUrl) => {
+                  if (pendingPhotoFile && photoPreviewUrl) URL.revokeObjectURL(photoPreviewUrl);
+                  setPendingPhotoFile(file);
+                  setPhotoPreviewUrl(previewUrl);
+                }}
+                existingVideos={existingVideos}
+                pendingVideoFiles={pendingVideoFiles}
+                onExistingVideoRemove={(id) =>
+                  setExistingVideos((prev) => prev.filter((v) => v.id !== id))
+                }
+                onVideosAdd={(files) => {
+                  const available = MAX_PORTFOLIO_VIDEOS - videoCount;
+                  const toAdd = files.slice(0, available).map((file) => ({
+                    file,
+                    objectUrl: URL.createObjectURL(file),
+                  }));
+                  setPendingVideoFiles((prev) => [...prev, ...toAdd]);
+                }}
+                onVideoRemove={(index) => {
+                  setPendingVideoFiles((prev) => {
+                    URL.revokeObjectURL(prev[index].objectUrl);
+                    return prev.filter((_, i) => i !== index);
+                  });
+                }}
                 submitError={submitError}
                 onExitResult={handleExitResult}
                 onRetryResult={() => handleStepChange(8)}
@@ -354,11 +418,7 @@ export function OnboardingShell({ creator, onComplete, onClose }: OnboardingProp
                   <Button
                     type="button"
                     onClick={handleNext}
-                    disabled={
-                      !stepCanProceed ||
-                      isPending ||
-                      (step === 6 && videoManager.isUploading)
-                    }
+                    disabled={!stepCanProceed || isPending}
                   >
                     {isPending
                       ? "Saving…"

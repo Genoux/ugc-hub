@@ -1,8 +1,7 @@
 "use client";
 
-import { Loader2, X } from "lucide-react";
+import { X } from "lucide-react";
 import { useState } from "react";
-import { uploadCreatorAsset } from "@/features/creators/hooks/portal/use-creator-asset-upload";
 import {
   MAX_PORTFOLIO_VIDEOS,
   MIN_PORTFOLIO_VIDEOS,
@@ -18,74 +17,60 @@ import {
   CarouselPrevious,
 } from "@/shared/components/ui/carousel";
 import { UPLOAD_SIZE_LIMITS } from "@/shared/lib/constants";
-import type { PortfolioVideoEntry, UploadingVideoEntry } from "../onboarding-types";
 
 const ACCEPTED_TYPES = ["video/mp4", "video/quicktime", "video/webm"] as const;
 
+interface ExistingVideo {
+  id: string;
+  url: string;
+  filename: string;
+}
+
+interface PendingFile {
+  file: File;
+  objectUrl: string;
+}
+
 interface Props {
-  doneEntries: PortfolioVideoEntry[];
-  uploadingEntries: UploadingVideoEntry[];
-  onEntryAdd: (entry: PortfolioVideoEntry) => void;
-  onEntryRemove: (assetId: string) => void;
-  onUploadStart: (entry: UploadingVideoEntry) => void;
-  onUploadEnd: (tempId: string) => void;
-  creatorId: string;
+  existingVideos: ExistingVideo[];
+  pendingFiles: PendingFile[];
+  onExistingRemove: (id: string) => void;
+  onFilesAdd: (files: File[]) => void;
+  onFileRemove: (index: number) => void;
 }
 
 export function StepVideos({
-  doneEntries,
-  uploadingEntries,
-  onEntryAdd,
-  onEntryRemove,
-  onUploadStart,
-  onUploadEnd,
-  creatorId,
+  existingVideos,
+  pendingFiles,
+  onExistingRemove,
+  onFilesAdd,
+  onFileRemove,
 }: Props) {
   const [errors, setErrors] = useState<{ id: string; message: string }[]>([]);
   const [movWarning, setMovWarning] = useState(false);
 
-  const totalEntries = doneEntries.length + uploadingEntries.length;
+  const totalEntries = existingVideos.length + pendingFiles.length;
+  const remaining = MIN_PORTFOLIO_VIDEOS - totalEntries;
 
   const handleFilesAdd = (files: File[]) => {
-    const toUpload = files.slice(0, MAX_PORTFOLIO_VIDEOS - totalEntries);
+    const available = MAX_PORTFOLIO_VIDEOS - totalEntries;
+    const toAdd = files.slice(0, available);
 
-    if (
-      toUpload.some((f) => f.name.toLowerCase().endsWith(".mov") || f.type === "video/quicktime")
-    ) {
+    if (toAdd.some((f) => f.name.toLowerCase().endsWith(".mov") || f.type === "video/quicktime")) {
       setMovWarning(true);
     }
 
-    for (const file of toUpload) {
-      const tempId = crypto.randomUUID();
-      const objectUrl = URL.createObjectURL(file);
-
-      onUploadStart({ tempId, objectUrl, filename: file.name });
-
-      uploadCreatorAsset(creatorId, "portfolio_video", file)
-        .then((result) => {
-          const { assetId } = result;
-          if (!assetId) throw new Error("Upload did not return an asset ID");
-          onEntryAdd({
-            assetId,
-            key: result.key,
-            filename: result.filename,
-            objectUrl,
-          });
-        })
-        .catch((err) => {
-          URL.revokeObjectURL(objectUrl);
-          const message = err instanceof Error ? err.message : "Upload failed. Please try again.";
-          setErrors((prev) => [...prev, { id: crypto.randomUUID(), message }]);
-        })
-        .finally(() => onUploadEnd(tempId));
-    }
+    onFilesAdd(toAdd);
   };
 
-  const remaining = MIN_PORTFOLIO_VIDEOS - doneEntries.length;
+  const allEntries = [
+    ...existingVideos.map((v) => ({ key: v.id, src: v.url, filename: v.filename, isExisting: true as const, id: v.id })),
+    ...pendingFiles.map((pf, i) => ({ key: `pending-${i}`, src: pf.objectUrl, filename: pf.file.name, isExisting: false as const, index: i })),
+  ];
 
   return (
     <div className="space-y-4">
-      {doneEntries.length > 0 && (
+      {allEntries.length > 0 && (
         <Carousel
           opts={{ align: "start", loop: false }}
           className="w-full flex flex-col gap-3"
@@ -93,17 +78,21 @@ export function StepVideos({
           scrollDuration={20}
         >
           <CarouselContent>
-            {doneEntries.map((entry) => (
-              <CarouselItem key={entry.assetId} className="basis-auto p-0">
+            {allEntries.map((entry) => (
+              <CarouselItem key={entry.key} className="basis-auto p-0">
                 <AssetCard
-                  src={entry.objectUrl}
+                  src={entry.src}
                   filename={entry.filename}
                   size="xs"
                   actionSlot={
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => onEntryRemove(entry.assetId)}
+                      onClick={() =>
+                        entry.isExisting
+                          ? onExistingRemove(entry.id)
+                          : onFileRemove(entry.index)
+                      }
                       className="h-8 w-8 text-white! hover:bg-white/20"
                     >
                       <X className="h-4 w-4" />
@@ -114,11 +103,9 @@ export function StepVideos({
             ))}
           </CarouselContent>
           <div className="flex items-center gap-2 justify-between">
-            <div className="mb-1">
-              <p className="text-xs text-muted-foreground">
-                {doneEntries.length} / {MAX_PORTFOLIO_VIDEOS}
-              </p>
-            </div>
+            <p className="text-xs text-muted-foreground mb-1">
+              {totalEntries} / {MAX_PORTFOLIO_VIDEOS}
+            </p>
             <div className="flex items-center gap-1">
               <CarouselPrevious />
               <CarouselNext />
@@ -127,27 +114,26 @@ export function StepVideos({
         </Carousel>
       )}
 
-      {uploadingEntries.length > 0 && (
-        <div className="space-y-1.5">
-          {uploadingEntries.map((entry) => (
-            <div
-              key={entry.tempId}
-              className="flex items-center gap-2.5 rounded-lg border px-3 py-2.5"
-            >
-              <Loader2 className="size-3.5 shrink-0 animate-spin text-muted-foreground" />
-              <span className="truncate text-sm">{entry.filename}</span>
-            </div>
-          ))}
-        </div>
-      )}
-
       {totalEntries < MAX_PORTFOLIO_VIDEOS && (
         <FileDropZone
           onFilesAdd={handleFilesAdd}
           accept={ACCEPTED_TYPES}
           maxFileSize={UPLOAD_SIZE_LIMITS.video}
           hint="MP4, MOV or WebM · Max 250 MB each"
+          onInvalidFiles={(rejected) => {
+            const message =
+              rejected.reason === "type"
+                ? "File type not supported. Use MP4, MOV or WebM."
+                : "File too large (max 250 MB).";
+            setErrors((prev) => [...prev, { id: crypto.randomUUID(), message }]);
+          }}
         />
+      )}
+
+      {remaining > 0 && totalEntries > 0 && (
+        <p className="text-xs text-muted-foreground">
+          Add {remaining} more video{remaining !== 1 ? "s" : ""} to continue.
+        </p>
       )}
 
       {movWarning && (

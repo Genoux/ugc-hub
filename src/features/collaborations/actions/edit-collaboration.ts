@@ -1,9 +1,11 @@
 "use server";
 
 import { randomUUID } from "node:crypto";
+import { DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { and, eq, ne } from "drizzle-orm";
 import { collaborations, creators } from "@/db/schema";
 import type { CollaborationHighlight } from "@/entities/creator/types";
+import { R2_BUCKET_NAME, r2Client } from "@/features/uploads/lib/r2-client";
 import { toActionError } from "@/shared/lib/action-error";
 import { requireAdmin } from "@/shared/lib/auth";
 import { calculateCreatorRating } from "@/shared/lib/calculate-ratings";
@@ -14,6 +16,8 @@ export async function editCollaboration(input: EditCollaborationInput) {
   try {
     const { userId } = await requireAdmin();
     const data = editCollaborationSchema.parse(input);
+
+    let droppedKeys: string[] = [];
 
     await db.transaction(async (tx) => {
       const existing = await tx.query.collaborations.findFirst({
@@ -51,6 +55,7 @@ export async function editCollaboration(input: EditCollaborationInput) {
       const keepSet = new Set(data.keepHighlightKeys);
       const previous = (existing.highlights ?? []) as CollaborationHighlight[];
       const kept = previous.filter((h) => keepSet.has(h.r2Key));
+      droppedKeys = previous.filter((h) => !keepSet.has(h.r2Key)).map((h) => h.r2Key);
 
       const newEntries = (data.newHighlights ?? []).map((h) => ({
         id: randomUUID(),
@@ -80,6 +85,11 @@ export async function editCollaboration(input: EditCollaborationInput) {
 
       await tx.update(creators).set({ overallRating }).where(eq(creators.id, data.creatorId));
     });
+
+    // Fire-and-forget — DB is already committed, so orphans are recoverable via check-r2-orphans
+    for (const key of droppedKeys) {
+      void r2Client.send(new DeleteObjectCommand({ Bucket: R2_BUCKET_NAME, Key: key }));
+    }
   } catch (err) {
     throw toActionError(err);
   }

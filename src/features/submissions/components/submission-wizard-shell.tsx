@@ -3,7 +3,6 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
-import { useMultipartUpload } from "@/features/uploads/hooks/use-multipart-upload";
 import { Button } from "@/shared/components/ui/button";
 import {
   Wizard,
@@ -18,16 +17,17 @@ import { WizardLoading } from "@/shared/components/wizard/wizard-loading";
 import { useSteppedFlow } from "@/shared/hooks/use-stepped-flow";
 import { ROUTES } from "@/shared/lib/routes";
 import { submitWizard } from "../actions/submit-wizard";
-import { WIZARD_STEPS } from "../lib/constants";
+import { useSubmissionUpload } from "../hooks/use-submission-upload";
+import { SUBMISSION_WIZARD_STEPS } from "../lib/submission-wizard-constants";
 import { StepSubmittingAs } from "./steps/step-submitting-as";
 import { StepUploadAssets } from "./steps/step-upload-assets";
 
-const CONTENT_STEPS = Object.keys(WIZARD_STEPS).length;
+const CONTENT_STEPS = Object.keys(SUBMISSION_WIZARD_STEPS).length;
 const LOADING_STEP = CONTENT_STEPS + 1;
 const COMPLETE_STEP = CONTENT_STEPS + 2;
 const TOTAL_STEPS = COMPLETE_STEP;
 
-interface WizardShellProps {
+interface SubmissionWizardShellProps {
   token: string;
   projectName: string;
   creatorId: string;
@@ -36,19 +36,22 @@ interface WizardShellProps {
   creatorImageUrl: string;
 }
 
-export function WizardShell({
+export function SubmissionWizardShell({
   token,
   creatorId,
   creatorName,
   creatorEmail,
   creatorImageUrl,
   projectName,
-}: WizardShellProps) {
+}: SubmissionWizardShellProps) {
   const { step, goToStep, directionRef } = useSteppedFlow(TOTAL_STEPS);
   const [uploadFiles, setUploadFiles] = useState<File[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const { uploadFile } = useMultipartUpload();
+
+  const { upload, setContext } = useSubmissionUpload(
+    (p) => setUploadProgress(20 + 80 * (p / 100)),
+  );
 
   const isLoadingStep = step === LOADING_STEP;
   const isResultStep = step === COMPLETE_STEP;
@@ -75,19 +78,12 @@ export function WizardShell({
       setUploadProgress(20);
 
       if (uploadFiles.length > 0) {
-        const n = uploadFiles.length;
-        const fileProgress = new Array<number>(n).fill(0);
-        await Promise.all(
-          uploadFiles.map((file, i) =>
-            uploadFile(file, result.project.id, result.folder.id, result.submission.id, {
-              onProgress: (p) => {
-                fileProgress[i] = p / 100;
-                const total = fileProgress.reduce((a, b) => a + b, 0) / n;
-                setUploadProgress(20 + 80 * total);
-              },
-            }),
-          ),
-        );
+        setContext({
+          projectId: result.project.id,
+          folderId: result.folder.id,
+          submissionId: result.submission.id,
+        });
+        await upload(uploadFiles);
       } else {
         setUploadProgress(100);
       }
@@ -123,8 +119,8 @@ export function WizardShell({
         <WizardStep stepKey={step} direction={directionRef.current}>
           {!isResultStep && !isLoadingStep && (
             <div className="flex flex-col gap-2">
-              <WizardTitle>{WIZARD_STEPS[step].header}</WizardTitle>
-              <WizardDescription>{WIZARD_STEPS[step].body}</WizardDescription>
+              <WizardTitle>{SUBMISSION_WIZARD_STEPS[step].header}</WizardTitle>
+              <WizardDescription>{SUBMISSION_WIZARD_STEPS[step].body}</WizardDescription>
             </div>
           )}
           {step === 1 && <StepSubmittingAs {...creatorProps} />}

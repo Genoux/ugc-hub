@@ -4,9 +4,7 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { auth } from "@clerk/nextjs/server";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-import type { PortfolioVideoEntry } from "@/entities/creator/types";
 import { getSessionCreator } from "@/features/creators/lib/get-session-creator";
-import { MAX_PORTFOLIO_VIDEOS } from "@/features/creators/lib/onboarding-utils";
 import { R2_BUCKET_NAME, r2Client } from "@/features/uploads/lib/r2-client";
 import { UPLOAD_SIZE_LIMITS } from "@/shared/lib/constants";
 
@@ -53,15 +51,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "File size exceeds limit" }, { status: 400 });
     }
 
-    if (assetType === "portfolio_video") {
-      const videos = (creator.portfolioVideos ?? []) as PortfolioVideoEntry[];
-      if (videos.length >= MAX_PORTFOLIO_VIDEOS) {
-        return NextResponse.json({ error: "Portfolio video limit reached" }, { status: 409 });
-      }
-    }
-
     // profile_picture: deterministic key so each save overwrites the previous one in R2.
-    // portfolio_video: unique key per file, tracked in creator_profile_assets.
+    // portfolio_video: unique key per file, committed to DB in completeCreatorProfile action.
     const key =
       assetType === "profile_picture"
         ? `creators/${creatorId}/profile-picture`

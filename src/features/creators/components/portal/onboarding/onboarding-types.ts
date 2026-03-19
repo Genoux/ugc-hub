@@ -1,21 +1,3 @@
-export interface PortfolioVideo {
-  assetId: string;
-  key: string;
-  filename: string;
-}
-
-/** Completed in-wizard entry — extends PortfolioVideo with a local blob URL for preview. */
-export interface PortfolioVideoEntry extends PortfolioVideo {
-  objectUrl: string;
-}
-
-/** Transient in-wizard entry — exists while a file is uploading. */
-export interface UploadingVideoEntry {
-  tempId: string;
-  objectUrl: string;
-  filename: string;
-}
-
 import type {
   AgeDemographic,
   ContentFormat,

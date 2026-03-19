@@ -3,7 +3,6 @@
 import { CameraIcon } from "lucide-react";
 import Image from "next/image";
 import { useRef, useState } from "react";
-import type { ProfilePhotoManager } from "@/features/creators/hooks/portal/use-profile-photo-manager";
 import { Button } from "@/shared/components/ui/button";
 import { UPLOAD_SIZE_LIMITS } from "@/shared/lib/constants";
 
@@ -11,16 +10,16 @@ const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
 interface Props {
   photoKey: string;
-  photoManager: ProfilePhotoManager;
+  previewUrl: string | null;
+  onFileChange: (file: File, previewUrl: string) => void;
   onChange: (profilePhotoKey: string) => void;
-  creatorId: string;
 }
 
-export function StepPhoto({ photoKey, photoManager, onChange }: Props) {
+export function StepPhoto({ photoKey, previewUrl, onFileChange, onChange }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const hasPhoto = !!photoManager.previewUrl || !!photoKey;
+  const hasPhoto = !!previewUrl || !!photoKey;
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -39,13 +38,7 @@ export function StepPhoto({ photoKey, photoManager, onChange }: Props) {
     }
 
     const objectUrl = URL.createObjectURL(file);
-
-    if (photoManager.pendingFile && photoManager.previewUrl) {
-      URL.revokeObjectURL(photoManager.previewUrl);
-    }
-
-    photoManager.setPreviewUrl(objectUrl);
-    photoManager.setPendingFile(file);
+    onFileChange(file, objectUrl);
     // Sentinel signals a file is staged but not yet uploaded — canProceed(5) checks for non-empty string.
     onChange("__pending__");
   };
@@ -66,9 +59,9 @@ export function StepPhoto({ photoKey, photoManager, onChange }: Props) {
         className="bg-muted hover:bg-muted/80 relative flex h-52 w-52 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-lg border transition-colors"
         aria-label={hasPhoto ? "Replace photo" : "Upload photo"}
       >
-        {photoManager.previewUrl ? (
+        {previewUrl ? (
           <Image
-            src={photoManager.previewUrl}
+            src={previewUrl}
             alt="Creator"
             fill
             unoptimized
