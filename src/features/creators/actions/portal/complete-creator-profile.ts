@@ -74,6 +74,8 @@ export async function completeCreatorProfile(input: z.infer<typeof schema>) {
       sizeBytes: v.sizeBytes,
     }));
 
+    await resizeProfilePhoto(validated.profilePhoto);
+
     await db
       .update(creators)
       .set({
@@ -112,10 +114,6 @@ export async function completeCreatorProfile(input: z.infer<typeof schema>) {
     for (const video of droppedVideos) {
       void r2Client.send(new DeleteObjectCommand({ Bucket: R2_BUCKET_NAME, Key: video.r2Key }));
     }
-
-    void resizeProfilePhoto(validated.profilePhoto).catch((err) =>
-      console.error("[profile-photo] resize failed:", err),
-    );
 
     revalidatePath("/creator");
   } catch (err) {
