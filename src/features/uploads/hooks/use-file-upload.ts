@@ -44,16 +44,21 @@ export function useFileUpload(config: FileUploadConfig): {
 
         if (presignResult.isMultipart) {
           result = await uploadMultipart(file, presignResult, (fileProgress) => {
-            const overall = (completedFiles * perFileShare) + (fileProgress / 100) * perFileShare;
+            const overall = completedFiles * perFileShare + (fileProgress / 100) * perFileShare;
             setProgress(overall);
             config.onProgress?.(overall);
           });
         } else {
-          result = await uploadSingle(file, presignResult.uploadUrl, presignResult.key, (fileProgress) => {
-            const overall = (completedFiles * perFileShare) + (fileProgress / 100) * perFileShare;
-            setProgress(overall);
-            config.onProgress?.(overall);
-          });
+          result = await uploadSingle(
+            file,
+            presignResult.uploadUrl,
+            presignResult.key,
+            (fileProgress) => {
+              const overall = completedFiles * perFileShare + (fileProgress / 100) * perFileShare;
+              setProgress(overall);
+              config.onProgress?.(overall);
+            },
+          );
         }
 
         await config.onComplete?.(file, result);

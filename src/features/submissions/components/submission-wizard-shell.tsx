@@ -49,9 +49,7 @@ export function SubmissionWizardShell({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
 
-  const { upload, setContext } = useSubmissionUpload(
-    (p) => setUploadProgress(20 + 80 * (p / 100)),
-  );
+  const { upload, setContext } = useSubmissionUpload((p) => setUploadProgress(20 + 80 * (p / 100)));
 
   const isLoadingStep = step === LOADING_STEP;
   const isResultStep = step === COMPLETE_STEP;

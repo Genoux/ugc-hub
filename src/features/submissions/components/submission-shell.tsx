@@ -18,11 +18,11 @@ import { useSteppedFlow } from "@/shared/hooks/use-stepped-flow";
 import { ROUTES } from "@/shared/lib/routes";
 import { submitWizard } from "../actions/submit-wizard";
 import { useSubmissionUpload } from "../hooks/use-submission-upload";
-import { WIZARD_STEPS } from "../lib/constants";
+import { SUBMISSION_WIZARD_STEPS } from "../lib/submission-wizard-constants";
 import { StepSubmittingAs } from "./steps/step-submitting-as";
 import { StepUploadAssets } from "./steps/step-upload-assets";
 
-const CONTENT_STEPS = Object.keys(WIZARD_STEPS).length;
+const CONTENT_STEPS = Object.keys(SUBMISSION_WIZARD_STEPS).length;
 const LOADING_STEP = CONTENT_STEPS + 1;
 const COMPLETE_STEP = CONTENT_STEPS + 2;
 const TOTAL_STEPS = COMPLETE_STEP;
@@ -117,8 +117,8 @@ export function WizardShell({
         <WizardStep stepKey={step} direction={directionRef.current}>
           {!isResultStep && !isLoadingStep && (
             <div className="flex flex-col gap-2">
-              <WizardTitle>{WIZARD_STEPS[step].header}</WizardTitle>
-              <WizardDescription>{WIZARD_STEPS[step].body}</WizardDescription>
+              <WizardTitle>{SUBMISSION_WIZARD_STEPS[step].header}</WizardTitle>
+              <WizardDescription>{SUBMISSION_WIZARD_STEPS[step].body}</WizardDescription>
             </div>
           )}
           {step === 1 && <StepSubmittingAs {...creatorProps} />}

@@ -6,8 +6,12 @@ import { useRouter } from "next/navigation";
 import { useRef, useState, useTransition } from "react";
 import { completeCreatorProfile } from "@/features/creators/actions/portal/complete-creator-profile";
 import { usePortfolioVideoUpload } from "@/features/creators/hooks/portal/use-portfolio-video-upload";
+import {
+  buildOnboardingData,
+  canProceed,
+  MAX_PORTFOLIO_VIDEOS,
+} from "@/features/creators/lib/onboarding-utils";
 import { putToR2 } from "@/features/uploads/lib/r2-upload";
-import { buildOnboardingData, canProceed, MAX_PORTFOLIO_VIDEOS } from "@/features/creators/lib/onboarding-utils";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -128,14 +132,19 @@ export function OnboardingShell({ creator, onComplete, onClose }: OnboardingProp
   const initialData = useRef(buildOnboardingData(creator));
   const initialPhotoUrl = useRef(creator.profilePhotoUrl ?? null);
   const [pendingPhotoFile, setPendingPhotoFile] = useState<File | null>(null);
-  const [photoPreviewUrl, setPhotoPreviewUrl] = useState<string | null>(creator.profilePhotoUrl ?? null);
+  const [photoPreviewUrl, setPhotoPreviewUrl] = useState<string | null>(
+    creator.profilePhotoUrl ?? null,
+  );
 
   const [existingVideos, setExistingVideos] = useState<ExistingVideo[]>(() =>
     creator.portfolioVideos.map((v) => ({ id: v.id, url: v.url, filename: v.filename })),
   );
   const [pendingVideoFiles, setPendingVideoFiles] = useState<PendingVideoFile[]>([]);
-  const { upload: uploadVideos, resultsRef: videoResultsRef, resetResults: resetVideoResults } =
-    usePortfolioVideoUpload(creator.id);
+  const {
+    upload: uploadVideos,
+    resultsRef: videoResultsRef,
+    resetResults: resetVideoResults,
+  } = usePortfolioVideoUpload(creator.id);
 
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [closeReason, setCloseReason] = useState<"incomplete" | "leave_save" | "quit" | null>(null);
@@ -171,9 +180,7 @@ export function OnboardingShell({ creator, onComplete, onClose }: OnboardingProp
       onClose();
       return;
     }
-    const allComplete = [1, 2, 3, 4, 5, 6, 7, 8].every((s) =>
-      canProceed(s, data, videoCount),
-    );
+    const allComplete = [1, 2, 3, 4, 5, 6, 7, 8].every((s) => canProceed(s, data, videoCount));
     if (hasChanges() && !allComplete) {
       setCloseReason("incomplete");
     } else if (creator.profileCompleted) {
@@ -195,7 +202,9 @@ export function OnboardingShell({ creator, onComplete, onClose }: OnboardingProp
     setPhotoPreviewUrl(initialPhotoUrl.current);
     for (const pf of pendingVideoFiles) URL.revokeObjectURL(pf.objectUrl);
     setPendingVideoFiles([]);
-    setExistingVideos(creator.portfolioVideos.map((v) => ({ id: v.id, url: v.url, filename: v.filename })));
+    setExistingVideos(
+      creator.portfolioVideos.map((v) => ({ id: v.id, url: v.url, filename: v.filename })),
+    );
   };
 
   const handleConfirmedClose = () => {

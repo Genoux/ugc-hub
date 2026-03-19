@@ -64,8 +64,20 @@ export function StepVideos({
   };
 
   const allEntries = [
-    ...existingVideos.map((v) => ({ key: v.id, src: v.url, filename: v.filename, isExisting: true as const, id: v.id })),
-    ...pendingFiles.map((pf, i) => ({ key: `pending-${i}`, src: pf.objectUrl, filename: pf.file.name, isExisting: false as const, index: i })),
+    ...existingVideos.map((v) => ({
+      key: v.id,
+      src: v.url,
+      filename: v.filename,
+      isExisting: true as const,
+      id: v.id,
+    })),
+    ...pendingFiles.map((pf, i) => ({
+      key: `pending-${i}`,
+      src: pf.objectUrl,
+      filename: pf.file.name,
+      isExisting: false as const,
+      index: i,
+    })),
   ];
 
   return (
@@ -89,9 +101,7 @@ export function StepVideos({
                       variant="ghost"
                       size="icon"
                       onClick={() =>
-                        entry.isExisting
-                          ? onExistingRemove(entry.id)
-                          : onFileRemove(entry.index)
+                        entry.isExisting ? onExistingRemove(entry.id) : onFileRemove(entry.index)
                       }
                       className="h-8 w-8 text-white! hover:bg-white/20"
                     >

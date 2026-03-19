@@ -60,24 +60,13 @@ export function StepPhoto({ photoKey, previewUrl, onFileChange, onChange }: Prop
         aria-label={hasPhoto ? "Replace photo" : "Upload photo"}
       >
         {previewUrl ? (
-          <Image
-            src={previewUrl}
-            alt="Creator"
-            fill
-            unoptimized
-            className="object-cover"
-          />
+          <Image src={previewUrl} alt="Creator" fill unoptimized className="object-cover" />
         ) : (
           <CameraIcon className="size-5 text-muted-foreground" />
         )}
       </button>
 
-      <Button
-        type="button"
-        variant="outline"
-        size="sm"
-        onClick={() => inputRef.current?.click()}
-      >
+      <Button type="button" variant="outline" size="sm" onClick={() => inputRef.current?.click()}>
         {hasPhoto ? "Replace photo" : "Upload photo"}
       </Button>
 

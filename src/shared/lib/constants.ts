@@ -195,6 +195,6 @@ export const EASING_FUNCTION = {
 export const ALLOWED_UPLOAD_MIME_TYPES = ["video/mp4", "video/quicktime"] as const;
 
 export const UPLOAD_SIZE_LIMITS = {
-  image: 5 * 1024 * 1024,   //   5 MB
+  image: 5 * 1024 * 1024, //   5 MB
   video: 250 * 1024 * 1024, // 250 MB
 } as const;

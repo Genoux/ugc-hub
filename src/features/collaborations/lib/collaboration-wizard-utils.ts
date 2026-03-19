@@ -1,6 +1,6 @@
-import type { ExistingPortfolioHighlight, LogCollabInitialData } from "../types";
 import type { PortfolioFile } from "../components/steps/step-portfolio";
 import type { CollaborationRatingsInput } from "../schemas";
+import type { ExistingPortfolioHighlight, LogCollabInitialData } from "../types";
 import type { CollaborationWizardMode } from "./collaboration-wizard-constants";
 
 export type CollaborationWizardState = {
