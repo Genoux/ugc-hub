@@ -20,7 +20,7 @@ import {
 import { UPLOAD_SIZE_LIMITS } from "@/shared/lib/constants";
 import type { PortfolioVideoEntry, UploadingVideoEntry } from "../onboarding-types";
 
-const ACCEPTED_TYPES = ["video/mp4", "video/quicktime", "video/x-msvideo", "video/webm"] as const;
+const ACCEPTED_TYPES = ["video/mp4", "video/quicktime", "video/webm"] as const;
 
 interface Props {
   doneEntries: PortfolioVideoEntry[];
@@ -41,12 +41,19 @@ export function StepVideos({
   onUploadEnd,
   creatorId,
 }: Props) {
-  const [errors, setErrors] = useState<string[]>([]);
+  const [errors, setErrors] = useState<{ id: string; message: string }[]>([]);
+  const [movWarning, setMovWarning] = useState(false);
 
   const totalEntries = doneEntries.length + uploadingEntries.length;
 
   const handleFilesAdd = (files: File[]) => {
     const toUpload = files.slice(0, MAX_PORTFOLIO_VIDEOS - totalEntries);
+
+    if (
+      toUpload.some((f) => f.name.toLowerCase().endsWith(".mov") || f.type === "video/quicktime")
+    ) {
+      setMovWarning(true);
+    }
 
     for (const file of toUpload) {
       const tempId = crypto.randomUUID();
@@ -68,7 +75,7 @@ export function StepVideos({
         .catch((err) => {
           URL.revokeObjectURL(objectUrl);
           const message = err instanceof Error ? err.message : "Upload failed. Please try again.";
-          setErrors((prev) => [...prev, message]);
+          setErrors((prev) => [...prev, { id: crypto.randomUUID(), message }]);
         })
         .finally(() => onUploadEnd(tempId));
     }
@@ -139,21 +146,21 @@ export function StepVideos({
           onFilesAdd={handleFilesAdd}
           accept={ACCEPTED_TYPES}
           maxFileSize={UPLOAD_SIZE_LIMITS.video}
-          hint="MP4, MOV or WebM · Max 1 GB each"
+          hint="MP4, MOV or WebM · Max 250 MB each"
         />
       )}
 
-      {errors.map((err) => (
-        <p key={err} className="text-destructive text-sm">
-          {err}
-        </p>
-      ))}
-
-      {remaining > 0 && (
-        <p className="text-muted-foreground text-xs">
-          {remaining} more video{remaining > 1 ? "s" : ""} required to continue.
+      {movWarning && (
+        <p className="text-amber-600 dark:text-amber-500 text-sm">
+          MOV files may not play in all browsers. For guaranteed playback, export as MP4.
         </p>
       )}
+
+      {errors.map(({ id, message }) => (
+        <p key={id} className="text-destructive text-sm">
+          {message}
+        </p>
+      ))}
     </div>
   );
 }

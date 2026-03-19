@@ -5,8 +5,8 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { creators } from "@/db/schema";
 import { requireCreator } from "@/features/creators/lib/require-creator";
-import { generateBlurPlaceholder } from "@/features/uploads/lib/generate-blur-placeholder";
 import { getR2SignedUrl } from "@/features/uploads/lib/r2-serve";
+import { resizeProfilePhoto } from "@/features/uploads/lib/resize-profile-photo";
 import { notifySlack } from "@/integrations/slack/notify-slack";
 import { toActionError } from "@/shared/lib/action-error";
 import { AGE_DEMOGRAPHICS, ETHNICITIES, GENDER_IDENTITIES } from "@/shared/lib/constants";
@@ -83,16 +83,8 @@ export async function completeCreatorProfile(input: z.infer<typeof schema>) {
       );
     }
 
-    void generateBlurPlaceholder(validated.profilePhoto)
-      .then((blurDataUrl) =>
-        blurDataUrl
-          ? db
-              .update(creators)
-              .set({ profilePhotoBlurDataUrl: blurDataUrl })
-              .where(eq(creators.id, creator.id))
-          : undefined,
-      )
-      .catch(console.error);
+    void resizeProfilePhoto(validated.profilePhoto)
+      .catch((err) => console.error("[profile-photo] resize failed:", err));
 
     revalidatePath("/creator");
   } catch (err) {

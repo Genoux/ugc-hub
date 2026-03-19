@@ -17,7 +17,6 @@ const DIMENSION_LABELS: { key: keyof CollaborationRatingsInput; label: string }[
 
 interface StepCloseConfirmProps {
   profilePhotoUrl: string;
-  profilePhotoBlurDataUrl?: string | null;
   creatorName: string;
   submissionName: string;
   ratings: CollaborationRatingsInput;
@@ -30,7 +29,6 @@ interface StepCloseConfirmProps {
 
 export function StepCloseConfirm({
   profilePhotoUrl,
-  profilePhotoBlurDataUrl,
   creatorName,
   submissionName,
   ratings,
@@ -62,8 +60,6 @@ export function StepCloseConfirm({
           width={40}
           height={40}
           unoptimized
-          placeholder={profilePhotoBlurDataUrl ? "blur" : "empty"}
-          blurDataURL={profilePhotoBlurDataUrl ?? undefined}
           className="size-10 rounded-full object-cover shrink-0"
         />
         <div className="flex-1 min-w-0">

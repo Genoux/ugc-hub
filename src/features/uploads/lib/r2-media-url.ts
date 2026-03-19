@@ -6,7 +6,7 @@ export function toMediaUrl(
 ): string | null {
   if (!r2Key) return null;
   const base = `/api/media/${r2Key}`;
-  if (!version) return base;
+  if (version == null) return base;
   const v = version instanceof Date ? version.getTime() : version;
   return `${base}?v=${v}`;
 }

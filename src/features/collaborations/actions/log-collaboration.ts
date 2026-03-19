@@ -15,24 +15,6 @@ export async function logCollaboration(input: LogCollaborationInput) {
     const { userId } = await requireAdmin();
     const data = logCollaborationSchema.parse(input);
 
-    const priorClosed = await db.query.collaborations.findMany({
-      where: and(eq(collaborations.creatorId, data.creatorId), eq(collaborations.status, "closed")),
-      columns: {
-        ratingVisualQuality: true,
-        ratingActingDelivery: true,
-        ratingReliabilitySpeed: true,
-      },
-    });
-
-    const overallRating = calculateCreatorRating([
-      ...priorClosed,
-      {
-        ratingVisualQuality: data.ratings.visual_quality,
-        ratingActingDelivery: data.ratings.acting_line_delivery,
-        ratingReliabilitySpeed: data.ratings.reliability_speed,
-      },
-    ]);
-
     const highlights = (data.highlights ?? []).map((h) => ({
       id: randomUUID(),
       r2Key: h.key,
@@ -44,38 +26,63 @@ export async function logCollaboration(input: LogCollaborationInput) {
 
     const totalPaidCents = Math.round(data.totalPaid * 100);
 
-    const [inserted] = await db
-      .insert(collaborations)
-      .values({
-        creatorId: data.creatorId,
-        projectId: null,
-        name: data.name,
-        status: "closed",
-        closedAt: new Date(),
-        closedBy: userId,
-        ratingVisualQuality: data.ratings.visual_quality,
-        ratingActingDelivery: data.ratings.acting_line_delivery,
-        ratingReliabilitySpeed: data.ratings.reliability_speed,
-        piecesOfContent: data.piecesOfContent,
-        totalPaid: totalPaidCents,
-        reviewNotes: data.notes ?? null,
-        highlights,
-      })
-      .returning({ id: collaborations.id });
+    const { insertedId, creatorName } = await db.transaction(async (tx) => {
+      const priorClosed = await tx.query.collaborations.findMany({
+        where: and(
+          eq(collaborations.creatorId, data.creatorId),
+          eq(collaborations.status, "closed"),
+        ),
+        columns: {
+          ratingVisualQuality: true,
+          ratingActingDelivery: true,
+          ratingReliabilitySpeed: true,
+        },
+      });
 
-    await db.update(creators).set({ overallRating }).where(eq(creators.id, data.creatorId));
+      const overallRating = calculateCreatorRating([
+        ...priorClosed,
+        {
+          ratingVisualQuality: data.ratings.visual_quality,
+          ratingActingDelivery: data.ratings.acting_line_delivery,
+          ratingReliabilitySpeed: data.ratings.reliability_speed,
+        },
+      ]);
 
-    const creator = await db.query.creators.findFirst({
-      where: eq(creators.id, data.creatorId),
-      columns: { fullName: true },
+      const [inserted] = await tx
+        .insert(collaborations)
+        .values({
+          creatorId: data.creatorId,
+          projectId: null,
+          name: data.name,
+          status: "closed",
+          closedAt: new Date(),
+          closedBy: userId,
+          ratingVisualQuality: data.ratings.visual_quality,
+          ratingActingDelivery: data.ratings.acting_line_delivery,
+          ratingReliabilitySpeed: data.ratings.reliability_speed,
+          piecesOfContent: data.piecesOfContent,
+          totalPaid: totalPaidCents,
+          reviewNotes: data.notes ?? null,
+          highlights,
+        })
+        .returning({ id: collaborations.id });
+
+      await tx.update(creators).set({ overallRating }).where(eq(creators.id, data.creatorId));
+
+      const creator = await tx.query.creators.findFirst({
+        where: eq(creators.id, data.creatorId),
+        columns: { fullName: true },
+      });
+
+      return { insertedId: inserted?.id, creatorName: creator?.fullName ?? "Unknown" };
     });
 
-    if (inserted) {
+    if (insertedId) {
       notifySlack({
         type: "admin_logged_collab",
-        collabId: inserted.id,
+        collabId: insertedId,
         creatorId: data.creatorId,
-        creatorName: creator?.fullName ?? "Unknown",
+        creatorName,
         collabName: data.name,
         piecesOfContent: data.piecesOfContent,
         totalPaidCents,

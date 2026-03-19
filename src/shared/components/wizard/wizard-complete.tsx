@@ -17,7 +17,7 @@ export function WizardComplete({ title, description, children, className }: Wiza
         <h1 id="wizard-title" className="text-4xl font-medium">
           {title}
         </h1>
-        <p className="text-muted-foreground text-sm">{description}</p>
+        <p className="text-muted-foreground text-sm text-center">{description}</p>
       </div>
       {children}
     </div>

@@ -13,32 +13,34 @@ export async function closeCollaboration(input: CloseCollaborationInput) {
     const { userId } = await requireAdmin();
     const data = closeCollaborationSchema.parse(input);
 
-    await db
-      .update(collaborations)
-      .set({
-        status: "closed",
-        closedAt: new Date(),
-        closedBy: userId,
-        ratingVisualQuality: data.ratings.visual_quality,
-        ratingActingDelivery: data.ratings.acting_line_delivery,
-        ratingReliabilitySpeed: data.ratings.reliability_speed,
-        piecesOfContent: data.piecesOfContent,
-        totalPaid: Math.round(data.totalPaid * 100), // dollars → cents
-        reviewNotes: data.notes,
-      })
-      .where(eq(collaborations.id, data.collaborationId));
+    const collab = await db.transaction(async (tx) => {
+      await tx
+        .update(collaborations)
+        .set({
+          status: "closed",
+          closedAt: new Date(),
+          closedBy: userId,
+          ratingVisualQuality: data.ratings.visual_quality,
+          ratingActingDelivery: data.ratings.acting_line_delivery,
+          ratingReliabilitySpeed: data.ratings.reliability_speed,
+          piecesOfContent: data.piecesOfContent,
+          totalPaid: Math.round(data.totalPaid * 100),
+          reviewNotes: data.notes,
+        })
+        .where(eq(collaborations.id, data.collaborationId));
 
-    await db
-      .update(creators)
-      .set({ overallRating: data.overallRating })
-      .where(eq(creators.id, data.creatorId));
+      await tx
+        .update(creators)
+        .set({ overallRating: data.overallRating })
+        .where(eq(creators.id, data.creatorId));
 
-    const collab = await db.query.collaborations.findFirst({
-      where: eq(collaborations.id, data.collaborationId),
-      with: {
-        project: { columns: { name: true } },
-        creator: { columns: { fullName: true } },
-      },
+      return tx.query.collaborations.findFirst({
+        where: eq(collaborations.id, data.collaborationId),
+        with: {
+          project: { columns: { name: true } },
+          creator: { columns: { fullName: true } },
+        },
+      });
     });
 
     if (collab) {

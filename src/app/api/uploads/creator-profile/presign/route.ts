@@ -4,7 +4,9 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { auth } from "@clerk/nextjs/server";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
+import type { PortfolioVideoEntry } from "@/entities/creator/types";
 import { getSessionCreator } from "@/features/creators/lib/get-session-creator";
+import { MAX_PORTFOLIO_VIDEOS } from "@/features/creators/lib/onboarding-utils";
 import { R2_BUCKET_NAME, r2Client } from "@/features/uploads/lib/r2-client";
 import { UPLOAD_SIZE_LIMITS } from "@/shared/lib/constants";
 
@@ -12,8 +14,8 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 const ALLOWED_MIME_TYPES: Record<string, string[]> = {
-  profile_picture: ["image/jpeg", "image/png", "image/webp", "image/gif"],
-  portfolio_video: ["video/mp4", "video/quicktime", "video/x-msvideo", "video/webm"],
+  profile_picture: ["image/jpeg", "image/png", "image/webp"],
+  portfolio_video: ["video/mp4", "video/quicktime", "video/webm"],
 };
 
 const MAX_FILE_SIZE: Record<string, number> = {
@@ -51,7 +53,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "File size exceeds limit" }, { status: 400 });
     }
 
-    // profile_picture: deterministic key so each new upload overwrites the previous one.
+    if (assetType === "portfolio_video") {
+      const videos = (creator.portfolioVideos ?? []) as PortfolioVideoEntry[];
+      if (videos.length >= MAX_PORTFOLIO_VIDEOS) {
+        return NextResponse.json({ error: "Portfolio video limit reached" }, { status: 409 });
+      }
+    }
+
+    // profile_picture: deterministic key so each save overwrites the previous one in R2.
     // portfolio_video: unique key per file, tracked in creator_profile_assets.
     const key =
       assetType === "profile_picture"
@@ -60,7 +69,7 @@ export async function POST(request: NextRequest) {
 
     const uploadUrl = await getSignedUrl(
       r2Client,
-      new PutObjectCommand({ Bucket: R2_BUCKET_NAME, Key: key, ContentType: mimeType }),
+      new PutObjectCommand({ Bucket: R2_BUCKET_NAME, Key: key, ContentType: mimeType, ContentLength: fileSize }),
       { expiresIn: 3600 },
     );
 

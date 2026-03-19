@@ -63,7 +63,6 @@ interface LogCollaborationWizardProps {
   creatorId: string;
   creatorName: string;
   profilePhotoUrl: string | null;
-  profilePhotoBlurDataUrl?: string | null;
   closedCollabRatings: CollabRatingRow[];
   initialData?: LogCollabInitialData;
 }
@@ -74,7 +73,6 @@ export function LogCollaborationWizard({
   creatorId,
   creatorName,
   profilePhotoUrl,
-  profilePhotoBlurDataUrl,
   closedCollabRatings,
   initialData,
 }: LogCollaborationWizardProps) {
@@ -339,7 +337,6 @@ export function LogCollaborationWizard({
               {step === 4 && (
                 <StepLogConfirm
                   profilePhotoUrl={profilePhotoUrl}
-                  profilePhotoBlurDataUrl={profilePhotoBlurDataUrl}
                   creatorName={creatorName}
                   collabName={collabName.trim()}
                   ratings={ratings as CollaborationRatingsInput}
@@ -411,7 +408,6 @@ export function LogCollaborationWizard({
         <CreatorWizardAside
           creatorName={creatorName}
           profilePhotoUrl={profilePhotoUrl}
-          profilePhotoBlurDataUrl={profilePhotoBlurDataUrl}
           subtitle={asideSubtitle}
           visible={!isResultStep}
         />

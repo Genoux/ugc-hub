@@ -38,7 +38,7 @@ export const SORT_OPTIONS: { key: SortKey; label: string }[] = [
   { key: "rate_high", label: "Rate: High to Low" },
 ];
 
-const DEBOUNCE_MS = 300;
+const DEBOUNCE_MS = 125;
 
 const arrayOf = <T extends string>(values: readonly T[]) =>
   parseAsArrayOf(parseAsStringEnum([...values]));

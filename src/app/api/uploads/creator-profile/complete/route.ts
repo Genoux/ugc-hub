@@ -4,7 +4,9 @@ import { eq, sql } from "drizzle-orm";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { creators } from "@/db/schema";
+import type { PortfolioVideoEntry } from "@/entities/creator/types";
 import { getSessionCreator } from "@/features/creators/lib/get-session-creator";
+import { MAX_PORTFOLIO_VIDEOS } from "@/features/creators/lib/onboarding-utils";
 import { db } from "@/shared/lib/db";
 
 export const dynamic = "force-dynamic";
@@ -29,16 +31,47 @@ export async function POST(request: NextRequest) {
     }
 
     const assetId = randomUUID();
-    const entry = { id: assetId, r2Key: key, filename, mimeType, sizeBytes: Number(sizeBytes) };
+    const entry: PortfolioVideoEntry = {
+      id: assetId,
+      r2Key: key,
+      filename,
+      mimeType,
+      sizeBytes: Number(sizeBytes),
+    };
 
-    await db
-      .update(creators)
-      .set({
-        portfolioVideos: sql`COALESCE(${creators.portfolioVideos}, '[]'::jsonb) || ${JSON.stringify([entry])}::jsonb`,
-      })
-      .where(eq(creators.id, creatorId));
+    const result = await db.transaction(async (tx) => {
+      // Lock the row so concurrent uploads can't both slip past the limit check
+      const [row] = await tx
+        .select({ portfolioVideos: creators.portfolioVideos })
+        .from(creators)
+        .where(eq(creators.id, creatorId))
+        .for("update");
 
-    return NextResponse.json({ assetId });
+      const existing = (row?.portfolioVideos ?? []) as PortfolioVideoEntry[];
+
+      if (existing.length >= MAX_PORTFOLIO_VIDEOS) {
+        return { error: "Portfolio video limit reached", status: 409 } as const;
+      }
+
+      if (existing.some((v) => v.r2Key === key)) {
+        return { error: "Duplicate video", status: 409 } as const;
+      }
+
+      await tx
+        .update(creators)
+        .set({
+          portfolioVideos: sql`COALESCE(${creators.portfolioVideos}, '[]'::jsonb) || ${JSON.stringify([entry])}::jsonb`,
+        })
+        .where(eq(creators.id, creatorId));
+
+      return { assetId } as const;
+    });
+
+    if ("error" in result) {
+      return NextResponse.json({ error: result.error }, { status: result.status });
+    }
+
+    return NextResponse.json({ assetId: result.assetId });
   } catch (error) {
     console.error("Creator profile complete error:", error);
     return NextResponse.json({ error: "Failed to record upload" }, { status: 500 });

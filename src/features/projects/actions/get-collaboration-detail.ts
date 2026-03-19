@@ -24,7 +24,6 @@ export async function getCollaborationDetail(
           fullName: true,
           email: true,
           profilePhoto: true,
-          profilePhotoBlurDataUrl: true,
           profileCompletedAt: true,
         },
       },
@@ -66,7 +65,6 @@ export async function getCollaborationDetail(
       fullName: raw.creator.fullName,
       email: raw.creator.email,
       profilePhotoUrl: toMediaUrl(raw.creator.profilePhoto, raw.creator.profileCompletedAt),
-      profilePhotoBlurDataUrl: raw.creator.profilePhotoBlurDataUrl ?? null,
       closedCollabRatings,
     },
     submissions: raw.submissions.map((submission) => ({

@@ -29,7 +29,11 @@ import { CollaborationCard } from "./_components/collaboration-card";
 type ClosedCollab = CreatorProfile["closedCollaborations"][number];
 
 function collabToInitialData(collab: ClosedCollab): LogCollabInitialData {
-  if (!collab.ratingVisualQuality || !collab.ratingActingDelivery || !collab.ratingReliabilitySpeed) {
+  if (
+    !collab.ratingVisualQuality ||
+    !collab.ratingActingDelivery ||
+    !collab.ratingReliabilitySpeed
+  ) {
     throw new Error("Cannot edit a collaboration that is missing ratings");
   }
   return {
@@ -38,8 +42,10 @@ function collabToInitialData(collab: ClosedCollab): LogCollabInitialData {
     projectId: collab.projectId,
     ratings: {
       visual_quality: collab.ratingVisualQuality as CollaborationRatingsInput["visual_quality"],
-      acting_line_delivery: collab.ratingActingDelivery as CollaborationRatingsInput["acting_line_delivery"],
-      reliability_speed: collab.ratingReliabilitySpeed as CollaborationRatingsInput["reliability_speed"],
+      acting_line_delivery:
+        collab.ratingActingDelivery as CollaborationRatingsInput["acting_line_delivery"],
+      reliability_speed:
+        collab.ratingReliabilitySpeed as CollaborationRatingsInput["reliability_speed"],
     },
     piecesOfContent: Math.max(1, collab.piecesOfContent ?? 1),
     totalPaidDollars: (collab.totalPaidCents ?? 0) / 100,
@@ -169,7 +175,9 @@ export function CreatorContent({ creator }: CreatorContentProps) {
         {wizardState && (
           <LogCollaborationWizard
             key={wizardState.mode === "edit" ? wizardState.collab.id : "log-new"}
-            initialData={wizardState.mode === "edit" ? collabToInitialData(wizardState.collab) : undefined}
+            initialData={
+              wizardState.mode === "edit" ? collabToInitialData(wizardState.collab) : undefined
+            }
             onClose={() => setWizardState(null)}
             onSuccess={() => {
               void queryClient.invalidateQueries({
@@ -179,7 +187,6 @@ export function CreatorContent({ creator }: CreatorContentProps) {
             creatorId={creator.id}
             creatorName={creator.fullName}
             profilePhotoUrl={creator.profilePhotoUrl}
-            profilePhotoBlurDataUrl={creator.profilePhotoBlurDataUrl}
             closedCollabRatings={closedRatingsExcluding(
               creator.closedCollaborations,
               wizardState.mode === "edit" ? wizardState.collab.id : undefined,

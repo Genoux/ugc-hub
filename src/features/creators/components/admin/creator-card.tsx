@@ -3,6 +3,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
 import { getCreatorProfile } from "@/features/creators/actions/admin/get-creator-profile";
 import type { CreatorListItem } from "@/features/creators/actions/admin/get-creators";
 import { RatingBadge } from "@/shared/components/blocks/rating-badge";
@@ -12,10 +13,12 @@ import { ROUTES } from "@/shared/lib/routes";
 
 interface CreatorCardProps {
   creator: CreatorListItem;
+  priority?: boolean;
 }
 
-export function CreatorCard({ creator }: CreatorCardProps) {
+export function CreatorCard({ creator, priority = false }: CreatorCardProps) {
   const queryClient = useQueryClient();
+  const [imageLoaded, setImageLoaded] = useState(false);
   const rateRange = creator.rateRangeInternal || creator.rateRangeSelf;
   const rateDisplay = rateRange ? `$${rateRange.min}-$${rateRange.max}` : "Rate TBD";
 
@@ -30,20 +33,26 @@ export function CreatorCard({ creator }: CreatorCardProps) {
     <Link
       href={ROUTES.creatorProfile(creator.id)}
       onMouseEnter={prefetch}
-      className="rounded-3xl cursor-pointer group relative h-[400px] aspect-square w-full overflow-hidden"
+      className="rounded-3xl cursor-pointer group relative h-[400px] aspect-square w-full overflow-hidden bg-muted"
     >
       <div className="absolute inset-0 overflow-hidden">
-        <Image
-          src={creator.profilePhotoUrl ?? ""}
-          alt={creator.fullName}
-          fill
-          unoptimized
-          placeholder={creator.profilePhotoBlurDataUrl ? "blur" : "empty"}
-          loading="lazy"
-          blurDataURL={creator.profilePhotoBlurDataUrl ?? undefined}
-          className="object-cover group-hover:scale-105 transition-transform duration-300"
-        />
-        <div className="absolute inset-0 flex flex-col bg-linear-to-t from-black/100 from-0% to-transparent to-40% p-4">
+        {creator.profilePhotoUrl && (
+          <Image
+            src={creator.profilePhotoUrl}
+            alt={creator.fullName}
+            fill
+            unoptimized
+            placeholder="empty"
+            priority={priority}
+            loading={priority ? undefined : "lazy"}
+            onLoad={() => setImageLoaded(true)}
+            onError={() => setImageLoaded(true)}
+            className={`object-cover transition-all duration-300 group-hover:scale-105 ${imageLoaded ? "opacity-100" : "opacity-0"}`}
+          />
+        )}
+        <div
+          className={`absolute inset-0 flex flex-col bg-linear-to-t from-black from-0% to-transparent to-40% p-4 transition-opacity duration-300 ${imageLoaded ? "opacity-100" : "opacity-0"}`}
+        >
           <div className="flex justify-start">
             <RatingBadge rating={creator.overallRating} />
           </div>

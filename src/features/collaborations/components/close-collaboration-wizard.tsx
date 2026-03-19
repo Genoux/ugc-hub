@@ -52,7 +52,6 @@ interface CloseCollaborationWizardProps {
   creatorId: string;
   creatorName: string;
   profilePhotoUrl: string;
-  profilePhotoBlurDataUrl?: string | null;
   submissionName: string;
   closedCollabRatings: CollabRatingRow[];
 }
@@ -64,7 +63,6 @@ export function CloseCollaborationWizard({
   creatorId,
   creatorName,
   profilePhotoUrl,
-  profilePhotoBlurDataUrl,
   submissionName,
   closedCollabRatings,
 }: CloseCollaborationWizardProps) {
@@ -249,7 +247,6 @@ export function CloseCollaborationWizard({
               {step === 4 && (
                 <StepCloseConfirm
                   profilePhotoUrl={profilePhotoUrl}
-                  profilePhotoBlurDataUrl={profilePhotoBlurDataUrl}
                   creatorName={creatorName}
                   submissionName={submissionName}
                   ratings={ratings as CollaborationRatingsInput}
@@ -319,7 +316,6 @@ export function CloseCollaborationWizard({
         <CreatorWizardAside
           creatorName={creatorName}
           profilePhotoUrl={profilePhotoUrl}
-          profilePhotoBlurDataUrl={profilePhotoBlurDataUrl}
           subtitle={submissionName}
           visible={!isResultStep}
         />

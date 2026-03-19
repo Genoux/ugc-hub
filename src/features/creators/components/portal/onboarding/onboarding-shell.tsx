@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useRef, useState, useTransition } from "react";
 import { completeCreatorProfile } from "@/features/creators/actions/portal/complete-creator-profile";
+import { uploadCreatorAsset } from "@/features/creators/hooks/portal/use-creator-asset-upload";
 import {
   type PortfolioVideoManager,
   usePortfolioVideoManager,
@@ -137,6 +138,7 @@ export function OnboardingShell({ creator, onComplete, onClose }: OnboardingProp
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [closeReason, setCloseReason] = useState<"incomplete" | "leave_save" | "quit" | null>(null);
   const update = (updates: Partial<OnboardingData>) => setData((prev) => ({ ...prev, ...updates }));
+
   const isLastFormStep = step === 8;
   const isResultStep = step === TOTAL_STEPS;
   const pendingCloseActionRef = useRef<(() => void | Promise<void>) | null>(null);
@@ -158,11 +160,12 @@ export function OnboardingShell({ creator, onComplete, onClose }: OnboardingProp
   };
 
   const handleRequestClose = () => {
+    const hc = hasChanges();
     if (isResultStep) {
       onClose();
       return;
     }
-    if (creator.profileCompleted && !hasChanges()) {
+    if (creator.profileCompleted && !hc) {
       onClose();
       return;
     }
@@ -186,6 +189,7 @@ export function OnboardingShell({ creator, onComplete, onClose }: OnboardingProp
 
   const handleConfirmedClose = () => {
     runAfterAlertClosed(async () => {
+      photoManager.revertPending();
       await videoManager.abandonAll();
       onClose();
     });
@@ -194,12 +198,13 @@ export function OnboardingShell({ creator, onComplete, onClose }: OnboardingProp
   const handleRevertAndQuit = () => {
     runAfterAlertClosed(async () => {
       setData(initialData.current);
+      photoManager.revertPending();
       await videoManager.abandonAll();
       onClose();
     });
   };
 
-  const buildProfilePayload = () => ({
+  const buildProfilePayload = (resolvedPhotoKey: string) => ({
     fullName: data.fullName,
     country: data.country,
     languages: data.languages,
@@ -211,17 +216,28 @@ export function OnboardingShell({ creator, onComplete, onClose }: OnboardingProp
     portfolioUrl: data.portfolioUrl || undefined,
     ugcCategories: data.ugcCategories,
     contentFormats: data.contentFormats,
-    profilePhoto: data.profilePhoto,
+    profilePhoto: resolvedPhotoKey,
     rateRangeSelf: data.rateRangeSelf ?? undefined,
     genderIdentity: data.genderIdentity as GenderIdentity,
     ageDemographic: data.ageDemographic as AgeDemographic,
     ethnicities: data.ethnicities as Ethnicity[],
   });
 
+  /** Upload the pending profile photo if one was selected, or return the existing key. */
+  const resolveProfilePhoto = async (): Promise<string> => {
+    if (photoManager.pendingFile) {
+      const { key } = await uploadCreatorAsset(creator.id, "profile_picture", photoManager.pendingFile);
+      photoManager.setPendingFile(null);
+      return key;
+    }
+    return data.profilePhoto;
+  };
+
   const handleSaveAndClose = () => {
     startTransition(async () => {
       try {
-        await completeCreatorProfile(buildProfilePayload());
+        const photoKey = await resolveProfilePhoto();
+        await completeCreatorProfile(buildProfilePayload(photoKey));
         router.refresh();
         onClose();
       } catch (err) {
@@ -235,7 +251,8 @@ export function OnboardingShell({ creator, onComplete, onClose }: OnboardingProp
     startTransition(async () => {
       setSubmitError(null);
       try {
-        await completeCreatorProfile(buildProfilePayload());
+        const photoKey = await resolveProfilePhoto();
+        await completeCreatorProfile(buildProfilePayload(photoKey));
         router.refresh();
         if (creator.profileCompleted) {
           onClose();
@@ -290,7 +307,6 @@ export function OnboardingShell({ creator, onComplete, onClose }: OnboardingProp
                 disabled={
                   !allStepsComplete ||
                   isPending ||
-                  (step === 5 && photoManager.isUploading) ||
                   (step === 6 && videoManager.isUploading)
                 }
                 aria-label="Save and close"
@@ -341,7 +357,6 @@ export function OnboardingShell({ creator, onComplete, onClose }: OnboardingProp
                     disabled={
                       !stepCanProceed ||
                       isPending ||
-                      (step === 5 && photoManager.isUploading) ||
                       (step === 6 && videoManager.isUploading)
                     }
                   >

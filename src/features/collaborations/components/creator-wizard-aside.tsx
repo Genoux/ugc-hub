@@ -6,7 +6,6 @@ import { WizardAside } from "@/shared/components/wizard/wizard";
 interface CreatorWizardAsideProps {
   creatorName: string;
   profilePhotoUrl: string | null;
-  profilePhotoBlurDataUrl?: string | null;
   subtitle: string;
   visible: boolean;
 }
@@ -14,7 +13,6 @@ interface CreatorWizardAsideProps {
 export function CreatorWizardAside({
   creatorName,
   profilePhotoUrl,
-  profilePhotoBlurDataUrl,
   subtitle,
   visible,
 }: CreatorWizardAsideProps) {
@@ -31,8 +29,6 @@ export function CreatorWizardAside({
             alt=""
             fill
             unoptimized
-            placeholder={profilePhotoBlurDataUrl ? "blur" : "empty"}
-            blurDataURL={profilePhotoBlurDataUrl ?? undefined}
             className="object-cover"
           />
         )}
@@ -44,8 +40,6 @@ export function CreatorWizardAside({
               width={80}
               height={80}
               unoptimized
-              placeholder={profilePhotoBlurDataUrl ? "blur" : "empty"}
-              blurDataURL={profilePhotoBlurDataUrl ?? undefined}
               className="size-40 rounded-full object-cover shadow-hub"
             />
           ) : (
