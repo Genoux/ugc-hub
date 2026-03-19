@@ -12,8 +12,8 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 const ALLOWED_MIME_TYPES: Record<string, string[]> = {
-  profile_picture: ["image/jpeg", "image/png", "image/webp", "image/gif"],
-  portfolio_video: ["video/mp4", "video/quicktime", "video/x-msvideo", "video/webm"],
+  profile_picture: ["image/jpeg", "image/png", "image/webp"],
+  portfolio_video: ["video/mp4", "video/quicktime", "video/webm"],
 };
 
 const MAX_FILE_SIZE: Record<string, number> = {
@@ -51,8 +51,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "File size exceeds limit" }, { status: 400 });
     }
 
-    // profile_picture: deterministic key so each new upload overwrites the previous one.
-    // portfolio_video: unique key per file, tracked in creator_profile_assets.
+    // profile_picture: deterministic key so each save overwrites the previous one in R2.
+    // portfolio_video: unique key per file, committed to DB in completeCreatorProfile action.
     const key =
       assetType === "profile_picture"
         ? `creators/${creatorId}/profile-picture`
@@ -60,7 +60,12 @@ export async function POST(request: NextRequest) {
 
     const uploadUrl = await getSignedUrl(
       r2Client,
-      new PutObjectCommand({ Bucket: R2_BUCKET_NAME, Key: key, ContentType: mimeType }),
+      new PutObjectCommand({
+        Bucket: R2_BUCKET_NAME,
+        Key: key,
+        ContentType: mimeType,
+        ContentLength: fileSize,
+      }),
       { expiresIn: 3600 },
     );
 

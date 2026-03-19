@@ -17,7 +17,6 @@ const DIMENSION_LABELS: { key: keyof CollaborationRatingsInput; label: string }[
 
 interface StepLogConfirmProps {
   profilePhotoUrl: string | null;
-  profilePhotoBlurDataUrl?: string | null;
   creatorName: string;
   collabName: string;
   ratings: CollaborationRatingsInput;
@@ -33,7 +32,6 @@ interface StepLogConfirmProps {
 
 export function StepLogConfirm({
   profilePhotoUrl,
-  profilePhotoBlurDataUrl,
   creatorName,
   collabName,
   ratings,
@@ -68,8 +66,6 @@ export function StepLogConfirm({
             width={40}
             height={40}
             unoptimized
-            placeholder={profilePhotoBlurDataUrl ? "blur" : "empty"}
-            blurDataURL={profilePhotoBlurDataUrl ?? undefined}
             className="size-10 shrink-0 rounded-full object-cover"
           />
         ) : (

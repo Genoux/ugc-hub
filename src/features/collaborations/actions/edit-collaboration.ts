@@ -1,9 +1,11 @@
 "use server";
 
 import { randomUUID } from "node:crypto";
+import { DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { and, eq, ne } from "drizzle-orm";
 import { collaborations, creators } from "@/db/schema";
 import type { CollaborationHighlight } from "@/entities/creator/types";
+import { R2_BUCKET_NAME, r2Client } from "@/features/uploads/lib/r2-client";
 import { toActionError } from "@/shared/lib/action-error";
 import { requireAdmin } from "@/shared/lib/auth";
 import { calculateCreatorRating } from "@/shared/lib/calculate-ratings";
@@ -15,69 +17,79 @@ export async function editCollaboration(input: EditCollaborationInput) {
     const { userId } = await requireAdmin();
     const data = editCollaborationSchema.parse(input);
 
-    const existing = await db.query.collaborations.findFirst({
-      where: and(
-        eq(collaborations.id, data.collaborationId),
-        eq(collaborations.creatorId, data.creatorId),
-      ),
-      columns: { id: true, projectId: true, highlights: true },
+    let droppedKeys: string[] = [];
+
+    await db.transaction(async (tx) => {
+      const existing = await tx.query.collaborations.findFirst({
+        where: and(
+          eq(collaborations.id, data.collaborationId),
+          eq(collaborations.creatorId, data.creatorId),
+        ),
+        columns: { id: true, projectId: true, highlights: true },
+      });
+
+      if (!existing) throw new Error("Collaboration not found");
+
+      const priorClosed = await tx.query.collaborations.findMany({
+        where: and(
+          eq(collaborations.creatorId, data.creatorId),
+          eq(collaborations.status, "closed"),
+          ne(collaborations.id, data.collaborationId),
+        ),
+        columns: {
+          ratingVisualQuality: true,
+          ratingActingDelivery: true,
+          ratingReliabilitySpeed: true,
+        },
+      });
+
+      const overallRating = calculateCreatorRating([
+        ...priorClosed,
+        {
+          ratingVisualQuality: data.ratings.visual_quality,
+          ratingActingDelivery: data.ratings.acting_line_delivery,
+          ratingReliabilitySpeed: data.ratings.reliability_speed,
+        },
+      ]);
+
+      const keepSet = new Set(data.keepHighlightKeys);
+      const previous = (existing.highlights ?? []) as CollaborationHighlight[];
+      const kept = previous.filter((h) => keepSet.has(h.r2Key));
+      droppedKeys = previous.filter((h) => !keepSet.has(h.r2Key)).map((h) => h.r2Key);
+
+      const newEntries = (data.newHighlights ?? []).map((h) => ({
+        id: randomUUID(),
+        r2Key: h.key,
+        filename: h.filename,
+        mimeType: h.mimeType,
+        sizeBytes: h.sizeBytes,
+        uploadedBy: userId,
+      }));
+
+      const highlights = [...kept, ...newEntries];
+      const totalPaidCents = Math.round(data.totalPaid * 100);
+
+      await tx
+        .update(collaborations)
+        .set({
+          ...(data.name != null ? { name: data.name } : {}),
+          ratingVisualQuality: data.ratings.visual_quality,
+          ratingActingDelivery: data.ratings.acting_line_delivery,
+          ratingReliabilitySpeed: data.ratings.reliability_speed,
+          piecesOfContent: data.piecesOfContent,
+          totalPaid: totalPaidCents,
+          reviewNotes: data.notes ?? null,
+          highlights,
+        })
+        .where(eq(collaborations.id, data.collaborationId));
+
+      await tx.update(creators).set({ overallRating }).where(eq(creators.id, data.creatorId));
     });
 
-    if (!existing) throw new Error("Collaboration not found");
-
-    const priorClosed = await db.query.collaborations.findMany({
-      where: and(
-        eq(collaborations.creatorId, data.creatorId),
-        eq(collaborations.status, "closed"),
-        ne(collaborations.id, data.collaborationId),
-      ),
-      columns: {
-        ratingVisualQuality: true,
-        ratingActingDelivery: true,
-        ratingReliabilitySpeed: true,
-      },
-    });
-
-    const overallRating = calculateCreatorRating([
-      ...priorClosed,
-      {
-        ratingVisualQuality: data.ratings.visual_quality,
-        ratingActingDelivery: data.ratings.acting_line_delivery,
-        ratingReliabilitySpeed: data.ratings.reliability_speed,
-      },
-    ]);
-
-    const keepSet = new Set(data.keepHighlightKeys);
-    const previous = (existing.highlights ?? []) as CollaborationHighlight[];
-    const kept = previous.filter((h) => keepSet.has(h.r2Key));
-
-    const newEntries = (data.newHighlights ?? []).map((h) => ({
-      id: randomUUID(),
-      r2Key: h.key,
-      filename: h.filename,
-      mimeType: h.mimeType,
-      sizeBytes: h.sizeBytes,
-      uploadedBy: userId,
-    }));
-
-    const highlights = [...kept, ...newEntries];
-    const totalPaidCents = Math.round(data.totalPaid * 100);
-
-    await db
-      .update(collaborations)
-      .set({
-        ...(data.name != null ? { name: data.name } : {}),
-        ratingVisualQuality: data.ratings.visual_quality,
-        ratingActingDelivery: data.ratings.acting_line_delivery,
-        ratingReliabilitySpeed: data.ratings.reliability_speed,
-        piecesOfContent: data.piecesOfContent,
-        totalPaid: totalPaidCents,
-        reviewNotes: data.notes ?? null,
-        highlights,
-      })
-      .where(eq(collaborations.id, data.collaborationId));
-
-    await db.update(creators).set({ overallRating }).where(eq(creators.id, data.creatorId));
+    // Fire-and-forget — DB is already committed, so orphans are recoverable via check-r2-orphans
+    for (const key of droppedKeys) {
+      void r2Client.send(new DeleteObjectCommand({ Bucket: R2_BUCKET_NAME, Key: key }));
+    }
   } catch (err) {
     throw toActionError(err);
   }

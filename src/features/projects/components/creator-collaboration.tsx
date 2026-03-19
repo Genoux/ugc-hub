@@ -7,7 +7,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
 import type { CollaborationDetail } from "@/entities/collaboration/types";
-import { CloseCollaborationWizard } from "@/features/collaborations/components/close-collaboration-wizard";
+import { CollaborationWizard } from "@/features/collaborations/components/collaboration-wizard";
 import { SubmissionSection } from "@/features/projects/components/submission-section";
 import { AssetCard } from "@/shared/components/blocks/asset-card";
 import { DownloadButton } from "@/shared/components/blocks/download-button";
@@ -149,14 +149,14 @@ export function CreatorCollaboration({ collaboration }: CreatorCollaborationProp
 
       <AnimatePresence>
         {showCloseWizard && (
-          <CloseCollaborationWizard
+          <CollaborationWizard
+            mode="close"
             onClose={() => setShowCloseWizard(false)}
             onSuccess={handleCloseSuccess}
             collaborationId={id}
             creatorId={creator.id}
             creatorName={creator.fullName}
-            profilePhotoUrl={creator.profilePhotoUrl ?? ""}
-            profilePhotoBlurDataUrl={creator.profilePhotoBlurDataUrl}
+            profilePhotoUrl={creator.profilePhotoUrl ?? null}
             submissionName={project.name}
             closedCollabRatings={creator.closedCollabRatings}
           />

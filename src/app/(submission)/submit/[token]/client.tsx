@@ -2,7 +2,7 @@
 
 import { AlertCircle, CheckCircle2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { WizardShell } from "@/features/wizard/components/wizard-shell";
+import { SubmissionWizardShell } from "@/features/submissions/components/submission-wizard-shell";
 import { Button } from "@/shared/components/ui/button";
 import { ROUTES } from "@/shared/lib/routes";
 
@@ -81,7 +81,7 @@ export function SubmitPageClient({ view }: { view: SubmitPageView }) {
   }
 
   return (
-    <WizardShell
+    <SubmissionWizardShell
       token={view.token}
       projectName={view.projectName}
       creatorId={view.creatorId}

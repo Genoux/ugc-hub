@@ -1,19 +1,29 @@
 "use server";
 
+import { randomUUID } from "node:crypto";
+import { DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { creators } from "@/db/schema";
+import type { PortfolioVideoEntry } from "@/entities/creator/types";
 import { requireCreator } from "@/features/creators/lib/require-creator";
-import { generateBlurPlaceholder } from "@/features/uploads/lib/generate-blur-placeholder";
+import { resizeProfilePhoto } from "@/features/creators/lib/resize-profile-photo";
+import { R2_BUCKET_NAME, r2Client } from "@/features/uploads/lib/r2-client";
 import { getR2SignedUrl } from "@/features/uploads/lib/r2-serve";
 import { notifySlack } from "@/integrations/slack/notify-slack";
 import { toActionError } from "@/shared/lib/action-error";
 import { AGE_DEMOGRAPHICS, ETHNICITIES, GENDER_IDENTITIES } from "@/shared/lib/constants";
 import { db } from "@/shared/lib/db";
 
+const videoEntrySchema = z.object({
+  key: z.string().min(1),
+  filename: z.string().min(1),
+  mimeType: z.string().min(1),
+  sizeBytes: z.number().int().min(0),
+});
+
 const schema = z.object({
-  // Steps 1-2
   fullName: z.string().min(1),
   country: z.string().min(1),
   languages: z.array(z.string()).min(1),
@@ -33,7 +43,6 @@ const schema = z.object({
       return /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
     })
     .pipe(z.url().optional()),
-  // Steps 3-9
   ugcCategories: z.array(z.string()).min(1),
   contentFormats: z.array(z.string()).min(1),
   profilePhoto: z.string().min(1),
@@ -41,6 +50,8 @@ const schema = z.object({
   genderIdentity: z.enum(GENDER_IDENTITIES),
   ageDemographic: z.enum(AGE_DEMOGRAPHICS),
   ethnicities: z.array(z.enum(ETHNICITIES)).min(1),
+  keepVideoIds: z.array(z.string().uuid()),
+  newVideos: z.array(videoEntrySchema),
 });
 
 export async function completeCreatorProfile(input: z.infer<typeof schema>) {
@@ -49,6 +60,21 @@ export async function completeCreatorProfile(input: z.infer<typeof schema>) {
     const validated = schema.parse(input);
 
     const wasAlreadyCompleted = creator.profileCompleted;
+
+    const currentVideos = (creator.portfolioVideos ?? []) as PortfolioVideoEntry[];
+    const keepSet = new Set(validated.keepVideoIds);
+    const keptVideos = currentVideos.filter((v) => keepSet.has(v.id));
+    const droppedVideos = currentVideos.filter((v) => !keepSet.has(v.id));
+
+    const newEntries: PortfolioVideoEntry[] = validated.newVideos.map((v) => ({
+      id: randomUUID(),
+      r2Key: v.key,
+      filename: v.filename,
+      mimeType: v.mimeType,
+      sizeBytes: v.sizeBytes,
+    }));
+
+    await resizeProfilePhoto(validated.profilePhoto);
 
     await db
       .update(creators)
@@ -65,6 +91,7 @@ export async function completeCreatorProfile(input: z.infer<typeof schema>) {
         genderIdentity: validated.genderIdentity,
         ageDemographic: validated.ageDemographic,
         ethnicity: validated.ethnicities,
+        portfolioVideos: [...keptVideos, ...newEntries],
         profileCompleted: true,
         profileCompletedAt: new Date(),
         ...(!wasAlreadyCompleted && { status: "joined", joinedAt: new Date() }),
@@ -83,16 +110,10 @@ export async function completeCreatorProfile(input: z.infer<typeof schema>) {
       );
     }
 
-    void generateBlurPlaceholder(validated.profilePhoto)
-      .then((blurDataUrl) =>
-        blurDataUrl
-          ? db
-              .update(creators)
-              .set({ profilePhotoBlurDataUrl: blurDataUrl })
-              .where(eq(creators.id, creator.id))
-          : undefined,
-      )
-      .catch(console.error);
+    // Fire-and-forget — DB is already committed; orphans recoverable via check-r2-orphans
+    for (const video of droppedVideos) {
+      void r2Client.send(new DeleteObjectCommand({ Bucket: R2_BUCKET_NAME, Key: video.r2Key }));
+    }
 
     revalidatePath("/creator");
   } catch (err) {

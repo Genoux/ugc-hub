@@ -25,7 +25,6 @@ export const creatorSchema = z.object({
   fullName: z.string(),
   email: z.string().email(),
   profilePhoto: z.string().nullable(),
-  profilePhotoBlurDataUrl: z.string().nullable(),
   country: z.string().nullable(),
   // z.string() intentionally — enum validation belongs at the input layer (server action),
   // not when reading back from the DB where old values may exist.

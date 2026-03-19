@@ -16,8 +16,7 @@ const DIMENSION_LABELS: { key: keyof CollaborationRatingsInput; label: string }[
 ];
 
 interface StepCloseConfirmProps {
-  profilePhotoUrl: string;
-  profilePhotoBlurDataUrl?: string | null;
+  profilePhotoUrl: string | null;
   creatorName: string;
   submissionName: string;
   ratings: CollaborationRatingsInput;
@@ -30,7 +29,6 @@ interface StepCloseConfirmProps {
 
 export function StepCloseConfirm({
   profilePhotoUrl,
-  profilePhotoBlurDataUrl,
   creatorName,
   submissionName,
   ratings,
@@ -56,16 +54,20 @@ export function StepCloseConfirm({
   return (
     <div className="space-y-3">
       <div className="rounded-xl bg-muted/60 p-4 flex items-center gap-3">
-        <Image
-          src={profilePhotoUrl}
-          alt={creatorName}
-          width={40}
-          height={40}
-          unoptimized
-          placeholder={profilePhotoBlurDataUrl ? "blur" : "empty"}
-          blurDataURL={profilePhotoBlurDataUrl ?? undefined}
-          className="size-10 rounded-full object-cover shrink-0"
-        />
+        {profilePhotoUrl ? (
+          <Image
+            src={profilePhotoUrl}
+            alt={creatorName}
+            width={40}
+            height={40}
+            unoptimized
+            className="size-10 rounded-full object-cover shrink-0"
+          />
+        ) : (
+          <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-muted text-sm font-medium">
+            {creatorName.slice(0, 1).toUpperCase()}
+          </div>
+        )}
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium truncate">{creatorName}</p>
           <p className="text-xs text-muted-foreground truncate">{submissionName}</p>

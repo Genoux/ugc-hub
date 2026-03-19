@@ -1,42 +1,46 @@
 "use client";
 
-import { CameraIcon, Loader2 } from "lucide-react";
+import { CameraIcon } from "lucide-react";
 import Image from "next/image";
-import { useRef } from "react";
-import { useCreatorAssetUpload } from "@/features/creators/hooks/portal/use-creator-asset-upload";
-import type { ProfilePhotoManager } from "@/features/creators/hooks/portal/use-profile-photo-manager";
+import { useRef, useState } from "react";
 import { Button } from "@/shared/components/ui/button";
+import { UPLOAD_SIZE_LIMITS } from "@/shared/lib/constants";
+
+const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
 interface Props {
   photoKey: string;
-  photoManager: ProfilePhotoManager;
+  previewUrl: string | null;
+  onFileChange: (file: File, previewUrl: string) => void;
   onChange: (profilePhotoKey: string) => void;
-  creatorId: string;
 }
 
-export function StepPhoto({ photoKey, photoManager, onChange, creatorId }: Props) {
+export function StepPhoto({ photoKey, previewUrl, onFileChange, onChange }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
-  const { upload, error } = useCreatorAssetUpload(creatorId, "profile_picture");
+  const [error, setError] = useState<string | null>(null);
 
-  const hasPhoto = !!photoManager.previewUrl || !!photoKey;
+  const hasPhoto = !!previewUrl || !!photoKey;
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     e.target.value = "";
     if (!file) return;
 
-    if (photoManager.previewUrl) URL.revokeObjectURL(photoManager.previewUrl);
-    photoManager.setPreviewUrl(URL.createObjectURL(file));
+    setError(null);
 
-    photoManager.setUploading(true);
-    try {
-      const { key } = await upload(file);
-      onChange(key);
-    } catch {
-      photoManager.setPreviewUrl(null);
-    } finally {
-      photoManager.setUploading(false);
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      setError("Only JPG, PNG, or WebP files are allowed.");
+      return;
     }
+    if (file.size > UPLOAD_SIZE_LIMITS.image) {
+      setError("File exceeds the 5 MB limit.");
+      return;
+    }
+
+    const objectUrl = URL.createObjectURL(file);
+    onFileChange(file, objectUrl);
+    // Sentinel signals a file is staged but not yet uploaded — canProceed(5) checks for non-empty string.
+    onChange("__pending__");
   };
 
   return (
@@ -47,46 +51,23 @@ export function StepPhoto({ photoKey, photoManager, onChange, creatorId }: Props
         accept="image/jpeg,image/png,image/webp"
         className="sr-only"
         onChange={handleFileChange}
-        disabled={photoManager.isUploading}
         aria-label="Profile photo"
       />
       <button
         type="button"
         onClick={() => inputRef.current?.click()}
-        disabled={photoManager.isUploading}
-        className="bg-muted hover:bg-muted/80 relative flex h-52 w-52 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-lg border transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+        className="bg-muted hover:bg-muted/80 relative flex h-52 w-52 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-lg border transition-colors"
         aria-label={hasPhoto ? "Replace photo" : "Upload photo"}
       >
-        {photoManager.previewUrl ? (
-          <Image
-            src={photoManager.previewUrl}
-            alt="Creator"
-            fill
-            unoptimized
-            className="object-cover"
-          />
+        {previewUrl ? (
+          <Image src={previewUrl} alt="Creator" fill unoptimized className="object-cover" />
         ) : (
           <CameraIcon className="size-5 text-muted-foreground" />
         )}
       </button>
 
-      <Button
-        type="button"
-        variant="outline"
-        size="sm"
-        disabled={photoManager.isUploading}
-        onClick={() => inputRef.current?.click()}
-      >
-        {photoManager.isUploading ? (
-          <>
-            <Loader2 className="size-3.5 animate-spin" />
-            Uploading…
-          </>
-        ) : hasPhoto ? (
-          "Replace photo"
-        ) : (
-          "Upload photo"
-        )}
+      <Button type="button" variant="outline" size="sm" onClick={() => inputRef.current?.click()}>
+        {hasPhoto ? "Replace photo" : "Upload photo"}
       </Button>
 
       {error && <p className="text-destructive text-sm">{error}</p>}

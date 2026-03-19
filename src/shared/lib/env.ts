@@ -17,6 +17,9 @@ const envSchema = z.object({
   R2_SECRET_ACCESS_KEY: z.string().min(1, "R2_SECRET_ACCESS_KEY is required"),
   R2_BUCKET_NAME: z.string().min(1, "R2_BUCKET_NAME is required"),
   SLACK_WEBHOOK_URL: z.url().optional(),
+  // CF Worker media proxy (optional — falls back to Next.js streaming proxy when unset)
+  MEDIA_WORKER_URL: z.url().optional(),
+  MEDIA_TOKEN_SECRET: z.string().min(1).optional(),
 });
 
 export const env = envSchema.parse(process.env);
