@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+import { useEffect, useRef, useState } from "react";
 import { cn } from "@/shared/lib/utils";
 
 const SIZE = {
@@ -9,6 +11,39 @@ const SIZE = {
   lg: "w-64",
 } as const;
 
+function useVideoThumbnail(src: string | null): string | null {
+  const [thumbnail, setThumbnail] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!src) return;
+    const video = document.createElement("video");
+    video.crossOrigin = "anonymous";
+    video.muted = true;
+    video.playsInline = true;
+    video.preload = "metadata";
+
+    const draw = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      canvas.getContext("2d")?.drawImage(video, 0, 0);
+      setThumbnail(canvas.toDataURL("image/jpeg", 0.8));
+      video.src = "";
+    };
+
+    video.addEventListener("loadeddata", draw);
+    video.src = src;
+    video.load();
+
+    return () => {
+      video.removeEventListener("loadeddata", draw);
+      video.src = "";
+    };
+  }, [src]);
+
+  return thumbnail;
+}
+
 type AssetThumbnailProps = {
   src: string | null;
   filename: string;
@@ -16,19 +51,36 @@ type AssetThumbnailProps = {
 };
 
 export function AssetThumbnail({ src, filename, className }: AssetThumbnailProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [near, setNear] = useState(false);
+  const thumbnail = useVideoThumbnail(near ? src : null);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el || !src) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setNear(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "200px" },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [src]);
+
   return (
-    <div className={cn("relative overflow-hidden bg-muted", className)}>
-      {src && (
-        <video
-          src={src}
-          muted
-          playsInline
-          preload="metadata"
-          aria-label={filename}
+    <div ref={containerRef} className={cn("relative overflow-hidden bg-muted", className)}>
+      {thumbnail && (
+        <Image
+          unoptimized
+          fill
+          src={thumbnail}
+          alt={filename}
           className="absolute inset-0 h-full w-full object-cover"
-        >
-          <track kind="captions" />
-        </video>
+        />
       )}
     </div>
   );
@@ -49,8 +101,29 @@ export function AssetVideo({
   size,
   className,
 }: AssetVideoProps) {
+  const containerRef = useRef<HTMLFieldSetElement>(null);
+  const [isNear, setIsNear] = useState(false);
+  const thumbnail = useVideoThumbnail(isNear ? src : null);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el || !src) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsNear(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "400px" },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [src]);
+
   return (
     <fieldset
+      ref={containerRef}
       className={cn(
         "break-inside-avoid relative group rounded overflow-hidden bg-muted shrink-0 border-none p-0 m-0",
         size ? SIZE[size] : "w-full",
@@ -61,9 +134,10 @@ export function AssetVideo({
       <div className="relative aspect-9/16 w-full bg-muted">
         {src && (
           <video
-            src={src}
+            src={isNear ? src : undefined}
+            poster={thumbnail ?? undefined}
             controls
-            preload="metadata"
+            preload="none"
             className="absolute inset-0 w-full h-full object-cover"
           >
             <track kind="captions" />
