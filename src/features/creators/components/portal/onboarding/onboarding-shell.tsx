@@ -460,7 +460,6 @@ export function OnboardingShell({ creator, onComplete, onClose }: OnboardingProp
             alt=""
             fill
             className="object-cover"
-            unoptimized
           />
         </WizardAside>
       </Wizard>

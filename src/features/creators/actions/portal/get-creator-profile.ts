@@ -9,7 +9,7 @@ import type {
 } from "@/entities/creator/types";
 import { requireCreator } from "@/features/creators/lib/require-creator";
 import { creatorSchema } from "@/features/creators/schemas";
-import { toMediaUrl } from "@/features/uploads/lib/r2-media-url";
+import { toWorkerUrl } from "@/features/uploads/lib/r2-media-url";
 import { db } from "@/shared/lib/db";
 
 export type CreatorProfile = ReturnType<typeof creatorSchema.parse> & {
@@ -42,14 +42,14 @@ export async function getCreatorProfile(): Promise<CreatorProfile> {
 
   const creator = creatorSchema.parse(row);
 
-  const profilePhotoUrl = toMediaUrl(row.profilePhoto, row.profileCompletedAt);
+  const profilePhotoUrl = toWorkerUrl(row.profilePhoto, row.profileCompletedAt);
 
   const portfolioVideos = ((row.portfolioVideos ?? []) as PortfolioVideoEntry[]).map((v) => ({
     id: v.id,
     filename: v.filename,
     mimeType: v.mimeType,
     sizeBytes: v.sizeBytes,
-    url: toMediaUrl(v.r2Key) ?? "",
+    url: toWorkerUrl(v.r2Key) ?? "",
   }));
 
   const closedCollaborations = row.collaborations.map((collab) => ({
@@ -58,7 +58,7 @@ export async function getCreatorProfile(): Promise<CreatorProfile> {
       id: h.id,
       filename: h.filename,
       mimeType: h.mimeType,
-      url: toMediaUrl(h.r2Key) ?? "",
+      url: toWorkerUrl(h.r2Key) ?? "",
     })),
   }));
 

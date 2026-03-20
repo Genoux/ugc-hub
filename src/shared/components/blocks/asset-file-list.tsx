@@ -2,7 +2,7 @@
 
 import { X } from "lucide-react";
 import { useEffect, useState } from "react";
-import { AssetCard } from "@/shared/components/blocks/asset-card";
+import { AssetVideo } from "@/shared/components/blocks/asset-card";
 import { Button } from "@/shared/components/ui/button";
 
 function useObjectUrl(file: File) {
@@ -29,7 +29,7 @@ function FileItem({
   const objectUrl = useObjectUrl(file);
 
   return (
-    <AssetCard
+    <AssetVideo
       src={objectUrl}
       filename={file.name}
       size={size}

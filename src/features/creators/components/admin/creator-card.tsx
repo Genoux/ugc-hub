@@ -41,17 +41,13 @@ export function CreatorCard({ creator, priority = false }: CreatorCardProps) {
             src={creator.profilePhotoUrl}
             alt={creator.fullName}
             fill
-            unoptimized
-            placeholder="empty"
-            priority={priority}
-            loading={priority ? undefined : "lazy"}
             onLoad={() => setImageLoaded(true)}
             onError={() => setImageLoaded(true)}
             className={`object-cover transition-all duration-300 group-hover:scale-105 ${imageLoaded ? "opacity-100" : "opacity-0"}`}
           />
         )}
         <div
-          className={`absolute inset-0 flex flex-col bg-linear-to-t from-black from-0% to-transparent to-40% p-4 transition-opacity duration-300 ${imageLoaded ? "opacity-100" : "opacity-0"}`}
+          className={`absolute inset-0 flex flex-col bg-linear-to-t from-black from-0% to-transparent to-40% p-4 transition-opacity ${imageLoaded ? "opacity-100" : "opacity-0"}`}
         >
           <div className="flex justify-start">
             <RatingBadge rating={creator.overallRating} />

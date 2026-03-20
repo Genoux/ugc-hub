@@ -8,3 +8,11 @@ bucket_name = "ugc-hub"
 
 [vars]
 ALLOWED_ORIGIN = "https://ugc.inbeat.agency"
+
+[env.dev]
+[[env.dev.r2_buckets]]
+binding = "R2_BUCKET"
+bucket_name = "ugc-hub-dev"
+
+[env.dev.vars]
+ALLOWED_ORIGIN = "http://localhost:3000"

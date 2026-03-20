@@ -4,7 +4,7 @@ import { and, eq, ne } from "drizzle-orm";
 import { collaborations } from "@/db/schema";
 import type { CollaborationDetail } from "@/entities/collaboration/types";
 import type { CollaborationHighlight } from "@/entities/creator/types";
-import { toMediaUrl } from "@/features/uploads/lib/r2-media-url";
+import { toWorkerUrl } from "@/features/uploads/lib/r2-media-url";
 import { requireAdmin } from "@/shared/lib/auth";
 import { db } from "@/shared/lib/db";
 
@@ -64,7 +64,7 @@ export async function getCollaborationDetail(
       id: raw.creator.id,
       fullName: raw.creator.fullName,
       email: raw.creator.email,
-      profilePhotoUrl: toMediaUrl(raw.creator.profilePhoto, raw.creator.profileCompletedAt),
+      profilePhotoUrl: toWorkerUrl(raw.creator.profilePhoto, raw.creator.profileCompletedAt),
       closedCollabRatings,
     },
     submissions: raw.submissions.map((submission) => ({
@@ -74,14 +74,14 @@ export async function getCollaborationDetail(
       deliveredAt: submission.deliveredAt,
       assets: submission.assets.map(({ r2Key, ...asset }) => ({
         ...asset,
-        url: toMediaUrl(r2Key) ?? "",
+        url: toWorkerUrl(r2Key) ?? "",
       })),
     })),
     highlights: ((raw.highlights ?? []) as CollaborationHighlight[]).map((h) => ({
       id: h.id,
       filename: h.filename,
       mimeType: h.mimeType,
-      url: toMediaUrl(h.r2Key) ?? "",
+      url: toWorkerUrl(h.r2Key) ?? "",
     })),
   };
 }

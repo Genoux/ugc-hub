@@ -2,7 +2,7 @@
 
 import { ChevronRight } from "lucide-react";
 import type { CreatorSubmissions } from "@/features/creators/actions/portal/get-creator-submissions";
-import { AssetCard } from "@/shared/components/blocks/asset-card";
+import { AssetVideo } from "@/shared/components/blocks/asset-card";
 import {
   CollapsibleContent,
   CollapsibleSection,
@@ -43,7 +43,7 @@ function SubmissionRowContent({ submission }: SubmissionRowProps) {
         <div className="p-4">
           <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-2">
             {submission.assets.map((asset) => (
-              <AssetCard key={asset.id} src={asset.url || null} filename={asset.filename} />
+              <AssetVideo key={asset.id} src={asset.url || null} filename={asset.filename} />
             ))}
           </div>
         </div>

@@ -2,7 +2,7 @@
 
 import { X } from "lucide-react";
 import { toast } from "sonner";
-import { AssetCard } from "@/shared/components/blocks/asset-card";
+import { AssetVideo } from "@/shared/components/blocks/asset-card";
 import { AssetFileList } from "@/shared/components/blocks/asset-file-list";
 import { FileDropZone } from "@/shared/components/blocks/file-drop-zone";
 import { Button } from "@/shared/components/ui/button";
@@ -52,7 +52,7 @@ export function StepPortfolio({
         <div className="flex w-full min-w-0 gap-1 overflow-x-auto pb-1">
           {existingHighlights.map((h) => (
             <div key={h.r2Key} className="shrink-0">
-              <AssetCard
+              <AssetVideo
                 src={h.url}
                 filename={h.filename}
                 size="xs"

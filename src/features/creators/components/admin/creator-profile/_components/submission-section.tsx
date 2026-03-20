@@ -2,7 +2,7 @@
 
 import { ChevronRight } from "lucide-react";
 import type { CreatorProfile } from "@/features/creators/actions/admin/get-creator-profile";
-import { AssetCard } from "@/shared/components/blocks/asset-card";
+import { AssetVideo } from "@/shared/components/blocks/asset-card";
 import {
   CollapsibleContent,
   CollapsibleSection,
@@ -43,14 +43,14 @@ function SubmissionSectionContent({ submission }: SubmissionSectionProps) {
           {submission.assets.length > 0 ? (
             <div className="flex overflow-x-auto gap-2">
               {submission.assets.map((asset) => (
-                <AssetCard
+                <AssetVideo
                   className="w-40"
                   key={asset.id}
                   src={asset.url}
                   filename={asset.filename}
                   actionSlot={
                     <DownloadButton
-                      assets={[{ id: asset.id, filename: asset.filename, url: asset.url }]}
+                      assets={[{ filename: asset.filename, url: asset.url }]}
                       size="icon"
                       variant="ghost"
                       className="h-8 w-8 text-white! hover:bg-white/20"

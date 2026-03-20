@@ -3,7 +3,7 @@
 import { eq } from "drizzle-orm";
 import { collaborations, projects } from "@/db/schema";
 import type { ProjectDetail } from "@/entities/project/types";
-import { toMediaUrl } from "@/features/uploads/lib/r2-media-url";
+import { toWorkerUrl } from "@/features/uploads/lib/r2-media-url";
 import { requireAdmin } from "@/shared/lib/auth";
 import { db } from "@/shared/lib/db";
 
@@ -45,7 +45,10 @@ export async function getProjectDetail(id: string): Promise<ProjectDetail | null
         id: collab.creator.id,
         fullName: collab.creator.fullName,
         email: collab.creator.email,
-        profilePhotoUrl: toMediaUrl(collab.creator.profilePhoto, collab.creator.profileCompletedAt),
+        profilePhotoUrl: toWorkerUrl(
+          collab.creator.profilePhoto,
+          collab.creator.profileCompletedAt,
+        ),
       },
       submissions: collab.submissions,
     })),

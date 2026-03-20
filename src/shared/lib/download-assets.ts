@@ -4,21 +4,10 @@ function safeZipName(name: string): string {
   return name.replace(/[/\\:*?"<>|]/g, "_").trim() || "download";
 }
 
-async function fetchBlobFromDownloadRoute(assetId: string): Promise<Blob> {
-  const res = await fetch(`/api/assets/${assetId}/download`);
+async function fetchBlob(url: string): Promise<Blob> {
+  const res = await fetch(url);
   if (!res.ok) throw new Error(res.statusText);
-  const { url } = (await res.json()) as { url: string };
-  const r2Res = await fetch(url);
-  if (!r2Res.ok) throw new Error(r2Res.statusText);
-  return r2Res.blob();
-}
-
-async function fetchBlob(asset: { id: string; url?: string }): Promise<Blob> {
-  if (asset.url)
-    return fetch(asset.url).then((r) =>
-      r.ok ? r.blob() : Promise.reject(new Error(r.statusText)),
-    );
-  return fetchBlobFromDownloadRoute(asset.id);
+  return res.blob();
 }
 
 function triggerBlobDownload(blob: Blob, filename: string): void {
@@ -30,11 +19,11 @@ function triggerBlobDownload(blob: Blob, filename: string): void {
   URL.revokeObjectURL(blobUrl);
 }
 
-/** Asset for download: id + filename required; url optional. When url is present, fetches directly and skips the /download API. */
-export type DownloadableAsset = { id: string; filename: string; url?: string };
+/** Asset for download: filename + url required. */
+export type DownloadableAsset = { filename: string; url: string };
 
 /**
- * Single asset: uses url when provided, else fetches signed URL from /download, then fetches blob from R2.
+ * Single asset: fetches blob directly from the worker URL and triggers download.
  * Multiple: same per file, then zips. Using fetch→blob→blobUrl ensures a.download is honoured for cross-origin R2.
  * Use from client only.
  */
@@ -46,7 +35,7 @@ export async function downloadAssets(
 
   if (assets.length === 1) {
     try {
-      const blob = await fetchBlob(assets[0]);
+      const blob = await fetchBlob(assets[0].url);
       triggerBlobDownload(blob, assets[0].filename);
     } catch {
       options?.onError?.(assets[0].filename);
@@ -54,16 +43,15 @@ export async function downloadAssets(
     return;
   }
 
-  const blobs: { blob: Blob; filename: string }[] = [];
+  const results = await Promise.allSettled(
+    assets.map((a) => fetchBlob(a.url).then((blob) => ({ blob, filename: a.filename }))),
+  );
 
-  for (const asset of assets) {
-    try {
-      const blob = await fetchBlob(asset);
-      blobs.push({ blob, filename: asset.filename });
-    } catch {
-      options?.onError?.(asset.filename);
-    }
-  }
+  const blobs = results.flatMap((r, i) => {
+    if (r.status === "fulfilled") return [r.value];
+    options?.onError?.(assets[i].filename);
+    return [];
+  });
 
   if (blobs.length === 0) return;
 

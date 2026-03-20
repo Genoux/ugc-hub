@@ -3,7 +3,7 @@
 import { ChevronRight } from "lucide-react";
 import type { CreatorProfile } from "@/features/creators/actions/admin/get-creator-profile";
 import { LabeledField } from "@/features/creators/components/labeled-field";
-import { AssetCard } from "@/shared/components/blocks/asset-card";
+import { AssetVideo } from "@/shared/components/blocks/asset-card";
 import { Author } from "@/shared/components/blocks/authored-note";
 import {
   CollapsibleContent,
@@ -105,40 +105,40 @@ function CollaborationCardContent({
               {(collab.ratingVisualQuality ||
                 collab.ratingActingDelivery ||
                 collab.ratingReliabilitySpeed) && (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-1">
-                  {collab.ratingVisualQuality && (
-                    <BentoCard>
-                      <LabeledField
-                        label="Visual"
-                        value={<RatingBadge color="white" rating={collab.ratingVisualQuality} />}
-                      />
-                    </BentoCard>
-                  )}
-                  {collab.ratingActingDelivery && (
-                    <BentoCard>
-                      <LabeledField
-                        label="Acting"
-                        value={<RatingBadge color="white" rating={collab.ratingActingDelivery} />}
-                      />
-                    </BentoCard>
-                  )}
-                  {collab.ratingReliabilitySpeed && (
-                    <BentoCard>
-                      <LabeledField
-                        label="Reliability"
-                        value={<RatingBadge color="white" rating={collab.ratingReliabilitySpeed} />}
-                      />
-                    </BentoCard>
-                  )}
-                </div>
-              )}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-1">
+                    {collab.ratingVisualQuality && (
+                      <BentoCard>
+                        <LabeledField
+                          label="Visual"
+                          value={<RatingBadge color="white" rating={collab.ratingVisualQuality} />}
+                        />
+                      </BentoCard>
+                    )}
+                    {collab.ratingActingDelivery && (
+                      <BentoCard>
+                        <LabeledField
+                          label="Acting"
+                          value={<RatingBadge color="white" rating={collab.ratingActingDelivery} />}
+                        />
+                      </BentoCard>
+                    )}
+                    {collab.ratingReliabilitySpeed && (
+                      <BentoCard>
+                        <LabeledField
+                          label="Reliability"
+                          value={<RatingBadge color="white" rating={collab.ratingReliabilitySpeed} />}
+                        />
+                      </BentoCard>
+                    )}
+                  </div>
+                )}
             </div>
           </div>
           <div className="space-y-2">
             <h2 className="text-sm font-medium text-foreground">Highlights</h2>
             <div className="flex gap-2">
               {collab.highlights.map((h) => (
-                <AssetCard key={h.id} src={h.url} filename={h.filename} size="xs" />
+                <AssetVideo key={h.id} src={h.url} filename={h.filename} size="xs" />
               ))}
             </div>
           </div>

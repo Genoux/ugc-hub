@@ -21,18 +21,12 @@ const logSlackError = (err: unknown) => console.error("[slack] notification fail
 /**
  * Schedules a Slack notification to run after the response is sent (Vercel waitUntil).
  * Fire-and-forget with void gets killed on serverless; after() can be unreliable in Server Actions.
- * Accepts a Promise<SlackEvent> when the payload depends on async work (e.g. profile-complete with signed URL).
  */
-export function notifySlack(event: SlackEvent | Promise<SlackEvent>): void {
+export function notifySlack(event: SlackEvent): void {
   if (process.env.NODE_ENV === "development") return;
   if (!env.SLACK_WEBHOOK_URL) {
     console.warn("[slack] SLACK_WEBHOOK_URL is not set — skipping notification");
     return;
   }
-  const url = env.SLACK_WEBHOOK_URL;
-  const promise =
-    event instanceof Promise
-      ? event.then((e) => sendToSlack(url, e)).catch(logSlackError)
-      : sendToSlack(url, event).catch(logSlackError);
-  waitUntil(promise);
+  waitUntil(sendToSlack(env.SLACK_WEBHOOK_URL, event).catch(logSlackError));
 }

@@ -6,7 +6,7 @@ import {
   MAX_PORTFOLIO_VIDEOS,
   MIN_PORTFOLIO_VIDEOS,
 } from "@/features/creators/lib/onboarding-utils";
-import { AssetCard } from "@/shared/components/blocks/asset-card";
+import { AssetVideo } from "@/shared/components/blocks/asset-card";
 import { FileDropZone } from "@/shared/components/blocks/file-drop-zone";
 import { Button } from "@/shared/components/ui/button";
 import {
@@ -92,7 +92,7 @@ export function StepVideos({
           <CarouselContent>
             {allEntries.map((entry) => (
               <CarouselItem key={entry.key} className="basis-auto p-0">
-                <AssetCard
+                <AssetVideo
                   src={entry.src}
                   filename={entry.filename}
                   size="xs"
@@ -116,10 +116,6 @@ export function StepVideos({
             <p className="text-xs text-muted-foreground mb-1">
               {totalEntries} / {MAX_PORTFOLIO_VIDEOS}
             </p>
-            <div className="flex items-center gap-1">
-              <CarouselPrevious />
-              <CarouselNext />
-            </div>
           </div>
         </Carousel>
       )}

@@ -1,8 +1,5 @@
 "use client";
 
-import { motion } from "motion/react";
-import { useState } from "react";
-import { EASING_FUNCTION } from "@/shared/lib/constants";
 import { cn } from "@/shared/lib/utils";
 
 const SIZE = {
@@ -12,25 +9,46 @@ const SIZE = {
   lg: "w-64",
 } as const;
 
-type AssetCardProps = {
+type AssetThumbnailProps = {
   src: string | null;
   filename: string;
-  isLoading?: boolean;
+  className?: string;
+};
+
+export function AssetThumbnail({ src, filename, className }: AssetThumbnailProps) {
+  return (
+    <div className={cn("relative overflow-hidden bg-muted", className)}>
+      {src && (
+        <video
+          src={src}
+          muted
+          playsInline
+          preload="metadata"
+          aria-label={filename}
+          className="absolute inset-0 h-full w-full object-cover"
+        >
+          <track kind="captions" />
+        </video>
+      )}
+    </div>
+  );
+}
+
+type AssetVideoProps = {
+  src: string | null;
+  filename: string;
   actionSlot?: React.ReactNode;
   size?: keyof typeof SIZE;
   className?: string;
 };
 
-export function AssetCard({
+export function AssetVideo({
   src,
   filename,
-  isLoading,
   actionSlot,
   size,
   className,
-}: AssetCardProps) {
-  const [ready, setReady] = useState(false);
-
+}: AssetVideoProps) {
   return (
     <fieldset
       className={cn(
@@ -41,21 +59,15 @@ export function AssetCard({
     >
       {/* Ratio anchor — video content is always 9:16 */}
       <div className="relative aspect-9/16 w-full bg-muted">
-        {(isLoading || !ready) && <div className="absolute inset-0 animate-pulse bg-muted" />}
-
-        {!isLoading && src && (
-          <motion.video
+        {src && (
+          <video
             src={src}
             controls
             preload="metadata"
             className="absolute inset-0 w-full h-full object-cover"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: ready ? 1 : 0 }}
-            transition={{ duration: 0.3, ease: EASING_FUNCTION.exponential }}
-            onLoadedMetadata={() => setReady(true)}
           >
             <track kind="captions" />
-          </motion.video>
+          </video>
         )}
 
         {/* Top overlay: filename + action */}

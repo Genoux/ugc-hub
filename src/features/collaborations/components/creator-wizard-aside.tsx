@@ -24,7 +24,7 @@ export function CreatorWizardAside({
         <div className="absolute inset-0 z-10 bg-black/30" />
         <div className="absolute inset-0 z-10 backdrop-blur-md" />
         {profilePhotoUrl && (
-          <Image src={profilePhotoUrl} alt="" fill unoptimized className="object-cover" />
+          <Image src={profilePhotoUrl} alt="" fill className="object-cover" />
         )}
         <div className="relative z-10 flex flex-col items-center gap-4">
           {profilePhotoUrl ? (
@@ -33,7 +33,6 @@ export function CreatorWizardAside({
               alt={creatorName}
               width={80}
               height={80}
-              unoptimized
               className="size-40 rounded-full object-cover shadow-hub"
             />
           ) : (

@@ -96,12 +96,12 @@ function Carousel({
   const resolved =
     useBottomRow && arrowButtons.length > 0 && content != null
       ? [
-          content,
-          ...rest,
-          <div key="carousel-buttons" className="flex justify-end gap-2 mt-2">
-            {arrowButtons}
-          </div>,
-        ]
+        content,
+        ...rest,
+        <div key="carousel-buttons" className="flex justify-end gap-2 mt-2">
+          {arrowButtons}
+        </div>,
+      ]
       : children;
 
   return (
@@ -144,7 +144,7 @@ function CarouselContent({ className, viewportClassName, ...props }: CarouselCon
   return (
     <div
       ref={carouselRef}
-      className={cn("overflow-hidden", viewportClassName)}
+      className={cn("overflow-x-auto", viewportClassName)}
       data-slot="carousel-content"
     >
       <div

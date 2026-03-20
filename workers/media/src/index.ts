@@ -69,19 +69,32 @@ function parseRange(rangeHeader: string | null): R2Range | undefined {
 }
 
 // ---------------------------------------------------------------------------
+// CORS: reflect origin if it matches the configured allowed origin or is a
+// Vercel preview deploy. Auth is HMAC-in-URL (no cookies), so reflecting is safe.
+// ---------------------------------------------------------------------------
+
+function resolveAllowedOrigin(requestOrigin: string | null, allowedOrigin: string): string {
+  if (!requestOrigin) return allowedOrigin;
+  if (requestOrigin === allowedOrigin) return allowedOrigin;
+  // Vercel preview deploys — safe to allow since auth is token-based, not cookie-based
+  if (requestOrigin.endsWith(".vercel.app")) return requestOrigin;
+  return allowedOrigin;
+}
+
+// ---------------------------------------------------------------------------
 // Main handler
 // ---------------------------------------------------------------------------
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
-    const allowedOrigin = env.ALLOWED_ORIGIN;
+    const origin = resolveAllowedOrigin(request.headers.get("Origin"), env.ALLOWED_ORIGIN);
 
     try {
       if (request.method === "OPTIONS") {
         return new Response(null, {
           status: 204,
           headers: {
-            "Access-Control-Allow-Origin": allowedOrigin,
+            "Access-Control-Allow-Origin": origin,
             "Access-Control-Allow-Methods": "GET",
             "Access-Control-Allow-Headers": "Range",
             "Access-Control-Max-Age": "86400",
@@ -94,7 +107,11 @@ export default {
       }
 
       const url = new URL(request.url);
-      const r2Key = decodeURIComponent(url.pathname.slice(1));
+      const pathPart = url.pathname.slice(1);
+      const r2Key = pathPart
+        .split("/")
+        .map((segment) => decodeURIComponent(segment))
+        .join("/");
       if (!r2Key) return new Response("Not Found", { status: 404 });
 
       const token = url.searchParams.get("t");
@@ -109,11 +126,23 @@ export default {
       const object = await env.R2_BUCKET.get(r2Key, range ? { range } : undefined);
       if (!object) return new Response("Not Found", { status: 404 });
 
+      const etag = `"${object.etag}"`;
+      const lastModified = object.uploaded.toUTCString();
+
+      // Shared headers for both 304 and 200/206 responses
       const headers = new Headers({
-        "Cache-Control": "private, max-age=3600, stale-while-revalidate=86400",
+        "Cache-Control": "private, max-age=7200, stale-while-revalidate=86400",
         "Accept-Ranges": "bytes",
-        "Access-Control-Allow-Origin": allowedOrigin,
+        "Access-Control-Allow-Origin": origin,
+        ETag: etag,
+        "Last-Modified": lastModified,
       });
+
+      // Conditional GET — return 304 if content hasn't changed
+      const ifNoneMatch = request.headers.get("If-None-Match");
+      if (ifNoneMatch && ifNoneMatch === etag) {
+        return new Response(null, { status: 304, headers });
+      }
 
       if (object.httpMetadata?.contentType) {
         headers.set("Content-Type", object.httpMetadata.contentType);

@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import type { CollaborationDetail } from "@/entities/collaboration/types";
 import { CollaborationWizard } from "@/features/collaborations/components/collaboration-wizard";
 import { SubmissionSection } from "@/features/projects/components/submission-section";
-import { AssetCard } from "@/shared/components/blocks/asset-card";
+import { AssetVideo } from "@/shared/components/blocks/asset-card";
 import { DownloadButton } from "@/shared/components/blocks/download-button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/ui/avatar";
 import {
@@ -43,7 +43,7 @@ export function CreatorCollaboration({ collaboration }: CreatorCollaborationProp
   }
 
   const allAssets = submissions.flatMap((s) =>
-    s.assets.map((a) => ({ id: a.id, filename: a.filename, url: a.url })),
+    s.assets.map((a) => ({ filename: a.filename, url: a.url })),
   );
 
   return (
@@ -119,7 +119,7 @@ export function CreatorCollaboration({ collaboration }: CreatorCollaborationProp
           <h3 className="text-sm font-semibold text-foreground">Collaboration highlights</h3>
           <div className="flex items-center gap-2 overflow-x-auto">
             {collaboration.highlights.map((highlight) => (
-              <AssetCard
+              <AssetVideo
                 key={highlight.id}
                 size="md"
                 src={highlight.url}

@@ -2,7 +2,7 @@
 
 import { and, eq } from "drizzle-orm";
 import { assets, collaborations, submissions } from "@/db/schema";
-import { toMediaUrl } from "@/features/uploads/lib/r2-media-url";
+import { toWorkerUrl } from "@/features/uploads/lib/r2-media-url";
 import { toActionError } from "@/shared/lib/action-error";
 import { requireAdmin } from "@/shared/lib/auth";
 import { db } from "@/shared/lib/db";
@@ -41,7 +41,7 @@ export async function getAssets(scope: Scope): Promise<{ data: AssetWithUrl[] }>
 
     const data = rows
       .map((row) => {
-        const url = toMediaUrl(row.r2Key);
+        const url = toWorkerUrl(row.r2Key);
         return url ? { id: row.id, filename: row.filename, url } : null;
       })
       .filter((a): a is AssetWithUrl => a !== null);

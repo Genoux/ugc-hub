@@ -8,7 +8,7 @@ import type {
   PortfolioVideoEntry,
 } from "@/entities/creator/types";
 import { type Creator, creatorSchema } from "@/features/creators/schemas";
-import { toMediaUrl } from "@/features/uploads/lib/r2-media-url";
+import { toWorkerUrl } from "@/features/uploads/lib/r2-media-url";
 import { requireAdmin } from "@/shared/lib/auth";
 import type { ClerkUserProfile } from "@/shared/lib/clerk";
 import { getClerkUserProfile } from "@/shared/lib/clerk";
@@ -107,14 +107,14 @@ export async function getCreatorProfile(creatorId: string): Promise<CreatorProfi
 
   const creator = creatorSchema.parse(row);
 
-  const profilePhotoUrl = toMediaUrl(row.profilePhoto, row.profileCompletedAt);
+  const profilePhotoUrl = toWorkerUrl(row.profilePhoto, row.profileCompletedAt);
 
   const portfolioVideos = ((row.portfolioVideos ?? []) as PortfolioVideoEntry[]).map((v) => ({
     id: v.id,
     filename: v.filename,
     mimeType: v.mimeType,
     sizeBytes: v.sizeBytes,
-    url: toMediaUrl(v.r2Key) ?? "",
+    url: toWorkerUrl(v.r2Key) ?? "",
   }));
 
   const closedCollaborations = await Promise.all(
@@ -134,7 +134,7 @@ export async function getCreatorProfile(creatorId: string): Promise<CreatorProfi
         r2Key: h.r2Key,
         filename: h.filename,
         mimeType: h.mimeType,
-        url: toMediaUrl(h.r2Key) ?? "",
+        url: toWorkerUrl(h.r2Key) ?? "",
       })),
       projectId: collab.projectId ?? null,
       submissions: collab.submissions.map((s) => ({
@@ -146,7 +146,7 @@ export async function getCreatorProfile(creatorId: string): Promise<CreatorProfi
           id: a.id,
           filename: a.filename,
           mimeType: a.mimeType,
-          url: toMediaUrl(a.r2Key) ?? "",
+          url: toWorkerUrl(a.r2Key) ?? "",
         })),
       })),
     })),

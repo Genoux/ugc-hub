@@ -25,6 +25,14 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "clerk.ugc.inbeat.agency",
       },
+      {
+        protocol: "https",
+        hostname: "ugc-media.inbeat.workers.dev",
+      },
+      {
+        protocol: "https",
+        hostname: "ugc-media-dev.inbeat.workers.dev",
+      },
     ],
   },
   experimental: {

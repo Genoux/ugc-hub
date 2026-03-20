@@ -8,7 +8,7 @@ import { CollaborationWizard } from "@/features/collaborations/components/collab
 import type { CollaborationRatingsInput } from "@/features/collaborations/schemas";
 import type { LogCollabInitialData } from "@/features/collaborations/types";
 import type { CreatorProfile } from "@/features/creators/actions/admin/get-creator-profile";
-import { AssetCard } from "@/shared/components/blocks/asset-card";
+import { AssetVideo } from "@/shared/components/blocks/asset-card";
 import { DownloadButton } from "@/shared/components/blocks/download-button";
 import { Button } from "@/shared/components/ui/button";
 import {
@@ -105,14 +105,14 @@ export function CreatorContent({ creator }: CreatorContentProps) {
             </h2>
             <div className="flex overflow-x-auto gap-1">
               {allAssets.map((asset) => (
-                <AssetCard
+                <AssetVideo
                   key={asset.id}
                   size="sm"
                   src={asset.url}
                   filename={asset.filename}
                   actionSlot={
                     <DownloadButton
-                      assets={[{ id: asset.id, filename: asset.filename, url: asset.url }]}
+                      assets={[{ filename: asset.filename, url: asset.url }]}
                       size="icon"
                       variant="ghost"
                       className="h-8 w-8 text-white! hover:bg-white/20"

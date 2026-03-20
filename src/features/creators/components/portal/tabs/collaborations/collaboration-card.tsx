@@ -2,33 +2,25 @@
 
 import { ChevronRight } from "lucide-react";
 import type { CreatorSubmissions } from "@/features/creators/actions/portal/get-creator-submissions";
+import { AssetThumbnail } from "@/shared/components/blocks/asset-card";
 import { StatusBadge } from "@/shared/components/blocks/status-badge";
-import { cn } from "@/shared/lib/utils";
 
 type Collaboration = CreatorSubmissions[number];
 type Asset = Collaboration["submissions"][number]["assets"][number];
 
-function allAssets(collaboration: Collaboration): Asset[] {
-  const out: Asset[] = [];
+type PreviewAsset = Pick<Asset, "url" | "filename">;
+
+function previewAssets(collaboration: Collaboration): PreviewAsset[] {
+  const fromSubmissions: PreviewAsset[] = [];
   for (const sub of collaboration.submissions) {
     for (const asset of sub.assets) {
-      if (asset.url) out.push(asset);
+      if (asset.url) fromSubmissions.push({ url: asset.url, filename: asset.filename });
     }
   }
-  return out;
-}
-
-function VideoThumbnail({ src, className }: { src: string; className?: string }) {
-  return (
-    <video
-      src={src}
-      muted
-      playsInline
-      preload="metadata"
-      className={cn("w-full h-full object-cover rounded", className)}
-      aria-hidden
-    />
-  );
+  if (fromSubmissions.length > 0) return fromSubmissions;
+  return collaboration.highlights
+    .filter((h) => h.url)
+    .map((h) => ({ url: h.url, filename: h.filename }));
 }
 
 interface CollaborationCardProps {
@@ -37,8 +29,10 @@ interface CollaborationCardProps {
 }
 
 export function CollaborationCard({ collaboration, onClick }: CollaborationCardProps) {
-  const pieceCount = collaboration.submissions.reduce((s, sub) => s + sub.assets.length, 0);
-  const assets = allAssets(collaboration);
+  const submissionPieces = collaboration.submissions.reduce((s, sub) => s + sub.assets.length, 0);
+  const pieceCount =
+    submissionPieces > 0 ? submissionPieces : collaboration.highlights.length;
+  const assets = previewAssets(collaboration);
   const [first, second] = assets;
   const overflow = Math.max(0, assets.length - 2);
   const isSingle = assets.length === 1;
@@ -53,11 +47,17 @@ export function CollaborationCard({ collaboration, onClick }: CollaborationCardP
         <div
           className={`relative min-h-0 ${isSingle ? "col-span-2 row-span-2" : "row-span-2 col-span-1"}`}
         >
-          {first && <VideoThumbnail src={first.url} />}
+          {first ? (
+            <AssetThumbnail src={first.url} filename={first.filename} className="h-full w-full rounded" />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center rounded bg-muted text-xs text-muted-foreground">
+              No preview
+            </div>
+          )}
         </div>
         {!isSingle && second && (
           <div className="relative w-full h-full min-h-0">
-            <VideoThumbnail src={second.url} />
+            <AssetThumbnail src={second.url} filename={second.filename} className="h-full w-full rounded" />
           </div>
         )}
         {!isSingle && overflow > 0 && (

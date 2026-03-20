@@ -41,8 +41,7 @@ export function CreatorProfileInfo({ creator }: CreatorProfileInfoProps) {
         src={creator.profilePhotoUrl || ""}
         alt={creator.fullName}
         fill
-        unoptimized
-        className="object-cover group-hover:scale-105 transition-transform duration-300"
+        className="object-cover"
       />
       <div className="absolute inset-0 flex flex-col bg-linear-to-t from-black/80 from-0% to-transparent to-30% p-4">
         <div className="mt-auto flex flex-col gap-1">

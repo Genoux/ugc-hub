@@ -20,9 +20,7 @@ interface CollaborationTabProps {
 export function CollaborationTab({ content }: CollaborationTabProps) {
   const [selectedCollaborationId, setSelectedCollaborationId] = useState<string | null>(null);
 
-  const collaborations = content.filter((c) => c.submissions.length > 0);
-
-  if (collaborations.length === 0) {
+  if (content.length === 0) {
     return (
       <div className="flex min-h-0 flex-1 flex-col items-center justify-center">
         <Empty>
@@ -32,7 +30,7 @@ export function CollaborationTab({ content }: CollaborationTabProps) {
             </EmptyMedia>
             <EmptyTitle>No collaborations</EmptyTitle>
             <EmptyDescription>
-              Projects you've submitted content for will appear here.
+              Your collaborations with inBeat will appear here.
             </EmptyDescription>
           </EmptyHeader>
         </Empty>
@@ -41,7 +39,7 @@ export function CollaborationTab({ content }: CollaborationTabProps) {
   }
 
   if (selectedCollaborationId) {
-    const collaboration = collaborations.find((c) => c.projectId === selectedCollaborationId);
+    const collaboration = content.find((c) => c.id === selectedCollaborationId);
     if (collaboration) {
       return (
         <CollaborationSubmissions
@@ -57,11 +55,11 @@ export function CollaborationTab({ content }: CollaborationTabProps) {
       <h1 className="text-2xl font-bold">Collaborations</h1>
       <hr />
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {collaborations.map((collaboration) => (
+        {content.map((collaboration) => (
           <CollaborationCard
-            key={collaboration.projectId}
+            key={collaboration.id}
             collaboration={collaboration}
-            onClick={() => setSelectedCollaborationId(collaboration.projectId)}
+            onClick={() => setSelectedCollaborationId(collaboration.id)}
           />
         ))}
       </div>

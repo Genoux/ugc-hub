@@ -1,12 +1,10 @@
 import Image from "next/image";
 import type { CreatorProfile } from "@/features/creators/actions/portal/get-creator-profile";
-import { AssetCard } from "@/shared/components/blocks/asset-card";
+import { AssetVideo } from "@/shared/components/blocks/asset-card";
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
 } from "@/shared/components/ui/carousel";
 
 interface ProfilePortfolioProps {
@@ -20,7 +18,7 @@ export function ProfilePortfolio({ creator }: ProfilePortfolioProps) {
   const hasHighlights = creator.closedCollaborations.some((c) => c.highlights.length > 0);
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-14">
       <Carousel
         className="w-full p-1"
         opts={{ align: "start", loop: false, slidesToScroll: "auto" }}
@@ -32,14 +30,10 @@ export function ProfilePortfolio({ creator }: ProfilePortfolioProps) {
           <CarouselContent>
             {creator.portfolioVideos.map((video) => (
               <CarouselItem key={video.id} className="basis-auto p-0">
-                <AssetCard src={video.url} filename={video.filename} size="sm" />
+                <AssetVideo src={video.url} filename={video.filename} size="sm" />
               </CarouselItem>
             ))}
           </CarouselContent>
-        </div>
-        <div className="flex justify-end gap-1 mt-2">
-          <CarouselPrevious />
-          <CarouselNext />
         </div>
       </Carousel>
 
@@ -54,7 +48,7 @@ export function ProfilePortfolio({ creator }: ProfilePortfolioProps) {
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
             {creator.closedCollaborations.flatMap((collab) =>
               collab.highlights.map((h) => (
-                <AssetCard key={h.id} src={h.url} filename={h.filename} className="w-full" />
+                <AssetVideo key={h.id} src={h.url} filename={h.filename} className="w-full" />
               )),
             )}
           </div>

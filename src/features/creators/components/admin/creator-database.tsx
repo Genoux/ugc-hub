@@ -11,6 +11,7 @@ import {
   SORT_OPTIONS,
   useCreatorFilters,
 } from "@/features/creators/hooks/admin/use-creator-filters";
+import { PageLoader } from "@/shared/components/layout/page-loader";
 import { Button } from "@/shared/components/ui/button";
 import {
   DropdownMenu,
@@ -27,7 +28,6 @@ import {
 } from "@/shared/components/ui/empty";
 import { Input } from "@/shared/components/ui/input";
 import { LoadMoreSentinel } from "@/shared/components/ui/load-more-sentinel";
-import { Skeleton } from "@/shared/components/ui/skeleton";
 import { useInfiniteScroll } from "@/shared/hooks/use-infinite-scroll";
 import { EASING_FUNCTION } from "@/shared/lib/constants";
 import { platformQueryKeys } from "@/shared/lib/platform-query-keys";
@@ -190,11 +190,7 @@ export function CreatorDatabase() {
         </AnimatePresence>
         <div ref={scrollContainerRef} className="flex flex-col flex-1 min-h-0 overflow-y-auto">
           {isLoading ? (
-            <div className="p-4 grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-              {Array.from({ length: 8 }, (_, i) => `skeleton-${i}`).map((id) => (
-                <Skeleton key={id} className="h-[400px] rounded-3xl" />
-              ))}
-            </div>
+            <PageLoader className="opacity-50" />
           ) : creators.length === 0 ? (
             <div className="flex flex-1 p-6">
               <Empty>

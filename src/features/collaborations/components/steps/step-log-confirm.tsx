@@ -65,7 +65,6 @@ export function StepLogConfirm({
             alt={creatorName}
             width={40}
             height={40}
-            unoptimized
             className="size-10 shrink-0 rounded-full object-cover"
           />
         ) : (

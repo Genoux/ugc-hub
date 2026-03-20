@@ -25,12 +25,11 @@ export type SlackEvent =
       piecesOfContent: number;
       totalPaidCents: number;
     }
-  | {
+  |     {
       type: "creator_profile_complete";
       creatorId: string;
       fullName: string;
       email?: string;
-      profileImageUrl?: string;
     }
   | {
       type: "creator_uploaded_content";
@@ -195,19 +194,11 @@ function buildCollabLoggedBlocks(
 function buildProfileCompleteBlocks(
   event: Extract<SlackEvent, { type: "creator_profile_complete" }>,
 ): object[] {
-  const contextImage =
-    event.profileImageUrl?.startsWith("https://") && event.profileImageUrl.length <= 3000
-      ? { type: "image" as const, image_url: event.profileImageUrl, alt_text: event.fullName }
-      : null;
-
   return [
     header("◉ Profile Completed"),
     {
       type: "context",
-      elements: [
-        ...(contextImage ? [contextImage] : []),
-        { type: "mrkdwn", text: `*${event.fullName}* has completed their profile.` },
-      ],
+      elements: [{ type: "mrkdwn", text: `*${event.fullName}* has completed their profile.` }],
     },
     divider,
     {

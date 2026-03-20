@@ -225,7 +225,7 @@ export function ApplyForm() {
     <Wizard variant="page">
       <WizardPanel isPending={isPending}>
         <WizardHeader>
-          <Image src="/inBeat.svg" alt="" width={40} height={40} unoptimized />
+          <Image src="/inBeat.svg" alt="" width={40} height={40} />
           <span />
         </WizardHeader>
         <WizardStep stepKey={step} direction={directionRef.current} className="h-[600px]">
@@ -282,7 +282,6 @@ export function ApplyForm() {
           alt=""
           fill
           className="object-cover"
-          unoptimized
         />
       </WizardAside>
     </Wizard>

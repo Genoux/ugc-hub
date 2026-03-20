@@ -51,7 +51,6 @@ export function CreatorProfileTab({ creator, uiState, onOpenOnboarding }: Creato
             src={profilePhotoUrl}
             alt={creator.fullName}
             fill
-            unoptimized
             className="object-cover"
           />
         </div>

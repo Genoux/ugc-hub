@@ -5,7 +5,7 @@ import { collaborations, creators } from "@/db/schema";
 import type { Filters } from "@/features/creators/components/admin/database-filters";
 import type { SortKey } from "@/features/creators/hooks/admin/use-creator-filters";
 import { type Creator, creatorSchema } from "@/features/creators/schemas";
-import { toMediaUrl } from "@/features/uploads/lib/r2-media-url";
+import { toWorkerUrl } from "@/features/uploads/lib/r2-media-url";
 import { toActionError } from "@/shared/lib/action-error";
 import { requireAdmin } from "@/shared/lib/auth";
 import type { OverallRatingTier } from "@/shared/lib/constants";
@@ -133,7 +133,7 @@ export async function getCreators(params: GetCreatorsParams): Promise<GetCreator
         const parsed = creatorSchema.parse({ ...creator, collabCount: collabCount ?? 0 });
         return {
           ...parsed,
-          profilePhotoUrl: toMediaUrl(parsed.profilePhoto, parsed.profileCompletedAt),
+          profilePhotoUrl: toWorkerUrl(parsed.profilePhoto, parsed.profileCompletedAt),
         };
       }),
       hasMore,

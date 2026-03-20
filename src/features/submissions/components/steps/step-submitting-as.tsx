@@ -28,7 +28,6 @@ export function StepSubmittingAs({
               src={creatorImageUrl}
               alt={creatorName}
               fill
-              unoptimized
               className="object-cover"
             />
           </div>

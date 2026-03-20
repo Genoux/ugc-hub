@@ -10,7 +10,6 @@ import type { PortfolioVideoEntry } from "@/entities/creator/types";
 import { requireCreator } from "@/features/creators/lib/require-creator";
 import { resizeProfilePhoto } from "@/features/creators/lib/resize-profile-photo";
 import { R2_BUCKET_NAME, r2Client } from "@/features/uploads/lib/r2-client";
-import { getR2SignedUrl } from "@/features/uploads/lib/r2-serve";
 import { notifySlack } from "@/integrations/slack/notify-slack";
 import { toActionError } from "@/shared/lib/action-error";
 import { AGE_DEMOGRAPHICS, ETHNICITIES, GENDER_IDENTITIES } from "@/shared/lib/constants";
@@ -99,15 +98,12 @@ export async function completeCreatorProfile(input: z.infer<typeof schema>) {
       .where(eq(creators.id, creator.id));
 
     if (!wasAlreadyCompleted) {
-      notifySlack(
-        getR2SignedUrl(validated.profilePhoto).then((profileImageUrl) => ({
-          type: "creator_profile_complete" as const,
-          creatorId: creator.id,
-          fullName: validated.fullName,
-          email: creator.email ?? undefined,
-          profileImageUrl: profileImageUrl ?? undefined,
-        })),
-      );
+      notifySlack({
+        type: "creator_profile_complete",
+        creatorId: creator.id,
+        fullName: validated.fullName,
+        email: creator.email ?? undefined,
+      });
     }
 
     // Fire-and-forget — DB is already committed; orphans recoverable via check-r2-orphans
